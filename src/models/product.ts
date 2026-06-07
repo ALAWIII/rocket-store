@@ -8,7 +8,7 @@ class Category {
   name: string;
   parentCategoryId?: string;
 }
-
+export type ProductVariantId = string;
 class Product {
   id: string;
   name: string;
@@ -18,7 +18,7 @@ class Product {
 }
 
 class ProductVariant {
-  id: string;
+  id: ProductVariantId;
   productId: string;
   description: string;
   info: Record<string, string>; // represented as key:value (JSONB) for which it can be substituted on the `details` html template.
