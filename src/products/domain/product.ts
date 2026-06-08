@@ -4,13 +4,13 @@ import { CategoryId } from './category';
 import { ProductId, ProductVariantId } from 'src/shared/domain/ids';
 
 // temporary will be replaced by layer specific DTO.
-type VariantInput = {
+interface ProductVariantData {
   sku: string;
   price: number;
   quantity: number;
   info: Record<string, string>;
   description?: string;
-};
+}
 interface ProductData {
   id: ProductId;
   name: string;
@@ -30,11 +30,11 @@ export class Product {
   getId(): ProductId {
     return this.productData.id;
   }
-  createVariant(vr: VariantInput) {
-    const v = ProductVariant.create(vr, this.productData.id);
+  createVariant(pvd: ProductVariantData) {
+    const v = ProductVariant.create(pvd, this.productData.id);
     this.variants.add(v);
   }
-  updateVariant(variantId: ProductVariantId, vi: VariantInput) {
+  updateVariant(variantId: ProductVariantId, vi: ProductVariantData) {
     const v = this.variants.getById(variantId);
     v?.update(vi);
   }
@@ -110,7 +110,7 @@ class ProductVariant {
     if (price < 0) throw new Error('Price cannot be negative');
     if (quantity < 0) throw new Error('Quantity cannot be negative');
   }
-  static create(v: VariantInput, productId: ProductId): ProductVariant {
+  static create(v: ProductVariantData, productId: ProductId): ProductVariant {
     return new ProductVariant(
       v7(),
       productId,
@@ -121,7 +121,7 @@ class ProductVariant {
       v.info,
     );
   }
-  update(input: VariantInput) {
+  update(input: ProductVariantData) {
     this.description = input.description;
     this.info = input.info;
     this.price = input.price;
