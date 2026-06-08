@@ -21,32 +21,32 @@ class Role {
     this.name = name;
   }
 }
-
+interface UserData {
+  readonly id: string;
+  email: string;
+  passwordHash: string;
+  firstName: string;
+  lastName: string;
+  roleId: string;
+  readonly createdAt: Date;
+  updatedAt: Date;
+  phone?: string;
+}
 class User {
-  constructor(
-    private readonly id: string,
-    private email: string,
-    private passwordHash: string,
-    private firstName: string,
-    private lastName: string,
-    private roleId: string,
-    private readonly createdAt: Date = new Date(),
-    private updatedAt: Date,
-    private phone?: string,
-  ) {}
+  constructor(private userdata: UserData) {}
   setEmail(email: string) {
-    this.email = email;
+    this.userdata.email = email;
   }
   setPassword(password: string) {
-    this.passwordHash = password;
+    this.userdata.passwordHash = password;
   }
   setPhone(phone: string) {
-    this.phone = phone;
+    this.userdata.phone = phone;
   }
   setUpdatedAt(d: Date) {
-    this.updatedAt = d;
+    this.userdata.updatedAt = d;
   }
   setRoleId(r: string) {
-    this.roleId = r;
+    this.userdata.roleId = r;
   }
 }
