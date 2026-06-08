@@ -1,70 +1,8 @@
 import { v7 } from 'uuid';
+import { BrandId } from './brand';
+import { CategoryId } from './category';
+import { ProductId, ProductVariantId } from 'src/shared/domain/ids';
 
-export type BrandId = string;
-export type CategoryId = string;
-export type ProductId = string;
-export type ProductVariantId = string;
-
-class Brand {
-  constructor(
-    private readonly id: BrandId,
-    private name: string,
-  ) {
-    if (!name.trim()) throw new Error('Brand name is required');
-  }
-
-  getId(): BrandId {
-    return this.id;
-  }
-
-  getName(): string {
-    return this.name;
-  }
-
-  rename(name: string): void {
-    if (!name.trim()) throw new Error('Brand name is required');
-    this.name = name;
-  }
-}
-
-class Category {
-  private parentCategoryId?: CategoryId;
-
-  constructor(
-    private readonly id: CategoryId,
-    private name: string,
-  ) {
-    if (!name.trim()) throw new Error('Category name is required');
-  }
-
-  getId(): CategoryId {
-    return this.id;
-  }
-
-  getName(): string {
-    return this.name;
-  }
-
-  getParentCategoryId(): CategoryId | undefined {
-    return this.parentCategoryId;
-  }
-
-  rename(name: string): void {
-    if (!name.trim()) throw new Error('Category name is required');
-    this.name = name;
-  }
-
-  assignParent(parentCategoryId: CategoryId): void {
-    if (parentCategoryId === this.id) {
-      throw new Error('Category cannot be parent of itself');
-    }
-    this.parentCategoryId = parentCategoryId;
-  }
-
-  removeParent(): void {
-    this.parentCategoryId = undefined;
-  }
-}
 // temporary will be replaced by layer specific DTO.
 type VariantInput = {
   sku: string;
