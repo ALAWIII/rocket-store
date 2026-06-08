@@ -1,5 +1,5 @@
+import { ProductVariantId } from 'src/shared/domain/ids';
 import { v7 } from 'uuid';
-import { ProductVariantId } from './product';
 
 class CartItem {
   constructor(

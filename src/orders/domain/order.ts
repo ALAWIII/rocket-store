@@ -1,7 +1,8 @@
 //----------------- after checkout ------------------
 // sku: Stock Keeping Unit. It’s an internal code used to identify and track a specific product variant in inventory, like a shirt in one size and color.
 
-import { ProductVariantId } from './product';
+import { ProductVariantId } from 'src/shared/domain/ids';
+
 enum OrderStatus {
   Pending = 'pending',
   Placed = 'placed',
