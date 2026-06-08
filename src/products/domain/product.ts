@@ -11,7 +11,74 @@ type VariantInput = {
   info: Record<string, string>;
   description?: string;
 };
+interface ProductData {
+  id: ProductId;
+  name: string;
+  categoryId: CategoryId;
+  detailsPage: string;
+  brandId?: BrandId;
+}
 
+export class Product {
+  private variants = new ProductVaraintList();
+  constructor(private productData: ProductData) {
+    if (!productData.name.trim()) throw new Error('Product name is required');
+    if (!productData.detailsPage.trim())
+      throw new Error('Details page is required');
+  }
+
+  getId(): ProductId {
+    return this.productData.id;
+  }
+  createVariant(vr: VariantInput) {
+    const v = ProductVariant.create(vr, this.productData.id);
+    this.variants.add(v);
+  }
+  updateVariant(variantId: ProductVariantId, vi: VariantInput) {
+    const v = this.variants.getById(variantId);
+    v?.update(vi);
+  }
+  removeVariant(id: ProductVariantId) {
+    this.variants.remove(id);
+  }
+  getName(): string {
+    return this.productData.name;
+  }
+
+  getCategoryId(): CategoryId {
+    return this.productData.categoryId;
+  }
+
+  getBrandId(): BrandId | undefined {
+    return this.productData.brandId;
+  }
+
+  getDetailsPage(): string {
+    return this.productData.detailsPage;
+  }
+
+  rename(name: string): void {
+    if (!name.trim()) throw new Error('Product name is required');
+    this.productData.name = name;
+  }
+
+  assignBrand(brandId: BrandId): void {
+    this.productData.brandId = brandId;
+  }
+
+  removeBrand(): void {
+    this.productData.brandId = undefined;
+  }
+
+  moveToCategory(categoryId: CategoryId): void {
+    this.productData.categoryId = categoryId;
+  }
+
+  changeDetailsPage(detailsPage: string): void {
+    if (!detailsPage.trim()) throw new Error('Details page is required');
+    this.productData.detailsPage = detailsPage;
+  }
+}
 class ProductVaraintList {
   private variants = new Map<ProductVariantId, ProductVariant>();
   add(variant: ProductVariant): void {
@@ -29,71 +96,6 @@ class ProductVaraintList {
     return [...this.variants.values()];
   }
 }
-export class Product {
-  brandId?: BrandId;
-  private variants = new ProductVaraintList();
-  constructor(
-    private readonly id: ProductId,
-    private name: string,
-    private categoryId: CategoryId,
-    private detailsPage: string,
-  ) {
-    if (!name.trim()) throw new Error('Product name is required');
-    if (!detailsPage.trim()) throw new Error('Details page is required');
-  }
-  getId(): ProductId {
-    return this.id;
-  }
-  createVariant(vr: VariantInput) {
-    const v = ProductVariant.create(vr, this.id);
-    this.variants.add(v);
-  }
-  updateVariant(variantId: ProductVariantId, vi: VariantInput) {
-    const v = this.variants.getById(variantId);
-    v?.update(vi);
-  }
-  removeVariant(id: ProductVariantId) {
-    this.variants.remove(id);
-  }
-  getName(): string {
-    return this.name;
-  }
-
-  getCategoryId(): CategoryId {
-    return this.categoryId;
-  }
-
-  getBrandId(): BrandId | undefined {
-    return this.brandId;
-  }
-
-  getDetailsPage(): string {
-    return this.detailsPage;
-  }
-
-  rename(name: string): void {
-    if (!name.trim()) throw new Error('Product name is required');
-    this.name = name;
-  }
-
-  assignBrand(brandId: BrandId): void {
-    this.brandId = brandId;
-  }
-
-  removeBrand(): void {
-    this.brandId = undefined;
-  }
-
-  moveToCategory(categoryId: CategoryId): void {
-    this.categoryId = categoryId;
-  }
-
-  changeDetailsPage(detailsPage: string): void {
-    if (!detailsPage.trim()) throw new Error('Details page is required');
-    this.detailsPage = detailsPage;
-  }
-}
-
 class ProductVariant {
   constructor(
     private readonly id: ProductVariantId,
