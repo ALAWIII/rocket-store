@@ -1,3 +1,5 @@
+import { v7 } from 'uuid';
+
 export type BrandId = string;
 export type CategoryId = string;
 export type ProductId = string;
@@ -63,10 +65,35 @@ class Category {
     this.parentCategoryId = undefined;
   }
 }
+// temporary will be replaced by layer specific DTO.
+type VariantInput = {
+  sku: string;
+  price: number;
+  quantity: number;
+  info: Record<string, string>;
+  description?: string;
+};
 
-class Product {
-  private brandId?: BrandId;
-
+class ProductVaraintList {
+  private variants = new Map<ProductVariantId, ProductVariant>();
+  add(variant: ProductVariant): void {
+    this.variants.set(variant.getId(), variant);
+  }
+  remove(variantId: ProductVariantId): ProductVariant | undefined {
+    const v = this.getById(variantId);
+    this.variants.delete(variantId);
+    return v;
+  }
+  getById(variantId: ProductVariantId): ProductVariant | undefined {
+    return this.variants.get(variantId);
+  }
+  getVariants(): ProductVariant[] {
+    return [...this.variants.values()];
+  }
+}
+export class Product {
+  brandId?: BrandId;
+  private variants = new ProductVaraintList();
   constructor(
     private readonly id: ProductId,
     private name: string,
@@ -76,11 +103,20 @@ class Product {
     if (!name.trim()) throw new Error('Product name is required');
     if (!detailsPage.trim()) throw new Error('Details page is required');
   }
-
   getId(): ProductId {
     return this.id;
   }
-
+  createVariant(vr: VariantInput) {
+    const v = ProductVariant.create(vr, this.id);
+    this.variants.add(v);
+  }
+  updateVariant(variantId: ProductVariantId, vi: VariantInput) {
+    const v = this.variants.getById(variantId);
+    v?.update(vi);
+  }
+  removeVariant(id: ProductVariantId) {
+    this.variants.remove(id);
+  }
   getName(): string {
     return this.name;
   }
@@ -121,21 +157,37 @@ class Product {
 }
 
 class ProductVariant {
-  private description?: string;
-  private info: Record<string, string> = {};
-
   constructor(
     private readonly id: ProductVariantId,
     private readonly productId: ProductId,
-    private readonly sku: string,
+    private sku: string,
     private price: number,
     private quantity: number,
+    private description?: string,
+    private info: Record<string, string> = {},
   ) {
     if (!sku.trim()) throw new Error('SKU is required');
     if (price < 0) throw new Error('Price cannot be negative');
     if (quantity < 0) throw new Error('Quantity cannot be negative');
   }
-
+  static create(v: VariantInput, productId: ProductId): ProductVariant {
+    return new ProductVariant(
+      v7(),
+      productId,
+      v.sku,
+      v.price,
+      v.quantity,
+      v.description,
+      v.info,
+    );
+  }
+  update(input: VariantInput) {
+    this.description = input.description;
+    this.info = input.info;
+    this.price = input.price;
+    this.quantity = input.quantity;
+    this.sku = input.sku;
+  }
   getId(): ProductVariantId {
     return this.id;
   }
@@ -162,42 +214,5 @@ class ProductVariant {
 
   getInfo(): Record<string, string> {
     return { ...this.info };
-  }
-
-  changePrice(price: number): void {
-    if (price < 0) throw new Error('Price cannot be negative');
-    this.price = price;
-  }
-
-  increaseStock(quantity: number): void {
-    if (quantity < 1) throw new Error('Quantity must be positive');
-    this.quantity += quantity;
-  }
-
-  decreaseStock(quantity: number): void {
-    if (quantity < 1) throw new Error('Quantity must be positive');
-    if (this.quantity - quantity < 0) {
-      throw new Error('Insufficient stock');
-    }
-    this.quantity -= quantity;
-  }
-
-  setDescription(description: string): void {
-    if (!description.trim()) throw new Error('Description cannot be empty');
-    this.description = description;
-  }
-
-  clearDescription(): void {
-    this.description = undefined;
-  }
-
-  setInfo(key: string, value: string): void {
-    if (!key.trim()) throw new Error('Info key is required');
-    if (!value.trim()) throw new Error('Info value is required');
-    this.info[key] = value;
-  }
-
-  removeInfo(key: string): void {
-    delete this.info[key];
   }
 }
