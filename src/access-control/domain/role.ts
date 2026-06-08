@@ -1,10 +1,11 @@
 import { Permission } from './permission';
 
-enum RoleType {
-  Admin = 'admin',
-  Customer = 'customer',
-  Custom = 'custom',
-}
+const ROLE_TYPE = {
+  Admin: 'Admin',
+  Customer: 'Customer',
+  Custom: 'Custom',
+} as const;
+type RoleType = keyof typeof ROLE_TYPE;
 class Role {
   permissions = new Set<Permission>();
   constructor(
