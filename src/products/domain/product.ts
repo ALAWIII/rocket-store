@@ -4,7 +4,6 @@ import { ProductId, ProductVariantId } from 'src/shared/domain/ids';
 
 // temporary will be replaced by layer specific DTO.
 type ProductVariantData = {
-  sku: string;
   price: number;
   quantity: number;
   info: Record<string, string>;
