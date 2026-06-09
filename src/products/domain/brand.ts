@@ -6,11 +6,12 @@ export type BrandId = string;
 type BrandData = {
   readonly id: BrandId;
   name: string;
-} & AuditFields;
+  audit: AuditFields;
+};
 
-export class Brand extends AuditableEntity<BrandData> {
-  private constructor(data: BrandData) {
-    super(data);
+export class Brand extends AuditableEntity {
+  private constructor(private data: BrandData) {
+    super(data.audit);
   }
 
   static create(data: { id: BrandId; name: string; userId: UserId }): Brand {
@@ -19,10 +20,12 @@ export class Brand extends AuditableEntity<BrandData> {
     return new Brand({
       id: data.id,
       name,
-      createdBy: data.userId,
-      updatedBy: data.userId,
-      createdAt: now,
-      updatedAt: now,
+      audit: {
+        createdBy: data.userId,
+        updatedBy: data.userId,
+        createdAt: now,
+        updatedAt: now,
+      },
     });
   }
   static restore(data: BrandData): Brand {
