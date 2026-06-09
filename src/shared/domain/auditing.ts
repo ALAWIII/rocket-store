@@ -9,43 +9,38 @@ export type AuditFields = {
   deletedBy?: UserId;
 };
 
-export abstract class AuditableEntity<T extends AuditFields> {
-  constructor(protected data: T) {}
+export abstract class AuditableEntity {
+  constructor(protected audit: AuditFields) {}
 
   get createdAt(): Date {
-    return this.data.createdAt;
+    return this.audit.createdAt;
   }
-
   get createdBy(): UserId {
-    return this.data.createdBy;
+    return this.audit.createdBy;
   }
-
   get updatedAt(): Date {
-    return this.data.updatedAt;
+    return this.audit.updatedAt;
   }
-
-  get updatedBy(): UserId {
-    return this.data.updatedBy;
+  get updatedBy(): UserId | undefined {
+    return this.audit.updatedBy;
   }
-
   get deletedAt(): Date | undefined {
-    return this.data.deletedAt;
+    return this.audit.deletedAt;
   }
-
   get deletedBy(): UserId | undefined {
-    return this.data.deletedBy;
+    return this.audit.deletedBy;
   }
-  //-----
 
   protected touch(updatedBy: UserId): void {
-    this.data.updatedAt = new Date();
-    this.data.updatedBy = updatedBy;
+    this.audit.updatedAt = new Date();
+    this.audit.updatedBy = updatedBy;
   }
 
   protected markDeleted(deletedBy: UserId): void {
-    this.data.deletedAt = new Date();
-    this.data.deletedBy = deletedBy;
-    this.data.updatedAt = this.data.deletedAt;
-    this.data.updatedBy = deletedBy;
+    const now = new Date();
+    this.audit.deletedAt = now;
+    this.audit.deletedBy = deletedBy;
+    this.audit.updatedAt = now;
+    this.audit.updatedBy = deletedBy;
   }
 }
