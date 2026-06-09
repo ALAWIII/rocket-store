@@ -54,4 +54,11 @@ export class Brand extends AuditableEntity {
     this.data.name = nextName;
     this.touch(updatedBy);
   }
+  toJSON() {
+    return {
+      id: this.data.id,
+      name: this.data.name,
+      ...this.audit,
+    };
+  }
 }
