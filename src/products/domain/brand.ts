@@ -1,18 +1,33 @@
+import { AuditableEntity, AuditFields } from 'src/shared/domain/auditing';
+import { UserId } from 'src/shared/domain/ids';
+
 export type BrandId = string;
 
 type BrandData = {
   readonly id: BrandId;
   name: string;
-};
+} & AuditFields;
 
-export class Brand {
-  private constructor(private data: BrandData) {}
-
-  static create(data: { id: BrandId; name: string }): Brand {
-    const name = Brand.validateName(data.name);
-    return new Brand({ id: data.id, name });
+export class Brand extends AuditableEntity<BrandData> {
+  private constructor(data: BrandData) {
+    super(data);
   }
 
+  static create(data: { id: BrandId; name: string; userId: UserId }): Brand {
+    const name = Brand.validateName(data.name);
+    const now = new Date();
+    return new Brand({
+      id: data.id,
+      name,
+      createdBy: data.userId,
+      updatedBy: data.userId,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+  static restore(data: BrandData): Brand {
+    return new Brand(data);
+  }
   private static validateName(name: string): string {
     const trimmed = name.trim();
     if (trimmed.length < 2 || trimmed.length > 50) {
@@ -29,7 +44,11 @@ export class Brand {
     return this.data.name;
   }
 
-  rename(name: string): void {
-    this.data.name = Brand.validateName(name);
+  rename(name: string, updatedBy: UserId): void {
+    const nextName = Brand.validateName(name);
+    if (this.data.name === nextName) return;
+
+    this.data.name = nextName;
+    this.touch(updatedBy);
   }
 }
