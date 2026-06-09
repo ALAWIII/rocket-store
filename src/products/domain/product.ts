@@ -12,9 +12,8 @@ type ProductVariantData = {
   description?: string;
 };
 type ProductData = {
-  id: string;
+  id: ProductId;
   name: ProductName;
-  detailsPage?: ProductDetails;
   categoryId: CategoryId;
   brandId?: BrandId;
 };
@@ -32,20 +31,7 @@ export class ProductName {
     return this._name;
   }
 }
-export class ProductDetails {
-  private constructor(private _page: string) {}
-  static create(page: string): ProductDetails {
-    const normalized = page.trim();
-    if (normalized.length < 2)
-      throw new Error(
-        'Invalid product name length must be between 2 and 100 characters.',
-      );
-    return new ProductDetails(normalized);
-  }
-  get page(): string {
-    return this._page;
-  }
-}
+
 export class Product {
   private variants = new ProductVaraintList();
   constructor(private productData: ProductData) {}
@@ -76,10 +62,6 @@ export class Product {
     return this.productData.brandId;
   }
 
-  get detailsPage(): string | undefined {
-    return this.productData.detailsPage?.page;
-  }
-
   rename(name: ProductName): void {
     this.productData.name = name;
   }
@@ -94,10 +76,6 @@ export class Product {
 
   moveToCategory(categoryId: CategoryId): void {
     this.productData.categoryId = categoryId;
-  }
-
-  changeDetailsPage(detailsPage: ProductDetails): void {
-    this.productData.detailsPage = detailsPage;
   }
 }
 class ProductVaraintList {
