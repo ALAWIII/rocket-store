@@ -4,20 +4,20 @@ import { CategoryId } from './category';
 import { ProductId, ProductVariantId } from 'src/shared/domain/ids';
 
 // temporary will be replaced by layer specific DTO.
-interface ProductVariantData {
+type ProductVariantData = {
   sku: string;
   price: number;
   quantity: number;
   info: Record<string, string>;
   description?: string;
-}
-interface ProductData {
+};
+type ProductData = {
   id: ProductId;
   name: string;
   categoryId: CategoryId;
   detailsPage: string;
   brandId?: BrandId;
-}
+};
 
 export class Product {
   private variants = new ProductVaraintList();

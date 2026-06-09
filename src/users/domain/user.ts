@@ -1,4 +1,4 @@
-interface UserData {
+type UserData = {
   readonly id: string;
   email: string;
   passwordHash: string;
@@ -8,7 +8,7 @@ interface UserData {
   readonly createdAt: Date;
   updatedAt: Date;
   phone?: string;
-}
+};
 class User {
   constructor(private userdata: UserData) {}
   setEmail(email: string) {
