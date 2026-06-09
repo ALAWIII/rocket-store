@@ -11,12 +11,7 @@ type ProductVariantData = {
   info: Record<string, string>;
   description?: string;
 };
-type ProductData = {
-  id: ProductId;
-  name: ProductName;
-  categoryId: CategoryId;
-  brandId?: BrandId;
-};
+
 export class ProductName {
   private constructor(private _name: string) {}
   static create(name: string): ProductName {
@@ -34,7 +29,13 @@ export class ProductName {
 
 export class Product {
   private variants = new ProductVaraintList();
-  constructor(private productData: ProductData) {}
+  constructor(
+    private productData: {
+      id: ProductId;
+      name: ProductName;
+      brandId?: BrandId;
+    },
+  ) {}
 
   get id(): ProductId {
     return this.productData.id;
@@ -54,10 +55,6 @@ export class Product {
     return this.productData.name.name;
   }
 
-  get categoryId(): CategoryId {
-    return this.productData.categoryId;
-  }
-
   get brandId(): BrandId | undefined {
     return this.productData.brandId;
   }
@@ -72,10 +69,6 @@ export class Product {
 
   removeBrand(): void {
     this.productData.brandId = undefined;
-  }
-
-  moveToCategory(categoryId: CategoryId): void {
-    this.productData.categoryId = categoryId;
   }
 }
 class ProductVaraintList {
