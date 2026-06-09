@@ -1,6 +1,5 @@
 import { v7 } from 'uuid';
 import { BrandId } from './brand';
-import { CategoryId } from './category';
 import { ProductId, ProductVariantId } from 'src/shared/domain/ids';
 
 // temporary will be replaced by layer specific DTO.
@@ -12,18 +11,18 @@ type ProductVariantData = {
   description?: string;
 };
 
-export class ProductName {
-  private constructor(private _name: string) {}
-  static create(name: string): ProductName {
-    const normalized = name.trim();
+export class ProductTitle {
+  private constructor(private _title: string) {}
+  static create(title: string): ProductTitle {
+    const normalized = title.trim();
     if (normalized.length < 2 || normalized.length > 100)
       throw new Error(
-        'Invalid product name length must be between 2 and 100 characters.',
+        'Invalid product title length must be between 2 and 100 characters.',
       );
-    return new ProductName(normalized);
+    return new ProductTitle(normalized);
   }
-  get name(): string {
-    return this._name;
+  get title(): string {
+    return this._title;
   }
 }
 
@@ -32,7 +31,7 @@ export class Product {
   constructor(
     private productData: {
       id: ProductId;
-      name: ProductName;
+      title: ProductTitle;
       brandId?: BrandId;
     },
   ) {}
@@ -51,19 +50,19 @@ export class Product {
   removeVariant(id: ProductVariantId) {
     this.variants.remove(id);
   }
-  get name(): string {
-    return this.productData.name.name;
+  get title(): string {
+    return this.productData.title.title;
   }
 
   get brandId(): BrandId | undefined {
     return this.productData.brandId;
   }
 
-  rename(name: ProductName): void {
-    this.productData.name = name;
+  set title(title: ProductTitle) {
+    this.productData.title = title;
   }
 
-  assignBrand(brandId: BrandId): void {
+  assignBrand(brandId: BrandId) {
     this.productData.brandId = brandId;
   }
 
