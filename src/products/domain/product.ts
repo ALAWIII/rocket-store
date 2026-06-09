@@ -91,13 +91,11 @@ class ProductVariant {
   constructor(
     private readonly id: ProductVariantId,
     private readonly productId: ProductId,
-    private sku: string,
     private price: number,
     private quantity: number,
     private description?: string,
     private info: Record<string, string> = {},
   ) {
-    if (!sku.trim()) throw new Error('SKU is required');
     if (price < 0) throw new Error('Price cannot be negative');
     if (quantity < 0) throw new Error('Quantity cannot be negative');
   }
@@ -105,7 +103,6 @@ class ProductVariant {
     return new ProductVariant(
       v7(),
       productId,
-      v.sku,
       v.price,
       v.quantity,
       v.description,
@@ -117,7 +114,6 @@ class ProductVariant {
     this.info = input.info;
     this.price = input.price;
     this.quantity = input.quantity;
-    this.sku = input.sku;
   }
   getId(): ProductVariantId {
     return this.id;
@@ -125,10 +121,6 @@ class ProductVariant {
 
   getProductId(): ProductId {
     return this.productId;
-  }
-
-  getSku(): string {
-    return this.sku;
   }
 
   getPrice(): number {
