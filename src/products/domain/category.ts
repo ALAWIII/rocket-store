@@ -98,7 +98,7 @@ class Category {
     return new Date(this.updatedAt);
   }
 
-  toJson() {
+  toJSON() {
     return {
       ...this.data,
       createdAt: this.createdAt,
