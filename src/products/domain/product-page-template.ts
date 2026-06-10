@@ -1,3 +1,4 @@
+import { AuditableEntity, AuditFields } from 'src/shared/domain/auditing';
 import { ProductId, UserId } from 'src/shared/domain/ids';
 
 // types
@@ -11,18 +12,17 @@ export type EditorState = {
 
 export type PublishStatus = 'draft' | 'published';
 
-export class ProductPageTemplate {
+export class ProductPageTemplate extends AuditableEntity {
   private constructor(
     private readonly _id: ProductPageTemplateId,
     private readonly _productId: ProductId,
     private _editorState: EditorState, // saved for admin/worker → editor reload
     private _renderedHtml: string, // saved for customer → fast rendering
     private _status: PublishStatus,
-    private readonly _createdBy: UserId,
-    private _updatedBy: UserId,
-    private readonly _createdAt: Date,
-    private _updatedAt: Date,
-  ) {}
+    audit: AuditFields,
+  ) {
+    super(audit);
+  }
 
   static create(props: {
     id: ProductPageTemplateId;
@@ -39,10 +39,12 @@ export class ProductPageTemplate {
       props.editorState,
       props.renderedHtml,
       'draft',
-      props.createdBy,
-      props.createdBy,
-      now,
-      now,
+      {
+        createdBy: props.createdBy,
+        updatedBy: props.createdBy,
+        createdAt: now,
+        updatedAt: now,
+      },
     );
   }
   private static validateHtml(html: string) {
@@ -56,21 +58,18 @@ export class ProductPageTemplate {
     ProductPageTemplate.validateHtml(props.renderedHtml);
     this._editorState = props.editorState;
     this._renderedHtml = props.renderedHtml;
-    this._updatedBy = props.updatedBy;
-    this._updatedAt = new Date();
     this._status = 'draft'; // reset to draft on every update
+    this.touch(props.updatedBy);
   }
 
   publish(updatedBy: UserId): void {
     this._status = 'published';
-    this._updatedBy = updatedBy;
-    this._updatedAt = new Date();
+    this.touch(updatedBy);
   }
 
   unpublish(updatedBy: UserId): void {
     this._status = 'draft';
-    this._updatedBy = updatedBy;
-    this._updatedAt = new Date();
+    this.touch(updatedBy);
   }
 
   get id(): ProductPageTemplateId {
@@ -90,17 +89,5 @@ export class ProductPageTemplate {
   }
   isPublished(): boolean {
     return this._status === 'published';
-  }
-  get createdBy(): UserId {
-    return this._createdBy;
-  }
-  get updatedBy(): UserId {
-    return this._updatedBy;
-  }
-  get createdAt(): Date {
-    return this._createdAt;
-  }
-  get updatedAt(): Date {
-    return this._updatedAt;
   }
 }
