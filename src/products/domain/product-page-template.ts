@@ -1,93 +1,88 @@
-import { AuditableEntity, AuditFields } from 'src/shared/domain/auditing';
-import { ProductId, UserId } from 'src/shared/domain/ids';
-
+import { UserId } from 'src/shared/domain/ids';
+import { CategoryId } from './category';
+// draft templates only allowed to be hard deleted!
+// published can only be soft deleted when exactly zero of products are relying on.
+// modify a template = copy the template with new id+status= 'draft' so that its immutable and only cloned templates allowed to be edited.
+// [immutablity] cloning : is because to prevent affecting/breaking multiple products relying on one published template.
+// when user edits the template and wants to save his changes without publishing it for later more editing, we have to consider allow updating the model when its draft.
 // types
-export type ProductPageTemplateId = string;
+export type PageTemplateId = string;
 
 // how the editor state is structured (craft.js / grapesjs style)
-export type EditorState = {
-  version: number;
-  nodes: Record<string, unknown>; // craft.js uses node map, grapesjs uses component tree
+export type EditorState = Record<string, unknown>; // craft.js uses node map, grapesjs uses component tree
+
+const PageTemplateStatus = {
+  Draft: 'draft',
+  Published: 'published',
+  Archived: 'archived',
+} as const;
+export type PageTemplateStatus = keyof typeof PageTemplateStatus;
+
+type PageTemplateProps = {
+  readonly id: PageTemplateId;
+  name: string;
+  editorState: EditorState; // craft.js uses node map, grapesjs uses component tree
+  renderedHtml: string; // saved for customer → fast rendering
+  status: PageTemplateStatus;
+  createdAt: Date;
+  createdBy: UserId;
+  categoryId?: CategoryId;
 };
 
-export type PublishStatus = 'draft' | 'published';
-
-export class ProductPageTemplate extends AuditableEntity {
-  private constructor(
-    private readonly _id: ProductPageTemplateId,
-    private readonly _productId: ProductId,
-    private _editorState: EditorState, // saved for admin/worker → editor reload
-    private _renderedHtml: string, // saved for customer → fast rendering
-    private _status: PublishStatus,
-    audit: AuditFields,
-  ) {
-    super(audit);
-  }
+export class PageTemplate {
+  private constructor(private data: PageTemplateProps) {}
 
   static create(props: {
-    id: ProductPageTemplateId;
-    productId: ProductId;
+    id: PageTemplateId;
+    name: string;
     editorState: EditorState;
     renderedHtml: string;
     createdBy: UserId;
-  }): ProductPageTemplate {
-    ProductPageTemplate.validateHtml(props.renderedHtml);
+    categoryId?: CategoryId;
+  }): PageTemplate {
+    PageTemplate.validateHtml(props.renderedHtml);
     const now = new Date();
-    return new ProductPageTemplate(
-      props.id,
-      props.productId,
-      props.editorState,
-      props.renderedHtml,
-      'draft',
-      {
-        createdBy: props.createdBy,
-        updatedBy: props.createdBy,
-        createdAt: now,
-        updatedAt: now,
-      },
-    );
+    return new PageTemplate({
+      ...props,
+      createdAt: now,
+      status: 'Draft',
+    });
   }
   private static validateHtml(html: string) {
     if (!html.trim()) throw new Error('Rendered HTML is required');
   }
-  update(props: {
-    editorState: EditorState;
-    renderedHtml: string;
-    updatedBy: UserId;
-  }): void {
-    ProductPageTemplate.validateHtml(props.renderedHtml);
-    this._editorState = props.editorState;
-    this._renderedHtml = props.renderedHtml;
-    this._status = 'draft'; // reset to draft on every update
-    this.touch(props.updatedBy);
+
+  publish(): void {
+    this.data.status = 'Published';
   }
 
-  publish(updatedBy: UserId): void {
-    this._status = 'published';
-    this.touch(updatedBy);
+  archive(): void {
+    this.data.status = 'Archived';
   }
 
-  unpublish(updatedBy: UserId): void {
-    this._status = 'draft';
-    this.touch(updatedBy);
+  get id(): PageTemplateId {
+    return this.data.id;
   }
 
-  get id(): ProductPageTemplateId {
-    return this._id;
-  }
-  get productId(): ProductId {
-    return this._productId;
-  }
   get editorState(): EditorState {
-    return this._editorState;
+    return this.data.editorState;
   }
   get renderedHtml(): string {
-    return this._renderedHtml;
+    return this.data.renderedHtml;
   }
-  get status(): PublishStatus {
-    return this._status;
+  get status(): PageTemplateStatus {
+    return this.data.status;
+  }
+  get categoryId(): CategoryId | undefined {
+    return this.data.categoryId;
+  }
+  get name(): string {
+    return this.data.name;
+  }
+  set name(name: string) {
+    this.data.name = name;
   }
   isPublished(): boolean {
-    return this._status === 'published';
+    return this.data.status === 'Published';
   }
 }
