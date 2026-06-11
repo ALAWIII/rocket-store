@@ -87,9 +87,7 @@ export class PageTemplate {
   get name(): string {
     return this.data.name;
   }
-  set name(name: string) {
-    this.data.name = name;
-  }
+
   isPublished(): boolean {
     return this.data.status === 'Published';
   }
