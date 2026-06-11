@@ -1,9 +1,8 @@
-import { v7 } from 'uuid';
 import { BrandId } from './brand';
 import { ProductId, ProductVariantId } from 'src/shared/domain/ids';
 
 // temporary will be replaced by layer specific DTO.
-type UpdateProductVariantData = {
+type UpdateProductVariantProps = {
   price: number;
   quantity: number;
   info: Record<string, string>;
@@ -12,7 +11,7 @@ type UpdateProductVariantData = {
 type CreateProductVariantProps = {
   readonly id: ProductVariantId;
   readonly productId: ProductId;
-} & UpdateProductVariantData;
+} & UpdateProductVariantProps;
 type ProductProps = {
   id: ProductId;
   title: ProductTitle;
@@ -78,7 +77,7 @@ export class ProductVaraintList {
     this._variants.delete(variantId);
     return v;
   }
-  update(variantId: ProductVariantId, vi: UpdateProductVariantData) {
+  update(variantId: ProductVariantId, vi: UpdateProductVariantProps) {
     const v = this.getById(variantId);
     v?.update(vi);
   }
@@ -103,7 +102,7 @@ class ProductVariant {
   static restore(props: CreateProductVariantProps): ProductVariant {
     return new ProductVariant(props);
   }
-  update(input: UpdateProductVariantData) {
+  update(input: UpdateProductVariantProps) {
     this.data.description = input.description;
     this.data.info = input.info;
     this.data.price = input.price;
