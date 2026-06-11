@@ -3,13 +3,21 @@ import { BrandId } from './brand';
 import { ProductId, ProductVariantId } from 'src/shared/domain/ids';
 
 // temporary will be replaced by layer specific DTO.
-type ProductVariantData = {
+type UpdateProductVariantData = {
   price: number;
   quantity: number;
   info: Record<string, string>;
   description?: string;
 };
-
+type CreateProductVariantProps = {
+  readonly id: ProductVariantId;
+  readonly productId: ProductId;
+} & UpdateProductVariantData;
+type ProductProps = {
+  id: ProductId;
+  title: ProductTitle;
+  brandId?: BrandId | null;
+};
 export class ProductTitle {
   private constructor(private _title: string) {}
   static create(title: string): ProductTitle {
@@ -26,54 +34,53 @@ export class ProductTitle {
 }
 
 export class Product {
-  private variants = new ProductVaraintList();
-  constructor(
-    private productData: {
-      id: ProductId;
-      title: ProductTitle;
-      brandId?: BrandId | null;
-    },
-  ) {}
+  constructor(private productProps: ProductProps) {}
 
   get id(): ProductId {
-    return this.productData.id;
-  }
-  createVariant(pvd: ProductVariantData) {
-    const v = ProductVariant.create(pvd, this.productData.id);
-    this.variants.add(v);
-  }
-  updateVariant(variantId: ProductVariantId, vi: ProductVariantData) {
-    const v = this.variants.getById(variantId);
-    v?.update(vi);
-  }
-  removeVariant(id: ProductVariantId) {
-    this.variants.remove(id);
+    return this.productProps.id;
   }
   get title(): string {
-    return this.productData.title.title;
+    return this.productProps.title.title;
   }
 
   get brandId(): BrandId | undefined | null {
-    return this.productData.brandId;
+    return this.productProps.brandId;
   }
 
   set title(title: ProductTitle) {
-    this.productData.title = title;
+    this.productProps.title = title;
   }
 
   setBrand(brandId: BrandId | null): void {
-    this.productData.brandId = brandId;
+    this.productProps.brandId = brandId;
+  }
+  toJSON() {
+    return { ...this.productProps };
   }
 }
-class ProductVaraintList {
-  private _variants = new Map<ProductVariantId, ProductVariant>();
+export class ProductVaraintList {
+  constructor(
+    private _variants = new Map<ProductVariantId, ProductVariant>(),
+  ) {}
+  static restore(variants: CreateProductVariantProps[]): ProductVaraintList {
+    const list = new ProductVaraintList();
+    for (const props of variants) {
+      const pv = ProductVariant.restore(props);
+      list.add(pv);
+    }
+    return list;
+  }
   add(variant: ProductVariant): void {
-    this._variants.set(variant.getId(), variant);
+    this._variants.set(variant.id, variant);
   }
   remove(variantId: ProductVariantId): ProductVariant | undefined {
     const v = this.getById(variantId);
     this._variants.delete(variantId);
     return v;
+  }
+  update(variantId: ProductVariantId, vi: UpdateProductVariantData) {
+    const v = this.getById(variantId);
+    v?.update(vi);
   }
   getById(variantId: ProductVariantId): ProductVariant | undefined {
     return this._variants.get(variantId);
@@ -81,56 +88,51 @@ class ProductVaraintList {
   get variants(): ProductVariant[] {
     return [...this._variants.values()];
   }
+  toJSON(): CreateProductVariantProps[] {
+    return this.variants.map((v) => v.toJSON());
+  }
 }
 class ProductVariant {
-  constructor(
-    private readonly id: ProductVariantId,
-    private readonly productId: ProductId,
-    private price: number,
-    private quantity: number,
-    private description?: string,
-    private info: Record<string, string> = {},
-  ) {
-    if (price < 0) throw new Error('Price cannot be negative');
-    if (quantity < 0) throw new Error('Quantity cannot be negative');
+  private constructor(private data: CreateProductVariantProps) {
+    if (data.price < 0) throw new Error('Price cannot be negative');
+    if (data.quantity < 0) throw new Error('Quantity cannot be negative');
   }
-  static create(v: ProductVariantData, productId: ProductId): ProductVariant {
-    return new ProductVariant(
-      v7(),
-      productId,
-      v.price,
-      v.quantity,
-      v.description,
-      v.info,
-    );
+  static create(props: CreateProductVariantProps): ProductVariant {
+    return new ProductVariant(props);
   }
-  update(input: ProductVariantData) {
-    this.description = input.description;
-    this.info = input.info;
-    this.price = input.price;
-    this.quantity = input.quantity;
+  static restore(props: CreateProductVariantProps): ProductVariant {
+    return new ProductVariant(props);
   }
-  getId(): ProductVariantId {
-    return this.id;
+  update(input: UpdateProductVariantData) {
+    this.data.description = input.description;
+    this.data.info = input.info;
+    this.data.price = input.price;
+    this.data.quantity = input.quantity;
+  }
+  get id(): ProductVariantId {
+    return this.data.id;
   }
 
-  getProductId(): ProductId {
-    return this.productId;
+  get productId(): ProductId {
+    return this.data.productId;
   }
 
-  getPrice(): number {
-    return this.price;
+  get price(): number {
+    return this.data.price;
   }
 
-  getQuantity(): number {
-    return this.quantity;
+  get quantity(): number {
+    return this.data.quantity;
   }
 
-  getDescription(): string | undefined {
-    return this.description;
+  get description(): string | undefined {
+    return this.data.description;
   }
 
-  getInfo(): Record<string, string> {
-    return { ...this.info };
+  get info(): Record<string, string> {
+    return { ...this.data.info };
+  }
+  toJSON(): CreateProductVariantProps {
+    return { ...this.data };
   }
 }
