@@ -9,14 +9,7 @@ import { CategoryId } from './category';
 export type PageTemplateId = string;
 
 // how the editor state is structured (craft.js / grapesjs style)
-export type EditorState = Record<string, unknown>; // craft.js uses node map, grapesjs uses component tree
-
-const PageTemplateStatus = {
-  Draft: 'draft',
-  Published: 'published',
-} as const;
-export type PageTemplateStatus =
-  (typeof PageTemplateStatus)[keyof typeof PageTemplateStatus];
+type EditorState = Record<string, unknown>; // craft.js uses node map, grapesjs uses component tree
 
 type PageTemplateProps = {
   readonly id: PageTemplateId;
@@ -72,6 +65,9 @@ abstract class PageTemplate {
   get name(): string {
     return this.data.name;
   }
+  toJSON(): PageTemplateProps {
+    return { ...this.data };
+  }
 }
 class PageTemplateDraft extends PageTemplate {
   private constructor(data: PageTemplateProps) {
@@ -96,9 +92,6 @@ class PageTemplateDraft extends PageTemplate {
   }
   publish(): PageTemplatePublished {
     return PageTemplatePublished.createFromDraft(this);
-  }
-  toJSON(): PageTemplateProps {
-    return { ...this.data };
   }
 }
 
