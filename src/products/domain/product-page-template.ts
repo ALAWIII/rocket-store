@@ -1,7 +1,7 @@
 import { UserId } from 'src/shared/domain/ids';
 import { CategoryId } from './category';
 // draft templates only allowed to be hard deleted!
-// published can only be soft deleted when exactly zero of products are relying on.
+// published can be hard deleted when exactly zero of products are relying on.
 // modify a template = copy the template with new id+status= 'draft' so that its immutable and only cloned templates allowed to be edited.
 // [immutablity] cloning : is because to prevent affecting/breaking multiple products relying on one published template.
 // when user edits the template and wants to save his changes without publishing it for later more editing, we have to consider allow updating the model when its draft.
@@ -14,7 +14,6 @@ export type EditorState = Record<string, unknown>; // craft.js uses node map, gr
 const PageTemplateStatus = {
   Draft: 'draft',
   Published: 'published',
-  Archived: 'archived',
 } as const;
 export type PageTemplateStatus = keyof typeof PageTemplateStatus;
 
@@ -26,7 +25,7 @@ type PageTemplateProps = {
   status: PageTemplateStatus;
   createdAt: Date;
   createdBy: UserId;
-  categoryId?: CategoryId;
+  categoryId?: CategoryId | null;
 };
 
 export class PageTemplate {
@@ -55,11 +54,20 @@ export class PageTemplate {
   publish(): void {
     this.data.status = 'Published';
   }
-
-  archive(): void {
-    this.data.status = 'Archived';
+  updateMetadata(info: { name?: string; categoryId?: string | null }): void {
+    if (info.name !== undefined) {
+      const name = info.name.trim();
+      const nameLength = name.length;
+      if (nameLength < 2 || nameLength > 20)
+        throw new Error(
+          'Template name length must range between 2 and 20 characters',
+        );
+      this.data.name = name;
+    }
+    if (info.categoryId !== undefined) {
+      this.data.categoryId = info.categoryId;
+    }
   }
-
   get id(): PageTemplateId {
     return this.data.id;
   }
@@ -73,7 +81,7 @@ export class PageTemplate {
   get status(): PageTemplateStatus {
     return this.data.status;
   }
-  get categoryId(): CategoryId | undefined {
+  get categoryId(): CategoryId | undefined | null {
     return this.data.categoryId;
   }
   get name(): string {
