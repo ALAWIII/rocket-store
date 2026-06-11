@@ -1,5 +1,6 @@
+import { AuditableEntity, AuditFields } from 'src/shared/domain/auditing';
 import { BrandId } from './brand';
-import { ProductId, ProductVariantId } from 'src/shared/domain/ids';
+import { ProductId, ProductVariantId, UserId } from 'src/shared/domain/ids';
 
 // temporary will be replaced by layer specific DTO.
 type UpdateProductVariantProps = {
@@ -12,11 +13,20 @@ type CreateProductVariantProps = {
   readonly id: ProductVariantId;
   readonly productId: ProductId;
 } & UpdateProductVariantProps;
-type ProductProps = {
-  id: ProductId;
-  title: ProductTitle;
+type UpdateProductProps = {
+  updatedBy: UserId;
+  title?: ProductTitle;
+  description?: string;
   brandId?: BrandId | null;
 };
+type ProductProps = {
+  readonly id: ProductId;
+  title: ProductTitle;
+  description: string;
+  brandId?: BrandId | null;
+  audit: AuditFields;
+};
+
 export class ProductTitle {
   private constructor(private _title: string) {}
   static create(title: string): ProductTitle {
@@ -32,8 +42,10 @@ export class ProductTitle {
   }
 }
 
-export class Product {
-  constructor(private productProps: ProductProps) {}
+export class Product extends AuditableEntity {
+  constructor(private productProps: ProductProps) {
+    super(productProps.audit);
+  }
 
   get id(): ProductId {
     return this.productProps.id;
@@ -41,17 +53,25 @@ export class Product {
   get title(): string {
     return this.productProps.title.title;
   }
-
   get brandId(): BrandId | undefined | null {
     return this.productProps.brandId;
   }
-
-  set title(title: ProductTitle) {
-    this.productProps.title = title;
+  get description(): string {
+    return this.productProps.description;
   }
+  update(updateProps: UpdateProductProps) {
+    if (updateProps.title !== undefined) {
+      this.productProps.title = updateProps.title;
+    }
 
-  setBrand(brandId: BrandId | null): void {
-    this.productProps.brandId = brandId;
+    if (updateProps.description !== undefined) {
+      this.productProps.description = updateProps.description;
+    }
+
+    if (updateProps.brandId !== undefined) {
+      this.productProps.brandId = updateProps.brandId; // can be null
+    }
+    this.touch(updateProps.updatedBy);
   }
   toJSON() {
     return { ...this.productProps };
