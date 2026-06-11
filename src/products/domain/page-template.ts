@@ -11,23 +11,17 @@ export type PageTemplateId = string;
 // how the editor state is structured (craft.js / grapesjs style)
 type EditorState = Record<string, unknown>; // craft.js uses node map, grapesjs uses component tree
 
-type PageTemplateProps = {
+type CreatePageTemplateDraftProps = {
   readonly id: PageTemplateId;
   name: string;
   editorState: EditorState; // craft.js uses node map, grapesjs uses component tree
   renderedHtml: string; // saved for customer → fast rendering
-  createdAt: Date;
   createdBy: UserId;
   categoryId?: CategoryId | null;
 };
-type CreatePageTemplateDraftProps = {
-  id: PageTemplateId;
-  name: string;
-  editorState: EditorState;
-  renderedHtml: string;
-  createdBy: UserId;
-  categoryId?: CategoryId;
-};
+type PageTemplateProps = {
+  createdAt: Date;
+} & CreatePageTemplateDraftProps;
 abstract class PageTemplate {
   protected constructor(protected data: PageTemplateProps) {}
 
@@ -81,6 +75,9 @@ export class PageTemplateDraft extends PageTemplate {
       createdAt: now,
     });
   }
+  static restore(props: PageTemplateProps): PageTemplateDraft {
+    return new PageTemplateDraft(props);
+  }
   updateContent(props: {
     editorState: EditorState;
     renderedHtml: string;
@@ -101,5 +98,8 @@ export class PageTemplatePublished extends PageTemplate {
   }
   static createFromDraft(draft: PageTemplateDraft): PageTemplatePublished {
     return new PageTemplatePublished(draft.toJSON());
+  }
+  static restore(props: PageTemplateProps): PageTemplatePublished {
+    return new PageTemplatePublished(props);
   }
 }
