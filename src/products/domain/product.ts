@@ -31,7 +31,7 @@ export class Product {
     private productData: {
       id: ProductId;
       title: ProductTitle;
-      brandId?: BrandId;
+      brandId?: BrandId | null;
     },
   ) {}
 
@@ -53,7 +53,7 @@ export class Product {
     return this.productData.title.title;
   }
 
-  get brandId(): BrandId | undefined {
+  get brandId(): BrandId | undefined | null {
     return this.productData.brandId;
   }
 
@@ -61,29 +61,25 @@ export class Product {
     this.productData.title = title;
   }
 
-  assignBrand(brandId: BrandId) {
+  setBrand(brandId: BrandId | null): void {
     this.productData.brandId = brandId;
-  }
-
-  removeBrand(): void {
-    this.productData.brandId = undefined;
   }
 }
 class ProductVaraintList {
-  private variants = new Map<ProductVariantId, ProductVariant>();
+  private _variants = new Map<ProductVariantId, ProductVariant>();
   add(variant: ProductVariant): void {
-    this.variants.set(variant.getId(), variant);
+    this._variants.set(variant.getId(), variant);
   }
   remove(variantId: ProductVariantId): ProductVariant | undefined {
     const v = this.getById(variantId);
-    this.variants.delete(variantId);
+    this._variants.delete(variantId);
     return v;
   }
   getById(variantId: ProductVariantId): ProductVariant | undefined {
-    return this.variants.get(variantId);
+    return this._variants.get(variantId);
   }
-  getVariants(): ProductVariant[] {
-    return [...this.variants.values()];
+  get variants(): ProductVariant[] {
+    return [...this._variants.values()];
   }
 }
 class ProductVariant {
