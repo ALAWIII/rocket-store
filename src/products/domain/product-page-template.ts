@@ -15,45 +15,33 @@ const PageTemplateStatus = {
   Draft: 'draft',
   Published: 'published',
 } as const;
-export type PageTemplateStatus = keyof typeof PageTemplateStatus;
+export type PageTemplateStatus =
+  (typeof PageTemplateStatus)[keyof typeof PageTemplateStatus];
 
 type PageTemplateProps = {
   readonly id: PageTemplateId;
   name: string;
   editorState: EditorState; // craft.js uses node map, grapesjs uses component tree
   renderedHtml: string; // saved for customer → fast rendering
-  status: PageTemplateStatus;
   createdAt: Date;
   createdBy: UserId;
   categoryId?: CategoryId | null;
 };
+type CreatePageTemplateDraftProps = {
+  id: PageTemplateId;
+  name: string;
+  editorState: EditorState;
+  renderedHtml: string;
+  createdBy: UserId;
+  categoryId?: CategoryId;
+};
+abstract class PageTemplate {
+  protected constructor(protected data: PageTemplateProps) {}
 
-export class PageTemplate {
-  private constructor(private data: PageTemplateProps) {}
-
-  static create(props: {
-    id: PageTemplateId;
-    name: string;
-    editorState: EditorState;
-    renderedHtml: string;
-    createdBy: UserId;
-    categoryId?: CategoryId;
-  }): PageTemplate {
-    PageTemplate.validateHtml(props.renderedHtml);
-    const now = new Date();
-    return new PageTemplate({
-      ...props,
-      createdAt: now,
-      status: 'Draft',
-    });
-  }
-  private static validateHtml(html: string) {
+  protected static validateHtml(html: string) {
     if (!html.trim()) throw new Error('Rendered HTML is required');
   }
 
-  publish(): void {
-    this.data.status = 'Published';
-  }
   updateMetadata(info: { name?: string; categoryId?: string | null }): void {
     if (info.name !== undefined) {
       const name = info.name.trim();
@@ -78,17 +66,47 @@ export class PageTemplate {
   get renderedHtml(): string {
     return this.data.renderedHtml;
   }
-  get status(): PageTemplateStatus {
-    return this.data.status;
-  }
   get categoryId(): CategoryId | undefined | null {
     return this.data.categoryId;
   }
   get name(): string {
     return this.data.name;
   }
+}
+class PageTemplateDraft extends PageTemplate {
+  private constructor(data: PageTemplateProps) {
+    super(data);
+  }
+  static create(props: CreatePageTemplateDraftProps): PageTemplateDraft {
+    PageTemplate.validateHtml(props.renderedHtml);
+    const now = new Date();
+    return new PageTemplateDraft({
+      ...props,
+      createdAt: now,
+    });
+  }
+  updateContent(props: {
+    editorState: EditorState;
+    renderedHtml: string;
+  }): void {
+    PageTemplate.validateHtml(props.renderedHtml);
 
-  isPublished(): boolean {
-    return this.data.status === 'Published';
+    this.data.editorState = props.editorState;
+    this.data.renderedHtml = props.renderedHtml;
+  }
+  publish(): PageTemplatePublished {
+    return PageTemplatePublished.createFromDraft(this);
+  }
+  toJSON(): PageTemplateProps {
+    return { ...this.data };
+  }
+}
+
+class PageTemplatePublished extends PageTemplate {
+  private constructor(data: PageTemplateProps) {
+    super(data);
+  }
+  static createFromDraft(draft: PageTemplateDraft): PageTemplatePublished {
+    return new PageTemplatePublished(draft.toJSON());
   }
 }
