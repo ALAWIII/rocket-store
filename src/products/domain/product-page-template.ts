@@ -69,7 +69,7 @@ abstract class PageTemplate {
     return { ...this.data };
   }
 }
-class PageTemplateDraft extends PageTemplate {
+export class PageTemplateDraft extends PageTemplate {
   private constructor(data: PageTemplateProps) {
     super(data);
   }
@@ -95,7 +95,7 @@ class PageTemplateDraft extends PageTemplate {
   }
 }
 
-class PageTemplatePublished extends PageTemplate {
+export class PageTemplatePublished extends PageTemplate {
   private constructor(data: PageTemplateProps) {
     super(data);
   }
