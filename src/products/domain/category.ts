@@ -1,52 +1,57 @@
+import { AuditableEntity, AuditFields } from 'src/shared/domain/auditing';
+import { UserId } from 'src/shared/domain/ids';
+
 export type CategoryId = string;
 type CreateCategoryProps = {
   id: CategoryId;
   name: string;
   parentCategoryId?: CategoryId;
+  createdBy: UserId;
 };
-
-type RestoreCategoryData = {
+type CategoryProps = {
   id: CategoryId;
   name: string;
   parentCategoryId?: CategoryId;
-  createdAt: Date;
-  updatedAt: Date;
+  audit: AuditFields;
 };
-class Category {
-  private constructor(
-    private data: {
-      id: CategoryId;
-      name: string;
-      parentCategoryId?: CategoryId;
-    },
-    readonly _createdAt: Date,
-    private updatedAt: Date,
-  ) {}
+type FlatCategoryProps = {
+  id: CategoryId;
+  name: string;
+  parentCategoryId?: CategoryId;
+} & AuditFields;
+export class Category extends AuditableEntity {
+  private constructor(private data: CategoryProps) {
+    super(data.audit);
+  }
 
   static create(data: CreateCategoryProps): Category {
     const now = new Date();
 
-    return new Category(
-      {
-        id: data.id,
-        name: Category.validateName(data.name),
-        parentCategoryId: data.parentCategoryId,
+    return new Category({
+      id: data.id,
+      name: Category.validateName(data.name),
+      parentCategoryId: data.parentCategoryId,
+      audit: {
+        createdAt: now,
+        updatedAt: now,
+        createdBy: data.createdBy,
+        updatedBy: data.createdBy,
       },
-      now,
-      now,
-    );
+    });
   }
 
-  static restore(data: RestoreCategoryData): Category {
-    return new Category(
-      {
-        id: data.id,
-        name: Category.validateName(data.name),
-        parentCategoryId: data.parentCategoryId,
+  static restore(data: FlatCategoryProps): Category {
+    return new Category({
+      id: data.id,
+      name: Category.validateName(data.name),
+      parentCategoryId: data.parentCategoryId,
+      audit: {
+        createdAt: data.createdAt,
+        createdBy: data.createdBy,
+        updatedAt: data.updatedAt,
+        updatedBy: data.updatedBy,
       },
-      data.createdAt,
-      data.updatedAt,
-    );
+    });
   }
   private static validateName(name: string): string {
     const normalized = name.trim();
@@ -70,39 +75,33 @@ class Category {
     return this.data.parentCategoryId;
   }
 
-  rename(name: string): void {
-    this.data.name = Category.validateName(name);
-    this.updateDate();
+  rename(renameInfo: { name: string; updatedBy: UserId }): void {
+    this.data.name = Category.validateName(renameInfo.name);
+    this.touch(renameInfo.updatedBy);
   }
 
-  assignParent(parentCategoryId: CategoryId): void {
-    if (parentCategoryId === this.id) {
+  assignParent(info: {
+    parentCategoryId: CategoryId;
+    updatedBy: UserId;
+  }): void {
+    if (info.parentCategoryId === this.id) {
       throw new Error('Category cannot be parent of itself');
     }
-    this.data.parentCategoryId = parentCategoryId;
-    this.updateDate();
+    this.data.parentCategoryId = info.parentCategoryId;
+    this.touch(info.updatedBy);
   }
 
-  removeParent(): void {
+  removeParent(userId: string): void {
     this.data.parentCategoryId = undefined;
-    this.updateDate();
-  }
-  private updateDate() {
-    this.updatedAt = new Date();
-  }
-  get createdAt(): Date {
-    return new Date(this._createdAt);
+    this.touch(userId);
   }
 
-  get lastUpdated(): Date {
-    return new Date(this.updatedAt);
-  }
-
-  toJSON() {
+  toJSON(): FlatCategoryProps {
     return {
-      ...this.data,
-      createdAt: this.createdAt,
-      lastUpdated: this.lastUpdated,
+      id: this.data.id,
+      name: this.data.name,
+      parentCategoryId: this.data.parentCategoryId,
+      ...this.data.audit,
     };
   }
 }
