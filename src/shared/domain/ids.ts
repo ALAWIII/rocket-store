@@ -1,5 +1,4 @@
 import { v7, validate, version } from 'uuid';
-export type ProductId = string;
 export type ProductVariantId = string;
 
 abstract class UuidV7Id {
@@ -53,5 +52,16 @@ export class BrandId extends UuidV7Id {
     const id = value ?? v7();
     super.validate(id);
     return new BrandId(id);
+  }
+}
+export class ProductId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new ProductId(id);
   }
 }
