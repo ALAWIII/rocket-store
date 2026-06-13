@@ -2,7 +2,6 @@
 // sku: Stock Keeping Unit. It’s an internal code used to identify and track a specific product variant in inventory, like a shirt in one size and color.
 
 import { OrderId, ProductVariantId, UserId } from 'src/shared/domain/ids';
-import { v7 } from 'uuid';
 
 const OrderStatus = {
   Pending: 'pending', // created, not yet confirmed

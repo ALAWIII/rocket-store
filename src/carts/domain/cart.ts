@@ -11,7 +11,7 @@ export class CartItem {
     if (props.quantity < 1) throw new Error('Quantity must be at least 1');
   }
 
-  get productVariantId(): string {
+  get productVariantId(): ProductVariantId {
     return this.props.productVariantId;
   }
 
