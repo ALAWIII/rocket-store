@@ -1,7 +1,7 @@
-import { ProductVariantId, UserId } from 'src/shared/domain/ids';
+import { CartItemId, ProductVariantId, UserId } from 'src/shared/domain/ids';
 
 type CartItemProps = {
-  readonly id: string;
+  readonly id: CartItemId;
   readonly productVariantId: ProductVariantId;
   userId: UserId;
   quantity: number;
