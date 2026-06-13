@@ -1,4 +1,4 @@
-type UserData = {
+type UserProps = {
   readonly id: string;
   email: string;
   passwordHash: string;
@@ -9,21 +9,51 @@ type UserData = {
   updatedAt: Date;
   phone?: string;
 };
+type UpdateUserProps = {
+  email?: string;
+  passwordHash?: string;
+  firstName?: string;
+  lastName?: string;
+  roleId?: string;
+  phone?: string;
+};
 class User {
-  constructor(private userdata: UserData) {}
-  setEmail(email: string) {
-    this.userdata.email = email;
+  constructor(private data: UserProps) {}
+  update(props: UpdateUserProps) {
+    if (props.email !== undefined) this.changeEmail(props.email);
+    if (props.passwordHash !== undefined)
+      this.changePasswordHash(props.passwordHash);
+    if (props.firstName !== undefined) this.changeFirstName(props.firstName);
+    if (props.lastName !== undefined) this.changeLastName(props.lastName);
+    if (props.roleId !== undefined) this.changeRole(props.roleId);
+    if (props.phone !== undefined) this.changePhone(props.phone);
+    this.touch();
   }
-  setPassword(password: string) {
-    this.userdata.passwordHash = password;
+  private changeEmail(email: string) {
+    this.data.email = email;
   }
-  setPhone(phone: string) {
-    this.userdata.phone = phone;
+  private changeFirstName(fname: string) {
+    this.data.firstName = fname;
   }
-  setUpdatedAt(d: Date) {
-    this.userdata.updatedAt = d;
+  private changeLastName(lastName: string) {
+    this.data.lastName = lastName;
   }
-  setRoleId(r: string) {
-    this.userdata.roleId = r;
+  private changePasswordHash(passwordHash: string) {
+    this.data.passwordHash = passwordHash;
+  }
+
+  private changePhone(phone?: string) {
+    this.data.phone = phone;
+  }
+
+  private changeRole(roleId: string) {
+    this.data.roleId = roleId;
+  }
+
+  private touch() {
+    this.data.updatedAt = new Date();
+  }
+  toJSON() {
+    return { ...this.data };
   }
 }
