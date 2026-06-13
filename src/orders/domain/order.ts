@@ -21,6 +21,7 @@ type OrderItemProps = {
 type OrderProps = {
   readonly id: string;
   readonly userId: string;
+  createdAt: Date;
   status: OrderStatus;
   items: OrderItem[];
 };
@@ -31,6 +32,7 @@ export class Order {
       id: v7(),
       userId: userId,
       status: OrderStatus.Pending,
+      createdAt: new Date(),
       items: [],
     });
   }
@@ -61,6 +63,9 @@ export class Order {
   get status(): OrderStatus {
     return this.props.status;
   }
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
   toJSON() {
     return {
       order: {
@@ -68,6 +73,7 @@ export class Order {
         userId: this.userId,
         status: this.status,
         totalPrice: this.total,
+        createdAt: this.createdAt,
       },
       items: this.props.items.map((item) => item.toJSON()),
     };
