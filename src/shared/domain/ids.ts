@@ -32,3 +32,15 @@ export class UserId extends UuidV7Id {
     return new UserId(id);
   }
 }
+
+export class OrderId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new OrderId(id);
+  }
+}

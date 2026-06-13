@@ -1,7 +1,7 @@
 //----------------- after checkout ------------------
 // sku: Stock Keeping Unit. It’s an internal code used to identify and track a specific product variant in inventory, like a shirt in one size and color.
 
-import { ProductVariantId, UserId } from 'src/shared/domain/ids';
+import { OrderId, ProductVariantId, UserId } from 'src/shared/domain/ids';
 import { v7 } from 'uuid';
 
 const OrderStatus = {
@@ -11,7 +11,7 @@ const OrderStatus = {
 } as const;
 type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
 type OrderItemProps = {
-  readonly id: string;
+  readonly id: OrderId;
   readonly variantId: ProductVariantId;
   readonly productTitle: string;
   readonly unitPrice: number;
@@ -19,7 +19,7 @@ type OrderItemProps = {
 };
 
 type OrderProps = {
-  readonly id: string;
+  readonly id: OrderId;
   readonly userId: UserId;
   createdAt: Date;
   status: OrderStatus;
@@ -29,7 +29,7 @@ export class Order {
   private constructor(private props: OrderProps) {}
   static create(userId: string): Order {
     return new Order({
-      id: v7(),
+      id: OrderId.create(), // will create a default new one if not provided.
       userId: UserId.create(userId),
       status: OrderStatus.Pending,
       createdAt: new Date(),
@@ -54,7 +54,7 @@ export class Order {
     }
     return t;
   }
-  get id(): string {
+  get id(): OrderId {
     return this.props.id;
   }
   get userId(): UserId {
