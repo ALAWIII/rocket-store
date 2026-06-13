@@ -1,5 +1,5 @@
-import { PageTemplateId, UserId } from 'src/shared/domain/ids';
-import { CategoryId } from './category';
+import { CategoryId, PageTemplateId, UserId } from 'src/shared/domain/ids';
+
 // draft templates only allowed to be hard deleted!
 // published can be hard deleted when exactly zero of products are relying on.
 // modify a template = copy the template with new id+status= 'draft' so that its immutable and only cloned templates allowed to be edited.
@@ -39,7 +39,8 @@ abstract class PageTemplate {
       this.data.name = name;
     }
     if (info.categoryId !== undefined) {
-      this.data.categoryId = info.categoryId;
+      this.data.categoryId =
+        info.categoryId === null ? null : CategoryId.create(info.categoryId);
     }
   }
   get id(): PageTemplateId {

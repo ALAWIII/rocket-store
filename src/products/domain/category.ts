@@ -1,7 +1,6 @@
 import { AuditableEntity, AuditFields } from 'src/shared/domain/auditing';
-import { UserId } from 'src/shared/domain/ids';
+import { CategoryId, UserId } from 'src/shared/domain/ids';
 
-export type CategoryId = string;
 type CreateCategoryProps = {
   id: CategoryId;
   name: string;

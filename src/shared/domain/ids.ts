@@ -86,3 +86,14 @@ export class PageTemplateId extends UuidV7Id {
     return new PageTemplateId(id);
   }
 }
+export class CategoryId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new CategoryId(id);
+  }
+}
