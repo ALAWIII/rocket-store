@@ -20,7 +20,7 @@ type OrderItemProps = {
 
 type OrderProps = {
   readonly id: string;
-  readonly userId: string;
+  readonly userId: UserId;
   createdAt: Date;
   status: OrderStatus;
   items: OrderItem[];
@@ -30,7 +30,7 @@ export class Order {
   static create(userId: string): Order {
     return new Order({
       id: v7(),
-      userId: userId,
+      userId: UserId.create(userId),
       status: OrderStatus.Pending,
       createdAt: new Date(),
       items: [],
