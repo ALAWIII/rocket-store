@@ -1,4 +1,4 @@
-import { UserId } from 'src/shared/domain/ids';
+import { PageTemplateId, UserId } from 'src/shared/domain/ids';
 import { CategoryId } from './category';
 // draft templates only allowed to be hard deleted!
 // published can be hard deleted when exactly zero of products are relying on.
@@ -6,7 +6,6 @@ import { CategoryId } from './category';
 // [immutablity] cloning : is because to prevent affecting/breaking multiple products relying on one published template.
 // when user edits the template and wants to save his changes without publishing it for later more editing, we have to consider allow updating the model when its draft.
 // types
-export type PageTemplateId = string;
 
 // how the editor state is structured (craft.js / grapesjs style)
 type EditorState = Record<string, unknown>; // craft.js uses node map, grapesjs uses component tree
