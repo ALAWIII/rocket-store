@@ -1,7 +1,5 @@
 import { AuditableEntity, AuditFields } from 'src/shared/domain/auditing';
-import { UserId } from 'src/shared/domain/ids';
-
-export type BrandId = string;
+import { BrandId, UserId } from 'src/shared/domain/ids';
 
 type BrandData = {
   readonly id: BrandId;

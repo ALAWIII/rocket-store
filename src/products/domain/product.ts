@@ -1,6 +1,11 @@
 import { AuditableEntity, AuditFields } from 'src/shared/domain/auditing';
-import { BrandId } from './brand';
-import { ProductId, ProductVariantId, UserId } from 'src/shared/domain/ids';
+
+import {
+  BrandId,
+  ProductId,
+  ProductVariantId,
+  UserId,
+} from 'src/shared/domain/ids';
 
 // temporary will be replaced by layer specific DTO.
 type UpdateProductVariantProps = {
