@@ -135,51 +135,51 @@ export class OrderAddress {
       createdAt: new Date(),
     });
   }
-  get id() {
+  get id(): AddressId {
     return this.props.id;
   }
 
-  get orderId() {
+  get orderId(): OrderId {
     return this.props.orderId;
   }
 
-  get addressType() {
+  get addressType(): AddressType {
     return this.props.addressType;
   }
 
-  get fullName() {
+  get fullName(): Name {
     return this.props.fullName;
   }
 
-  get phone() {
+  get phone(): Phone {
     return this.props.phone;
   }
 
-  get country() {
+  get country(): Name {
     return this.props.country;
   }
 
-  get city() {
+  get city(): Name {
     return this.props.city;
   }
 
-  get state() {
+  get state(): Name {
     return this.props.state;
   }
 
-  get postalCode() {
+  get postalCode(): string {
     return this.props.postalCode;
   }
 
-  get addressLine1() {
+  get addressLine1(): string {
     return this.props.addressLine1;
   }
 
-  get addressLine2() {
+  get addressLine2(): string | undefined {
     return this.props.addressLine2;
   }
 
-  get createdAt() {
+  get createdAt(): Date {
     return this.props.createdAt;
   }
 
