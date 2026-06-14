@@ -1,7 +1,12 @@
 //----------------- after checkout ------------------
 // sku: Stock Keeping Unit. It’s an internal code used to identify and track a specific product variant in inventory, like a shirt in one size and color.
 
-import { OrderId, ProductVariantId, UserId } from 'src/shared/domain/ids';
+import {
+  AddressId,
+  OrderId,
+  ProductVariantId,
+  UserId,
+} from 'src/shared/domain/ids';
 
 const OrderStatus = {
   Pending: 'pending', // created, not yet confirmed
@@ -20,6 +25,8 @@ type OrderItemProps = {
 type OrderProps = {
   readonly id: OrderId;
   readonly userId: UserId;
+  billingAddressId?: AddressId;
+  shippingAddressId?: AddressId;
   createdAt: Date;
   status: OrderStatus;
   items: OrderItem[];
@@ -65,6 +72,12 @@ export class Order {
   get createdAt(): Date {
     return this.props.createdAt;
   }
+  get billingAddressId(): AddressId | undefined {
+    return this.props.billingAddressId;
+  }
+  get shippingAddressId(): AddressId | undefined {
+    return this.props.shippingAddressId;
+  }
   toJSON() {
     return {
       order: {
@@ -72,6 +85,8 @@ export class Order {
         userId: this.userId,
         status: this.status,
         totalPrice: this.total,
+        billingAddressId: this.billingAddressId,
+        shippingAddressId: this.shippingAddressId,
         createdAt: this.createdAt,
       },
       items: this.props.items.map((item) => item.toJSON()),
