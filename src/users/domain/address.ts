@@ -1,7 +1,6 @@
-import { AddressId, UserId } from 'src/shared/domain/ids';
+import { AddressId, OrderId, UserId } from 'src/shared/domain/ids';
 import { Name, Phone } from './user';
-type CreateAddressProps = {
-  readonly userId: UserId;
+type SharedProps = {
   fullName: Name;
   phone: Phone;
   country: Name;
@@ -11,12 +10,15 @@ type CreateAddressProps = {
   addressLine1: string;
   addressLine2?: string;
 };
+type CreateAddressProps = {
+  readonly userId: UserId;
+} & SharedProps;
 type AddressProps = {
   readonly id: AddressId;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
-} & CreateAddressProps;
+} & SharedProps;
 type UpdateAddressProps = {
   fullName?: Name;
   phone?: Phone;
@@ -27,7 +29,7 @@ type UpdateAddressProps = {
   addressLine1?: string;
   addressLine2?: string;
 };
-class Address {
+export class Address {
   private constructor(private props: AddressProps) {}
   static create(data: CreateAddressProps) {
     const now = new Date();
@@ -102,6 +104,86 @@ class Address {
     return this.props.updatedAt;
   }
   toJSON(): AddressProps {
+    return { ...this.props };
+  }
+}
+
+const AddressType = {
+  Billing: 'billing',
+  Shipping: 'shipping',
+} as const;
+type AddressType = (typeof AddressType)[keyof typeof AddressType];
+
+type OrderAddressProps = {
+  readonly id: AddressId;
+  orderId: OrderId;
+  addressType: AddressType;
+  createdAt: Date;
+} & SharedProps;
+type CreateOrderAddressProps = {
+  orderId: OrderId;
+  addressType: AddressType;
+} & SharedProps;
+
+export class OrderAddress {
+  private constructor(private props: OrderAddressProps) {}
+
+  static create(data: CreateOrderAddressProps): OrderAddress {
+    return new OrderAddress({
+      id: AddressId.create(),
+      ...data,
+      createdAt: new Date(),
+    });
+  }
+  get id() {
+    return this.props.id;
+  }
+
+  get orderId() {
+    return this.props.orderId;
+  }
+
+  get addressType() {
+    return this.props.addressType;
+  }
+
+  get fullName() {
+    return this.props.fullName;
+  }
+
+  get phone() {
+    return this.props.phone;
+  }
+
+  get country() {
+    return this.props.country;
+  }
+
+  get city() {
+    return this.props.city;
+  }
+
+  get state() {
+    return this.props.state;
+  }
+
+  get postalCode() {
+    return this.props.postalCode;
+  }
+
+  get addressLine1() {
+    return this.props.addressLine1;
+  }
+
+  get addressLine2() {
+    return this.props.addressLine2;
+  }
+
+  get createdAt() {
+    return this.props.createdAt;
+  }
+
+  toJSON(): OrderAddressProps {
     return { ...this.props };
   }
 }
