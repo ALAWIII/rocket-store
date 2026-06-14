@@ -1,5 +1,6 @@
 import { AddressId, OrderId, UserId } from 'src/shared/domain/ids';
 import { Name, Phone } from './user';
+
 type SharedProps = {
   fullName: Name;
   phone: Phone;
@@ -10,59 +11,42 @@ type SharedProps = {
   addressLine1: string;
   addressLine2?: string;
 };
+
 type CreateAddressProps = {
   readonly userId: UserId;
 } & SharedProps;
+
 type AddressProps = {
   readonly id: AddressId;
+  readonly userId: UserId;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
 } & SharedProps;
-type UpdateAddressProps = {
-  fullName?: Name;
-  phone?: Phone;
-  country?: Name;
-  city?: Name;
-  state?: Name;
-  postalCode?: string;
-  addressLine1?: string;
-  addressLine2?: string;
-};
-export class Address {
-  private constructor(private props: AddressProps) {}
-  static create(data: CreateAddressProps) {
-    const now = new Date();
-    return new Address({
-      id: AddressId.create(),
-      ...data,
-      createdAt: now,
-      updatedAt: now,
-    });
-  }
-  static restore(data: AddressProps) {
-    return new Address(data);
-  }
-  update(data: UpdateAddressProps) {
-    if (data.fullName !== undefined) this.props.fullName = data.fullName;
-    if (data.phone !== undefined) this.props.phone = data.phone;
-    if (data.country !== undefined) this.props.country = data.country;
-    if (data.city !== undefined) this.props.city = data.city;
-    if (data.state !== undefined) this.props.state = data.state;
-    if (data.postalCode !== undefined) this.props.postalCode = data.postalCode;
-    if (data.addressLine1 !== undefined)
-      this.props.addressLine1 = data.addressLine1;
-    if (data.addressLine2 !== undefined)
-      this.props.addressLine2 = data.addressLine2;
 
-    this.props.updatedAt = new Date();
-  }
-  delete() {
-    this.props.deletedAt = new Date();
-  }
-  get id(): AddressId {
-    return this.props.id;
-  }
+type UpdateAddressProps = Partial<SharedProps>;
+
+const AddressType = {
+  Billing: 'billing',
+  Shipping: 'shipping',
+} as const;
+
+type AddressType = (typeof AddressType)[keyof typeof AddressType];
+
+type OrderAddressProps = {
+  readonly id: AddressId;
+  readonly orderId: OrderId;
+  addressType: AddressType;
+  createdAt: Date;
+} & SharedProps;
+
+type CreateOrderAddressProps = {
+  orderId: OrderId;
+  addressType: AddressType;
+} & SharedProps;
+
+abstract class AddressBase<T extends SharedProps> {
+  protected constructor(protected props: T) {}
 
   get fullName(): Name {
     return this.props.fullName;
@@ -96,6 +80,48 @@ export class Address {
     return this.props.addressLine2;
   }
 
+  toJSON(): T {
+    return { ...this.props };
+  }
+}
+
+export class Address extends AddressBase<AddressProps> {
+  private constructor(props: AddressProps) {
+    super(props);
+  }
+
+  static create(data: CreateAddressProps) {
+    const now = new Date();
+
+    return new Address({
+      id: AddressId.create(),
+      ...data,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  static restore(data: AddressProps) {
+    return new Address(data);
+  }
+
+  update(data: UpdateAddressProps) {
+    Object.assign(this.props, removeUndefined(data));
+    this.props.updatedAt = new Date();
+  }
+
+  delete() {
+    this.props.deletedAt = new Date();
+  }
+
+  get id(): AddressId {
+    return this.props.id;
+  }
+
+  get userId(): UserId {
+    return this.props.userId;
+  }
+
   get createdAt(): Date {
     return this.props.createdAt;
   }
@@ -103,30 +129,16 @@ export class Address {
   get updatedAt(): Date {
     return this.props.updatedAt;
   }
-  toJSON(): AddressProps {
-    return { ...this.props };
+
+  get deletedAt(): Date | undefined {
+    return this.props.deletedAt;
   }
 }
 
-const AddressType = {
-  Billing: 'billing',
-  Shipping: 'shipping',
-} as const;
-type AddressType = (typeof AddressType)[keyof typeof AddressType];
-
-type OrderAddressProps = {
-  readonly id: AddressId;
-  orderId: OrderId;
-  addressType: AddressType;
-  createdAt: Date;
-} & SharedProps;
-type CreateOrderAddressProps = {
-  orderId: OrderId;
-  addressType: AddressType;
-} & SharedProps;
-
-export class OrderAddress {
-  private constructor(private props: OrderAddressProps) {}
+export class OrderAddress extends AddressBase<OrderAddressProps> {
+  private constructor(props: OrderAddressProps) {
+    super(props);
+  }
 
   static create(data: CreateOrderAddressProps): OrderAddress {
     return new OrderAddress({
@@ -135,6 +147,11 @@ export class OrderAddress {
       createdAt: new Date(),
     });
   }
+
+  static restore(data: OrderAddressProps): OrderAddress {
+    return new OrderAddress(data);
+  }
+
   get id(): AddressId {
     return this.props.id;
   }
@@ -147,43 +164,13 @@ export class OrderAddress {
     return this.props.addressType;
   }
 
-  get fullName(): Name {
-    return this.props.fullName;
-  }
-
-  get phone(): Phone {
-    return this.props.phone;
-  }
-
-  get country(): Name {
-    return this.props.country;
-  }
-
-  get city(): Name {
-    return this.props.city;
-  }
-
-  get state(): Name {
-    return this.props.state;
-  }
-
-  get postalCode(): string {
-    return this.props.postalCode;
-  }
-
-  get addressLine1(): string {
-    return this.props.addressLine1;
-  }
-
-  get addressLine2(): string | undefined {
-    return this.props.addressLine2;
-  }
-
   get createdAt(): Date {
     return this.props.createdAt;
   }
+}
 
-  toJSON(): OrderAddressProps {
-    return { ...this.props };
-  }
+function removeUndefined<T extends object>(obj: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, value]) => value !== undefined),
+  ) as Partial<T>;
 }
