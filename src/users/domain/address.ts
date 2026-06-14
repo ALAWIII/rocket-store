@@ -1,6 +1,6 @@
 import { AddressId, UserId } from 'src/shared/domain/ids';
 import { Name, Phone } from './user';
-type CreateUpdateProps = {
+type CreateAddressProps = {
   readonly userId: UserId;
   fullName: Name;
   phone: Phone;
@@ -16,7 +16,7 @@ type AddressProps = {
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
-} & CreateUpdateProps;
+} & CreateAddressProps;
 type UpdateAddressProps = {
   fullName?: Name;
   phone?: Phone;
@@ -29,7 +29,7 @@ type UpdateAddressProps = {
 };
 class Address {
   private constructor(private props: AddressProps) {}
-  static create(data: CreateUpdateProps) {
+  static create(data: CreateAddressProps) {
     const now = new Date();
     return new Address({
       id: AddressId.create(),
