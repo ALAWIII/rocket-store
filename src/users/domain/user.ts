@@ -111,6 +111,9 @@ export class Name {
   get value(): string {
     return this._value;
   }
+  toJSON() {
+    return this.value;
+  }
 }
 
 export class Email {
@@ -131,6 +134,9 @@ export class Email {
   get value(): string {
     return this._value;
   }
+  toJSON() {
+    return this.value;
+  }
 }
 
 export class Phone {
@@ -147,5 +153,8 @@ export class Phone {
 
   get value(): string {
     return this._value;
+  }
+  toJSON() {
+    return this.value;
   }
 }
