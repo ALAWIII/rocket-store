@@ -74,15 +74,192 @@ export class Payment {
 }
 type PaymentProviderProps = {
   id: PaymentProviderId;
-  slug: string;
-  displayName: string;
-  isActive: boolean;
-  config: Record<string, unknown>;
-  handlerClass: string;
+  slug: string; // A unique, lowercase identifier for the provider — e.g. 'stripe', 'myfatoorah', 'paypal'.
+  displayName: string; // A human-readable name shown in admin UI / customer-facing selection — e.g. 'Stripe', 'MyFatoorah Payment Gateway'
+  isActive: boolean; // A boolean toggle that enables/disables the provider without deleting the record.
+  config: Record<string, unknown>; // Stores sensitive provider credentials as JSON (jsonb in Postgres)
+  handlerClass: string; // A string name of the handler class that implements IPaymentHandler for this provider.
   createdAt: Date;
   updatedAt: Date;
 };
-class PaymentProvider {}
+type CreatePaymentProviderProps = {
+  slug: string;
+  displayName: string;
+  config?: Record<string, unknown>;
+  handlerClass: string;
+  isActive?: boolean;
+};
+
+class PaymentProvider {
+  private constructor(private props: PaymentProviderProps) {}
+
+  static create(data: CreatePaymentProviderProps): PaymentProvider {
+    const now = new Date();
+
+    const slug = this.normalizeSlug(data.slug);
+    const displayName = this.normalizeDisplayName(data.displayName);
+    const handlerClass = this.normalizeHandlerClass(data.handlerClass);
+    const config = data.config ?? {};
+
+    this.validateSlug(slug);
+    this.validateDisplayName(displayName);
+    this.validateHandlerClass(handlerClass);
+    this.validateConfig(config);
+
+    return new PaymentProvider({
+      id: PaymentProviderId.create(),
+      slug,
+      displayName,
+      isActive: data.isActive ?? true,
+      config,
+      handlerClass,
+      createdAt: now,
+      updatedAt: now,
+    });
+  }
+
+  static restore(data: PaymentProviderProps): PaymentProvider {
+    this.validateSlug(data.slug);
+    this.validateDisplayName(data.displayName);
+    this.validateHandlerClass(data.handlerClass);
+    this.validateConfig(data.config);
+
+    return new PaymentProvider(data);
+  }
+
+  activate() {
+    if (this.props.isActive) return;
+    this.props.isActive = true;
+    this.touch();
+  }
+
+  deactivate() {
+    if (!this.props.isActive) return;
+    this.props.isActive = false;
+    this.touch();
+  }
+
+  rename(displayName: string) {
+    const normalized = PaymentProvider.normalizeDisplayName(displayName);
+    PaymentProvider.validateDisplayName(normalized);
+
+    this.props.displayName = normalized;
+    this.touch();
+  }
+
+  changeSlug(slug: string) {
+    const normalized = PaymentProvider.normalizeSlug(slug);
+    PaymentProvider.validateSlug(normalized);
+
+    this.props.slug = normalized;
+    this.touch();
+  }
+
+  changeHandlerClass(handlerClass: string) {
+    const normalized = PaymentProvider.normalizeHandlerClass(handlerClass);
+    PaymentProvider.validateHandlerClass(normalized);
+
+    this.props.handlerClass = normalized;
+    this.touch();
+  }
+
+  replaceConfig(config: Record<string, unknown>) {
+    PaymentProvider.validateConfig(config);
+
+    this.props.config = { ...config };
+    this.touch();
+  }
+
+  mergeConfig(partial: Record<string, unknown>) {
+    PaymentProvider.validateConfig(partial);
+
+    this.props.config = {
+      ...this.props.config,
+      ...partial,
+    };
+    this.touch();
+  }
+
+  hasSlug(slug: string): boolean {
+    return this.props.slug === PaymentProvider.normalizeSlug(slug);
+  }
+
+  usesHandler(handlerClass: string): boolean {
+    return (
+      this.props.handlerClass ===
+      PaymentProvider.normalizeHandlerClass(handlerClass)
+    );
+  }
+
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+
+  toPrimitives(): PaymentProviderProps {
+    return {
+      ...this.props,
+      config: { ...this.props.config },
+    };
+  }
+
+  private touch() {
+    this.props.updatedAt = new Date();
+  }
+
+  private static normalizeSlug(value: string): string {
+    return value.trim().toLowerCase();
+  }
+
+  private static normalizeDisplayName(value: string): string {
+    return value.trim();
+  }
+
+  private static normalizeHandlerClass(value: string): string {
+    return value.trim();
+  }
+
+  private static validateSlug(value: string) {
+    if (!value) throw new Error('slug is required');
+    if (value.length < 2 || value.length > 50) {
+      throw new Error('slug length must be between 2 and 50 characters');
+    }
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
+      throw new Error(
+        'slug must contain only lowercase letters, numbers, and hyphens',
+      );
+    }
+  }
+
+  private static validateDisplayName(value: string) {
+    if (!value) throw new Error('displayName is required');
+    if (value.length < 2 || value.length > 100) {
+      throw new Error(
+        'displayName length must be between 2 and 100 characters',
+      );
+    }
+  }
+
+  private static validateHandlerClass(value: string) {
+    if (!value) throw new Error('handlerClass is required');
+    if (value.length < 2 || value.length > 120) {
+      throw new Error(
+        'handlerClass length must be between 2 and 120 characters',
+      );
+    }
+    if (!/^[A-Z][A-Za-z0-9]*$/.test(value)) {
+      throw new Error(
+        'handlerClass must be a valid class-like name such as StripePaymentGateway',
+      );
+    }
+  }
+
+  private static validateConfig(value: Record<string, unknown>) {
+    if (value == null || Array.isArray(value) || typeof value !== 'object') {
+      throw new Error('config must be a plain object');
+    }
+  }
+}
+
 type CreatePaymentTransactionProps = {
   paymentId: PaymentId;
   providerId: PaymentProviderId;
