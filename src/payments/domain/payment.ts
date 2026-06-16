@@ -25,15 +25,11 @@ type CreatePaymentProps = {
 };
 type PaymentProps = {
   id: PaymentId;
-  orderId: OrderId;
-  amountInMinorUnit: number;
-  currency: string;
-  method: PaymentMethod;
   status: PaymentStatus;
   paidAt?: Date | null;
   createdAt: Date;
   updatedAt: Date;
-};
+} & CreatePaymentProps;
 
 export class Payment {
   private constructor(private props: PaymentProps) {}
