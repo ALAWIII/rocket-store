@@ -81,7 +81,6 @@ type PaymentProviderProps = {
   displayName: string; // A human-readable name shown in admin UI / customer-facing selection — e.g. 'Stripe', 'MyFatoorah Payment Gateway'
   isActive: boolean; // A boolean toggle that enables/disables the provider without deleting the record.
   config: Record<string, unknown>; // Stores sensitive provider credentials as JSON (jsonb in Postgres)
-  handlerClass: string; // A string name of the handler class that implements IPaymentHandler for this provider.
   createdAt: Date;
   updatedAt: Date;
 };
@@ -89,7 +88,6 @@ type CreatePaymentProviderProps = {
   slug: string;
   displayName: string;
   config?: Record<string, unknown>;
-  handlerClass: string;
   isActive?: boolean;
 };
 
@@ -101,12 +99,11 @@ export class PaymentProvider {
 
     const slug = this.normalizeSlug(data.slug);
     const displayName = this.normalizeDisplayName(data.displayName);
-    const handlerClass = this.normalizeHandlerClass(data.handlerClass);
     const config = data.config ?? {};
 
     this.validateSlug(slug);
     this.validateDisplayName(displayName);
-    this.validateHandlerClass(handlerClass);
+
     this.validateConfig(config);
 
     return new PaymentProvider({
@@ -115,7 +112,6 @@ export class PaymentProvider {
       displayName,
       isActive: data.isActive ?? true,
       config,
-      handlerClass,
       createdAt: now,
       updatedAt: now,
     });
@@ -124,7 +120,7 @@ export class PaymentProvider {
   static restore(data: PaymentProviderProps): PaymentProvider {
     this.validateSlug(data.slug);
     this.validateDisplayName(data.displayName);
-    this.validateHandlerClass(data.handlerClass);
+
     this.validateConfig(data.config);
 
     return new PaymentProvider(data);
@@ -158,14 +154,6 @@ export class PaymentProvider {
     this.touch();
   }
 
-  changeHandlerClass(handlerClass: string) {
-    const normalized = PaymentProvider.normalizeHandlerClass(handlerClass);
-    PaymentProvider.validateHandlerClass(normalized);
-
-    this.props.handlerClass = normalized;
-    this.touch();
-  }
-
   replaceConfig(config: Record<string, unknown>) {
     PaymentProvider.validateConfig(config);
 
@@ -187,13 +175,6 @@ export class PaymentProvider {
     return this.props.slug === PaymentProvider.normalizeSlug(slug);
   }
 
-  usesHandler(handlerClass: string): boolean {
-    return (
-      this.props.handlerClass ===
-      PaymentProvider.normalizeHandlerClass(handlerClass)
-    );
-  }
-
   get isActive(): boolean {
     return this.props.isActive;
   }
@@ -207,10 +188,6 @@ export class PaymentProvider {
   }
 
   private static normalizeDisplayName(value: string): string {
-    return value.trim();
-  }
-
-  private static normalizeHandlerClass(value: string): string {
     return value.trim();
   }
 
@@ -231,20 +208,6 @@ export class PaymentProvider {
     if (value.length < 2 || value.length > 100) {
       throw new Error(
         'displayName length must be between 2 and 100 characters',
-      );
-    }
-  }
-
-  private static validateHandlerClass(value: string) {
-    if (!value) throw new Error('handlerClass is required');
-    if (value.length < 2 || value.length > 120) {
-      throw new Error(
-        'handlerClass length must be between 2 and 120 characters',
-      );
-    }
-    if (!/^[A-Z][A-Za-z0-9]*$/.test(value)) {
-      throw new Error(
-        'handlerClass must be a valid class-like name such as StripePaymentGateway',
       );
     }
   }
