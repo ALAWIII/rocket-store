@@ -119,3 +119,15 @@ export class AddressId extends UuidV7Id {
     return new AddressId(id);
   }
 }
+
+export class PaymentId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new PaymentId(id);
+  }
+}
