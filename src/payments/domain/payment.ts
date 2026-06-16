@@ -71,6 +71,9 @@ export class Payment {
   private touch() {
     this.props.updatedAt = new Date();
   }
+  toJSON(): PaymentProps {
+    return { ...this.props };
+  }
 }
 type PaymentProviderProps = {
   id: PaymentProviderId;
@@ -90,7 +93,7 @@ type CreatePaymentProviderProps = {
   isActive?: boolean;
 };
 
-class PaymentProvider {
+export class PaymentProvider {
   private constructor(private props: PaymentProviderProps) {}
 
   static create(data: CreatePaymentProviderProps): PaymentProvider {
@@ -195,13 +198,6 @@ class PaymentProvider {
     return this.props.isActive;
   }
 
-  toPrimitives(): PaymentProviderProps {
-    return {
-      ...this.props,
-      config: { ...this.props.config },
-    };
-  }
-
   private touch() {
     this.props.updatedAt = new Date();
   }
@@ -258,6 +254,9 @@ class PaymentProvider {
       throw new Error('config must be a plain object');
     }
   }
+  toJSON(): PaymentProviderProps {
+    return { ...this.props };
+  }
 }
 
 type CreatePaymentTransactionProps = {
@@ -278,7 +277,7 @@ type PaymentTransactionProps = {
   updatedAt: Date;
 } & CreatePaymentTransactionProps;
 
-class PaymentTransaction {
+export class PaymentTransaction {
   private constructor(private props: PaymentTransactionProps) {}
 
   static create(data: CreatePaymentTransactionProps): PaymentTransaction {
@@ -389,5 +388,8 @@ class PaymentTransaction {
     if (!/^\\d{4}$/.test(value)) {
       throw new Error('cardLast4 must be exactly 4 digits');
     }
+  }
+  toJSON(): PaymentTransactionProps {
+    return { ...this.props };
   }
 }
