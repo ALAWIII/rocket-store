@@ -131,3 +131,15 @@ export class PaymentId extends UuidV7Id {
     return new PaymentId(id);
   }
 }
+
+export class PaymentTransactionId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new PaymentTransactionId(id);
+  }
+}
