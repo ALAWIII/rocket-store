@@ -83,22 +83,6 @@ type PaymentProviderProps = {
   updatedAt: Date;
 };
 class PaymentProvider {}
-
-type PaymentTransactionProps = {
-  id: PaymentTransactionId;
-  paymentId: PaymentId;
-  providerId: PaymentProviderId;
-  gatewayTransactionId: string;
-  gatewayCustomerId?: string | null;
-  amountInMinorUnit: number;
-  status: PaymentStatus;
-  cardLast4?: string | null; // The last 4 digits of the customer's card
-  cardBrand?: string | null; // The card type/brand (e.g. "visa", "mastercard", "amex").
-  receiptUrl?: string | null; // A URL to the payment receipt from the gateway
-  rawPayload: Record<string, unknown>;
-  createdAt: Date;
-  updatedAt: Date;
-};
 type CreatePaymentTransactionProps = {
   paymentId: PaymentId;
   providerId: PaymentProviderId;
@@ -106,10 +90,16 @@ type CreatePaymentTransactionProps = {
   gatewayCustomerId?: string | null;
   amountInMinorUnit: number;
   rawPayload: Record<string, unknown>;
-  cardLast4?: string | null;
-  cardBrand?: string | null;
-  receiptUrl?: string | null;
+  cardLast4?: string | null; // The last 4 digits of the customer's card
+  cardBrand?: string | null; // The card type/brand (e.g. "visa", "mastercard", "amex").
+  receiptUrl?: string | null; // A URL to the payment receipt from the gateway
 };
+type PaymentTransactionProps = {
+  id: PaymentTransactionId;
+  status: PaymentStatus;
+  createdAt: Date;
+  updatedAt: Date;
+} & CreatePaymentTransactionProps;
 
 class PaymentTransaction {
   private constructor(private props: PaymentTransactionProps) {}
