@@ -155,3 +155,25 @@ export class PaymentProviderId extends UuidV7Id {
     return new PaymentProviderId(id);
   }
 }
+export class ShippingProviderId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new ShippingProviderId(id);
+  }
+}
+export class ShipmentId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new ShipmentId(id);
+  }
+}
