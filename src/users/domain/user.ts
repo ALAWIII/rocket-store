@@ -1,3 +1,6 @@
+import { Email } from 'src/shared/value-objects/email';
+import { Name } from 'src/shared/value-objects/name';
+import { Phone } from 'src/shared/value-objects/phone';
 import { v7 } from 'uuid';
 
 type CreateUserProps = {
@@ -88,73 +91,5 @@ class User {
   }
   toJSON() {
     return { ...this.data };
-  }
-}
-
-export class Name {
-  private constructor(private readonly _value: string) {}
-
-  static create(value: string): Name {
-    const v = value.trim();
-
-    if (!v) throw new Error('Name is required');
-    if (v.length < 2 || v.length > 50) {
-      throw new Error('Name must be between 2 and 50 characters');
-    }
-
-    const regex = /^[a-zA-ZÀ-ÿ]+([ '-][a-zA-ZÀ-ÿ]+)*$/;
-    if (!regex.test(v)) throw new Error('Invalid name');
-
-    return new Name(v);
-  }
-
-  get value(): string {
-    return this._value;
-  }
-  toJSON() {
-    return this.value;
-  }
-}
-
-export class Email {
-  private constructor(private readonly _value: string) {}
-
-  static create(value: string): Email {
-    const v = value.trim().toLowerCase();
-
-    if (!v) throw new Error('Email is required');
-    if (v.length > 254) throw new Error('Email is too long');
-
-    const regex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/i;
-    if (!regex.test(v)) throw new Error('Invalid email');
-
-    return new Email(v);
-  }
-
-  get value(): string {
-    return this._value;
-  }
-  toJSON() {
-    return this.value;
-  }
-}
-
-export class Phone {
-  private constructor(private readonly _value: string) {}
-
-  static create(value: string): Phone {
-    const v = value.trim();
-
-    const regex = /^\+[1-9]\d{3,14}$/;
-    if (!regex.test(v)) throw new Error('Invalid phone number');
-
-    return new Phone(v);
-  }
-
-  get value(): string {
-    return this._value;
-  }
-  toJSON() {
-    return this.value;
   }
 }
