@@ -177,3 +177,25 @@ export class ShipmentId extends UuidV7Id {
     return new ShipmentId(id);
   }
 }
+export class WishListId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new WishListId(id);
+  }
+}
+export class WishItemId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new WishItemId(id);
+  }
+}
