@@ -3,7 +3,7 @@ import {
   PaymentProviderId,
   PaymentTransactionId,
 } from 'src/shared/domain/ids';
-import { PaymentStatus } from './payment';
+import { PaymentStatus } from './payment-status';
 
 type CreatePaymentTransactionProps = {
   paymentId: PaymentId;
