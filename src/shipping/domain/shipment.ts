@@ -32,7 +32,7 @@ type CreateShipmentProps = {
   providerId?: ShippingProviderId | null;
 };
 
-class Shipment {
+export class Shipment {
   private constructor(private props: ShipmentProps) {}
 
   static create(data: CreateShipmentProps): Shipment {
