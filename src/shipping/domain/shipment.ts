@@ -6,24 +6,8 @@ import {
   ShipmentId,
   ShippingProviderId,
 } from 'src/shared/domain/ids';
-
-// shipment-method.enum.ts
-export const ShipmentMethod = {
-  STANDARD: 'STANDARD',
-  EXPRESS: 'EXPRESS',
-} as const;
-export type ShipmentMethod =
-  (typeof ShipmentMethod)[keyof typeof ShipmentMethod];
-// shipment-status.enum.ts
-export const ShipmentStatus = {
-  PENDING: 'PENDING',
-  PREPARING: 'PREPARING',
-  SHIPPED: 'SHIPPED',
-  DELIVERED: 'DELIVERED',
-  CANCELLED: 'CANCELLED',
-} as const;
-export type ShipmentStatus =
-  (typeof ShipmentStatus)[keyof typeof ShipmentStatus];
+import { ShipmentMethod } from './shipping-method';
+import { ShipmentStatus } from './shipping-status';
 
 type ShipmentProps = {
   id: ShipmentId;
