@@ -199,3 +199,25 @@ export class WishlistItemId extends UuidV7Id {
     return new WishlistItemId(id);
   }
 }
+export class ImageId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new ImageId(id);
+  }
+}
+export class ImageAttachmentId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new ImageAttachmentId(id);
+  }
+}
