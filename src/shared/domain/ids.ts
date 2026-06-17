@@ -1,6 +1,6 @@
 import { v7, validate, version } from 'uuid';
 
-abstract class UuidV7Id {
+export abstract class UuidV7Id {
   protected constructor(private readonly value: string) {}
 
   protected static validate(value: string) {
