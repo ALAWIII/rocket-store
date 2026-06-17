@@ -1,17 +1,6 @@
 import { OrderId, PaymentId } from 'src/shared/domain/ids';
-export const PaymentMethod = {
-  COD: 'COD',
-  ELECTRONIC: 'ELECTRONIC',
-} as const;
-export type PaymentMethod = (typeof PaymentMethod)[keyof typeof PaymentMethod];
-
-export const PaymentStatus = {
-  PENDING: 'PENDING',
-  PAID: 'PAID',
-  FAILED: 'FAILED',
-  CANCELLED: 'CANCELLED',
-} as const;
-export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];
+import { PaymentStatus } from './payment-status';
+import { PaymentMethod } from './payment-method';
 
 type CreatePaymentProps = {
   orderId: OrderId;
