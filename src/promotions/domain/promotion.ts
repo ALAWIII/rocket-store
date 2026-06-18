@@ -1,4 +1,5 @@
 import { PromotionId, UserId } from 'src/shared/domain/ids';
+import { ValueOf } from 'src/shared/types/value-of';
 import { Name } from 'src/shared/value-objects/name';
 
 export const PromotionType = {
@@ -6,7 +7,7 @@ export const PromotionType = {
   COUPON: 'COUPON',
 } as const;
 
-export type PromotionType = (typeof PromotionType)[keyof typeof PromotionType];
+export type PromotionType = ValueOf<typeof PromotionType>;
 
 export const DiscountType = {
   PERCENTAGE: 'PERCENTAGE',
@@ -14,7 +15,7 @@ export const DiscountType = {
   FREE_SHIPPING: 'FREE_SHIPPING',
 } as const;
 
-export type DiscountType = (typeof DiscountType)[keyof typeof DiscountType];
+export type DiscountType = ValueOf<typeof DiscountType>;
 
 export const PromotionStatus = {
   ACTIVE: 'ACTIVE',
@@ -23,8 +24,7 @@ export const PromotionStatus = {
   DISABLED: 'DISABLED',
 } as const;
 
-export type PromotionStatus =
-  (typeof PromotionStatus)[keyof typeof PromotionStatus];
+export type PromotionStatus = ValueOf<typeof PromotionStatus>;
 
 /**
    * | Field        | Purpose                                                                   |

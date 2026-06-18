@@ -1,3 +1,5 @@
+import { ValueOf } from 'src/shared/types/value-of';
+
 export const ImageAttachmentEntityType = {
   PRODUCT: 'PRODUCT',
   PRODUCT_VARIANT: 'PRODUCT_VARIANT',
@@ -6,5 +8,6 @@ export const ImageAttachmentEntityType = {
   USER: 'USER',
 } as const;
 
-export type ImageAttachmentEntityType =
-  (typeof ImageAttachmentEntityType)[keyof typeof ImageAttachmentEntityType];
+export type ImageAttachmentEntityType = ValueOf<
+  typeof ImageAttachmentEntityType
+>;

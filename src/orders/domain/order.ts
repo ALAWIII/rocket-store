@@ -7,13 +7,14 @@ import {
   ProductVariantId,
   UserId,
 } from 'src/shared/domain/ids';
+import { ValueOf } from 'src/shared/types/value-of';
 
 const OrderStatus = {
   Pending: 'pending', // created, not yet confirmed
   Placed: 'placed', // confirmed / payment initiated
   Paid: 'paid', // payment succeeded
 } as const;
-type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus];
+type OrderStatus = ValueOf<typeof OrderStatus>;
 type OrderItemProps = {
   readonly id: OrderId;
   readonly variantId: ProductVariantId;
