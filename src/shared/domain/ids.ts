@@ -16,6 +16,9 @@ export abstract class UuidV7Id {
   equals(other: UuidV7Id): boolean {
     return this.value === other.value;
   }
+  toJSON() {
+    return this.value;
+  }
 }
 
 export class UserId extends UuidV7Id {
