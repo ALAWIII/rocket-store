@@ -257,3 +257,14 @@ export class PromotionRuleId extends UuidV7Id {
     return new PromotionRuleId(id);
   }
 }
+export class CouponId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new CouponId(id);
+  }
+}
