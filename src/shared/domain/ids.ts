@@ -221,3 +221,14 @@ export class ImageAttachmentId extends UuidV7Id {
     return new ImageAttachmentId(id);
   }
 }
+export class PromotionId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new PromotionId(id);
+  }
+}
