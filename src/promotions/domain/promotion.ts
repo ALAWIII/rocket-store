@@ -18,7 +18,6 @@ export const DISCOUNT_TYPE = {
 export type DiscountType = (typeof DISCOUNT_TYPE)[keyof typeof DISCOUNT_TYPE];
 
 export const PromotionStatus = {
-  DRAFT: 'DRAFT',
   ACTIVE: 'ACTIVE',
   SCHEDULED: 'SCHEDULED',
   EXPIRED: 'EXPIRED',
@@ -79,7 +78,7 @@ type CreatePromotionProps = Omit<
   'usageCount' | 'createdAt' | 'updatedAt' | 'status'
 >;
 
-class Promotion {
+export class Promotion {
   private constructor(private props: PromotionProps) {}
 
   static create(props: CreatePromotionProps): Promotion {
@@ -97,7 +96,7 @@ class Promotion {
     return new Promotion({
       ...props,
       usageCount: 0,
-      status: 'DRAFT',
+      status: this.resolveStatus(now, props.startsAt, props.endsAt),
       createdAt: now,
       updatedAt: now,
     });
@@ -176,5 +175,8 @@ class Promotion {
     if (startsAt && startsAt > now) return 'SCHEDULED';
     if (endsAt && endsAt < now) return 'EXPIRED';
     return 'ACTIVE';
+  }
+  toJSON(): PromotionProps {
+    return { ...this.props };
   }
 }
