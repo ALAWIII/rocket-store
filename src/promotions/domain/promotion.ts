@@ -1,21 +1,20 @@
 import { PromotionId, UserId } from 'src/shared/domain/ids';
 import { Name } from 'src/shared/value-objects/name';
 
-export const PROMOTION_TYPE = {
+export const PromotionType = {
   AUTOMATIC: 'AUTOMATIC',
   COUPON: 'COUPON',
 } as const;
 
-export type PromotionType =
-  (typeof PROMOTION_TYPE)[keyof typeof PROMOTION_TYPE];
+export type PromotionType = (typeof PromotionType)[keyof typeof PromotionType];
 
-export const DISCOUNT_TYPE = {
+export const DiscountType = {
   PERCENTAGE: 'PERCENTAGE',
   FIXED_AMOUNT: 'FIXED_AMOUNT',
   FREE_SHIPPING: 'FREE_SHIPPING',
 } as const;
 
-export type DiscountType = (typeof DISCOUNT_TYPE)[keyof typeof DISCOUNT_TYPE];
+export type DiscountType = (typeof DiscountType)[keyof typeof DiscountType];
 
 export const PromotionStatus = {
   ACTIVE: 'ACTIVE',
@@ -67,8 +66,6 @@ type PromotionProps = {
   priority: number;
 
   createdBy: UserId;
-  updatedBy: UserId;
-
   createdAt: Date;
   updatedAt: Date;
 };
@@ -114,10 +111,79 @@ export class Promotion {
 
     return new Promotion(props);
   }
-  disable() {
-    if (this.props.status === 'EXPIRED') return;
-    this.props.status = 'DISABLED';
+
+  rename(name: Name) {
+    this.props.name = name;
+    this.touch();
   }
+
+  changeDescription(description?: string | null) {
+    this.props.description = description ?? null;
+    this.touch();
+  }
+
+  changeDiscount(value: number, maxDiscountAmount?: number | null) {
+    Promotion.validateDiscount(
+      this.props.discountType,
+      value,
+      maxDiscountAmount,
+    );
+
+    this.props.value = value;
+    this.props.maxDiscountAmount = maxDiscountAmount ?? null;
+    this.touch();
+  }
+
+  changeDiscountType(discountType: DiscountType) {
+    Promotion.validateDiscount(
+      discountType,
+      this.props.value,
+      this.props.maxDiscountAmount,
+    );
+
+    this.props.discountType = discountType;
+    this.touch();
+  }
+
+  reschedule(startsAt?: Date | null, endsAt?: Date | null) {
+    Promotion.validateDates(startsAt, endsAt);
+
+    this.props.startsAt = startsAt ?? null;
+    this.props.endsAt = endsAt ?? null;
+    this.props.status = Promotion.resolveStatus(
+      new Date(),
+      this.props.startsAt,
+      this.props.endsAt,
+      this.props.status,
+    );
+    this.touch();
+  }
+
+  changeLimits(usageLimit?: number | null, perUserLimit?: number | null) {
+    Promotion.validateLimits(usageLimit, perUserLimit);
+
+    this.props.usageLimit = usageLimit ?? null;
+    this.props.perUserLimit = perUserLimit ?? null;
+    this.touch();
+  }
+
+  changePriority(priority: number) {
+    Promotion.validatePriority(priority);
+
+    this.props.priority = priority;
+    this.touch();
+  }
+
+  enableStacking() {
+    this.props.stackable = true;
+    this.touch();
+  }
+
+  disableStacking() {
+    this.props.stackable = false;
+    this.touch();
+  }
+
   activate() {
     if (this.props.status !== 'DISABLED') return;
 
@@ -126,6 +192,48 @@ export class Promotion {
       this.props.startsAt,
       this.props.endsAt,
     );
+    this.touch();
+  }
+
+  disable() {
+    if (this.props.status === 'EXPIRED') return;
+
+    this.props.status = 'DISABLED';
+    this.touch();
+  }
+
+  refreshStatus(now = new Date()) {
+    this.props.status = Promotion.resolveStatus(
+      now,
+      this.props.startsAt,
+      this.props.endsAt,
+      this.props.status,
+    );
+    this.touch();
+  }
+
+  increaseUsageCount(by = 1) {
+    if (by <= 0) throw new Error('Usage increment must be greater than 0');
+
+    this.refreshStatus();
+
+    if (this.props.status !== 'ACTIVE') {
+      throw new Error('Promotion is not active');
+    }
+
+    if (
+      this.props.usageLimit != null &&
+      this.props.usageCount + by > this.props.usageLimit
+    ) {
+      throw new Error('Promotion usage limit exceeded');
+    }
+
+    this.props.usageCount += by;
+    this.touch();
+  }
+
+  private touch() {
+    this.props.updatedAt = new Date();
   }
 
   private static validateDiscount(
