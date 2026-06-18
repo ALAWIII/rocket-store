@@ -39,4 +39,7 @@ export class PromotionRule<T> {
   get createdAt(): Date {
     return this.props.createdAt;
   }
+  toJSON() {
+    return { ...this.props };
+  }
 }
