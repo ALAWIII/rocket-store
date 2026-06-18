@@ -243,3 +243,14 @@ export class PromotionTargetId extends UuidV7Id {
     return new PromotionTargetId(id);
   }
 }
+export class PromotionRuleId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new PromotionRuleId(id);
+  }
+}
