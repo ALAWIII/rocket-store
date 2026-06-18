@@ -26,13 +26,6 @@ export const PromotionStatus = {
 export type PromotionStatus =
   (typeof PromotionStatus)[keyof typeof PromotionStatus];
 
-type PromotionTargetType =
-  | 'PRODUCT'
-  | 'CATEGORY'
-  | 'BRAND'
-  | 'ORDER'
-  | 'SHIPPING';
-
 /**
    * | Field        | Purpose                                                                   |
    | ------------ | ------------------------------------------------------------------------- |
