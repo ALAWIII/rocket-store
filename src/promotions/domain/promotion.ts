@@ -114,6 +114,19 @@ export class Promotion {
 
     return new Promotion(props);
   }
+  disable() {
+    if (this.props.status === 'EXPIRED') return;
+    this.props.status = 'DISABLED';
+  }
+  activate() {
+    if (this.props.status !== 'DISABLED') return;
+
+    this.props.status = Promotion.resolveStatus(
+      new Date(),
+      this.props.startsAt,
+      this.props.endsAt,
+    );
+  }
 
   private static validateDiscount(
     discountType: DiscountType,
@@ -171,11 +184,14 @@ export class Promotion {
     now: Date,
     startsAt?: Date | null,
     endsAt?: Date | null,
+    currentState?: PromotionStatus,
   ): PromotionStatus {
+    if (currentState === 'DISABLED') return 'DISABLED';
     if (startsAt && startsAt > now) return 'SCHEDULED';
     if (endsAt && endsAt < now) return 'EXPIRED';
     return 'ACTIVE';
   }
+
   toJSON(): PromotionProps {
     return { ...this.props };
   }
