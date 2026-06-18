@@ -1,3 +1,10 @@
+import {
+  BrandId,
+  CategoryId,
+  PaymentProviderId,
+  ProductId,
+} from 'src/shared/domain/ids';
+
 export abstract class PromotionRuleType<T> {
   abstract readonly kind: string;
 
@@ -11,6 +18,7 @@ export abstract class PromotionRuleType<T> {
   }
 }
 
+// for example if user buys products with >100$ amount gets 10$ discounts
 export type MinOrderAmountProps = {
   amount: number;
   currency: string;
@@ -37,7 +45,7 @@ export class MinQuantity extends PromotionRuleType<MinQuantityProps> {
 }
 
 export type ProductInCartProps = {
-  productIds: string[];
+  productIds: ProductId[];
 };
 
 export class ProductInCart extends PromotionRuleType<ProductInCartProps> {
@@ -49,7 +57,7 @@ export class ProductInCart extends PromotionRuleType<ProductInCartProps> {
 }
 
 export type CategoryInCartProps = {
-  categoryIds: string[];
+  categoryIds: CategoryId[];
 };
 
 export class CategoryInCart extends PromotionRuleType<CategoryInCartProps> {
@@ -61,7 +69,7 @@ export class CategoryInCart extends PromotionRuleType<CategoryInCartProps> {
 }
 
 export type BrandInCartProps = {
-  brandIds: string[];
+  brandIds: BrandId[];
 };
 
 export class BrandInCart extends PromotionRuleType<BrandInCartProps> {
@@ -82,38 +90,14 @@ export class FirstOrder extends PromotionRuleType<FirstOrderProps> {
   }
 }
 
-export type CustomerSegmentProps = {
-  segmentIds: string[];
+export type PaymentProviderRuleProps = {
+  paymentProviderIds: PaymentProviderId[];
 };
 
-export class CustomerSegment extends PromotionRuleType<CustomerSegmentProps> {
-  readonly kind = 'CUSTOMER_SEGMENT';
+export class PaymentProviderRule extends PromotionRuleType<PaymentProviderRuleProps> {
+  readonly kind = 'PAYMENT_PROVIDER';
 
-  constructor(props: CustomerSegmentProps) {
-    super(props);
-  }
-}
-
-export type ShippingMethodProps = {
-  shippingMethodIds: string[];
-};
-
-export class ShippingMethod extends PromotionRuleType<ShippingMethodProps> {
-  readonly kind = 'SHIPPING_METHOD';
-
-  constructor(props: ShippingMethodProps) {
-    super(props);
-  }
-}
-
-export type PaymentMethodProps = {
-  paymentMethodIds: string[];
-};
-
-export class PaymentMethod extends PromotionRuleType<PaymentMethodProps> {
-  readonly kind = 'PAYMENT_METHOD';
-
-  constructor(props: PaymentMethodProps) {
+  constructor(props: PaymentProviderRuleProps) {
     super(props);
   }
 }
