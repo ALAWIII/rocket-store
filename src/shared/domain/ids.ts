@@ -279,3 +279,14 @@ export class PromotionRedemptionId extends UuidV7Id {
     return new PromotionRedemptionId(id);
   }
 }
+export class ReviewId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): UserId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new ReviewId(id);
+  }
+}
