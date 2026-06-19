@@ -85,7 +85,7 @@ export class PromotionRedemption {
     return this.props.userId == null;
   }
 
-  toObject(): PromotionRedemptionProps {
+  toJSON(): PromotionRedemptionProps {
     return {
       ...this.props,
       couponId: this.props.couponId ?? null,
