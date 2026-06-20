@@ -4,6 +4,7 @@
 import {
   AddressId,
   OrderId,
+  ProductId,
   ProductVariantId,
   UserId,
 } from 'src/shared/domain/ids';
@@ -17,6 +18,7 @@ const OrderStatus = {
 type OrderStatus = ValueOf<typeof OrderStatus>;
 type OrderItemProps = {
   readonly id: OrderId;
+  readonly productId: ProductId; // to enable quick scanning if user bought the product or not, instead of joining two tables (OrderItem + ProductVariant).
   readonly variantId: ProductVariantId;
   readonly productTitle: string;
   readonly unitPrice: number;
@@ -90,7 +92,7 @@ export class Order {
         shippingAddressId: this.shippingAddressId,
         createdAt: this.createdAt,
       },
-      items: this.props.items.map((item) => item.toJSON()),
+      items: [...this.props.items],
     };
   }
 }
