@@ -61,7 +61,7 @@ export class Order {
   get total(): number {
     let t = 0;
     for (const citem of this.props.items) {
-      t += citem.total;
+      t += citem.subtotal;
     }
     return t;
   }
@@ -89,7 +89,7 @@ export class Order {
         id: this.id,
         userId: this.userId,
         status: this.status,
-        totalPrice: this.total,
+        totalAmount: this.total,
         billingAddressId: this.billingAddressId,
         shippingAddressId: this.shippingAddressId,
         createdAt: this.createdAt,
@@ -101,10 +101,10 @@ export class Order {
 
 class OrderItem {
   constructor(private props: OrderItemProps) {}
-  get total(): number {
+  get subtotal(): number {
     return this.props.quantity * this.props.unitPrice;
   }
-  toJSON(): OrderItemProps {
-    return { ...this.props };
+  toJSON() {
+    return { ...this.props, subtotal: this.subtotal };
   }
 }
