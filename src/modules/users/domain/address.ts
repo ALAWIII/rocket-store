@@ -1,6 +1,6 @@
-import { AddressId, OrderId, UserId } from 'src/shared/domain/ids';
-import { Name } from 'src/shared/value-objects/name';
-import { Phone } from 'src/shared/value-objects/phone';
+import { AddressId, OrderId, UserId } from 'src/modules/shared/domain/ids';
+import { Name } from 'src/modules/shared/value-objects/name';
+import { Phone } from 'src/modules/shared/value-objects/phone';
 
 type SharedProps = {
   fullName: Name;

@@ -1,6 +1,6 @@
-import { Email } from 'src/shared/value-objects/email';
-import { Name } from 'src/shared/value-objects/name';
-import { Phone } from 'src/shared/value-objects/phone';
+import { Email } from 'src/modules/shared/value-objects/email';
+import { Name } from 'src/modules/shared/value-objects/name';
+import { Phone } from 'src/modules/shared/value-objects/phone';
 import { v7 } from 'uuid';
 
 type CreateUserProps = {

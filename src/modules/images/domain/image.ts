@@ -1,5 +1,5 @@
-import { ImageId } from 'src/shared/domain/ids';
-import { Name } from 'src/shared/value-objects/name';
+import { ImageId } from 'src/modules/shared/domain/ids';
+import { Name } from 'src/modules/shared/value-objects/name';
 
 type StorageKey = ImageId;
 

@@ -5,7 +5,7 @@ import {
   OrderId,
   ShipmentId,
   ShippingProviderId,
-} from 'src/shared/domain/ids';
+} from 'src/modules/shared/domain/ids';
 import { ShipmentMethod } from './shipping-method';
 import { ShipmentStatus } from './shipping-status';
 

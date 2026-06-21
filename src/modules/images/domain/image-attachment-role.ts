@@ -1,4 +1,4 @@
-import { ValueOf } from 'src/shared/types/value-of';
+import { ValueOf } from 'src/modules/shared/types/value-of';
 
 export const ImageAttachmentRole = {
   MAIN: 'MAIN', // the default main product image on the product details page

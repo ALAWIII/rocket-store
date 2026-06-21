@@ -1,4 +1,4 @@
-import { PromotionId, PromotionRuleId } from 'src/shared/domain/ids';
+import { PromotionId, PromotionRuleId } from 'src/modules/shared/domain/ids';
 import { PromotionRuleType } from './promotion-rule-type';
 
 export type PromotionRuleProps<T> = {

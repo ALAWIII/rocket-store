@@ -1,5 +1,8 @@
-import { AuditableEntity, AuditFields } from 'src/shared/domain/auditing';
-import { BrandId, UserId } from 'src/shared/domain/ids';
+import {
+  AuditableEntity,
+  AuditFields,
+} from 'src/modules/shared/domain/auditing';
+import { BrandId, UserId } from 'src/modules/shared/domain/ids';
 
 type BrandData = {
   readonly id: BrandId;

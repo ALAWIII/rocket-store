@@ -4,8 +4,8 @@ import {
   UserId,
   WishlistId,
   WishlistItemId,
-} from 'src/shared/domain/ids';
-import { Name } from 'src/shared/value-objects/name';
+} from 'src/modules/shared/domain/ids';
+import { Name } from 'src/modules/shared/value-objects/name';
 
 type WishlistProps = {
   id: WishlistId;

@@ -2,8 +2,8 @@ import {
   PromotionId,
   PromotionTargetId,
   UuidV7Id,
-} from 'src/shared/domain/ids';
-import { ValueOf } from 'src/shared/types/value-of';
+} from 'src/modules/shared/domain/ids';
+import { ValueOf } from 'src/modules/shared/types/value-of';
 
 export const PROMOTION_TARGET_TYPE = {
   PRODUCT: 'PRODUCT',

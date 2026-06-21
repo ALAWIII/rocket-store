@@ -1,4 +1,4 @@
-import { ShippingProviderId } from 'src/shared/domain/ids';
+import { ShippingProviderId } from 'src/modules/shared/domain/ids';
 
 type ShippingProviderProps = {
   id: ShippingProviderId;

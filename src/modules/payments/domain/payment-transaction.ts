@@ -2,7 +2,7 @@ import {
   PaymentId,
   PaymentProviderId,
   PaymentTransactionId,
-} from 'src/shared/domain/ids';
+} from 'src/modules/shared/domain/ids';
 import { PaymentStatus } from './payment-status';
 
 type CreatePaymentTransactionProps = {

@@ -4,7 +4,7 @@ import {
   PromotionId,
   PromotionRedemptionId,
   UserId,
-} from 'src/shared/domain/ids';
+} from 'src/modules/shared/domain/ids';
 
 type PromotionRedemptionProps = {
   id: PromotionRedemptionId;

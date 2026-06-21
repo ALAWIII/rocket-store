@@ -1,5 +1,5 @@
-import { ReviewId, UserId } from 'src/shared/domain/ids';
-import { ValueOf } from 'src/shared/types/value-of';
+import { ReviewId, UserId } from 'src/modules/shared/domain/ids';
+import { ValueOf } from 'src/modules/shared/types/value-of';
 
 const REVIEW_REPORT_REASON = {
   SPAM: 'spam',

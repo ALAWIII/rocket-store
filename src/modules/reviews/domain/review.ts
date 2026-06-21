@@ -1,4 +1,9 @@
-import { OrderId, ProductId, ReviewId, UserId } from 'src/shared/domain/ids';
+import {
+  OrderId,
+  ProductId,
+  ReviewId,
+  UserId,
+} from 'src/modules/shared/domain/ids';
 
 type ReviewStatus = 'published' | 'hidden';
 

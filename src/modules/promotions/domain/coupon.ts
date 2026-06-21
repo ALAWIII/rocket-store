@@ -1,4 +1,4 @@
-import { CouponId, PromotionId, UserId } from 'src/shared/domain/ids';
+import { CouponId, PromotionId, UserId } from 'src/modules/shared/domain/ids';
 
 type CouponProps = {
   id: CouponId;

@@ -1,4 +1,8 @@
-import { CategoryId, PageTemplateId, UserId } from 'src/shared/domain/ids';
+import {
+  CategoryId,
+  PageTemplateId,
+  UserId,
+} from 'src/modules/shared/domain/ids';
 
 // draft templates only allowed to be hard deleted!
 // published can be hard deleted when exactly zero of products are relying on.

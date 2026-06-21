@@ -1,4 +1,4 @@
-import { ReviewId, UserId } from 'src/shared/domain/ids';
+import { ReviewId, UserId } from 'src/modules/shared/domain/ids';
 
 type ReviewVoteType = 'helpful' | 'not_helpful';
 

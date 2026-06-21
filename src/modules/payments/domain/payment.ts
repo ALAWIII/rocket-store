@@ -1,4 +1,4 @@
-import { OrderId, PaymentId } from 'src/shared/domain/ids';
+import { OrderId, PaymentId } from 'src/modules/shared/domain/ids';
 import { PaymentStatus } from './payment-status';
 import { PaymentMethod } from './payment-method';
 

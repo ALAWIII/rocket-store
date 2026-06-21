@@ -7,8 +7,8 @@ import {
   ProductId,
   ProductVariantId,
   UserId,
-} from 'src/shared/domain/ids';
-import { ValueOf } from 'src/shared/types/value-of';
+} from 'src/modules/shared/domain/ids';
+import { ValueOf } from 'src/modules/shared/types/value-of';
 
 const OrderStatus = {
   Pending: 'pending', // created, not yet confirmed

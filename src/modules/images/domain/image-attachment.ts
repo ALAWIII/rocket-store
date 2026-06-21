@@ -1,6 +1,10 @@
-import { ImageAttachmentId, ImageId, UuidV7Id } from 'src/shared/domain/ids';
 import { ImageAttachmentEntityType } from './image-attachment-type';
 import { ImageAttachmentRole } from './image-attachment-role';
+import {
+  ImageAttachmentId,
+  ImageId,
+  UuidV7Id,
+} from 'src/modules/shared/domain/ids';
 
 type ImageAttachmentProps = {
   id: ImageAttachmentId;

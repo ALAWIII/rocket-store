@@ -1,4 +1,4 @@
-import { PaymentProviderId } from 'src/shared/domain/ids';
+import { PaymentProviderId } from 'src/modules/shared/domain/ids';
 
 type PaymentProviderProps = {
   id: PaymentProviderId;

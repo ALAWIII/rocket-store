@@ -1,4 +1,8 @@
-import { CartItemId, ProductVariantId, UserId } from 'src/shared/domain/ids';
+import {
+  CartItemId,
+  ProductVariantId,
+  UserId,
+} from 'src/modules/shared/domain/ids';
 
 type CartItemProps = {
   readonly id: CartItemId;

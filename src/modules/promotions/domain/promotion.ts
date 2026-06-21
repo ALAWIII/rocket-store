@@ -1,6 +1,6 @@
-import { PromotionId, UserId } from 'src/shared/domain/ids';
-import { ValueOf } from 'src/shared/types/value-of';
-import { Name } from 'src/shared/value-objects/name';
+import { PromotionId, UserId } from 'src/modules/shared/domain/ids';
+import { ValueOf } from 'src/modules/shared/types/value-of';
+import { Name } from 'src/modules/shared/value-objects/name';
 
 export const PromotionType = {
   AUTOMATIC: 'AUTOMATIC',

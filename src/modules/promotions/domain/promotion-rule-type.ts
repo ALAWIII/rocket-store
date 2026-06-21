@@ -3,7 +3,7 @@ import {
   CategoryId,
   PaymentProviderId,
   ProductId,
-} from 'src/shared/domain/ids';
+} from 'src/modules/shared/domain/ids';
 
 export abstract class PromotionRuleType<T> {
   abstract readonly kind: string;
