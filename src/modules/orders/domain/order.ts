@@ -10,12 +10,12 @@ import {
 } from 'src/modules/shared/domain/ids';
 import { ValueOf } from 'src/modules/shared/types/value-of';
 
-const OrderStatus = {
+export const OrderStatus = {
   Pending: 'pending', // created, not yet confirmed
   Placed: 'placed', // confirmed / payment initiated
   Paid: 'paid', // payment succeeded
 } as const;
-type OrderStatus = ValueOf<typeof OrderStatus>;
+export type OrderStatus = ValueOf<typeof OrderStatus>;
 type OrderItemProps = {
   readonly id: OrderId;
   readonly productId: ProductId; // to enable quick scanning if user bought the product or not, instead of joining two tables (OrderItem + ProductVariant).
