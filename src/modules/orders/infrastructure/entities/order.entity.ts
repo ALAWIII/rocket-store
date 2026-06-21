@@ -13,6 +13,8 @@ import { OrderStatus } from '../../domain/order';
 export class OrderEntity {
   @UuidV7PrimaryColumn()
   id!: string;
+  @Column({ type: 'integer', default: 0 }) // using integer minor units like cents/pennies.
+  totalAmount!: number;
   @Column({ type: 'varchar', length: 15 })
   status!: OrderStatus;
   @Column({ type: 'uuid', name: 'user_id' })
