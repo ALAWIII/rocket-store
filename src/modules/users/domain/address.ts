@@ -27,12 +27,12 @@ type AddressProps = {
 
 type UpdateAddressProps = Partial<SharedProps>;
 
-const AddressType = {
+export const AddressType = {
   Billing: 'billing',
   Shipping: 'shipping',
 } as const;
 
-type AddressType = (typeof AddressType)[keyof typeof AddressType];
+export type AddressType = (typeof AddressType)[keyof typeof AddressType];
 
 type OrderAddressProps = {
   readonly id: AddressId;
