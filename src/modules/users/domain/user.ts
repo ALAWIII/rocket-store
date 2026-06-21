@@ -1,3 +1,4 @@
+import { UserId } from 'src/modules/shared/domain/ids';
 import { Email } from 'src/modules/shared/value-objects/email';
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Phone } from 'src/modules/shared/value-objects/phone';
@@ -13,7 +14,7 @@ type CreateUserProps = {
 };
 
 type UserProps = {
-  readonly id: string;
+  readonly id: UserId;
   readonly createdAt: Date;
   updatedAt: Date;
   email: Email;
@@ -41,7 +42,7 @@ class User {
     const phone =
       props.phone === undefined ? undefined : Phone.create(props.phone);
     return new User({
-      id: v7(),
+      id: UserId.create(),
       passwordHash: props.passwordHash,
       roleId: props.roleId,
       email: email,
