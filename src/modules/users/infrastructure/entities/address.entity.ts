@@ -14,7 +14,7 @@ import { AddressType } from '../../domain/address';
 import { OrderEntity } from 'src/modules/orders/infrastructure/entities/order.entity';
 
 @Entity('addresses')
-export class Address {
+export class AddressEntity {
   @UuidV7PrimaryColumn()
   id!: string;
 
@@ -61,10 +61,10 @@ export class Address {
 
 @Entity('order_addresses')
 @Unique(['orderId', 'addressType'])
-class OrderAddress {
+class OrderAddressEntity {
   @UuidV7PrimaryColumn()
   id!: string;
-  @Column({ type: 'varchar', length: 20, enum: AddressType })
+  @Column({ type: 'varchar', length: 20 })
   addressType!: AddressType;
   @Column('varchar', { length: 50 })
   fullName!: string;
