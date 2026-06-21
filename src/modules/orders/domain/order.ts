@@ -4,6 +4,7 @@
 import {
   AddressId,
   OrderId,
+  OrderItemId,
   ProductId,
   ProductVariantId,
   UserId,
@@ -17,7 +18,8 @@ export const OrderStatus = {
 } as const;
 export type OrderStatus = ValueOf<typeof OrderStatus>;
 type OrderItemProps = {
-  readonly id: OrderId;
+  readonly id: OrderItemId;
+  readonly orderId: OrderId;
   readonly productId: ProductId; // to enable quick scanning if user bought the product or not, instead of joining two tables (OrderItem + ProductVariant).
   readonly variantId: ProductVariantId;
   readonly productTitle: string;
