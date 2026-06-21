@@ -7,6 +7,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+import { UpdateDateColumn } from 'typeorm/browser';
 
 @Entity('users')
 export class UserEntity {
@@ -14,7 +15,7 @@ export class UserEntity {
   id!: string;
   @CreateDateColumn()
   createdAt!: Date;
-  @CreateDateColumn()
+  @UpdateDateColumn()
   updatedAt!: Date;
   @Column({ type: 'varchar', length: 254 })
   email!: string;
