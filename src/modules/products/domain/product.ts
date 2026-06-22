@@ -1,32 +1,18 @@
 import { BrandId, ProductId, UserId } from 'src/modules/shared/domain/ids';
+import { Title } from 'src/modules/shared/value-objects/title';
 
 type UpdateProductProps = {
   updatedBy: UserId;
-  title?: ProductTitle;
+  title?: Title;
   description?: string;
   brandId?: BrandId | null;
 };
 type ProductProps = {
   readonly id: ProductId;
-  title: ProductTitle;
+  title: Title;
   description: string;
   brandId?: BrandId | null;
 };
-
-export class ProductTitle {
-  private constructor(private _title: string) {}
-  static create(title: string): ProductTitle {
-    const normalized = title.trim();
-    if (normalized.length < 2 || normalized.length > 100)
-      throw new Error(
-        'Invalid product title length must be between 2 and 100 characters.',
-      );
-    return new ProductTitle(normalized);
-  }
-  get title(): string {
-    return this._title;
-  }
-}
 
 export class Product {
   constructor(private productProps: ProductProps) {}
