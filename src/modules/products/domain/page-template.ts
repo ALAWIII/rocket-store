@@ -3,6 +3,7 @@ import {
   PageTemplateId,
   UserId,
 } from 'src/modules/shared/domain/ids';
+import { Name } from 'src/modules/shared/value-objects/name';
 
 // draft templates only allowed to be hard deleted!
 // published can be hard deleted when exactly zero of products are relying on.
@@ -13,18 +14,17 @@ import {
 
 // how the editor state is structured (craft.js / grapesjs style)
 type EditorState = Record<string, unknown>; // craft.js uses node map, grapesjs uses component tree
-
-type CreatePageTemplateDraftProps = {
+type PageTemplateProps = {
   readonly id: PageTemplateId;
-  name: string;
+  name: Name;
   editorState: EditorState; // craft.js uses node map, grapesjs uses component tree
   renderedHtml: string; // saved for customer → fast rendering
-  createdBy: UserId;
   categoryId?: CategoryId | null;
-};
-type PageTemplateProps = {
+  createdBy: UserId; // since template are immutable, we decide to set the user here.
   createdAt: Date;
-} & CreatePageTemplateDraftProps;
+};
+
+type CreatePageTemplateDraftProps = Omit<PageTemplateProps, 'createdAt'>;
 abstract class PageTemplate {
   protected constructor(protected data: PageTemplateProps) {}
 
@@ -32,19 +32,13 @@ abstract class PageTemplate {
     if (!html.trim()) throw new Error('Rendered HTML is required');
   }
 
-  updateMetadata(info: { name?: string; categoryId?: string | null }): void {
+  updateMetadata(info: { name?: Name; categoryId?: string | null }): void {
     if (info.name !== undefined) {
-      const name = info.name.trim();
-      const nameLength = name.length;
-      if (nameLength < 2 || nameLength > 20)
-        throw new Error(
-          'Template name length must range between 2 and 20 characters',
-        );
-      this.data.name = name;
+      this.data.name = info.name;
     }
     if (info.categoryId !== undefined) {
       this.data.categoryId =
-        info.categoryId === null ? null : CategoryId.create(info.categoryId);
+        info.categoryId === null ? null : CategoryId.create(info.categoryId); // create new id for categoryId if not exist, will cause a bug later!
     }
   }
   get id(): PageTemplateId {
@@ -60,7 +54,7 @@ abstract class PageTemplate {
   get categoryId(): CategoryId | undefined | null {
     return this.data.categoryId;
   }
-  get name(): string {
+  get name(): Name {
     return this.data.name;
   }
   toJSON(): PageTemplateProps {
