@@ -1,45 +1,37 @@
-import { BrandId, UserId } from 'src/modules/shared/domain/ids';
+import { BrandId } from 'src/modules/shared/domain/ids';
+import { Name } from 'src/modules/shared/value-objects/name';
 
 type BrandData = {
   readonly id: BrandId;
-  name: string;
+  name: Name;
+  createdAt: Date;
 };
 
 export class Brand {
   private constructor(private data: BrandData) {}
 
-  static create(data: { id: BrandId; name: string; userId: UserId }): Brand {
-    const name = Brand.validateName(data.name);
-    const now = new Date();
+  static create(data: { id: BrandId; name: Name }): Brand {
     return new Brand({
-      id: data.id,
-      name,
+      ...data,
+      createdAt: new Date(),
     });
   }
   static restore(data: BrandData): Brand {
     return new Brand(data);
-  }
-  private static validateName(name: string): string {
-    const trimmed = name.trim();
-    if (trimmed.length < 2 || trimmed.length > 50) {
-      throw new Error('Brand name length must be between 2 and 50 characters');
-    }
-    return trimmed;
   }
 
   get id(): BrandId {
     return this.data.id;
   }
 
-  get name(): string {
+  get name(): Name {
     return this.data.name;
   }
 
-  rename(name: string, updatedBy: UserId): void {
-    const nextName = Brand.validateName(name);
-    if (this.data.name === nextName) return;
+  rename(name: Name): void {
+    if (this.name.value === name.value) return;
 
-    this.data.name = nextName;
+    this.data.name = name;
   }
   toJSON() {
     return {
