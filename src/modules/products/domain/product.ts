@@ -1,18 +1,13 @@
 import { BrandId, ProductId, UserId } from 'src/modules/shared/domain/ids';
 import { Title } from 'src/modules/shared/value-objects/title';
 
-type UpdateProductProps = {
-  updatedBy: UserId;
-  title?: Title;
-  description?: string;
-  brandId?: BrandId | null;
-};
 type ProductProps = {
   readonly id: ProductId;
   title: Title;
   description: string;
   brandId?: BrandId | null;
 };
+type UpdateProductProps = Partial<Omit<ProductProps, 'id'>>;
 
 export class Product {
   constructor(private productProps: ProductProps) {}
