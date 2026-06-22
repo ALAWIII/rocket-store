@@ -1,85 +1,54 @@
-import { CategoryId, UserId } from 'src/modules/shared/domain/ids';
+import { CategoryId } from 'src/modules/shared/domain/ids';
+import { Name } from 'src/modules/shared/value-objects/name';
 
-type CreateCategoryProps = {
-  id: CategoryId;
-  name: string;
-  parentCategoryId: CategoryId | null;
-  createdBy: UserId;
-};
 type CategoryProps = {
   id: CategoryId;
-  name: string;
+  name: Name;
   parentCategoryId: CategoryId | null;
+  createdAt: Date;
 };
-type FlatCategoryProps = {
-  id: CategoryId;
-  name: string;
-  parentCategoryId: CategoryId | null;
-};
-type UpdateCategoryProps = {
-  updatedBy: UserId;
-  name?: string;
-  parentCategoryId?: CategoryId | null;
-};
+type CreateCategoryProps = Omit<CategoryProps, 'createdAt'>;
+
+type UpdateCategoryProps = Partial<Omit<CategoryProps, 'id' | 'createdAt'>>;
 export class Category {
-  private constructor(private data: CategoryProps) {}
+  private constructor(private props: CategoryProps) {}
 
   static create(data: CreateCategoryProps): Category {
-    const now = new Date();
-
     return new Category({
-      id: data.id,
-      name: Category.validateName(data.name),
-      parentCategoryId: data.parentCategoryId,
+      ...data,
+      createdAt: new Date(),
     });
   }
 
-  static restore(data: FlatCategoryProps): Category {
-    return new Category({
-      id: data.id,
-      name: Category.validateName(data.name),
-      parentCategoryId: data.parentCategoryId,
-    });
+  static restore(data: CategoryProps): Category {
+    return new Category(data);
   }
-  private static validateName(name: string): string {
-    const normalized = name.trim();
-    if (normalized.length < 2) {
-      throw new Error('Category name must be at least 2 characters.');
-    }
-    if (normalized.length > 20) {
-      throw new Error('Category name must not exceed 20 characters.');
-    }
-    return normalized;
-  }
+
   get id(): CategoryId {
-    return this.data.id;
+    return this.props.id;
   }
 
-  get name(): string {
-    return this.data.name;
+  get name(): Name {
+    return this.props.name;
   }
 
   get parentCategoryId(): CategoryId | undefined | null {
-    return this.data.parentCategoryId;
+    return this.props.parentCategoryId;
   }
   update(props: UpdateCategoryProps): void {
     if (props.name !== undefined) {
-      this.data.name = Category.validateName(props.name);
+      this.props.name = props.name;
     }
 
     if (props.parentCategoryId !== undefined) {
       if (props.parentCategoryId === this.id) {
         throw new Error('Category cannot be parent of itself');
       }
-      this.data.parentCategoryId = props.parentCategoryId;
+      this.props.parentCategoryId = props.parentCategoryId;
     }
   }
 
-  toJSON(): FlatCategoryProps {
-    return {
-      id: this.data.id,
-      name: this.data.name,
-      parentCategoryId: this.data.parentCategoryId,
-    };
+  toJSON(): CategoryProps {
+    return { ...this.props };
   }
 }
