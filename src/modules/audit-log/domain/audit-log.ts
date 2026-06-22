@@ -8,14 +8,14 @@ export const AuditAction = {
 export type AuditAction = ValueOf<typeof AuditAction>;
 type AuditLogProps = {
   readonly id: AuditLogId;
-  occurredAt: Date;
-  actorId?: UserId | null;
-  action: AuditAction;
-  entity: string;
-  entityId: UuidV7Id;
+  readonly occurredAt: Date;
+  readonly actorId?: UserId | null;
+  readonly action: AuditAction;
+  readonly entity: string;
+  readonly entityId: UuidV7Id;
 };
 export class AuditLog {
-  constructor(private props: AuditLogProps) {}
+  constructor(private readonly props: AuditLogProps) {}
   toJSON() {
     return { ...this.props };
   }
