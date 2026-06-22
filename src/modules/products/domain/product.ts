@@ -1,4 +1,4 @@
-import { BrandId, ProductId, UserId } from 'src/modules/shared/domain/ids';
+import { BrandId, ProductId } from 'src/modules/shared/domain/ids';
 import { Title } from 'src/modules/shared/value-objects/title';
 
 type ProductProps = {

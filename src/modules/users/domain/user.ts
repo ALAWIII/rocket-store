@@ -2,7 +2,6 @@ import { UserId } from 'src/modules/shared/domain/ids';
 import { Email } from 'src/modules/shared/value-objects/email';
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Phone } from 'src/modules/shared/value-objects/phone';
-import { v7 } from 'uuid';
 
 type CreateUserProps = {
   email: string;

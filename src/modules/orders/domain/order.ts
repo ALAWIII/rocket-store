@@ -5,7 +5,6 @@ import {
   AddressId,
   OrderId,
   OrderItemId,
-  ProductId,
   ProductVariantId,
   UserId,
 } from 'src/modules/shared/domain/ids';

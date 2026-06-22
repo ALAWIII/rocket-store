@@ -1,5 +1,5 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, Entity, ForeignKey, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 import { OrderEntity } from './order.entity';
 import { ProductVariantEntity } from 'src/modules/products/infrastructure/entities/product-variant.entity';
 
