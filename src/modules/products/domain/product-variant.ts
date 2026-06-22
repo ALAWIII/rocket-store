@@ -7,8 +7,12 @@ type ProductVariantProps = {
   quantity: number;
   info: Record<string, string>;
   description?: string;
+  createdAt: Date;
 };
-type UpdateProductVariantProps = Omit<ProductVariantProps, 'productId' | 'id'>;
+type UpdateProductVariantProps = Omit<
+  ProductVariantProps,
+  'productId' | 'id' | 'createdAt'
+>;
 
 export class ProductVaraintList {
   constructor(

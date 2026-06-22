@@ -6,8 +6,9 @@ type ProductProps = {
   title: Title;
   description: string;
   brandId?: BrandId | null;
+  createdAt: Date;
 };
-type UpdateProductProps = Partial<Omit<ProductProps, 'id'>>;
+type UpdateProductProps = Partial<Omit<ProductProps, 'id' | 'createdAt'>>;
 
 export class Product {
   constructor(private productProps: ProductProps) {}
