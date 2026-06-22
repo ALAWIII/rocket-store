@@ -1,8 +1,3 @@
-import {
-  AuditableEntity,
-  AuditFields,
-} from 'src/modules/shared/domain/auditing';
-
 import { BrandId, ProductId, UserId } from 'src/modules/shared/domain/ids';
 
 type UpdateProductProps = {
@@ -16,7 +11,6 @@ type ProductProps = {
   title: ProductTitle;
   description: string;
   brandId?: BrandId | null;
-  audit: AuditFields;
 };
 
 export class ProductTitle {
@@ -34,10 +28,8 @@ export class ProductTitle {
   }
 }
 
-export class Product extends AuditableEntity {
-  constructor(private productProps: ProductProps) {
-    super(productProps.audit);
-  }
+export class Product {
+  constructor(private productProps: ProductProps) {}
 
   get id(): ProductId {
     return this.productProps.id;
@@ -63,7 +55,6 @@ export class Product extends AuditableEntity {
     if (updateProps.brandId !== undefined) {
       this.productProps.brandId = updateProps.brandId; // can be null
     }
-    this.touch(updateProps.updatedBy);
   }
   toJSON() {
     return { ...this.productProps };

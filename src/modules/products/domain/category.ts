@@ -1,7 +1,3 @@
-import {
-  AuditableEntity,
-  AuditFields,
-} from 'src/modules/shared/domain/auditing';
 import { CategoryId, UserId } from 'src/modules/shared/domain/ids';
 
 type CreateCategoryProps = {
@@ -14,22 +10,19 @@ type CategoryProps = {
   id: CategoryId;
   name: string;
   parentCategoryId: CategoryId | null;
-  audit: AuditFields;
 };
 type FlatCategoryProps = {
   id: CategoryId;
   name: string;
   parentCategoryId: CategoryId | null;
-} & AuditFields;
+};
 type UpdateCategoryProps = {
   updatedBy: UserId;
   name?: string;
   parentCategoryId?: CategoryId | null;
 };
-export class Category extends AuditableEntity {
-  private constructor(private data: CategoryProps) {
-    super(data.audit);
-  }
+export class Category {
+  private constructor(private data: CategoryProps) {}
 
   static create(data: CreateCategoryProps): Category {
     const now = new Date();
@@ -38,12 +31,6 @@ export class Category extends AuditableEntity {
       id: data.id,
       name: Category.validateName(data.name),
       parentCategoryId: data.parentCategoryId,
-      audit: {
-        createdAt: now,
-        updatedAt: now,
-        createdBy: data.createdBy,
-        updatedBy: data.createdBy,
-      },
     });
   }
 
@@ -52,12 +39,6 @@ export class Category extends AuditableEntity {
       id: data.id,
       name: Category.validateName(data.name),
       parentCategoryId: data.parentCategoryId,
-      audit: {
-        createdAt: data.createdAt,
-        createdBy: data.createdBy,
-        updatedAt: data.updatedAt,
-        updatedBy: data.updatedBy,
-      },
     });
   }
   private static validateName(name: string): string {
@@ -92,8 +73,6 @@ export class Category extends AuditableEntity {
       }
       this.data.parentCategoryId = props.parentCategoryId;
     }
-
-    this.touch(props.updatedBy);
   }
 
   toJSON(): FlatCategoryProps {
@@ -101,7 +80,6 @@ export class Category extends AuditableEntity {
       id: this.data.id,
       name: this.data.name,
       parentCategoryId: this.data.parentCategoryId,
-      ...this.data.audit,
     };
   }
 }

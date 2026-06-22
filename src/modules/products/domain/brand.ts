@@ -1,19 +1,12 @@
-import {
-  AuditableEntity,
-  AuditFields,
-} from 'src/modules/shared/domain/auditing';
 import { BrandId, UserId } from 'src/modules/shared/domain/ids';
 
 type BrandData = {
   readonly id: BrandId;
   name: string;
-  audit: AuditFields;
 };
 
-export class Brand extends AuditableEntity {
-  private constructor(private data: BrandData) {
-    super(data.audit);
-  }
+export class Brand {
+  private constructor(private data: BrandData) {}
 
   static create(data: { id: BrandId; name: string; userId: UserId }): Brand {
     const name = Brand.validateName(data.name);
@@ -21,12 +14,6 @@ export class Brand extends AuditableEntity {
     return new Brand({
       id: data.id,
       name,
-      audit: {
-        createdBy: data.userId,
-        updatedBy: data.userId,
-        createdAt: now,
-        updatedAt: now,
-      },
     });
   }
   static restore(data: BrandData): Brand {
@@ -53,13 +40,11 @@ export class Brand extends AuditableEntity {
     if (this.data.name === nextName) return;
 
     this.data.name = nextName;
-    this.touch(updatedBy);
   }
   toJSON() {
     return {
       id: this.data.id,
       name: this.data.name,
-      ...this.audit,
     };
   }
 }
