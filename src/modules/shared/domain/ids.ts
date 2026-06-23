@@ -312,3 +312,14 @@ export class AuditLogId extends UuidV7Id {
     return new AuditLogId(id);
   }
 }
+export class CartId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): CartId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new CartId(id);
+  }
+}
