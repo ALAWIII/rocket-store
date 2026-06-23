@@ -21,21 +21,16 @@ type ReviewProps = {
   updatedAt: Date;
 };
 
-type CreateReviewProps = {
-  id: ReviewId;
-  userId: UserId;
-  productId: ProductId;
-  orderId: OrderId;
-  rating: number;
-  title: string | null;
-  body: string;
-};
+type CreateReviewProps = Omit<
+  ReviewProps,
+  'status' | 'editedAt' | 'updatedAt' | 'createdAt'
+>;
 type EditReviewProps = {
   title?: string | null;
   body?: string;
   rating?: number;
 };
-class Review {
+export class Review {
   private constructor(private props: ReviewProps) {}
 
   static create(props: CreateReviewProps): Review {
