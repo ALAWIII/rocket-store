@@ -1,14 +1,14 @@
 import { BrandId } from 'src/modules/shared/domain/ids';
 import { Name } from 'src/modules/shared/value-objects/name';
 
-type BrandData = {
+type BrandProps = {
   readonly id: BrandId;
   name: Name;
   createdAt: Date;
 };
 
 export class Brand {
-  private constructor(private data: BrandData) {}
+  private constructor(private props: BrandProps) {}
 
   static create(data: { id: BrandId; name: Name }): Brand {
     return new Brand({
@@ -16,27 +16,26 @@ export class Brand {
       createdAt: new Date(),
     });
   }
-  static restore(data: BrandData): Brand {
+  static restore(data: BrandProps): Brand {
     return new Brand(data);
   }
 
   get id(): BrandId {
-    return this.data.id;
+    return this.props.id;
   }
 
   get name(): Name {
-    return this.data.name;
+    return this.props.name;
   }
-
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
   rename(name: Name): void {
     if (this.name.value === name.value) return;
 
-    this.data.name = name;
+    this.props.name = name;
   }
   toJSON() {
-    return {
-      id: this.data.id,
-      name: this.data.name,
-    };
+    return { ...this.props };
   }
 }

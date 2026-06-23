@@ -11,34 +11,37 @@ type ProductProps = {
 type UpdateProductProps = Partial<Omit<ProductProps, 'id' | 'createdAt'>>;
 
 export class Product {
-  constructor(private productProps: ProductProps) {}
+  constructor(private props: ProductProps) {}
 
   get id(): ProductId {
-    return this.productProps.id;
+    return this.props.id;
   }
   get title(): string {
-    return this.productProps.title.title;
+    return this.props.title.title;
   }
   get brandId(): BrandId | undefined | null {
-    return this.productProps.brandId;
+    return this.props.brandId;
   }
   get description(): string {
-    return this.productProps.description;
+    return this.props.description;
+  }
+  get createdAt(): Date {
+    return this.props.createdAt;
   }
   update(updateProps: UpdateProductProps) {
     if (updateProps.title !== undefined) {
-      this.productProps.title = updateProps.title;
+      this.props.title = updateProps.title;
     }
 
     if (updateProps.description !== undefined) {
-      this.productProps.description = updateProps.description;
+      this.props.description = updateProps.description;
     }
 
     if (updateProps.brandId !== undefined) {
-      this.productProps.brandId = updateProps.brandId; // can be null
+      this.props.brandId = updateProps.brandId; // can be null
     }
   }
   toJSON() {
-    return { ...this.productProps };
+    return { ...this.props };
   }
 }

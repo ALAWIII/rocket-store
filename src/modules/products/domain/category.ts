@@ -31,7 +31,9 @@ export class Category {
   get name(): Name {
     return this.props.name;
   }
-
+  get createdAt(): Date {
+    return this.props.createdAt;
+  }
   get parentCategoryId(): CategoryId | undefined | null {
     return this.props.parentCategoryId;
   }
