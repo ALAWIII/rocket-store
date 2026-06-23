@@ -1,21 +1,19 @@
 import { PaymentProviderId } from 'src/modules/shared/domain/ids';
+import { Name } from 'src/modules/shared/value-objects/name';
 
 type PaymentProviderProps = {
   id: PaymentProviderId;
   slug: string; // A unique, lowercase identifier for the provider — e.g. 'stripe', 'myfatoorah', 'paypal'.
-  displayName: string; // A human-readable name shown in admin UI / customer-facing selection — e.g. 'Stripe', 'MyFatoorah Payment Gateway'
+  displayName: Name; // A human-readable name shown in admin UI / customer-facing selection — e.g. 'Stripe', 'MyFatoorah Payment Gateway'
   isActive: boolean; // A boolean toggle that enables/disables the provider without deleting the record.
   config: Record<string, unknown>; // Stores sensitive provider credentials as JSON (jsonb in Postgres)
   createdAt: Date;
   updatedAt: Date;
 };
-type CreatePaymentProviderProps = {
-  slug: string;
-  displayName: string;
-  config?: Record<string, unknown>;
-  isActive?: boolean;
-};
-
+type CreatePaymentProviderProps = Partial<
+  Pick<PaymentProviderProps, 'config' | 'isActive'>
+> &
+  Pick<PaymentProviderProps, 'slug' | 'displayName'>;
 export class PaymentProvider {
   private constructor(private props: PaymentProviderProps) {}
 
@@ -23,18 +21,16 @@ export class PaymentProvider {
     const now = new Date();
 
     const slug = this.normalizeSlug(data.slug);
-    const displayName = this.normalizeDisplayName(data.displayName);
     const config = data.config ?? {};
 
     this.validateSlug(slug);
-    this.validateDisplayName(displayName);
 
     this.validateConfig(config);
 
     return new PaymentProvider({
       id: PaymentProviderId.create(),
       slug,
-      displayName,
+      displayName: data.displayName,
       isActive: data.isActive ?? true,
       config,
       createdAt: now,
@@ -44,8 +40,6 @@ export class PaymentProvider {
 
   static restore(data: PaymentProviderProps): PaymentProvider {
     this.validateSlug(data.slug);
-    this.validateDisplayName(data.displayName);
-
     this.validateConfig(data.config);
 
     return new PaymentProvider(data);
@@ -63,11 +57,8 @@ export class PaymentProvider {
     this.touch();
   }
 
-  rename(displayName: string) {
-    const normalized = PaymentProvider.normalizeDisplayName(displayName);
-    PaymentProvider.validateDisplayName(normalized);
-
-    this.props.displayName = normalized;
+  rename(displayName: Name) {
+    this.props.displayName = displayName;
     this.touch();
   }
 
@@ -112,10 +103,6 @@ export class PaymentProvider {
     return value.trim().toLowerCase();
   }
 
-  private static normalizeDisplayName(value: string): string {
-    return value.trim();
-  }
-
   private static validateSlug(value: string) {
     if (!value) throw new Error('slug is required');
     if (value.length < 2 || value.length > 50) {
@@ -124,15 +111,6 @@ export class PaymentProvider {
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
       throw new Error(
         'slug must contain only lowercase letters, numbers, and hyphens',
-      );
-    }
-  }
-
-  private static validateDisplayName(value: string) {
-    if (!value) throw new Error('displayName is required');
-    if (value.length < 2 || value.length > 100) {
-      throw new Error(
-        'displayName length must be between 2 and 100 characters',
       );
     }
   }
