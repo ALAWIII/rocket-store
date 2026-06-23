@@ -1,4 +1,5 @@
 import {
+  CartId,
   CartItemId,
   ProductVariantId,
   UserId,
@@ -7,7 +8,6 @@ import {
 type CartItemProps = {
   readonly id: CartItemId;
   readonly productVariantId: ProductVariantId;
-  userId: UserId;
   quantity: number;
 };
 export class CartItem {
@@ -30,9 +30,14 @@ export class CartItem {
     return { ...this.props };
   }
 }
-
+type CartProps = {
+  id: CartId;
+  userId: UserId;
+  createdAt: Date;
+};
 export class Cart {
-  constructor(private items: CartItem[] = []) {}
+  private items: CartItem[] = [];
+  constructor(private props: CartProps) {}
 
   addItem(itemProps: CartItemProps) {
     const existing = this.getItem(itemProps.productVariantId);
@@ -50,7 +55,7 @@ export class Cart {
     );
   }
 
-  toJSON(): CartItemProps[] {
-    return [...this.items].map((citem) => citem.toJSON());
+  toJSON() {
+    return { ...this.props, items: [...this.items] };
   }
 }
