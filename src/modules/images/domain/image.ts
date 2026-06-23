@@ -3,7 +3,7 @@ import { Name } from 'src/modules/shared/value-objects/name';
 
 type StorageKey = ImageId;
 
-type CreateImageProps = {
+type ImageProps = {
   id: ImageId;
   storageKey: StorageKey;
   name: Name;
@@ -14,10 +14,9 @@ type CreateImageProps = {
   height?: number;
   altText?: string;
   metadata?: Record<string, unknown>;
-};
-type ImageProps = {
   createdAt: Date;
-} & CreateImageProps;
+};
+type CreateImageProps = Omit<ImageProps, 'createdAt'>;
 export class Image {
   private constructor(private readonly props: ImageProps) {}
 

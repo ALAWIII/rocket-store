@@ -17,15 +17,7 @@ type ImageAttachmentProps = {
   createdAt: Date;
 };
 
-type CreateImageAttachmentProps = {
-  id: ImageAttachmentId;
-  imageId: ImageId;
-  entityType: ImageAttachmentEntityType;
-  entityId: UuidV7Id;
-  role: ImageAttachmentRole;
-  sortOrder?: number;
-  isPrimary?: boolean;
-};
+type CreateImageAttachmentProps = Omit<ImageAttachmentProps, 'createdAt'>;
 
 type RestoreImageAttachmentProps = ImageAttachmentProps;
 
@@ -43,8 +35,8 @@ export class ImageAttachment {
       entityType: props.entityType,
       entityId: props.entityId,
       role: props.role,
-      sortOrder: props.sortOrder ?? 0,
-      isPrimary: props.isPrimary ?? false,
+      sortOrder: props.sortOrder,
+      isPrimary: props.isPrimary,
       createdAt: new Date(),
     });
   }
