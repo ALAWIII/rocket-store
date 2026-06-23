@@ -8,6 +8,7 @@ import {
 type CartItemProps = {
   readonly id: CartItemId;
   readonly productVariantId: ProductVariantId;
+  readonly cartId: CartId;
   quantity: number;
 };
 export class CartItem {
