@@ -5,7 +5,7 @@ type ProductVariantProps = {
   readonly productId: ProductId;
   price: number;
   quantity: number;
-  info: Record<string, string>;
+  info: Record<string, unknown>;
   description?: string;
   createdAt: Date;
 };
@@ -85,7 +85,7 @@ class ProductVariant {
     return this.data.description;
   }
 
-  get info(): Record<string, string> {
+  get info(): Record<string, unknown> {
     return { ...this.data.info };
   }
   toJSON(): ProductVariantProps {
