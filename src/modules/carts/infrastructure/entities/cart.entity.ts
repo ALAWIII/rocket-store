@@ -3,7 +3,7 @@ import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entit
 import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
 
 @Entity('carts')
-export class Cart {
+export class CartEntity {
   @UuidV7PrimaryColumn()
   id!: string;
   @Column('uuid')
