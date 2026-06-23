@@ -1,11 +1,11 @@
 import { ValueOf } from 'src/modules/shared/types/value-of';
 
 export const ImageAttachmentEntityType = {
-  PRODUCT: 'PRODUCT',
-  PRODUCT_VARIANT: 'PRODUCT_VARIANT',
-  BRAND: 'BRAND',
-  CATEGORY: 'CATEGORY',
-  USER: 'USER',
+  PRODUCT: 'product',
+  PRODUCT_VARIANT: 'product_variant',
+  BRAND: 'brand',
+  CATEGORY: 'category',
+  USER: 'user',
 } as const;
 
 export type ImageAttachmentEntityType = ValueOf<
