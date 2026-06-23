@@ -2,20 +2,21 @@ import { OrderId, PaymentId } from 'src/modules/shared/domain/ids';
 import { PaymentStatus } from './payment-status';
 import { PaymentMethod } from './payment-method';
 
-type CreatePaymentProps = {
-  orderId: OrderId;
-  amountInMinorUnit: number;
-  currency: string;
-  method: PaymentMethod;
-};
 type PaymentProps = {
   id: PaymentId;
   status: PaymentStatus;
   paidAt?: Date | null;
+  orderId: OrderId;
+  amountInMinorUnit: number;
+  currency: string;
+  method: PaymentMethod;
   createdAt: Date;
   updatedAt: Date;
-} & CreatePaymentProps;
-
+};
+type CreatePaymentProps = Pick<
+  PaymentProps,
+  'orderId' | 'amountInMinorUnit' | 'currency' | 'method'
+>;
 export class Payment {
   private constructor(private props: PaymentProps) {}
   static create(data: CreatePaymentProps): Payment {
