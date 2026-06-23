@@ -1,12 +1,6 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
 import { OrderStatus } from '../../domain/order';
 
 @Entity('orders')
@@ -17,11 +11,9 @@ export class OrderEntity {
   totalAmount!: number;
   @Column({ type: 'varchar', length: 15 })
   status!: OrderStatus;
-  @Column({ type: 'uuid', name: 'user_id' })
+  @Column('uuid')
+  @ForeignKey(() => UserEntity, (u) => u.id)
   userId!: string;
-  @ManyToOne(() => UserEntity)
-  @JoinColumn({ name: 'user_id' })
-  user!: UserEntity;
 
   @CreateDateColumn()
   createdAt!: Date;
