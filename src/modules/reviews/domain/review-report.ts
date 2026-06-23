@@ -1,7 +1,7 @@
 import { ReviewId, UserId } from 'src/modules/shared/domain/ids';
 import { ValueOf } from 'src/modules/shared/types/value-of';
 
-const REVIEW_REPORT_REASON = {
+export const ReviewReportReason = {
   SPAM: 'spam',
   ABUSE: 'abuse',
   OFF_TOPIC: 'off_topic',
@@ -9,15 +9,15 @@ const REVIEW_REPORT_REASON = {
   OTHER: 'other',
 } as const;
 
-type ReviewReportReason = ValueOf<typeof REVIEW_REPORT_REASON>;
+export type ReviewReportReason = ValueOf<typeof ReviewReportReason>;
 
-const REVIEW_REPORT_STATUS = {
+export const ReviewReportStatus = {
   PENDING: 'pending',
   RESOLVED: 'resolved',
   REJECTED: 'rejected',
 } as const;
 
-type ReviewReportStatus = ValueOf<typeof REVIEW_REPORT_STATUS>;
+export type ReviewReportStatus = ValueOf<typeof ReviewReportStatus>;
 
 type ReviewReportProps = {
   reviewId: ReviewId;
@@ -28,12 +28,7 @@ type ReviewReportProps = {
   createdAt: Date;
 };
 
-type CreateReviewReportProps = {
-  reviewId: ReviewId;
-  userId: UserId;
-  reason: ReviewReportReason;
-  details?: string | null;
-};
+type CreateReviewReportProps = Omit<ReviewReportProps, 'status' | 'createdAt'>;
 
 export class ReviewReport {
   private constructor(private props: ReviewReportProps) {}

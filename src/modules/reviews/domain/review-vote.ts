@@ -1,6 +1,6 @@
 import { ReviewId, UserId } from 'src/modules/shared/domain/ids';
 
-type ReviewVoteType = 'helpful' | 'not_helpful';
+export type ReviewVoteType = 'helpful' | 'not_helpful';
 
 type ReviewVoteProps = {
   reviewId: ReviewId;
@@ -8,7 +8,7 @@ type ReviewVoteProps = {
   type: ReviewVoteType;
 };
 
-class ReviewVote {
+export class ReviewVote {
   private constructor(private props: ReviewVoteProps) {}
 
   static create(props: ReviewVoteProps): ReviewVote {
