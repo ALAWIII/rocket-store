@@ -3,25 +3,25 @@ import { ValueOf } from 'src/modules/shared/types/value-of';
 import { Name } from 'src/modules/shared/value-objects/name';
 
 export const PromotionType = {
-  AUTOMATIC: 'AUTOMATIC',
-  COUPON: 'COUPON',
+  AUTOMATIC: 'automatic',
+  COUPON: 'coupon',
 } as const;
 
 export type PromotionType = ValueOf<typeof PromotionType>;
 
 export const DiscountType = {
-  PERCENTAGE: 'PERCENTAGE',
-  FIXED_AMOUNT: 'FIXED_AMOUNT',
-  FREE_SHIPPING: 'FREE_SHIPPING',
+  PERCENTAGE: 'percentage',
+  FIXED_AMOUNT: 'fixed_amount',
+  FREE_SHIPPING: 'free_shipping',
 } as const;
 
 export type DiscountType = ValueOf<typeof DiscountType>;
 
 export const PromotionStatus = {
-  ACTIVE: 'ACTIVE',
-  SCHEDULED: 'SCHEDULED',
-  EXPIRED: 'EXPIRED',
-  DISABLED: 'DISABLED',
+  ACTIVE: 'active',
+  SCHEDULED: 'scheduled',
+  EXPIRED: 'expired',
+  DISABLED: 'disabled',
 } as const;
 
 export type PromotionStatus = ValueOf<typeof PromotionStatus>;
@@ -178,7 +178,7 @@ export class Promotion {
   }
 
   activate() {
-    if (this.props.status !== 'DISABLED') return;
+    if (this.props.status !== PromotionStatus.DISABLED) return;
 
     this.props.status = Promotion.resolveStatus(
       new Date(),
@@ -189,9 +189,9 @@ export class Promotion {
   }
 
   disable() {
-    if (this.props.status === 'EXPIRED') return;
+    if (this.props.status === PromotionStatus.EXPIRED) return;
 
-    this.props.status = 'DISABLED';
+    this.props.status = PromotionStatus.DISABLED;
     this.touch();
   }
 
@@ -210,7 +210,7 @@ export class Promotion {
 
     this.refreshStatus();
 
-    if (this.props.status !== 'ACTIVE') {
+    if (this.props.status !== PromotionStatus.ACTIVE) {
       throw new Error('Promotion is not active');
     }
 
@@ -236,7 +236,7 @@ export class Promotion {
   ): void {
     if (value <= 0) throw new Error('Promotion value must be greater than 0');
 
-    if (discountType === 'PERCENTAGE' && value > 100) {
+    if (discountType === DiscountType.PERCENTAGE && value > 100) {
       throw new Error('Percentage discount cannot exceed 100');
     }
 
@@ -287,10 +287,11 @@ export class Promotion {
     endsAt?: Date | null,
     currentState?: PromotionStatus,
   ): PromotionStatus {
-    if (currentState === 'DISABLED') return 'DISABLED';
-    if (startsAt && startsAt > now) return 'SCHEDULED';
-    if (endsAt && endsAt < now) return 'EXPIRED';
-    return 'ACTIVE';
+    if (currentState === PromotionStatus.DISABLED)
+      return PromotionStatus.DISABLED;
+    if (startsAt && startsAt > now) return PromotionStatus.SCHEDULED;
+    if (endsAt && endsAt < now) return PromotionStatus.EXPIRED;
+    return PromotionStatus.ACTIVE;
   }
 
   toJSON(): PromotionProps {
