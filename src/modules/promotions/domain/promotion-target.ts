@@ -5,28 +5,28 @@ import {
 } from 'src/modules/shared/domain/ids';
 import { ValueOf } from 'src/modules/shared/types/value-of';
 
-export const PROMOTION_TARGET_TYPE = {
-  PRODUCT: 'PRODUCT',
-  CATEGORY: 'CATEGORY',
-  BRAND: 'BRAND',
-  ORDER: 'ORDER',
-  SHIPPING: 'SHIPPING',
+export const PromotionTargetType = {
+  PRODUCT: 'product',
+  CATEGORY: 'category',
+  BRAND: 'brand',
+  ORDER: 'order',
+  SHIPPING: 'shipping',
 } as const;
 
-export type PromotionTargetType = ValueOf<typeof PROMOTION_TARGET_TYPE>;
+export type PromotionTargetType = ValueOf<typeof PromotionTargetType>;
 
-export const PROMOTION_TARGET_MODE = {
-  INCLUDE: 'INCLUDE',
-  EXCLUDE: 'EXCLUDE',
+export const PromotionTargetMode = {
+  INCLUDE: 'include',
+  EXCLUDE: 'exclude',
 } as const;
 
-export type PromotionTargetMode = ValueOf<typeof PROMOTION_TARGET_MODE>;
+export type PromotionTargetMode = ValueOf<typeof PromotionTargetMode>;
 
 export type PromotionTargetProps = {
   id: PromotionTargetId;
   promotionId: PromotionId;
   type: PromotionTargetType;
-  targetId: UuidV7Id;
+  entityTargetId: UuidV7Id;
   mode: PromotionTargetMode;
   createdAt: Date;
 };
@@ -39,7 +39,7 @@ export class PromotionTarget {
   static create(props: CreatePromotionTargetProps): PromotionTarget {
     return new PromotionTarget({
       ...props,
-      mode: props.mode ?? PROMOTION_TARGET_MODE.INCLUDE,
+      mode: props.mode ?? PromotionTargetMode.INCLUDE,
       createdAt: new Date(),
     });
   }
@@ -65,7 +65,7 @@ export class PromotionTarget {
   }
 
   get targetId(): UuidV7Id {
-    return this.props.targetId;
+    return this.props.entityTargetId;
   }
 
   get mode(): PromotionTargetMode {
