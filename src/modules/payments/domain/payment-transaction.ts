@@ -5,7 +5,11 @@ import {
 } from 'src/modules/shared/domain/ids';
 import { PaymentStatus } from './payment-status';
 
-type CreatePaymentTransactionProps = {
+type PaymentTransactionProps = {
+  id: PaymentTransactionId;
+  status: PaymentStatus;
+  createdAt: Date;
+  updatedAt: Date;
   paymentId: PaymentId;
   providerId: PaymentProviderId;
   gatewayTransactionId: string;
@@ -16,13 +20,10 @@ type CreatePaymentTransactionProps = {
   cardBrand?: string | null; // The card type/brand (e.g. "visa", "mastercard", "amex").
   receiptUrl?: string | null; // A URL to the payment receipt from the gateway
 };
-type PaymentTransactionProps = {
-  id: PaymentTransactionId;
-  status: PaymentStatus;
-  createdAt: Date;
-  updatedAt: Date;
-} & CreatePaymentTransactionProps;
-
+type CreatePaymentTransactionProps = Omit<
+  PaymentTransactionProps,
+  'id' | 'status' | 'createdAt' | 'updatedAt'
+>;
 export class PaymentTransaction {
   private constructor(private props: PaymentTransactionProps) {}
 
