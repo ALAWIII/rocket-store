@@ -2,7 +2,7 @@ import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuid
 import { Column, CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
 
 @Entity('payment_providers')
-export class PaymentProvider {
+export class PaymentProviderEntity {
   @UuidV7PrimaryColumn()
   id!: string;
   @Column('varchar', { length: 30, unique: true })
