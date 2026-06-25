@@ -58,14 +58,12 @@ type PromotionProps = {
   stackable: boolean;
   priority: number;
 
-  createdBy: UserId;
   createdAt: Date;
-  updatedAt: Date;
 };
 
 type CreatePromotionProps = Omit<
   PromotionProps,
-  'usageCount' | 'createdAt' | 'updatedAt' | 'status'
+  'usageCount' | 'createdAt' | 'status'
 >;
 
 export class Promotion {
@@ -88,7 +86,6 @@ export class Promotion {
       usageCount: 0,
       status: this.resolveStatus(now, props.startsAt, props.endsAt),
       createdAt: now,
-      updatedAt: now,
     });
   }
 
@@ -107,12 +104,10 @@ export class Promotion {
 
   rename(name: Name) {
     this.props.name = name;
-    this.touch();
   }
 
   changeDescription(description?: string | null) {
     this.props.description = description ?? null;
-    this.touch();
   }
 
   changeDiscount(value: number, maxDiscountAmount?: number | null) {
@@ -124,7 +119,6 @@ export class Promotion {
 
     this.props.value = value;
     this.props.maxDiscountAmount = maxDiscountAmount ?? null;
-    this.touch();
   }
 
   changeDiscountType(discountType: DiscountType) {
@@ -135,7 +129,6 @@ export class Promotion {
     );
 
     this.props.discountType = discountType;
-    this.touch();
   }
 
   reschedule(startsAt?: Date | null, endsAt?: Date | null) {
@@ -149,7 +142,6 @@ export class Promotion {
       this.props.endsAt,
       this.props.status,
     );
-    this.touch();
   }
 
   changeLimits(usageLimit?: number | null, perUserLimit?: number | null) {
@@ -157,24 +149,20 @@ export class Promotion {
 
     this.props.usageLimit = usageLimit ?? null;
     this.props.perUserLimit = perUserLimit ?? null;
-    this.touch();
   }
 
   changePriority(priority: number) {
     Promotion.validatePriority(priority);
 
     this.props.priority = priority;
-    this.touch();
   }
 
   enableStacking() {
     this.props.stackable = true;
-    this.touch();
   }
 
   disableStacking() {
     this.props.stackable = false;
-    this.touch();
   }
 
   activate() {
@@ -185,14 +173,12 @@ export class Promotion {
       this.props.startsAt,
       this.props.endsAt,
     );
-    this.touch();
   }
 
   disable() {
     if (this.props.status === PromotionStatus.EXPIRED) return;
 
     this.props.status = PromotionStatus.DISABLED;
-    this.touch();
   }
 
   refreshStatus(now = new Date()) {
@@ -202,7 +188,6 @@ export class Promotion {
       this.props.endsAt,
       this.props.status,
     );
-    this.touch();
   }
 
   increaseUsageCount(by = 1) {
@@ -222,11 +207,6 @@ export class Promotion {
     }
 
     this.props.usageCount += by;
-    this.touch();
-  }
-
-  private touch() {
-    this.props.updatedAt = new Date();
   }
 
   private static validateDiscount(
