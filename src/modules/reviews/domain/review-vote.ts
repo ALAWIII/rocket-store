@@ -1,27 +1,13 @@
 import { ReviewId, UserId } from 'src/modules/shared/domain/ids';
 
-export type ReviewVoteType = 'helpful' | 'not_helpful';
-
 type ReviewVoteProps = {
   reviewId: ReviewId;
   userId: UserId;
-  type: ReviewVoteType;
+  helpful: boolean;
 };
 
 export class ReviewVote {
-  private constructor(private props: ReviewVoteProps) {}
-
-  static create(props: ReviewVoteProps): ReviewVote {
-    this.validateType(props.type);
-
-    return new ReviewVote(props);
-  }
-
-  static restore(props: ReviewVoteProps): ReviewVote {
-    this.validateType(props.type);
-
-    return new ReviewVote(props);
-  }
+  constructor(private props: ReviewVoteProps) {}
 
   get reviewId(): ReviewId {
     return this.props.reviewId;
@@ -31,28 +17,18 @@ export class ReviewVote {
     return this.props.userId;
   }
 
-  get type(): ReviewVoteType {
-    return this.props.type;
-  }
-
   isHelpful(): boolean {
-    return this.props.type === 'helpful';
+    return this.props.helpful;
   }
 
-  isNotHelpful(): boolean {
-    return this.props.type === 'not_helpful';
+  markHelpful(): void {
+    this.props.helpful = true;
   }
 
-  changeType(type: ReviewVoteType): void {
-    ReviewVote.validateType(type);
-    this.props.type = type;
+  markNotHelpful(): void {
+    this.props.helpful = false;
   }
 
-  private static validateType(type: ReviewVoteType): void {
-    if (type !== 'helpful' && type !== 'not_helpful') {
-      throw new Error('Invalid review vote type.');
-    }
-  }
   toJSON(): ReviewVoteProps {
     return { ...this.props };
   }
