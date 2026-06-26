@@ -24,13 +24,14 @@ type ShipmentProps = {
   updatedAt: Date;
 };
 
-type CreateShipmentProps = {
-  orderId: OrderId;
-  orderAddressId: AddressId;
-  method: ShipmentMethod;
-  shippingFeeInMinorUnit: number;
-  providerId?: ShippingProviderId | null;
-};
+type CreateShipmentProps = Pick<
+  ShipmentProps,
+  | 'orderId'
+  | 'orderAddressId'
+  | 'method'
+  | 'shippingFeeInMinorUnit'
+  | 'providerId'
+>;
 
 export class Shipment {
   private constructor(private props: ShipmentProps) {}
