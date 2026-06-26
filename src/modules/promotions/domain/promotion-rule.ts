@@ -40,6 +40,12 @@ export class PromotionRule<T> {
     return this.props.createdAt;
   }
   toJSON() {
-    return { ...this.props };
+    return {
+      id: this.id,
+      promotionId: this.promotionId,
+      ruleType: this.rule.ruleType.toLowerCase(),
+      ruleData: this.rule.data(),
+      createdAt: this.createdAt,
+    };
   }
 }

@@ -10,11 +10,11 @@ export abstract class PromotionRuleType<T> {
 
   constructor(protected readonly props: T) {}
 
-  toJSON() {
-    return {
-      ruleType: this.ruleType,
-      ruleData: { ...this.props },
-    };
+  data(): Record<string, unknown> {
+    return { ...(this.props as Record<string, unknown>) };
+  }
+  toJSON(): T {
+    return { ...this.props };
   }
 }
 
