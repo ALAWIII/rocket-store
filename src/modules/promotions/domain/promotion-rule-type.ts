@@ -4,14 +4,31 @@ import {
   PaymentProviderId,
   ProductId,
 } from 'src/modules/shared/domain/ids';
+// extend this type with more field types if you encountered new props that requires new types.
+type TypeMap = {
+  string: string;
+  number: number;
+  boolean: boolean;
+};
+type Shape = Record<string, keyof TypeMap>;
+type PropsFromShape<S extends Shape> = {
+  [K in keyof S]: TypeMap[S[K]];
+};
 
-export abstract class PromotionRuleType<T> {
+export abstract class PromotionRuleType<T extends Record<string, unknown>> {
   abstract readonly ruleType: string;
 
-  constructor(protected readonly props: T) {}
-
-  data(): Record<string, unknown> {
-    return { ...(this.props as Record<string, unknown>) };
+  protected constructor(protected readonly props: T) {}
+  protected static validateShape(
+    data: Record<string, unknown>,
+    shape: Shape,
+  ): void {
+    for (const [key, type] of Object.entries(shape)) {
+      if (!(key in data)) throw new Error(`Missing field: ${key}`);
+      if (typeof data[key] !== type) {
+        throw new Error(`Invalid field: ${key}`);
+      }
+    }
   }
   toJSON(): T {
     return { ...this.props };
@@ -19,16 +36,24 @@ export abstract class PromotionRuleType<T> {
 }
 
 // for example if user buys products with >100$ amount gets 10$ discounts
-export type MinOrderAmountProps = {
-  amount: number;
-  currency: string;
-};
-
+const MinOrderAmountShape = {
+  amount: 'number',
+  currency: 'string',
+} as const;
+type MinOrderAmountProps = PropsFromShape<typeof MinOrderAmountShape>;
 export class MinOrderAmount extends PromotionRuleType<MinOrderAmountProps> {
   readonly ruleType = 'MIN_ORDER_AMOUNT';
 
   constructor(props: MinOrderAmountProps) {
     super(props);
+  }
+  static fromJSON(data: Record<string, unknown>): MinOrderAmount {
+    this.validateShape(data, MinOrderAmountShape);
+
+    return new MinOrderAmount({
+      amount: data.amount as number,
+      currency: data.currency as string,
+    });
   }
 }
 
