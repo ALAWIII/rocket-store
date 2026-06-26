@@ -10,12 +10,10 @@ type ShippingProviderProps = {
   updatedAt: Date;
 };
 
-type CreateShippingProviderProps = {
-  slug: string;
-  displayName: string;
-  config?: Record<string, unknown>;
-  isActive?: boolean;
-};
+type CreateShippingProviderProps = Pick<
+  ShippingProviderProps,
+  'slug' | 'displayName' | 'config' | 'isActive'
+>;
 
 export class ShippingProvider {
   private constructor(private readonly props: ShippingProviderProps) {}
@@ -35,7 +33,7 @@ export class ShippingProvider {
       id: ShippingProviderId.create(),
       slug,
       displayName,
-      isActive: data.isActive ?? true,
+      isActive: data.isActive,
       config: { ...config },
       createdAt: now,
       updatedAt: now,
