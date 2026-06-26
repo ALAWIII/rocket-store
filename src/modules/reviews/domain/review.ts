@@ -5,7 +5,7 @@ import {
   UserId,
 } from 'src/modules/shared/domain/ids';
 
-type ReviewStatus = 'published' | 'hidden';
+export type ReviewStatus = 'published' | 'hidden';
 
 type ReviewProps = {
   id: ReviewId;
@@ -18,13 +18,9 @@ type ReviewProps = {
   status: ReviewStatus;
   editedAt: Date | null;
   createdAt: Date;
-  updatedAt: Date;
 };
 
-type CreateReviewProps = Omit<
-  ReviewProps,
-  'status' | 'editedAt' | 'updatedAt' | 'createdAt'
->;
+type CreateReviewProps = Omit<ReviewProps, 'status' | 'editedAt' | 'createdAt'>;
 type EditReviewProps = {
   title?: string | null;
   body?: string;
@@ -54,7 +50,6 @@ export class Review {
       status: 'published',
       editedAt: null,
       createdAt: now,
-      updatedAt: now,
     });
   }
 
@@ -100,9 +95,6 @@ export class Review {
   }
   get createdAt(): Date {
     return this.props.createdAt;
-  }
-  get updatedAt(): Date {
-    return this.props.updatedAt;
   }
 
   // Behavior
@@ -151,19 +143,16 @@ export class Review {
 
     const now = new Date();
     this.props.editedAt = now;
-    this.props.updatedAt = now;
   }
 
   hide(): void {
     if (this.props.status === 'hidden') return;
     this.props.status = 'hidden';
-    this.props.updatedAt = new Date();
   }
 
   publish(): void {
     if (this.props.status === 'published') return;
     this.props.status = 'published';
-    this.props.updatedAt = new Date();
   }
 
   isHidden(): boolean {
