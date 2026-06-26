@@ -14,7 +14,7 @@ type ShipmentProps = {
   orderId: OrderId;
   providerId: ShippingProviderId | null;
   orderAddressId: AddressId;
-  method: ShipmentMethod;
+  shipmentMethod: ShipmentMethod;
   status: ShipmentStatus;
   shippingFeeInMinorUnit: number;
   trackingNumber: string | null;
@@ -28,7 +28,7 @@ type CreateShipmentProps = Pick<
   ShipmentProps,
   | 'orderId'
   | 'orderAddressId'
-  | 'method'
+  | 'shipmentMethod'
   | 'shippingFeeInMinorUnit'
   | 'providerId'
 >;
@@ -45,7 +45,7 @@ export class Shipment {
       id: ShipmentId.create(),
       orderId: data.orderId,
       orderAddressId: data.orderAddressId,
-      method: data.method,
+      shipmentMethod: data.shipmentMethod,
       status: ShipmentStatus.PENDING,
       shippingFeeInMinorUnit: data.shippingFeeInMinorUnit,
       providerId: data.providerId ?? null,
