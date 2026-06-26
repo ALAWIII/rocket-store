@@ -3,7 +3,7 @@ import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
 import { PromotionEntity } from './promotion.entity';
 
 @Entity('promotion_rules')
-export class PromotionRule {
+export class PromotionRuleEntity {
   @UuidV7PrimaryColumn()
   id!: string;
   @Column('uuid')
