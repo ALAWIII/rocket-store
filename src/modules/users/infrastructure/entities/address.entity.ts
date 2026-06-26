@@ -61,7 +61,7 @@ export class AddressEntity {
 
 @Entity('order_addresses')
 @Unique(['orderId', 'addressType'])
-class OrderAddressEntity {
+export class OrderAddressEntity {
   @UuidV7PrimaryColumn()
   id!: string;
   @Column({ type: 'varchar', length: 20 })
