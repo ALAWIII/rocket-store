@@ -20,10 +20,14 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@hedystia/better-auth-typeorm": "^1.0.1",
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/typeorm": "^11.0.2",
+    "@thallesp/nestjs-better-auth": "^2.6.1",
+    "better-auth": "^1.6.22",
     "pg": "^8.22.0",
     "pg-query-stream": "^4.16.0",
     "reflect-metadata": "^0.2.2",
