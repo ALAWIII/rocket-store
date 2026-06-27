@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  ForeignKey,
 } from 'typeorm';
 import { UpdateDateColumn } from 'typeorm/browser';
 
@@ -13,10 +14,6 @@ import { UpdateDateColumn } from 'typeorm/browser';
 export class UserEntity {
   @UuidV7PrimaryColumn()
   id!: string;
-  @CreateDateColumn()
-  createdAt!: Date;
-  @UpdateDateColumn()
-  updatedAt!: Date;
   @Column({ type: 'varchar', length: 254 })
   email!: string;
   @Column()
@@ -29,9 +26,10 @@ export class UserEntity {
   phone?: string;
 
   @Column({ type: 'uuid', name: 'role_id' })
+  @ForeignKey(() => RoleEntity, (r) => r.id)
   roleId!: string;
-
-  @ManyToOne(() => RoleEntity)
-  @JoinColumn({ name: 'role_id' })
-  role!: RoleEntity;
+  @CreateDateColumn()
+  createdAt!: Date;
+  @UpdateDateColumn()
+  updatedAt!: Date;
 }

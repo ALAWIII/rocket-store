@@ -4,6 +4,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  ForeignKey,
   JoinColumn,
   ManyToOne,
   Unique,
@@ -52,11 +53,8 @@ export class AddressEntity {
   deletedAt?: Date;
 
   @Column({ type: 'uuid', name: 'user_id' })
+  @ForeignKey(() => UserEntity, (u) => u.id)
   userId!: string;
-
-  @ManyToOne(() => UserEntity)
-  @JoinColumn({ name: 'user_id' })
-  user!: UserEntity;
 }
 
 @Entity('order_addresses')
@@ -93,8 +91,6 @@ export class OrderAddressEntity {
   @CreateDateColumn()
   createdAt!: Date;
   @Column({ type: 'uuid', name: 'order_id' })
+  @ForeignKey(() => OrderEntity, (o) => o.id)
   orderId!: string;
-  @ManyToOne(() => OrderEntity, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'order_id' })
-  order!: OrderEntity;
 }
