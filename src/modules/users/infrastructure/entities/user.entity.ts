@@ -1,13 +1,6 @@
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import {
-  Entity,
-  Column,
-  CreateDateColumn,
-  ManyToOne,
-  JoinColumn,
-  ForeignKey,
-} from 'typeorm';
+import { Entity, Column, CreateDateColumn, ForeignKey } from 'typeorm';
 import { UpdateDateColumn } from 'typeorm/browser';
 
 @Entity('users')
