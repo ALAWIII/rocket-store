@@ -4,7 +4,7 @@ import type { Request, Response } from 'express';
 import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 
 @AllowAnonymous()
-@Controller('auth')
+@Controller('/api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
