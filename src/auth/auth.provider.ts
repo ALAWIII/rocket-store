@@ -8,5 +8,5 @@ export type AuthInstance = ReturnType<typeof createAuth>;
 export const authProvider: FactoryProvider<AuthInstance> = {
   provide: AUTH,
   inject: [DataSource],
-  useFactory: (dataSource: DataSource) => createAuth(dataSource),
+  useFactory: (dataSource: DataSource): AuthInstance => createAuth(dataSource),
 };
