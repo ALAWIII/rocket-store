@@ -15,12 +15,17 @@ export class User {
   emailVerified!: boolean;
 
   @Column('text', { name: 'image', nullable: true })
-  image: string | null;
+  image!: string | null;
 
-  @Column('timestamptz', { name: 'createdAt', default: () => 'CURRENT_TIMESTAMP' })
+  @Column('timestamptz', {
+    name: 'createdAt',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   createdAt!: Date;
 
-  @Column('timestamptz', { name: 'updatedAt', default: () => 'CURRENT_TIMESTAMP' })
+  @Column('timestamptz', {
+    name: 'updatedAt',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   updatedAt!: Date;
-
 }

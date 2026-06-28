@@ -1,4 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { User } from './User';
 
 @Entity('account')
@@ -21,30 +28,32 @@ export class Account {
   user!: User;
 
   @Column('text', { name: 'accessToken', nullable: true })
-  accessToken: string | null;
+  accessToken!: string | null;
 
   @Column('text', { name: 'refreshToken', nullable: true })
-  refreshToken: string | null;
+  refreshToken!: string | null;
 
   @Column('text', { name: 'idToken', nullable: true })
-  idToken: string | null;
+  idToken!: string | null;
 
   @Column('timestamptz', { name: 'accessTokenExpiresAt', nullable: true })
-  accessTokenExpiresAt: Date | null;
+  accessTokenExpiresAt!: Date | null;
 
   @Column('timestamptz', { name: 'refreshTokenExpiresAt', nullable: true })
-  refreshTokenExpiresAt: Date | null;
+  refreshTokenExpiresAt!: Date | null;
 
   @Column('text', { name: 'scope', nullable: true })
-  scope: string | null;
+  scope!: string | null;
 
   @Column('text', { name: 'password', nullable: true })
-  password: string | null;
+  password!: string | null;
 
-  @Column('timestamptz', { name: 'createdAt', default: () => 'CURRENT_TIMESTAMP' })
+  @Column('timestamptz', {
+    name: 'createdAt',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   createdAt!: Date;
 
   @Column('timestamptz', { name: 'updatedAt' })
   updatedAt!: Date;
-
 }

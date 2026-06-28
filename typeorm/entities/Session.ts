@@ -1,4 +1,11 @@
-import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryColumn,
+} from 'typeorm';
 import { User } from './User';
 
 @Entity('session')
@@ -12,17 +19,20 @@ export class Session {
   @Column('text', { name: 'token', unique: true })
   token!: string;
 
-  @Column('timestamptz', { name: 'createdAt', default: () => 'CURRENT_TIMESTAMP' })
+  @Column('timestamptz', {
+    name: 'createdAt',
+    default: () => 'CURRENT_TIMESTAMP',
+  })
   createdAt!: Date;
 
   @Column('timestamptz', { name: 'updatedAt' })
   updatedAt!: Date;
 
   @Column('text', { name: 'ipAddress', nullable: true })
-  ipAddress: string | null;
+  ipAddress!: string | null;
 
   @Column('text', { name: 'userAgent', nullable: true })
-  userAgent: string | null;
+  userAgent!: string | null;
 
   @Index('session_userId_idx')
   @Column('text', { name: 'userId' })
@@ -31,5 +41,4 @@ export class Session {
   @ManyToOne(() => User, { onDelete: 'CASCADE', nullable: false })
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user!: User;
-
 }
