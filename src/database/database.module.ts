@@ -12,7 +12,13 @@ import path from 'path';
         type: 'postgres',
         url: config.getOrThrow('DATABASE_URL'),
         namingStrategy: new SnakeNamingStrategy(),
-        entities: [path.join(__dirname, '/../**/*.entity{.ts,.js}')],
+        entities: [
+          path.join(__dirname, '/../**/*.entity{.ts,.js}'),
+          path.join(process.cwd(), 'dist/typeorm/entities/**/*.js'),
+        ],
+        migrations: [
+          path.join(process.cwd(), 'dist/typeorm/migrations/**/*.js'),
+        ],
         autoLoadEntities: true,
         migrationsRun: true,
         synchronize: config.getOrThrow<boolean>('DB_SYNC'), // for development only
