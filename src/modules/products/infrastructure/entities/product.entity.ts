@@ -11,8 +11,8 @@ export class ProductEntity {
   @Column('varchar', { length: 500 })
   description!: string;
 
-  @Column({ nullable: true })
-  @ForeignKey(() => BrandEntity, 'id')
+  @Column('uuid', { nullable: true })
+  @ForeignKey(() => BrandEntity, (b) => b.id)
   brandId?: string | null;
   @CreateDateColumn()
   createdAt!: Date;
