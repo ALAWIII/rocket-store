@@ -12,9 +12,11 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { ImagesModule } from './modules/images/images.module';
 import { CartsModule } from './modules/carts/carts.module';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
     AuditLogModule,
     UsersModule,
