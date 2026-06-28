@@ -11,13 +11,22 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { ImagesModule } from './modules/images/images.module';
 import { CartsModule } from './modules/carts/carts.module';
-import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from '@thallesp/nestjs-better-auth';
+import { DataSource } from 'typeorm';
+import { createAuth } from './auth/auth.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
+    AuthModule.forRootAsync({
+      imports: [DatabaseModule],
+      inject: [DataSource],
+      useFactory: (dataSource: DataSource) => ({
+        auth: createAuth(dataSource),
+      }),
+    }),
     AuditLogModule,
     UsersModule,
     ProductsModule,
@@ -29,7 +38,6 @@ import { ConfigModule } from '@nestjs/config';
     OrdersModule,
     ImagesModule,
     CartsModule,
-    AuthModule,
   ],
 })
 export class AppModule {}
