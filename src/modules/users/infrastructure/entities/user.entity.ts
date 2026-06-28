@@ -1,16 +1,26 @@
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Entity, Column, CreateDateColumn, ForeignKey } from 'typeorm';
+import {
+  Entity,
+  Column,
+  CreateDateColumn,
+  ForeignKey,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 import { UpdateDateColumn } from 'typeorm/browser';
+import { User as TUser } from 'typeorm/entities/User';
 
 @Entity('users')
 export class UserEntity {
   @UuidV7PrimaryColumn()
   id!: string;
-  @Column({ type: 'varchar', length: 254 })
-  email!: string;
-  @Column()
-  passwordHash!: string;
+  @Column({ type: 'text', unique: true, name: 'auth_id' })
+  authId!: string;
+
+  @OneToOne(() => TUser)
+  @JoinColumn({ name: 'auth_id', referencedColumnName: 'id' })
+  authUser!: TUser;
   @Column({ type: 'varchar', length: 50 })
   firstName!: string;
   @Column({ type: 'varchar', length: 50 })
