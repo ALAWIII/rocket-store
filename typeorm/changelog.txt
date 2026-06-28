@@ -1,0 +1,10 @@
+# TypeORM Schema Changes - 2026-06-28T13:25:39.566Z
+
+- Generated missing entity: entities/User.ts
+
+- Generated missing entity: entities/Session.ts
+
+- Generated missing entity: entities/Account.ts
+
+- Generated missing entity: entities/Verification.ts
+
