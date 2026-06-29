@@ -1,8 +1,6 @@
-import { UserId } from 'src/modules/shared/domain/ids';
 import { User } from '../../domain/user';
 
-type UpdateUserData = {
-  authId: string;
+export type UpdateUserRepoData = {
   firstName?: string;
   lastName?: string;
   roleId?: string;
@@ -10,8 +8,11 @@ type UpdateUserData = {
 };
 
 export interface IUserRepository {
-  save(user: User): Promise<void>;
-  updateByAuthId(data: UpdateUserData): Promise<User>;
-  findByAuthId(authId: UserId): Promise<User | null>;
-  findById(id: UserId): Promise<User | null>;
+  save(user: User): Promise<User>;
+  updateByAuthId(
+    authId: string,
+    data: UpdateUserRepoData,
+  ): Promise<User | null>;
+  findByAuthId(authId: string): Promise<User | null>;
+  findById(id: string): Promise<User | null>;
 }
