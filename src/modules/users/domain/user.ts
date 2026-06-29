@@ -14,6 +14,17 @@ type UserProps = {
   updatedAt: Date;
   readonly createdAt: Date;
 };
+type UserPrimitives = {
+  id: string;
+  authId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  roleId: string;
+  phone?: string;
+  updatedAt: Date;
+  createdAt: Date;
+};
 
 type UpdateUserProps = Partial<
   Pick<UserProps, 'firstName' | 'lastName' | 'roleId' | 'phone'>
@@ -22,6 +33,19 @@ export class User {
   private constructor(private data: UserProps) {}
   static restore(props: UserProps) {
     return new User(props);
+  }
+  static fromPrimitives(data: UserPrimitives) {
+    return new User({
+      id: UserId.create(data.id),
+      authId: UserId.create(data.authId),
+      email: Email.create(data.email),
+      firstName: Name.create(data.firstName),
+      lastName: Name.create(data.lastName),
+      roleId: data.roleId,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+      phone: data.phone !== undefined ? Phone.create(data.phone) : undefined,
+    });
   }
   update(props: UpdateUserProps) {
     if (props.firstName !== undefined) this.changeFirstName(props.firstName);
@@ -49,7 +73,17 @@ export class User {
   private touch() {
     this.data.updatedAt = new Date();
   }
-  toJSON() {
-    return { ...this.data };
+  toJSON(): UserPrimitives {
+    return {
+      id: this.data.id.toString(),
+      authId: this.data.authId.toString(),
+      email: this.data.email.value,
+      firstName: this.data.firstName.value,
+      lastName: this.data.lastName.value,
+      roleId: this.data.roleId,
+      phone: this.data.phone?.value,
+      updatedAt: this.data.updatedAt,
+      createdAt: this.data.createdAt,
+    };
   }
 }
