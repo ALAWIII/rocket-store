@@ -2,7 +2,9 @@ import { AddressId, OrderId, UserId } from 'src/modules/shared/domain/ids';
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Phone } from 'src/modules/shared/value-objects/phone';
 
-type SharedProps = {
+type AddressProps = {
+  readonly id: AddressId;
+  readonly userId: UserId;
   fullName: Name;
   phone: Phone;
   country: Name;
@@ -11,19 +13,16 @@ type SharedProps = {
   postalCode: string;
   addressLine1: string;
   addressLine2?: string;
-};
-
-type CreateAddressProps = {
-  readonly userId: UserId;
-} & SharedProps;
-
-type AddressProps = {
-  readonly id: AddressId;
-  readonly userId: UserId;
   createdAt: Date;
   updatedAt: Date;
   deletedAt?: Date;
-} & SharedProps;
+};
+
+type CreateAddressProps = Omit<
+  AddressProps,
+  'id' | 'createdAt' | 'updatedAt' | 'deletedAt'
+>;
+type SharedProps = Omit<CreateAddressProps, 'userId'>;
 
 type UpdateAddressProps = Partial<SharedProps>;
 
@@ -41,10 +40,7 @@ type OrderAddressProps = {
   createdAt: Date;
 } & SharedProps;
 
-type CreateOrderAddressProps = {
-  orderId: OrderId;
-  addressType: AddressType;
-} & SharedProps;
+type CreateOrderAddressProps = Omit<OrderAddressProps, 'id' | 'createdAt'>;
 
 abstract class AddressBase<T extends SharedProps> {
   protected constructor(protected props: T) {}
