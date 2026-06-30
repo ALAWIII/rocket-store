@@ -3,6 +3,7 @@ import { typeormAdapter } from '@hedystia/better-auth-typeorm';
 import { DataSource } from 'typeorm';
 import { v7 } from 'uuid';
 import argon2 from 'argon2';
+import { openAPI } from 'better-auth/plugins';
 
 async function betterHash(password: string) {
   return argon2.hash(password, {
@@ -28,5 +29,7 @@ export function createAuth(dataSource: DataSource) {
         verify: betterVerify,
       },
     },
+    disabledPaths: ['/update-user', '/delete-user'],
+    plugins: [...(process.env.DEVELOPMENT_ENV === 'true' ? [openAPI()] : [])],
   });
 }
