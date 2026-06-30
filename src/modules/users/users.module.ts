@@ -12,5 +12,6 @@ import { AuthUserRepository } from './infrastructure/repositories/typeorm-auth-u
     { provide: IUserRepository, useClass: UserRepository },
     { provide: IAuthUserRepository, useClass: AuthUserRepository },
   ],
+  exports: [IUserRepository],
 })
 export class UsersModule {}
