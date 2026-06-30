@@ -2,11 +2,16 @@
 
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
-import { createAuth } from './auth.config';
+import { betterAuth } from 'better-auth';
+import { typeormAdapter } from '@hedystia/better-auth-typeorm';
 
 const dataSource = new DataSource({
   type: 'postgres',
   url: process.env.DATABASE_URL,
 });
 
-export const auth = createAuth(dataSource);
+export const auth = betterAuth({
+  database: typeormAdapter(dataSource),
+  secret: process.env.BETTER_AUTH_SECRET,
+  baseURL: process.env.BETTER_AUTH_URL,
+});
