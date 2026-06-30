@@ -13,20 +13,13 @@ import { ImagesModule } from './modules/images/images.module';
 import { CartsModule } from './modules/carts/carts.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from '@thallesp/nestjs-better-auth';
-import { DataSource } from 'typeorm';
-import { createAuth } from './auth/auth.config';
+import { AppAuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     DatabaseModule,
-    AuthModule.forRootAsync({
-      imports: [DatabaseModule],
-      inject: [DataSource],
-      useFactory: (dataSource: DataSource) => ({
-        auth: createAuth(dataSource),
-      }),
-    }),
+    AppAuthModule,
     AuditLogModule,
     UsersModule,
     ProductsModule,
@@ -38,6 +31,7 @@ import { createAuth } from './auth/auth.config';
     OrdersModule,
     ImagesModule,
     CartsModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
