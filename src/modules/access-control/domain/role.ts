@@ -1,25 +1,33 @@
 import { Permission } from './permission';
 
-const ROLE_TYPE = {
-  Admin: 'Admin',
-  Customer: 'Customer',
-  Custom: 'Custom',
-} as const;
-type RoleType = keyof typeof ROLE_TYPE;
-class Role {
-  permissions = new Set<Permission>();
+export class Role {
   constructor(
     private readonly id: string,
     private name: string, // unique
-    private roleType: RoleType,
+    private permissions: Permission[],
   ) {}
-  addPermission(permission: Permission) {
-    this.permissions.add(permission);
+  findPermission(perm: Permission): number {
+    return this.permissions.findIndex((p) => p.equals(perm));
   }
-  removePermission(permission: Permission) {
-    this.permissions.delete(permission);
+  addPermission(perm: Permission) {
+    const index = this.findPermission(perm);
+    if (index >= 0) return;
+
+    this.permissions.push(perm);
+  }
+  removePermission(perm: Permission) {
+    const index = this.findPermission(perm);
+    if (index < 0) return;
+    this.permissions.splice(index, 1);
   }
   setName(name: string) {
     this.name = name;
+  }
+  toJSON() {
+    return {
+      id: this.id,
+      name: this.name,
+      permissions: this.permissions.map((p) => p.toJSON()),
+    };
   }
 }
