@@ -69,6 +69,9 @@ export class Permission {
       this.props.scope === other.props.scope
     );
   }
+  key(): string {
+    return this.toString();
+  }
   toString(): string {
     return `${this.props.entity}.${this.props.action}.${this.props.scope}`;
   }
