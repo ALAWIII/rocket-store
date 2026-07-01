@@ -1,6 +1,14 @@
 type CapitalizeWord<T extends string> = Capitalize<T>;
 
-const Entities = ['product', 'cart', 'order', 'user'] as const;
+const Entities = [
+  'product',
+  'cart',
+  'order',
+  'user',
+  'role',
+  'wishlist',
+  'review',
+] as const;
 type Entity = (typeof Entities)[number];
 type EntityKeys = CapitalizeWord<Entity>;
 //===========================================
