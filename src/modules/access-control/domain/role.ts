@@ -1,9 +1,10 @@
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Permission } from './permission';
+import { RoleId } from 'src/modules/shared/domain/ids';
 
 export class Role {
   constructor(
-    private readonly id: string,
+    private readonly id: RoleId,
     private name: Name, // unique
     private permissions: Permission[],
   ) {}

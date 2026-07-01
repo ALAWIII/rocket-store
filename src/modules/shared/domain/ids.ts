@@ -323,3 +323,14 @@ export class CartId extends UuidV7Id {
     return new CartId(id);
   }
 }
+export class RoleId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): RoleId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new RoleId(id);
+  }
+}
