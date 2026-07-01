@@ -23,11 +23,13 @@ type CapitalizeWord<T extends string> = Capitalize<T>;
 
 type PermissionMatrix = typeof PermissionMatrix;
 
-type Entity = StringKeyOf<PermissionMatrix>;
+export type Entity = StringKeyOf<PermissionMatrix>;
 
-type Action<E extends Entity = Entity> = PermissionMatrix[E]['actions'][number];
+export type Action<E extends Entity = Entity> =
+  PermissionMatrix[E]['actions'][number];
 
-type Scope<E extends Entity = Entity> = PermissionMatrix[E]['scopes'][number];
+export type Scope<E extends Entity = Entity> =
+  PermissionMatrix[E]['scopes'][number];
 
 type PermissionProps<E extends Entity = Entity> = {
   entity: E;
