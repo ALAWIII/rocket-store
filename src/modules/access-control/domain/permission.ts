@@ -1,27 +1,19 @@
-import { ValueOf } from 'src/modules/shared/types/value-of';
+type CapitalizeWord<T extends string> = Capitalize<T>;
 
-export const Entity = {
-  Product: 'product',
-  Cart: 'cart',
-  Order: 'order',
-  User: 'user',
-} as const;
-export type Entity = ValueOf<typeof Entity>;
+const Entities = ['product', 'cart', 'order', 'user'] as const;
+type Entity = (typeof Entities)[number];
+type EntityKeys = CapitalizeWord<Entity>;
+//===========================================
+const Actions = ['create', 'view', 'list'] as const;
+type Action = (typeof Actions)[number];
+type ActionKeys = CapitalizeWord<Action>;
 
-export const Action = {
-  Create: 'create',
-  View: 'view',
-  List: 'list',
-} as const;
-export type Action = ValueOf<typeof Action>;
+//========================================
+const Scopes = ['own', 'others', 'all'] as const;
+type Scope = (typeof Scopes)[number];
+type ScopeKeys = CapitalizeWord<Scope>;
 
-export const Scope = {
-  Own: 'own',
-  Others: 'others',
-  All: 'all',
-} as const;
-export type Scope = ValueOf<typeof Scope>;
-
+//===========================================
 type PermissionProps = {
   entity: Entity;
   action: Action;
@@ -52,15 +44,15 @@ export class Permission {
     return new Permission({ entity, action, scope });
   }
   private static validateEntity(entity: string): entity is Entity {
-    return Object.values(Entity).includes(entity as Entity);
+    return Entities.includes(entity as Entity);
   }
 
   private static validateAction(action: string): action is Action {
-    return Object.values(Action).includes(action as Action);
+    return Actions.includes(action as Action);
   }
 
   private static validateScope(scope: string): scope is Scope {
-    return Object.values(Scope).includes(scope as Scope);
+    return Scopes.includes(scope as Scope);
   }
   equals(other: Permission): boolean {
     return (
@@ -76,6 +68,27 @@ export class Permission {
     return `${this.props.entity}.${this.props.action}.${this.props.scope}`;
   }
   toJSON(): PermissionProps {
-    return this.props;
+    return { ...this.props };
   }
 }
+
+type PermissionKey = `${EntityKeys}${ActionKeys}${ScopeKeys}`;
+
+type AllPermissionsMap = {
+  [K in PermissionKey]: Permission;
+};
+
+function capitalize<T extends string>(value: T): Capitalize<T> {
+  return (value.charAt(0).toUpperCase() + value.slice(1)) as Capitalize<T>;
+}
+
+export const AllPermissions = Object.fromEntries(
+  Entities.flatMap((entity) =>
+    Actions.flatMap((action) =>
+      Scopes.map((scope) => {
+        const key: PermissionKey = `${capitalize(entity)}${capitalize(action)}${capitalize(scope)}`;
+        return [key, new Permission({ entity, action, scope })];
+      }),
+    ),
+  ),
+) as AllPermissionsMap;
