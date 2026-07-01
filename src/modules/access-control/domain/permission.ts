@@ -62,6 +62,13 @@ export class Permission {
   private static validateScope(scope: string): scope is Scope {
     return Object.values(Scope).includes(scope as Scope);
   }
+  equals(other: Permission): boolean {
+    return (
+      this.props.entity === other.props.entity &&
+      this.props.action === other.props.action &&
+      this.props.scope === other.props.scope
+    );
+  }
   toString(): string {
     return `${this.props.entity}.${this.props.action}.${this.props.scope}`;
   }
