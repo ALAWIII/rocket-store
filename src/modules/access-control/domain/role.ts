@@ -1,9 +1,10 @@
+import { Name } from 'src/modules/shared/value-objects/name';
 import { Permission } from './permission';
 
 export class Role {
   constructor(
     private readonly id: string,
-    private name: string, // unique
+    private name: Name, // unique
     private permissions: Permission[],
   ) {}
   findPermission(perm: Permission): number {
@@ -21,7 +22,7 @@ export class Role {
     this.permissions.splice(index, 1);
   }
   setName(name: string) {
-    this.name = name;
+    this.name = Name.create(name);
   }
   toJSON() {
     return {
