@@ -1,24 +1,24 @@
 import { ValueOf } from 'src/modules/shared/types/value-of';
 
 export const Entity = {
-  PRODUCT: 'prdouct',
-  CART: 'cart',
-  ORDER: 'order',
-  USER: 'user',
+  Product: 'product',
+  Cart: 'cart',
+  Order: 'order',
+  User: 'user',
 } as const;
 export type Entity = ValueOf<typeof Entity>;
 
 export const Action = {
-  CREATE: 'create',
-  VIEW: 'view',
-  LISTALL: 'listall',
+  Create: 'create',
+  View: 'view',
+  List: 'list',
 } as const;
 export type Action = ValueOf<typeof Action>;
 
 export const Scope = {
-  OWN: 'own',
-  OTHERS: 'others',
-  ALL: 'all',
+  Own: 'own',
+  Others: 'others',
+  All: 'all',
 } as const;
 export type Scope = ValueOf<typeof Scope>;
 
