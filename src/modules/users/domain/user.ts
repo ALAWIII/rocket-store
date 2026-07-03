@@ -7,8 +7,9 @@ type UserProps = {
   readonly id: UserId;
   readonly authId: UserId;
   email: Email;
-  firstName: Name;
-  lastName: Name;
+  displayName: Name;
+  givenName: Name;
+  familyName: Name;
   roleId: string;
   phone?: Phone;
   updatedAt: Date;
@@ -18,8 +19,9 @@ type UserPrimitives = {
   id: string;
   authId: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  displayName: string;
+  givenName: string;
+  familyName: string;
   roleId: string;
   phone?: string;
   updatedAt: Date;
@@ -27,7 +29,10 @@ type UserPrimitives = {
 };
 
 type UpdateUserProps = Partial<
-  Pick<UserProps, 'firstName' | 'lastName' | 'roleId' | 'phone'>
+  Pick<
+    UserProps,
+    'displayName' | 'givenName' | 'familyName' | 'roleId' | 'phone'
+  >
 >;
 export class User {
   private constructor(private data: UserProps) {}
@@ -39,8 +44,9 @@ export class User {
       id: UserId.create(data.id),
       authId: UserId.create(data.authId),
       email: Email.create(data.email),
-      firstName: Name.create(data.firstName),
-      lastName: Name.create(data.lastName),
+      displayName: Name.create(data.displayName),
+      givenName: Name.create(data.givenName),
+      familyName: Name.create(data.familyName),
       roleId: data.roleId,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,
@@ -48,18 +54,18 @@ export class User {
     });
   }
   update(props: UpdateUserProps) {
-    if (props.firstName !== undefined) this.changeFirstName(props.firstName);
-    if (props.lastName !== undefined) this.changeLastName(props.lastName);
+    if (props.givenName !== undefined) this.changeFirstName(props.givenName);
+    if (props.familyName !== undefined) this.changeLastName(props.familyName);
     if (props.roleId !== undefined) this.changeRole(props.roleId);
     if (props.phone !== undefined) this.changePhone(props.phone);
     this.touch();
   }
 
   private changeFirstName(fname: Name) {
-    this.data.firstName = fname;
+    this.data.givenName = fname;
   }
   private changeLastName(lastName: Name) {
-    this.data.lastName = lastName;
+    this.data.familyName = lastName;
   }
 
   private changePhone(phone: Phone) {
@@ -77,9 +83,10 @@ export class User {
     return {
       id: this.data.id.toString(),
       authId: this.data.authId.toString(),
+      displayName: this.data.displayName.value,
       email: this.data.email.value,
-      firstName: this.data.firstName.value,
-      lastName: this.data.lastName.value,
+      givenName: this.data.givenName.value,
+      familyName: this.data.familyName.value,
       roleId: this.data.roleId,
       phone: this.data.phone?.value,
       updatedAt: this.data.updatedAt,

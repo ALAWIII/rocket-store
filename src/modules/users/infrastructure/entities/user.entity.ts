@@ -21,9 +21,9 @@ export class UserEntity {
   @JoinColumn({ name: 'auth_id', referencedColumnName: 'id' })
   authUser!: TUser;
   @Column({ type: 'varchar', length: 50 })
-  firstName!: string;
+  givenName!: string;
   @Column({ type: 'varchar', length: 50 })
-  lastName!: string;
+  familyName!: string;
   @Column({ nullable: true })
   phone?: string;
 
