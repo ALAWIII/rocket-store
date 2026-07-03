@@ -21,11 +21,16 @@ export class UserRepository implements IUserRepository {
     authId: string,
     data: UpdateUserRepoData,
   ): Promise<User | null> {
-    const result = await this.userRepo.update({ authId: authId }, data);
-    if (!result.affected) {
-      return null;
-    }
-    return this.findByAuthId(authId);
+    const result = await this.userRepo
+      .createQueryBuilder()
+      .update(UserEntity)
+      .set({ ...data })
+      .where('auth_id= :authId', { authId })
+      .returning('*')
+      .execute();
+    const rows = result.raw as UserEntity[];
+    const row = rows[0] ?? null;
+    return row ? this.toDomain(row) : null;
   }
   async findByAuthId(authId: string): Promise<User | null> {
     const entity = await this.userRepo.findOneBy({ authId });
