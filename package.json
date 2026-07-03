@@ -29,6 +29,7 @@
     "@thallesp/nestjs-better-auth": "^2.6.1",
     "better-auth": "^1.6.22",
     "dotenv": "^17.4.2",
+    "nest-authz": "^2.17.0",
     "pg": "^8.22.0",
     "pg-query-stream": "^4.16.0",
     "reflect-metadata": "^0.2.2",
