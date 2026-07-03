@@ -26,22 +26,6 @@ type SharedProps = Omit<CreateAddressProps, 'userId'>;
 
 type UpdateAddressProps = Partial<SharedProps>;
 
-export const AddressType = {
-  Billing: 'billing',
-  Shipping: 'shipping',
-} as const;
-
-export type AddressType = (typeof AddressType)[keyof typeof AddressType];
-
-type OrderAddressProps = {
-  readonly id: AddressId;
-  readonly orderId: OrderId;
-  addressType: AddressType;
-  createdAt: Date;
-} & SharedProps;
-
-type CreateOrderAddressProps = Omit<OrderAddressProps, 'id' | 'createdAt'>;
-
 abstract class AddressBase<T extends SharedProps> {
   protected constructor(protected props: T) {}
 
@@ -81,7 +65,22 @@ abstract class AddressBase<T extends SharedProps> {
     return { ...this.props };
   }
 }
-
+//===============================================
+type AddressPrimitives = {
+  id: string;
+  userId: string;
+  fullName: string;
+  phone: string;
+  country: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  addressLine1: string;
+  addressLine2?: string;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt?: Date;
+};
 export class Address extends AddressBase<AddressProps> {
   private constructor(props: AddressProps) {
     super(props);
@@ -130,8 +129,71 @@ export class Address extends AddressBase<AddressProps> {
   get deletedAt(): Date | undefined {
     return this.props.deletedAt;
   }
-}
+  static fromPrimitives(data: AddressPrimitives): Address {
+    return new Address({
+      id: AddressId.create(data.id),
+      userId: UserId.create(data.userId),
+      fullName: Name.create(data.fullName),
+      phone: Phone.create(data.phone),
+      country: Name.create(data.country),
+      city: Name.create(data.city),
+      state: Name.create(data.state),
+      postalCode: data.postalCode,
+      addressLine1: data.addressLine1,
+      addressLine2: data.addressLine2,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+      deletedAt: data.deletedAt,
+    });
+  }
 
+  toPrimitives(): AddressPrimitives {
+    return {
+      id: this.props.id.toString(),
+      userId: this.props.userId.toString(),
+      fullName: this.props.fullName.value,
+      phone: this.props.phone.value,
+      country: this.props.country.value,
+      city: this.props.city.value,
+      state: this.props.state.value,
+      postalCode: this.props.postalCode,
+      addressLine1: this.props.addressLine1,
+      addressLine2: this.props.addressLine2,
+      createdAt: this.props.createdAt,
+      updatedAt: this.props.updatedAt,
+      deletedAt: this.props.deletedAt,
+    };
+  }
+}
+//======================================================================
+export const AddressType = {
+  Billing: 'billing',
+  Shipping: 'shipping',
+} as const;
+export type AddressType = (typeof AddressType)[keyof typeof AddressType];
+
+type OrderAddressProps = {
+  readonly id: AddressId;
+  readonly orderId: OrderId;
+  addressType: AddressType;
+  createdAt: Date;
+} & SharedProps;
+
+type CreateOrderAddressProps = Omit<OrderAddressProps, 'id' | 'createdAt'>;
+export type OrderAddressPrimitives = {
+  id: string;
+  fullName: string;
+  orderId: string;
+  phone: string;
+  country: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  addressType: AddressType;
+  addressLine1: string;
+  addressLine2?: string;
+  createdAt: Date;
+};
 export class OrderAddress extends AddressBase<OrderAddressProps> {
   private constructor(props: OrderAddressProps) {
     super(props);
@@ -148,7 +210,39 @@ export class OrderAddress extends AddressBase<OrderAddressProps> {
   static restore(data: OrderAddressProps): OrderAddress {
     return new OrderAddress(data);
   }
+  static fromPrimitives(data: OrderAddressPrimitives): OrderAddress {
+    return new OrderAddress({
+      id: AddressId.create(data.id),
+      orderId: OrderId.create(data.orderId),
+      addressType: data.addressType,
+      fullName: Name.create(data.fullName),
+      phone: Phone.create(data.phone),
+      country: Name.create(data.country),
+      city: Name.create(data.city),
+      state: Name.create(data.state),
+      postalCode: data.postalCode,
+      addressLine1: data.addressLine1,
+      addressLine2: data.addressLine2,
+      createdAt: data.createdAt,
+    });
+  }
 
+  toPrimitives(): OrderAddressPrimitives {
+    return {
+      id: this.props.id.toString(),
+      orderId: this.orderId.toString(),
+      addressType: this.addressType,
+      fullName: this.props.fullName.value,
+      phone: this.props.phone.value,
+      country: this.props.country.value,
+      city: this.props.city.value,
+      state: this.props.state.value,
+      postalCode: this.props.postalCode,
+      addressLine1: this.props.addressLine1,
+      addressLine2: this.props.addressLine2,
+      createdAt: this.props.createdAt,
+    };
+  }
   get id(): AddressId {
     return this.props.id;
   }
