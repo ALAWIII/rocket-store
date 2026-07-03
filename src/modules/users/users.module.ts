@@ -10,8 +10,19 @@ import { IAddressRepository } from './infrastructure/repositories/address.reposi
 import { AddressRepository } from './infrastructure/repositories/typeorm-address.repository';
 import { IOrderAddressRepository } from './infrastructure/repositories/order-address.repository';
 import { OrderAddressRepositroy } from './infrastructure/repositories/typeorm-order-address.repository';
+import {
+  AddressEntity,
+  OrderAddressEntity,
+} from './infrastructure/entities/address.entity';
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, AuthUserEntity])],
+  imports: [
+    TypeOrmModule.forFeature([
+      UserEntity,
+      AuthUserEntity,
+      AddressEntity,
+      OrderAddressEntity,
+    ]),
+  ],
   providers: [
     { provide: IUserRepository, useClass: UserRepository },
     { provide: IAuthUserRepository, useClass: AuthUserRepository },
