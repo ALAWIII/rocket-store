@@ -29,7 +29,7 @@ export class Role {
     return {
       id: this.id,
       name: this.name,
-      permissions: this.permissions.map((p) => p.toJSON()),
+      permissions: this.permissions.map((p) => p),
     };
   }
 }
