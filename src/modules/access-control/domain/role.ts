@@ -4,8 +4,8 @@ import { RoleId } from 'src/modules/shared/domain/ids';
 
 export class Role {
   constructor(
-    private readonly id: RoleId,
-    private name: Name, // unique
+    private readonly _id: RoleId,
+    private _name: Name, // unique
     private permissions: Permission[],
   ) {}
   findPermission(perm: Permission): number {
@@ -23,12 +23,18 @@ export class Role {
     this.permissions.splice(index, 1);
   }
   setName(name: string) {
-    this.name = Name.create(name);
+    this._name = Name.create(name);
+  }
+  get name(): string {
+    return this._name.value;
+  }
+  get id(): string {
+    return this._id.toString();
   }
   toJSON() {
     return {
-      id: this.id,
-      name: this.name,
+      id: this._id,
+      name: this._name,
       permissions: this.permissions.map((p) => p),
     };
   }
