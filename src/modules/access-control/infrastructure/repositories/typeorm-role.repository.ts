@@ -4,7 +4,7 @@ import { Role } from '../../domain/role';
 import { Action, Entity, Permission, Scope } from '../../domain/permission';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEntity } from '../entities/role.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { RoleId } from 'src/modules/shared/domain/ids';
 import { Name } from 'src/modules/shared/value-objects/name';
 
@@ -14,6 +14,13 @@ export class RoleRepository implements IRoleRepository {
     @InjectRepository(RoleEntity)
     private readonly roleRepo: Repository<RoleEntity>,
   ) {}
+  async loadByNames(names: string[]): Promise<Role[]> {
+    if (names.length === 0) return [];
+    const roles = await this.roleRepo.findBy({
+      name: In(names),
+    });
+    return roles.map((r) => this.toDomain(r));
+  }
   async findById(id: string): Promise<Role | null> {
     const r = await this.roleRepo.findOneBy({ id });
     if (r === null) return null;
