@@ -32,6 +32,9 @@ importers:
       better-auth:
         specifier: ^1.6.22
         version: 1.6.22(pg@8.22.0)
+      casbin:
+        specifier: ^5.51.1
+        version: 5.51.1
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2
