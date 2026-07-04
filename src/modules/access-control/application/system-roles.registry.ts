@@ -1,42 +1,63 @@
+// src/modules/access-control/application/system-roles.registry.ts
 import { Injectable } from '@nestjs/common';
-import type { Role } from '../domain/role';
 
 export type SystemRoleName = 'admin' | 'worker' | 'customer';
 
+type RoleId = string;
+
 @Injectable()
 export class SystemRolesRegistry {
-  private readonly roles = new Map<SystemRoleName, Role>();
+  private readonly roleIds = new Map<SystemRoleName, RoleId>();
 
-  set(role: Role): void {
-    const roleJ = role.toJSON();
-    if (!this.isSystemRoleName(roleJ.name.value)) return;
-    this.roles.set(roleJ.name.value, role);
+  set(name: SystemRoleName, id: RoleId): void {
+    this.roleIds.set(name, id);
   }
 
-  setMany(roles: Role[]): void {
+  setMany(
+    roles: Array<{
+      id: RoleId;
+      name: string;
+    }>,
+  ): void {
     for (const role of roles) {
-      this.set(role);
+      if (this.isSystemRoleName(role.name)) {
+        this.roleIds.set(role.name, role.id);
+      }
     }
   }
 
-  get(name: SystemRoleName): Role | undefined {
-    return this.roles.get(name);
+  get(name: SystemRoleName): RoleId | undefined {
+    return this.roleIds.get(name);
   }
 
-  getOrThrow(name: SystemRoleName): Role {
-    const role = this.roles.get(name);
-    if (!role) {
+  getOrThrow(name: SystemRoleName): RoleId {
+    const roleId = this.roleIds.get(name);
+
+    if (!roleId) {
       throw new Error(`System role "${name}" is not loaded`);
     }
-    return role;
+
+    return roleId;
+  }
+
+  getAdminRoleId(): RoleId {
+    return this.getOrThrow('admin');
+  }
+
+  getWorkerRoleId(): RoleId {
+    return this.getOrThrow('worker');
+  }
+
+  getCustomerRoleId(): RoleId {
+    return this.getOrThrow('customer');
   }
 
   has(name: SystemRoleName): boolean {
-    return this.roles.has(name);
+    return this.roleIds.has(name);
   }
 
   clear(): void {
-    this.roles.clear();
+    this.roleIds.clear();
   }
 
   private isSystemRoleName(name: string): name is SystemRoleName {
