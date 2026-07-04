@@ -2,17 +2,17 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { Enforcer } from 'casbin';
 
-import { CASBIN_ENFORCER } from '../infrastructure/casbin/casbin.constants';
 import { IRoleRepository } from '../infrastructure/repositories/role.repository';
 import type { Role } from '../domain/role';
 import type { Permission } from '../domain/permission';
+import { AUTHZ_ENFORCER } from 'nest-authz';
 
 @Injectable()
 export class AccessControlSyncService {
   private readonly logger = new Logger(AccessControlSyncService.name);
 
   constructor(
-    @Inject(CASBIN_ENFORCER)
+    @Inject(AUTHZ_ENFORCER)
     private readonly enforcer: Enforcer,
     @Inject(IRoleRepository)
     private readonly roleRepository: IRoleRepository,
