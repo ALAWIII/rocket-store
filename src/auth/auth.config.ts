@@ -23,8 +23,8 @@ export function createAuth(dataSource: DataSource, userRepo: IUserRepository) {
     user: {
       additionalFields: {
         givenName: { type: 'string', required: false },
-        familyName: { type: 'string', required: false, returned: false },
-        phone: { type: 'string', required: false, returned: false },
+        familyName: { type: 'string', required: false },
+        phone: { type: 'string', required: false },
         roleId: {
           type: 'string',
           required: true,
