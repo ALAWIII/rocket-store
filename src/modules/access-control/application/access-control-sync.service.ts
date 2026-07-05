@@ -1,4 +1,3 @@
-// src/modules/access-control/application/access-control-sync.service.ts
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { Enforcer } from 'casbin';
 
@@ -40,7 +39,7 @@ export class AccessControlSyncService {
     for (const role of roles) {
       const roleJson = role.toJSON();
       for (const permission of roleJson.permissions) {
-        const policy = this.toPolicy(roleJson.name.value, permission);
+        const policy = this.toPolicy(roleJson.id.toString(), permission);
         const key = policy.join('::');
 
         if (seen.has(key)) continue;
@@ -48,12 +47,12 @@ export class AccessControlSyncService {
         policies.push(policy);
       }
     }
-
+    seen.clear();
     return policies;
   }
 
-  private toPolicy(roleName: string, permission: Permission): string[] {
+  private toPolicy(roleId: string, permission: Permission): string[] {
     const perm = permission.toJSON();
-    return [roleName, perm.entity, perm.action, perm.scope];
+    return [roleId, perm.entity, perm.action, perm.scope];
   }
 }
