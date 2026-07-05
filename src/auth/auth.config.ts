@@ -31,6 +31,7 @@ export function createAuth(dataSource: DataSource, userRepo: IUserRepository) {
           references: { model: 'roles', field: 'id' },
         },
       },
+      deleteUser: { enabled: false },
     },
     secret: process.env.BETTER_AUTH_SECRET,
     baseURL: process.env.BETTER_AUTH_URL,
@@ -45,7 +46,6 @@ export function createAuth(dataSource: DataSource, userRepo: IUserRepository) {
     },
     emailVerification: {
       autoSignInAfterVerification: true,
-      async afterEmailVerification(user, request) {},
     },
     disabledPaths: ['/update-user', '/delete-user'],
     plugins: [...(process.env.DEVELOPMENT_ENV === 'true' ? [openAPI()] : [])],
