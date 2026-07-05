@@ -12,8 +12,8 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { ImagesModule } from './modules/images/images.module';
 import { CartsModule } from './modules/carts/carts.module';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { AppAuthModule } from './auth/auth.module';
+import { AccessControlModule } from './modules/access-control/access-control.module';
 
 @Module({
   imports: [
@@ -31,7 +31,7 @@ import { AppAuthModule } from './auth/auth.module';
     OrdersModule,
     ImagesModule,
     CartsModule,
-    AuthModule,
+    AccessControlModule,
   ],
 })
 export class AppModule {}
