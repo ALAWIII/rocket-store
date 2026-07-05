@@ -5,7 +5,6 @@ import { Phone } from 'src/modules/shared/value-objects/phone';
 
 type UserProps = {
   readonly id: UserId;
-  readonly authId: UserId;
   email: Email;
   displayName: Name;
   givenName: Name;
@@ -17,7 +16,6 @@ type UserProps = {
 };
 type UserPrimitives = {
   id: string;
-  authId: string;
   email: string;
   displayName: string;
   givenName: string;
@@ -42,7 +40,6 @@ export class User {
   static fromPrimitives(data: UserPrimitives) {
     return new User({
       id: UserId.create(data.id),
-      authId: UserId.create(data.authId),
       email: Email.create(data.email),
       displayName: Name.create(data.displayName),
       givenName: Name.create(data.givenName),
@@ -82,7 +79,6 @@ export class User {
   toJSON(): UserPrimitives {
     return {
       id: this.data.id.toString(),
-      authId: this.data.authId.toString(),
       displayName: this.data.displayName.value,
       email: this.data.email.value,
       givenName: this.data.givenName.value,
