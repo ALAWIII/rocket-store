@@ -17,24 +17,17 @@ export class UserRepository implements IUserRepository {
     const fullUser = await this.findById(saved.id);
     return fullUser!;
   }
-  async updateByAuthId(
-    authId: string,
-    data: UpdateUserRepoData,
-  ): Promise<User | null> {
+  async updateById(id: string, data: UpdateUserRepoData): Promise<User | null> {
     const result = await this.userRepo
       .createQueryBuilder()
       .update(UserEntity)
       .set({ ...data })
-      .where('auth_id= :authId', { authId })
+      .where('id= :id', { id })
       .returning('*')
       .execute();
     const rows = result.raw as UserEntity[];
     const row = rows[0] ?? null;
     return row ? this.toDomain(row) : null;
-  }
-  async findByAuthId(authId: string): Promise<User | null> {
-    const entity = await this.userRepo.findOneBy({ authId });
-    return entity ? this.toDomain(entity) : null;
   }
 
   async findById(id: string): Promise<User | null> {
@@ -45,15 +38,14 @@ export class UserRepository implements IUserRepository {
   private toDomain(userEntity: UserEntity): User {
     return User.fromPrimitives({
       id: userEntity.id,
-      authId: userEntity.authId,
-      email: userEntity.authUser.email,
-      displayName: userEntity.authUser.name,
+      email: userEntity.email,
+      name: userEntity.name,
       givenName: userEntity.givenName,
       familyName: userEntity.familyName,
       roleId: userEntity.roleId,
-      phone: userEntity.phone,
+      phone: userEntity.phone ?? undefined,
       updatedAt: userEntity.updatedAt,
-      createdAt: userEntity.authUser.createdAt,
+      createdAt: userEntity.createdAt,
     });
   }
 }
