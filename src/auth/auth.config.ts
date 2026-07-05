@@ -21,10 +21,19 @@ export function createAuth(dataSource: DataSource) {
     database: typeormAdapter(dataSource, { usePlural: true }),
     user: {
       additionalFields: {
-        givenName: { type: 'string', required: false },
-        familyName: { type: 'string', required: false },
+        givenName: {
+          fieldName: 'given_name',
+          type: 'string',
+          required: false,
+        },
+        familyName: {
+          fieldName: 'family_name',
+          type: 'string',
+          required: false,
+        },
         phone: { type: 'string', required: false },
         roleId: {
+          fieldName: 'role_id',
           type: 'string',
           required: true,
           references: { model: 'roles', field: 'id' },
