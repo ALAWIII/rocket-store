@@ -23,7 +23,7 @@ export class UserEntity {
   @Column('boolean', { name: 'emailVerified', default: false })
   emailVerified!: boolean;
 
-  @Column({ nullable: true })
+  @Column('varchar', { nullable: true, length: 20 })
   phone!: string | null;
   @Column('text', { name: 'image', nullable: true })
   image!: string | null;
