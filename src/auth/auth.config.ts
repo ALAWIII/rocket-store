@@ -4,7 +4,6 @@ import { DataSource } from 'typeorm';
 import { v7 } from 'uuid';
 import argon2 from 'argon2';
 import { openAPI } from 'better-auth/plugins';
-import { IUserRepository } from 'src/modules/users/infrastructure/repositories/user.repository';
 
 async function betterHash(password: string) {
   return argon2.hash(password, {
@@ -17,7 +16,7 @@ async function betterHash(password: string) {
 async function betterVerify(data: { hash: string; password: string }) {
   return argon2.verify(data.hash, data.password);
 }
-export function createAuth(dataSource: DataSource, userRepo: IUserRepository) {
+export function createAuth(dataSource: DataSource) {
   return betterAuth({
     database: typeormAdapter(dataSource, { usePlural: true }),
     user: {
