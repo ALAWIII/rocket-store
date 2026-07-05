@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { IOrderAddressRepository } from './order-address.repository';
-import { OrderAddress, OrderAddressPrimitives } from '../../domain/address';
+import { OrderAddress } from '../../domain/address';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderAddressEntity } from '../entities/address.entity';
 import { Repository } from 'typeorm';
