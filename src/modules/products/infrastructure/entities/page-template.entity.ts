@@ -2,6 +2,7 @@ import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuid
 import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
 import { CategoryEntity } from './category.entity';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('page_templates')
 export class PageTemplateEntity {
@@ -20,6 +21,6 @@ export class PageTemplateEntity {
   @Column('uuid')
   @ForeignKey(() => UserEntity, (u) => u.id)
   createdBy!: string;
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
 }

@@ -1,6 +1,7 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 import { BrandEntity } from './brand.entity';
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('products')
 export class ProductEntity {
@@ -14,6 +15,6 @@ export class ProductEntity {
   @Column('uuid', { nullable: true })
   @ForeignKey(() => BrandEntity, (b) => b.id)
   brandId?: string | null;
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
 }

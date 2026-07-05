@@ -1,10 +1,11 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, CreateDateColumn, Entity } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import {
   DiscountType,
   PromotionStatus,
   PromotionType,
 } from '../../domain/promotion';
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('promotions')
 export class PromotionEntity {
@@ -53,6 +54,6 @@ export class PromotionEntity {
   @Column('integer', { default: 0 })
   priority!: number;
 
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
 }

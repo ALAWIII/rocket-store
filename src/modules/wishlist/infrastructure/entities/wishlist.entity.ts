@@ -1,12 +1,10 @@
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ForeignKey,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 
 @Entity('wishlists')
 export class WishlistEntity {
@@ -17,8 +15,8 @@ export class WishlistEntity {
   userId!: string;
   @Column('varchar', { length: 50 })
   name!: string;
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   updatedAt!: Date;
 }

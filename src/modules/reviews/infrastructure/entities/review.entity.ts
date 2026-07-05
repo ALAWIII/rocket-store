@@ -2,8 +2,9 @@ import { OrderEntity } from 'src/modules/orders/infrastructure/entities/order.en
 import { ProductEntity } from 'src/modules/products/infrastructure/entities/product.entity';
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
-import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 import { type ReviewStatus } from '../../domain/review';
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('reviews')
 export class ReviewEntity {
@@ -28,6 +29,6 @@ export class ReviewEntity {
   status!: ReviewStatus;
   @Column('timestamptz', { nullable: true })
   editedAt!: Date | null;
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
 }

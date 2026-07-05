@@ -1,5 +1,6 @@
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, CreateDateColumn, Entity } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 @Entity('images')
 export class ImageEntity {
@@ -23,6 +24,6 @@ export class ImageEntity {
   altText!: string | null;
   @Column('jsonb', { nullable: true })
   metadata!: Record<string, unknown> | null;
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
 }

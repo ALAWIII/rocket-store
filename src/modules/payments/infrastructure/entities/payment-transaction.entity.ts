@@ -1,14 +1,12 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ForeignKey,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 import { PaymentStatus } from '../../domain/payment-status';
 import { PaymentEntity } from './payment.entity';
 import { PaymentProviderEntity } from './payment-provider.entity';
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('payment_transactions')
 export class PaymentTransactionEntity {
@@ -42,9 +40,9 @@ export class PaymentTransactionEntity {
   @Column('text', { nullable: true })
   receiptUrl!: string | null;
 
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   updatedAt!: Date;
 }

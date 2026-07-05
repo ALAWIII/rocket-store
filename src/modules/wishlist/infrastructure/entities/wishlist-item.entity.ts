@@ -1,8 +1,9 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 import { WishlistEntity } from './wishlist.entity';
 import { ProductEntity } from 'src/modules/products/infrastructure/entities/product.entity';
 import { ProductVariantEntity } from 'src/modules/products/infrastructure/entities/product-variant.entity';
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('wishlist_items')
 export class WishlistItemEntity {
@@ -19,6 +20,6 @@ export class WishlistItemEntity {
   variantId!: string | null;
   @Column('varchar', { nullable: true, length: 500 })
   note!: string | null;
-  @CreateDateColumn({ name: 'added_at' })
+  @CreateDateColumnTz({ name: 'added_at' })
   addedAt!: Date;
 }

@@ -1,6 +1,7 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 import { PromotionEntity } from './promotion.entity';
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('promotion_rules')
 export class PromotionRuleEntity {
@@ -13,6 +14,6 @@ export class PromotionRuleEntity {
   ruleType!: string;
   @Column('jsonb')
   ruleData!: Record<string, unknown>;
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
 }

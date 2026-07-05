@@ -1,14 +1,12 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  ForeignKey,
-  UpdateDateColumn,
-} from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 import { PaymentStatus } from '../../domain/payment-status';
 import { OrderEntity } from 'src/modules/orders/infrastructure/entities/order.entity';
 import { PaymentMethod } from '../../domain/payment-method';
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('payments')
 export class PaymentEntity {
@@ -27,8 +25,8 @@ export class PaymentEntity {
   status!: PaymentStatus;
   @Column('varchar', { length: 20 })
   method!: PaymentMethod;
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   updatedAt!: Date;
 }

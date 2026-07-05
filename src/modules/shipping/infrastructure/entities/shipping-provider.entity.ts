@@ -1,5 +1,9 @@
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, CreateDateColumn, Entity, UpdateDateColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 
 @Entity('shipping_providers')
 export class ShippingProviderEntity {
@@ -13,8 +17,8 @@ export class ShippingProviderEntity {
   isActive!: boolean;
   @Column('jsonb')
   config!: Record<string, unknown>;
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
-  @UpdateDateColumn()
+  @UpdateDateColumnTz()
   updatedAt!: Date;
 }

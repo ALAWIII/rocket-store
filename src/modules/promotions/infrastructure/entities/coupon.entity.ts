@@ -1,7 +1,8 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
-import { Column, CreateDateColumn, Entity, ForeignKey, Index } from 'typeorm';
+import { Column, Entity, ForeignKey, Index } from 'typeorm';
 import { PromotionEntity } from './promotion.entity';
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('coupons')
 @Index(['code'], { unique: true })
@@ -18,6 +19,6 @@ export class CouponEntity {
   @Column('uuid', { nullable: true })
   @ForeignKey(() => UserEntity, (u) => u.id)
   userId!: string | null;
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
 }

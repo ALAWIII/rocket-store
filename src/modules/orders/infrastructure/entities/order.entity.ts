@@ -1,7 +1,8 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
-import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 import { OrderStatus } from '../../domain/order';
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('orders')
 export class OrderEntity {
@@ -15,6 +16,6 @@ export class OrderEntity {
   @ForeignKey(() => UserEntity, (u) => u.id)
   userId!: string;
 
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
 }

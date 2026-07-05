@@ -1,8 +1,9 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 import { ImageEntity } from './image.entity';
 import { ImageAttachmentEntityType } from '../../domain/image-attachment-type';
 import { ImageAttachmentRole } from '../../domain/image-attachment-role';
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('image_attachments')
 export class ImageAttachmentEntity {
@@ -22,6 +23,6 @@ export class ImageAttachmentEntity {
   sortOrder!: number;
   @Column('boolean', { default: false })
   isPrimary!: boolean;
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
 }

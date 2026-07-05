@@ -1,5 +1,6 @@
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 
 @Entity('categories')
 export class CategoryEntity {
@@ -10,6 +11,6 @@ export class CategoryEntity {
   @Column('uuid', { nullable: true })
   @ForeignKey(() => CategoryEntity, (c) => c.id, { onDelete: 'SET NULL' })
   parentCategoryId!: string | null;
-  @CreateDateColumn()
+  @CreateDateColumnTz()
   createdAt!: Date;
 }

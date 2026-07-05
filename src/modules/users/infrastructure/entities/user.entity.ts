@@ -1,12 +1,10 @@
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
-import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import {
-  Entity,
-  Column,
-  ForeignKey,
-  UpdateDateColumn,
-  CreateDateColumn,
-} from 'typeorm';
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
+import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
+import { Entity, Column, ForeignKey } from 'typeorm';
 
 @Entity('users')
 export class UserEntity {
@@ -33,8 +31,8 @@ export class UserEntity {
   @Column({ type: 'uuid', name: 'role_id' })
   @ForeignKey(() => RoleEntity, (r) => r.id)
   roleId!: string;
-  @UpdateDateColumn({ type: 'timestamptz', name: 'updatedAt' })
+  @UpdateDateColumnTz({ name: 'updatedAt' })
   updatedAt!: Date;
-  @CreateDateColumn({ type: 'timestamptz', name: 'createdAt' })
+  @CreateDateColumnTz({ name: 'createdAt' })
   createdAt!: Date;
 }

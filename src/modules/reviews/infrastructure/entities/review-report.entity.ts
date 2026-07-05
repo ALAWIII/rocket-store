@@ -1,11 +1,12 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, CreateDateColumn, Entity, ForeignKey, Index } from 'typeorm';
+import { Column, Entity, ForeignKey, Index } from 'typeorm';
 import { ReviewEntity } from './review.entity';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 import {
   ReviewReportReason,
   ReviewReportStatus,
 } from '../../domain/review-report';
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('review_reports')
 @Index(['reviewId', 'userId'], { unique: true })
@@ -24,6 +25,6 @@ export class ReviewReportEntity {
   details!: string | null;
   @Column('varchar', { length: 15 })
   status!: ReviewReportStatus;
-  @CreateDateColumn({ name: 'reported_at' })
+  @CreateDateColumnTz({ name: 'reported_at' })
   reportedAt!: Date;
 }
