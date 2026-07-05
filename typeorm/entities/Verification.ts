@@ -1,8 +1,9 @@
+import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 
-@Entity('verification')
+@Entity('verifications')
 export class Verification {
-  @PrimaryColumn('text')
+  @UuidV7PrimaryColumn()
   id!: string;
 
   @Index('verification_identifier_idx')

@@ -1,16 +1,10 @@
-import {
-  Column,
-  Entity,
-  Index,
-  JoinColumn,
-  ManyToOne,
-  PrimaryColumn,
-} from 'typeorm';
-import { User } from './User';
+import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
+import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity('account')
 export class Account {
-  @PrimaryColumn('text')
+  @UuidV7PrimaryColumn()
   id!: string;
 
   @Column('text', { name: 'accountId' })
@@ -20,12 +14,12 @@ export class Account {
   providerId!: string;
 
   @Index('account_userId_idx')
-  @Column('text', { name: 'userId' })
+  @Column('uuid', { name: 'userId' })
   userId!: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE', nullable: false })
+  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE', nullable: false })
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
-  user!: User;
+  user!: UserEntity;
 
   @Column('text', { name: 'accessToken', nullable: true })
   accessToken!: string | null;
