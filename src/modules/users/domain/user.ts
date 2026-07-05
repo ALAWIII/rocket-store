@@ -6,7 +6,7 @@ import { Phone } from 'src/modules/shared/value-objects/phone';
 type UserProps = {
   readonly id: UserId;
   email: Email;
-  displayName: Name;
+  name: Name;
   givenName: Name;
   familyName: Name;
   roleId: string;
@@ -17,7 +17,7 @@ type UserProps = {
 type UserPrimitives = {
   id: string;
   email: string;
-  displayName: string;
+  name: string;
   givenName: string;
   familyName: string;
   roleId: string;
@@ -27,10 +27,7 @@ type UserPrimitives = {
 };
 
 type UpdateUserProps = Partial<
-  Pick<
-    UserProps,
-    'displayName' | 'givenName' | 'familyName' | 'roleId' | 'phone'
-  >
+  Pick<UserProps, 'name' | 'givenName' | 'familyName' | 'roleId' | 'phone'>
 >;
 export class User {
   private constructor(private data: UserProps) {}
@@ -41,7 +38,7 @@ export class User {
     return new User({
       id: UserId.create(data.id),
       email: Email.create(data.email),
-      displayName: Name.create(data.displayName),
+      name: Name.create(data.name),
       givenName: Name.create(data.givenName),
       familyName: Name.create(data.familyName),
       roleId: data.roleId,
@@ -79,7 +76,7 @@ export class User {
   toJSON(): UserPrimitives {
     return {
       id: this.data.id.toString(),
-      displayName: this.data.displayName.value,
+      name: this.data.name.value,
       email: this.data.email.value,
       givenName: this.data.givenName.value,
       familyName: this.data.familyName.value,
