@@ -4,32 +4,37 @@ import {
   Entity,
   Column,
   ForeignKey,
-  OneToOne,
-  JoinColumn,
   UpdateDateColumn,
+  CreateDateColumn,
 } from 'typeorm';
-import { User as TUser } from 'typeorm/entities/User';
 
 @Entity('users')
 export class UserEntity {
   @UuidV7PrimaryColumn()
   id!: string;
-  @Column({ type: 'text', unique: true, name: 'auth_id' })
-  authId!: string;
+  @Column('varchar', { name: 'name', length: 30 })
+  name!: string;
 
-  @OneToOne(() => TUser, { eager: true })
-  @JoinColumn({ name: 'auth_id', referencedColumnName: 'id' })
-  authUser!: TUser;
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 30, nullable: true })
   givenName!: string;
-  @Column({ type: 'varchar', length: 50 })
+  @Column({ type: 'varchar', length: 30, nullable: true })
   familyName!: string;
+  @Column('text', { name: 'email', unique: true })
+  email!: string;
+
+  @Column('boolean', { name: 'emailVerified', default: false })
+  emailVerified!: boolean;
+
   @Column({ nullable: true })
-  phone?: string;
+  phone!: string | null;
+  @Column('text', { name: 'image', nullable: true })
+  image!: string | null;
 
   @Column({ type: 'uuid', name: 'role_id' })
   @ForeignKey(() => RoleEntity, (r) => r.id)
   roleId!: string;
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updatedAt' })
   updatedAt!: Date;
+  @CreateDateColumn({ type: 'timestamptz', name: 'createdAt' })
+  createdAt!: Date;
 }

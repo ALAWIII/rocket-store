@@ -5,7 +5,6 @@ import { v7 } from 'uuid';
 import argon2 from 'argon2';
 import { openAPI } from 'better-auth/plugins';
 import { IUserRepository } from 'src/modules/users/infrastructure/repositories/user.repository';
-import { User } from 'src/modules/users/domain/user';
 
 async function betterHash(password: string) {
   return argon2.hash(password, {
@@ -20,7 +19,19 @@ async function betterVerify(data: { hash: string; password: string }) {
 }
 export function createAuth(dataSource: DataSource, userRepo: IUserRepository) {
   return betterAuth({
-    database: typeormAdapter(dataSource),
+    database: typeormAdapter(dataSource, { usePlural: true }),
+    user: {
+      additionalFields: {
+        givenName: { type: 'string', required: false },
+        familyName: { type: 'string', required: false, returned: false },
+        phone: { type: 'string', required: false, returned: false },
+        roleId: {
+          type: 'string',
+          required: true,
+          references: { model: 'roles', field: 'id' },
+        },
+      },
+    },
     secret: process.env.BETTER_AUTH_SECRET,
     baseURL: process.env.BETTER_AUTH_URL,
     advanced: { database: { generateId: () => v7() } },
