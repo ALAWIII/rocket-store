@@ -10,4 +10,5 @@ export abstract class IRoleRepository {
   abstract findByName(name: string): RolePromise;
   abstract upsertByName(name: string, perms: Permission[]): RolePromise;
   abstract updateById(id: string, perms: Permission[]): RolePromise;
+  abstract removeById(id: string): Promise<number>;
 }

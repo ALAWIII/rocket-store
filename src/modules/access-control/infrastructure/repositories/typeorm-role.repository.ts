@@ -69,6 +69,10 @@ export class RoleRepository implements IRoleRepository {
 
     return row ? this.toDomain(row) : null;
   }
+  async removeById(id: string): Promise<number> {
+    const deleteResult = await this.roleRepo.delete({ id });
+    return deleteResult.affected ?? 0;
+  }
   private toDomain(r: RoleEntity): Role {
     const perms = r.permissions.map((p) =>
       Permission.create(
