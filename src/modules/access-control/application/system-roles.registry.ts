@@ -60,7 +60,9 @@ export class SystemRolesRegistry {
   has(name: SystemRoleName): boolean {
     return this.roleIds.has(name);
   }
-
+  clear() {
+    this.roleIds.clear();
+  }
   private isSystemRoleName(name: string): name is SystemRoleName {
     return name === 'admin' || name === 'worker' || name === 'customer';
   }
