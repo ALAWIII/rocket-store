@@ -10,8 +10,10 @@ import { SystemRolesRegistry } from './application/system-roles.registry';
 import { AUTHZ_ENFORCER, AuthZModule } from 'nest-authz';
 import { createCasbinEnforcer } from './infrastructure/casbin/casbin.factory';
 import { AuthenticatedRequest } from 'src/auth/auth.config';
+import { UsersModule } from '../users/users.module';
 @Module({
   imports: [
+    UsersModule,
     TypeOrmModule.forFeature([RoleEntity]),
     AuthZModule.register({
       enforcerProvider: {
