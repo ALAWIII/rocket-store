@@ -53,6 +53,10 @@ export class AccessControlSyncService {
     if (policies.length === 0) return true;
     return this.enforcer.addPolicies(policies);
   }
+  async hasRole(roleId: string): Promise<boolean> {
+    const policies = await this.enforcer.getFilteredPolicy(0, roleId);
+    return policies.length > 0;
+  }
   private toPolicies(roles: Role[]): string[][] {
     const seen = new Set<string>();
     const policies: string[][] = [];
