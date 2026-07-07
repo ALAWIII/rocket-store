@@ -15,4 +15,8 @@ export abstract class IUserRepository {
     data: UpdateUserRepoData,
   ): Promise<User | null>;
   abstract findById(id: string): Promise<User | null>;
+  abstract reassignUsersRole(
+    oldRoleId: string,
+    newRoleId: string,
+  ): Promise<number>;
 }

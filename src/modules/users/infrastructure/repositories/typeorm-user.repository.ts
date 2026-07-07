@@ -34,7 +34,16 @@ export class UserRepository implements IUserRepository {
     const entity = await this.userRepo.findOneBy({ id });
     return entity ? this.toDomain(entity) : null;
   }
-
+  async reassignUsersRole(
+    oldRoleId: string,
+    newRoleId: string,
+  ): Promise<number> {
+    const updateResult = await this.userRepo.update(
+      { roleId: oldRoleId },
+      { roleId: newRoleId },
+    );
+    return updateResult.affected ?? 0;
+  }
   private toDomain(userEntity: UserEntity): User {
     return User.fromPrimitives({
       id: userEntity.id,
