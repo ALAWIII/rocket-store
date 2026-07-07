@@ -33,8 +33,7 @@ export class AccessControlSyncService {
   }
 
   async upsertRole(role: Role): Promise<void> {
-    const removed = await this.removeRole(role);
-    await this.removeRole(role);
+    const removed = await this.removeRole(role.id);
     const added = await this.addRole(role);
     if (!added) {
       throw new Error(
@@ -42,8 +41,7 @@ export class AccessControlSyncService {
       );
     }
   }
-  async removeRole(role: Role): Promise<boolean> {
-    const roleId = role.id.toString();
+  async removeRole(roleId: string): Promise<boolean> {
     const currentPolicies = await this.enforcer.getFilteredPolicy(0, roleId);
 
     if (currentPolicies.length === 0) return true;
