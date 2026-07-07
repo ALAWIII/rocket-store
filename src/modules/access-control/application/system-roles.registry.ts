@@ -56,10 +56,6 @@ export class SystemRolesRegistry {
     return this.roleIds.has(name);
   }
 
-  clear(): void {
-    this.roleIds.clear();
-  }
-
   private isSystemRoleName(name: string): name is SystemRoleName {
     return name === 'admin' || name === 'worker' || name === 'customer';
   }
