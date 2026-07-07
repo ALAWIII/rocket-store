@@ -1,4 +1,3 @@
-// src/modules/access-control/application/system-roles.registry.ts
 import { Injectable } from '@nestjs/common';
 
 export type SystemRoleName = 'admin' | 'worker' | 'customer';
@@ -52,6 +51,12 @@ export class SystemRolesRegistry {
     return this.getOrThrow('customer');
   }
 
+  hasId(roleId: RoleId) {
+    for (const id of this.roleIds.values()) {
+      if (id === roleId) return true;
+    }
+    return false;
+  }
   has(name: SystemRoleName): boolean {
     return this.roleIds.has(name);
   }
