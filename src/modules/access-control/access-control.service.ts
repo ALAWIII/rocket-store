@@ -5,6 +5,7 @@ import { Permission } from './domain/permission';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { IUserRepository } from '../users/infrastructure/repositories/user.repository';
 import { SystemRolesRegistry } from './application/system-roles.registry';
+import { ReassignRoleDto } from './dto/reassign-role.dto';
 
 @Injectable()
 export class AccessControlService {
@@ -24,7 +25,7 @@ export class AccessControlService {
     }
     return role?.id ?? null;
   }
-  async removeRole(roleId: string) {
+  async removeRole(roleId: string): Promise<number> {
     const isSystemRole = this.systemRole.hasId(roleId);
     if (isSystemRole) throw new Error('System roles cannot be removed');
     await this.userRepo.reassignUsersRole(
@@ -32,6 +33,9 @@ export class AccessControlService {
       this.systemRole.getCustomerRoleId(),
     );
     await this.acsyncSerivce.removeRole(roleId);
-    await this.roleRepo.removeById(roleId);
+    return await this.roleRepo.removeById(roleId);
+  }
+  async reassignRole(idData: ReassignRoleDto): Promise<number> {
+    return await this.userRepo.reassignUsersRole(idData.oldId, idData.newId);
   }
 }
