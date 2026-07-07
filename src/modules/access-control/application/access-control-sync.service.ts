@@ -32,6 +32,29 @@ export class AccessControlSyncService {
     );
   }
 
+  async upsertRole(role: Role): Promise<void> {
+    const removed = await this.removeRole(role);
+    await this.removeRole(role);
+    const added = await this.addRole(role);
+    if (!added) {
+      throw new Error(
+        `Failed adding Casbin policies for role ${role.id.toString()}`,
+      );
+    }
+  }
+  async removeRole(role: Role): Promise<boolean> {
+    const roleId = role.id.toString();
+    const currentPolicies = await this.enforcer.getFilteredPolicy(0, roleId);
+
+    if (currentPolicies.length === 0) return true;
+
+    return await this.enforcer.removePolicies(currentPolicies);
+  }
+  async addRole(role: Role) {
+    const policies = this.toPolicies([role]);
+    if (policies.length === 0) return true;
+    return this.enforcer.addPolicies(policies);
+  }
   private toPolicies(roles: Role[]): string[][] {
     const seen = new Set<string>();
     const policies: string[][] = [];
