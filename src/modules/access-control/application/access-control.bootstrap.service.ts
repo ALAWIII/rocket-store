@@ -1,4 +1,3 @@
-// access-control.bootstrap.service.ts
 import { Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common';
 
 import { AccessControlSyncService } from './access-control-sync.service';
