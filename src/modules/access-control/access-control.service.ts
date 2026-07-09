@@ -5,7 +5,6 @@ import { Permission } from './domain/permission';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { IUserRepository } from '../users/infrastructure/repositories/user.repository';
 import { SystemRolesRegistry } from './application/system-roles.registry';
-import { ReassignRoleDto } from './dto/reassign-role.dto';
 
 @Injectable()
 export class AccessControlService {
@@ -36,8 +35,5 @@ export class AccessControlService {
     );
     await this.acsyncService.removeRole(roleId);
     return await this.roleRepo.removeById(roleId);
-  }
-  async reassignRole(idData: ReassignRoleDto): Promise<number> {
-    return await this.userRepo.reassignUsersRole(idData.oldId, idData.newId);
   }
 }
