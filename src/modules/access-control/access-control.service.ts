@@ -10,10 +10,10 @@ import { ReassignRoleDto } from './dto/reassign-role.dto';
 @Injectable()
 export class AccessControlService {
   constructor(
-    private readonly roleRepo: IRoleRepository,
-    private readonly acsyncSerivce: AccessControlSyncService,
     private readonly userRepo: IUserRepository,
+    private readonly roleRepo: IRoleRepository,
     private readonly systemRole: SystemRolesRegistry,
+    private readonly acsyncService: AccessControlSyncService,
   ) {}
   async createRole(roleData: CreateRoleDto): Promise<string | null> {
     if (this.systemRole.isSystemRoleName(roleData.name)) return null; // the null means, cant modify system Role
@@ -23,7 +23,7 @@ export class AccessControlService {
     );
     // make sure to handle when the upsertion success but no role were returned
     const role = await this.roleRepo.upsertByName(roleData.name, perms);
-    await this.acsyncSerivce.upsertRole(role);
+    await this.acsyncService.upsertRole(role);
 
     return role.id;
   }
@@ -34,7 +34,7 @@ export class AccessControlService {
       roleId,
       this.systemRole.getCustomerRoleId(),
     );
-    await this.acsyncSerivce.removeRole(roleId);
+    await this.acsyncService.removeRole(roleId);
     return await this.roleRepo.removeById(roleId);
   }
   async reassignRole(idData: ReassignRoleDto): Promise<number> {
