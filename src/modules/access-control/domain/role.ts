@@ -34,6 +34,20 @@ export class Role {
   get permissions(): Permission[] {
     return this._permissions;
   }
+
+  toFlatPermissions(): string[][] {
+    const permList: string[][] = [];
+    for (const perm of this.permissions) {
+      const permJson = perm.toJSON();
+      permList.push([
+        this.id,
+        permJson.entity,
+        permJson.action,
+        permJson.scope,
+      ]);
+    }
+    return permList;
+  }
   toJSON() {
     return {
       id: this._id,
