@@ -40,7 +40,7 @@ describe('AccessControlService', () => {
     it('should return null when attempting to create/update an existing system Role.', async () => {
       const adminRole = { name: 'admin', permissions: [] };
       systemRole.isSystemRoleName.mockReturnValue(true);
-      const result = await service.createRole(adminRole);
+      const result = await service.upsertRole(adminRole);
       expect(result).toBeNull();
       expect(systemRole.isSystemRoleName).toHaveBeenCalledTimes(1);
       expect(roleRepoMock.upsertByName).toHaveBeenCalledTimes(0);
@@ -50,9 +50,9 @@ describe('AccessControlService', () => {
       const devRole = Role.create(devRoleDto);
       systemRole.isSystemRoleName.mockReturnValue(false);
       roleRepoMock.upsertByName.mockReturnValue(devRole);
-      const roleId = await service.createRole(devRoleDto);
-      expect(roleId).not.toBeNull();
-      expect(roleId).toStrictEqual(devRole.id);
+      const role = await service.upsertRole(devRoleDto);
+      expect(role).not.toBeNull();
+      expect(role).toStrictEqual(devRole.toPrimitives());
       expect(roleRepoMock.upsertByName).toHaveBeenCalledWith(
         devRoleDto.name,
         devRoleDto.permissions,
