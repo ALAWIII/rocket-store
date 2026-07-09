@@ -16,6 +16,8 @@ export class AccessControlService {
     private readonly systemRole: SystemRolesRegistry,
   ) {}
   async createRole(roleData: CreateRoleDto): Promise<string | null> {
+    if (this.systemRole.isSystemRoleName(roleData.name)) return null;
+
     const perms = roleData.permissions.map((p) =>
       Permission.fromString(`${p.entity}.${p.action}.${p.scope}`),
     );
