@@ -63,4 +63,44 @@ describe('AccessControlService', () => {
       expect(systemRole.isSystemRoleName).toHaveBeenCalledTimes(1);
     });
   });
+  describe('removeRole', () => {
+    it('should throw when trying to remove a system role', async () => {
+      systemRole.hasId.mockReturnValue(true);
+
+      await expect(service.removeRole('role-id')).rejects.toThrow(
+        new Error('System roles cannot be removed'),
+      );
+
+      expect(userRepoMock.reassignUsersRole).toHaveBeenCalledTimes(0);
+      expect(acsyncService.removeRole).toHaveBeenCalledTimes(0);
+      expect(roleRepoMock.removeById).toHaveBeenCalledTimes(0);
+    });
+    it('should remove a non-system role successfully', async () => {
+      systemRole.hasId.mockReturnValue(false);
+      systemRole.getCustomerRoleId.mockReturnValue('customer-id');
+      userRepoMock.reassignUsersRole.mockResolvedValue(undefined);
+      acsyncService.removeRole.mockResolvedValue(true);
+      roleRepoMock.removeById.mockResolvedValue(1);
+
+      const result = await service.removeRole('role-id');
+
+      expect(result).toBe(1);
+      expect(userRepoMock.reassignUsersRole).toHaveBeenCalledWith(
+        'role-id',
+        'customer-id',
+      );
+      expect(acsyncService.removeRole).toHaveBeenCalledWith('role-id');
+      expect(roleRepoMock.removeById).toHaveBeenCalledWith('role-id');
+    });
+    it('should propagate error when reassignUsersRole fails', async () => {
+      systemRole.hasId.mockReturnValue(false);
+      systemRole.getCustomerRoleId.mockReturnValue('customer-id');
+      userRepoMock.reassignUsersRole.mockRejectedValue(new Error('db failed'));
+
+      await expect(service.removeRole('role-id')).rejects.toThrow('db failed');
+
+      expect(acsyncService.removeRole).toHaveBeenCalledTimes(0);
+      expect(roleRepoMock.removeById).toHaveBeenCalledTimes(0);
+    });
+  });
 });
