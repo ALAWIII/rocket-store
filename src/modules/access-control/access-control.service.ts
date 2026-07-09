@@ -15,6 +15,10 @@ export class AccessControlService {
     private readonly systemRole: SystemRolesRegistry,
     private readonly acsyncService: AccessControlSyncService,
   ) {}
+  async loadAll(): Promise<RoleResponseDto[]> {
+    const roles = (await this.roleRepo.loadAll()).map((r) => r.toPrimitives());
+    return roles;
+  }
   async upsertRole(roleData: CreateRoleDto): Promise<RoleResponseDto | null> {
     if (this.systemRole.isSystemRoleName(roleData.name)) return null; // the null means, cant modify system Role
 
