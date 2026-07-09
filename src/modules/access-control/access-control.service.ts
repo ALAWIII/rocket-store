@@ -16,16 +16,16 @@ export class AccessControlService {
     private readonly systemRole: SystemRolesRegistry,
   ) {}
   async createRole(roleData: CreateRoleDto): Promise<string | null> {
-    if (this.systemRole.isSystemRoleName(roleData.name)) return null;
+    if (this.systemRole.isSystemRoleName(roleData.name)) return null; // the null means, cant modify system Role
 
     const perms = roleData.permissions.map((p) =>
       Permission.fromString(`${p.entity}.${p.action}.${p.scope}`),
     );
+    // make sure to handle when the upsertion success but no role were returned
     const role = await this.roleRepo.upsertByName(roleData.name, perms);
-    if (role !== null) {
-      await this.acsyncSerivce.upsertRole(role);
-    }
-    return role?.id ?? null;
+    await this.acsyncSerivce.upsertRole(role);
+
+    return role.id;
   }
   async removeRole(roleId: string): Promise<number> {
     const isSystemRole = this.systemRole.hasId(roleId);
