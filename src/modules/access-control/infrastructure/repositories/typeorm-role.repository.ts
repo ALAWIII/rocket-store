@@ -52,7 +52,7 @@ export class RoleRepository implements IRoleRepository {
 
     return row ? this.toDomain(row) : null;
   }
-  async upsertByName(name: string, perms: Permission[]): Promise<Role | null> {
+  async upsertByName(name: string, perms: Permission[]): Promise<Role> {
     const nPerms = perms.map((p) => p.toJSON());
 
     const result = await this.roleRepo
@@ -65,9 +65,13 @@ export class RoleRepository implements IRoleRepository {
       .execute();
 
     const rows = result.raw as RoleEntity[];
-    const row = rows[0] ?? null;
-
-    return row ? this.toDomain(row) : null;
+    const row = rows[0];
+    if (!row) {
+      throw new Error(
+        `Role upsert succeeded but returned no row for name=${name}`,
+      );
+    }
+    return this.toDomain(row);
   }
   async removeById(id: string): Promise<number> {
     const deleteResult = await this.roleRepo.delete({ id });

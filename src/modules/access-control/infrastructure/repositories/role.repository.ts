@@ -8,7 +8,7 @@ export abstract class IRoleRepository {
   abstract loadByNames(names: string[]): Promise<Role[]>;
   abstract findById(id: string): RolePromise;
   abstract findByName(name: string): RolePromise;
-  abstract upsertByName(name: string, perms: Permission[]): RolePromise;
+  abstract upsertByName(name: string, perms: Permission[]): Promise<Role>;
   abstract updateById(id: string, perms: Permission[]): RolePromise;
   abstract removeById(id: string): Promise<number>;
 }
