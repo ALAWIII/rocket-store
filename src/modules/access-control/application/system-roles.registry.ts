@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-export type SystemRoleName = 'admin' | 'worker' | 'customer';
-
+export const SYSTEM_ROLE_NAMES = ['admin', 'worker', 'customer'] as const;
+export type SystemRoleName = (typeof SYSTEM_ROLE_NAMES)[number];
 type RoleId = string;
 
 @Injectable()
@@ -63,7 +63,7 @@ export class SystemRolesRegistry {
   clear() {
     this.roleIds.clear();
   }
-  private isSystemRoleName(name: string): name is SystemRoleName {
-    return name === 'admin' || name === 'worker' || name === 'customer';
+  isSystemRoleName(value: string): value is SystemRoleName {
+    return SYSTEM_ROLE_NAMES.includes(value as SystemRoleName);
   }
 }
