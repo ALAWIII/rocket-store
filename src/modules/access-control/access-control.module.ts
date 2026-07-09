@@ -11,6 +11,7 @@ import { AUTHZ_ENFORCER, AuthZModule } from 'nest-authz';
 import { createCasbinEnforcer } from './infrastructure/casbin/casbin.factory';
 import { AuthenticatedRequest } from 'src/auth/auth.config';
 import { UsersModule } from '../users/users.module';
+import { AccessControlController } from './access-control.controller';
 @Module({
   imports: [
     UsersModule,
@@ -38,5 +39,6 @@ import { UsersModule } from '../users/users.module';
     AccessControlSyncService,
     SystemRolesRegistry,
   ],
+  controllers: [AccessControlController],
 })
 export class AccessControlModule {}
