@@ -59,14 +59,14 @@ export class Role {
     return {
       id: this.id,
       name: this.name,
-      permissions: this._permissions.map((p) => p),
+      permissions: this.permissions.map((p) => p.toJSON()),
     };
   }
   toJSON() {
     return {
-      id: this._id,
-      name: this._name,
-      permissions: this._permissions.map((p) => p),
+      id: this.id,
+      name: this.name,
+      permissions: this.permissions.map((p) => p),
     };
   }
 }
