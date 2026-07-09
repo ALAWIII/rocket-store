@@ -62,11 +62,9 @@ export class AccessControlSyncService {
     const policies: string[][] = [];
 
     for (const role of roles) {
-      const roleJson = role.toJSON();
-      for (const permission of roleJson.permissions) {
-        const policy = this.toPolicy(roleJson.id.toString(), permission);
+      const rolePolicies = role.toFlatPermissions();
+      for (const policy of rolePolicies) {
         const key = policy.join('::');
-
         if (seen.has(key)) continue;
         seen.add(key);
         policies.push(policy);
@@ -74,10 +72,5 @@ export class AccessControlSyncService {
     }
     seen.clear();
     return policies;
-  }
-
-  private toPolicy(roleId: string, permission: Permission): string[] {
-    const perm = permission.toJSON();
-    return [roleId, perm.entity, perm.action, perm.scope];
   }
 }
