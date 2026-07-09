@@ -8,6 +8,13 @@ export class Role {
     private _name: Name, // unique
     private _permissions: Permission[],
   ) {}
+  static create(roleData: { name: string; permissions: Permission[] }): Role {
+    return new Role(
+      RoleId.create(),
+      Name.create(roleData.name),
+      roleData.permissions,
+    );
+  }
   findPermission(perm: Permission): number {
     return this._permissions.findIndex((p) => p.equals(perm));
   }
