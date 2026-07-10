@@ -5,8 +5,6 @@ import { Action, Entity, Permission, Scope } from '../../domain/permission';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEntity } from '../entities/role.entity';
 import { In, Repository } from 'typeorm';
-import { RoleId } from 'src/modules/shared/domain/ids';
-import { Name } from 'src/modules/shared/value-objects/name';
 
 @Injectable()
 export class RoleRepository implements IRoleRepository {
@@ -36,21 +34,26 @@ export class RoleRepository implements IRoleRepository {
     return rs.map((r) => this.toDomain(r));
   }
 
-  async updateById(id: string, perms: Permission[]): Promise<Role | null> {
-    const nPerms = perms.map((p) => p.toJSON());
+  async update(role: Role): Promise<Role> {
+    const perms = role.permissions.map((p) => p.toJSON());
 
     const result = await this.roleRepo
       .createQueryBuilder()
       .update(RoleEntity)
-      .set({ permissions: nPerms })
-      .where('id = :id', { id })
+      .set({ name: role.name, permissions: perms })
+      .where('id = :id', { id: role.id })
       .returning('*')
       .execute();
 
     const rows = result.raw as RoleEntity[];
-    const row = rows[0] ?? null;
+    const row = rows[0];
+    if (!row) {
+      throw new Error(
+        `Role update succeeded but returned no row for id=${role.id}`,
+      );
+    }
 
-    return row ? this.toDomain(row) : null;
+    return this.toDomain(row);
   }
   async upsertByName(name: string, perms: Permission[]): Promise<Role> {
     const nPerms = perms.map((p) => p.toJSON());
@@ -85,6 +88,6 @@ export class RoleRepository implements IRoleRepository {
         p.scope as Scope,
       ),
     );
-    return new Role(RoleId.create(r.id), Name.create(r.name), perms);
+    return Role.restore({ ...r, permissions: perms });
   }
 }
