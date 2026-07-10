@@ -3,7 +3,7 @@ import { Permission } from './permission';
 import { RoleId } from 'src/modules/shared/domain/ids';
 
 export class Role {
-  constructor(
+  private constructor(
     private readonly _id: RoleId,
     private _name: Name, // unique
     private _permissions: Permission[],
@@ -13,6 +13,17 @@ export class Role {
       RoleId.create(),
       Name.create(roleData.name),
       roleData.permissions,
+    );
+  }
+  static restore(data: {
+    id: string;
+    name: string;
+    permissions: Permission[];
+  }): Role {
+    return new Role(
+      RoleId.create(data.id),
+      Name.create(data.name),
+      data.permissions,
     );
   }
   findPermission(perm: Permission): number {
