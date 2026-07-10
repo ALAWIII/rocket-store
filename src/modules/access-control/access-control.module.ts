@@ -12,6 +12,7 @@ import { createCasbinEnforcer } from './infrastructure/casbin/casbin.factory';
 import { AuthenticatedRequest } from 'src/auth/auth.config';
 import { UsersModule } from '../users/users.module';
 import { RolesController } from './role.controller';
+import { SystemRolesProvider } from './application/system-roles.provider';
 @Module({
   imports: [
     UsersModule,
@@ -32,6 +33,7 @@ import { RolesController } from './role.controller';
     AccessControlSyncService,
     AccessControlService,
     SystemRolesRegistry,
+    SystemRolesProvider,
     { provide: IRoleRepository, useClass: RoleRepository },
   ],
   exports: [
