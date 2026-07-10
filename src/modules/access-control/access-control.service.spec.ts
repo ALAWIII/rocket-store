@@ -12,7 +12,7 @@ describe('AccessControlService', () => {
     reassignUsersRole: jest.fn(),
   };
   const roleRepoMock = {
-    upsertByName: jest.fn(),
+    upsert: jest.fn(),
     removeById: jest.fn(),
   };
   const systemRole = {
@@ -43,22 +43,29 @@ describe('AccessControlService', () => {
       const result = await service.upsertRole(adminRole);
       expect(result).toBeNull();
       expect(systemRole.isSystemRoleName).toHaveBeenCalledTimes(1);
-      expect(roleRepoMock.upsertByName).toHaveBeenCalledTimes(0);
+      expect(roleRepoMock.upsert).toHaveBeenCalledTimes(0);
     });
     it('should successfully upsert new role.', async () => {
       const devRoleDto = { name: 'developer', permissions: [] };
-      const devRole = Role.create(devRoleDto);
       systemRole.isSystemRoleName.mockReturnValue(false);
-      roleRepoMock.upsertByName.mockReturnValue(devRole);
+
+      roleRepoMock.upsert.mockImplementation((role: Role) => role);
+
       const role = await service.upsertRole(devRoleDto);
+
       expect(role).not.toBeNull();
-      expect(role).toStrictEqual(devRole.toPrimitives());
-      expect(roleRepoMock.upsertByName).toHaveBeenCalledWith(
-        devRoleDto.name,
-        devRoleDto.permissions,
-      );
-      expect(roleRepoMock.upsertByName).toHaveBeenCalledTimes(1);
-      expect(acsyncService.upsertRole).toHaveBeenCalledWith(devRole);
+      expect(role).toMatchObject({
+        name: devRoleDto.name,
+        permissions: devRoleDto.permissions,
+      });
+
+      expect(roleRepoMock.upsert).toHaveBeenCalledTimes(1);
+      const passedRole = (roleRepoMock.upsert.mock.calls[0] as Role[])[0];
+      expect(passedRole).toBeInstanceOf(Role);
+      expect(passedRole.name).toBe(devRoleDto.name);
+      expect(passedRole.permissions).toEqual(devRoleDto.permissions);
+
+      expect(acsyncService.upsertRole).toHaveBeenCalledWith(passedRole);
       expect(acsyncService.upsertRole).toHaveBeenCalledTimes(1);
       expect(systemRole.isSystemRoleName).toHaveBeenCalledTimes(1);
     });
