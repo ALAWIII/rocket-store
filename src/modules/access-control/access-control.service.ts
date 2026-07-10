@@ -6,6 +6,8 @@ import { CreateRoleDto } from './dto/create-role.dto';
 import { IUserRepository } from '../users/infrastructure/repositories/user.repository';
 import { SystemRolesRegistry } from './application/system-roles.registry';
 import { RoleResponseDto } from './dto/role-response.dto';
+import { UpdateRoleDto } from './dto/update-role.dto';
+import { Role } from './domain/role';
 
 @Injectable()
 export class AccessControlService {
@@ -29,11 +31,23 @@ export class AccessControlService {
     const role = await this.roleRepo.upsertByName(roleData.name, perms);
     await this.acsyncService.upsertRole(role);
 
-    return {
-      id: role.id,
-      name: role.name,
-      permissions: role.permissions.map((p) => p.toJSON()),
-    };
+    return role.toPrimitives();
+  }
+  async updateRole(
+    id: string,
+    updateData: UpdateRoleDto,
+  ): Promise<RoleResponseDto | null> {
+    if (this.systemRole.hasId(id)) return null;
+    const upRole = Role.restore({
+      id,
+      name: updateData.name,
+      permissions: updateData.permissions.map((p) =>
+        Permission.fromPrimitives(p),
+      ),
+    });
+    const role = await this.roleRepo.update(upRole);
+    await this.acsyncService.upsertRole(role);
+    return role.toPrimitives();
   }
   async removeRole(roleId: string): Promise<number> {
     const isSystemRole = this.systemRole.hasId(roleId);
