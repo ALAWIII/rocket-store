@@ -24,11 +24,14 @@ export class AccessControlService {
   async upsertRole(roleData: CreateRoleDto): Promise<RoleResponseDto | null> {
     if (this.systemRole.isSystemRoleName(roleData.name)) return null; // the null means, cant modify system Role
 
-    const perms = roleData.permissions.map((p) =>
-      Permission.fromString(`${p.entity}.${p.action}.${p.scope}`),
-    );
+    const newRole = Role.create({
+      name: roleData.name,
+      permissions: roleData.permissions.map((p) =>
+        Permission.fromPrimitives(p),
+      ),
+    });
     // make sure to handle when the upsertion success but no role were returned
-    const role = await this.roleRepo.upsertByName(roleData.name, perms);
+    const role = await this.roleRepo.upsert(newRole);
     await this.acsyncService.upsertRole(role);
 
     return role.toPrimitives();
