@@ -3,6 +3,8 @@ import { AccessControlBootstrapService } from './access-control.bootstrap.servic
 import { AccessControlSyncService } from './access-control-sync.service';
 import { SystemRolesRegistry } from './system-roles.registry';
 import { IRoleRepository } from '../infrastructure/repositories/role.repository';
+import { SystemRolesProvider } from './system-roles.provider';
+import { Role } from '../domain/role';
 
 describe('AccessControlBootstrapService', () => {
   let service: AccessControlBootstrapService;
@@ -17,18 +19,28 @@ describe('AccessControlBootstrapService', () => {
   };
 
   const roleRepositoryMock = {
-    upsertByName: jest.fn(),
+    upsert: jest.fn(),
     loadByNames: jest.fn(),
   };
+  const systemRoleProviderMock = {
+    getNames: jest.fn(),
+    getAll: jest.fn(),
+  };
+  const systemRoles = [
+    Role.create({ name: 'admin', permissions: [] }),
+    Role.create({ name: 'worker', permissions: [] }),
+    Role.create({ name: 'customer', permissions: [] }),
+  ];
 
   beforeEach(async () => {
     jest.clearAllMocks();
-
-    roleRepositoryMock.loadByNames.mockResolvedValue([
-      { id: '1', name: 'admin', permissions: [] },
-      { id: '2', name: 'worker', permissions: [] },
-      { id: '3', name: 'customer', permissions: [] },
+    systemRoleProviderMock.getAll.mockReturnValue(systemRoles);
+    systemRoleProviderMock.getNames.mockReturnValue([
+      'admin',
+      'worker',
+      'customer',
     ]);
+    roleRepositoryMock.loadByNames.mockResolvedValue(systemRoles);
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -45,6 +57,7 @@ describe('AccessControlBootstrapService', () => {
           provide: IRoleRepository,
           useValue: roleRepositoryMock,
         },
+        { provide: SystemRolesProvider, useValue: systemRoleProviderMock },
       ],
     }).compile();
 
@@ -54,21 +67,18 @@ describe('AccessControlBootstrapService', () => {
   it('should bootstrap access control', async () => {
     await service.onApplicationBootstrap();
 
-    expect(roleRepositoryMock.upsertByName).toHaveBeenCalledTimes(3);
-    expect(roleRepositoryMock.upsertByName).toHaveBeenNthCalledWith(
+    expect(roleRepositoryMock.upsert).toHaveBeenCalledTimes(3);
+    expect(roleRepositoryMock.upsert).toHaveBeenNthCalledWith(
       1,
-      'admin',
-      [],
+      systemRoles[0],
     );
-    expect(roleRepositoryMock.upsertByName).toHaveBeenNthCalledWith(
+    expect(roleRepositoryMock.upsert).toHaveBeenNthCalledWith(
       2,
-      'worker',
-      [],
+      systemRoles[1],
     );
-    expect(roleRepositoryMock.upsertByName).toHaveBeenNthCalledWith(
+    expect(roleRepositoryMock.upsert).toHaveBeenNthCalledWith(
       3,
-      'customer',
-      [],
+      systemRoles[2],
     );
 
     expect(roleRepositoryMock.loadByNames).toHaveBeenCalledWith([
@@ -78,11 +88,7 @@ describe('AccessControlBootstrapService', () => {
     ]);
 
     expect(systemRolesRegistryMock.clear).toHaveBeenCalledTimes(1);
-    expect(systemRolesRegistryMock.setMany).toHaveBeenCalledWith([
-      { id: '1', name: 'admin', permissions: [] },
-      { id: '2', name: 'worker', permissions: [] },
-      { id: '3', name: 'customer', permissions: [] },
-    ]);
+    expect(systemRolesRegistryMock.setMany).toHaveBeenCalledWith(systemRoles);
 
     expect(
       accessControlSyncServiceMock.reloadFromDatabase,
