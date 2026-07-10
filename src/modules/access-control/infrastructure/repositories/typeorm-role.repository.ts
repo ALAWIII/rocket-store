@@ -55,14 +55,14 @@ export class RoleRepository implements IRoleRepository {
 
     return this.toDomain(row);
   }
-  async upsertByName(name: string, perms: Permission[]): Promise<Role> {
-    const nPerms = perms.map((p) => p.toJSON());
+  async upsert(role: Role): Promise<Role> {
+    const perms = role.permissions.map((p) => p.toJSON());
 
     const result = await this.roleRepo
       .createQueryBuilder()
       .insert()
       .into(RoleEntity)
-      .values({ name, permissions: nPerms })
+      .values({ id: role.id, name: role.name, permissions: perms })
       .orUpdate(['permissions'], ['name'])
       .returning('*')
       .execute();
@@ -71,7 +71,7 @@ export class RoleRepository implements IRoleRepository {
     const row = rows[0];
     if (!row) {
       throw new Error(
-        `Role upsert succeeded but returned no row for name=${name}`,
+        `Role upsert succeeded but returned no row for name=${role.name}`,
       );
     }
     return this.toDomain(row);
