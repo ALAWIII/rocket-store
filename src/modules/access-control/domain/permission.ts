@@ -47,28 +47,36 @@ export class Permission<E extends Entity = Entity> {
   ): Permission<E> {
     return new Permission({ entity, action, scope });
   }
+  static fromPrimitives(data: {
+    entity: string;
+    action: string;
+    scope: string;
+  }): Permission<Entity> {
+    if (!isEntity(data.entity)) {
+      throw new Error(`Unknown entity: ${data.entity}`);
+    }
 
+    if (!isActionForEntity(data.entity, data.action)) {
+      throw new Error(
+        `Unknown action "${data.entity}" for entity "${data.entity}"`,
+      );
+    }
+
+    if (!isScopeForEntity(data.entity, data.scope)) {
+      throw new Error(
+        `Unknown scope "${data.scope}" for entity "${data.entity as string}"`,
+      );
+    }
+    return Permission.create(data.entity, data.action, data.scope);
+  }
   static fromString(value: string): Permission {
     const parts = value.toLowerCase().split('.');
     if (parts.length !== 3) {
       throw new Error(`Inconsistent permission, length: ${parts.length}.`);
     }
-
     const [entity, action, scope] = parts;
 
-    if (!isEntity(entity)) {
-      throw new Error(`Unknown entity: ${entity}`);
-    }
-
-    if (!isActionForEntity(entity, action)) {
-      throw new Error(`Unknown action "${action}" for entity "${entity}"`);
-    }
-
-    if (!isScopeForEntity(entity, scope)) {
-      throw new Error(`Unknown scope "${scope}" for entity "${entity}"`);
-    }
-
-    return Permission.create(entity, action, scope);
+    return this.fromPrimitives({ entity, action, scope });
   }
 
   equals(other: Permission): boolean {
