@@ -5,11 +5,9 @@ import { AUTHZ_ENFORCER } from 'nest-authz';
 import { IRoleRepository } from '../infrastructure/repositories/role.repository';
 import { AllPermissions, Permission } from '../domain/permission';
 import { Role } from '../domain/role';
-import { RoleId } from 'src/modules/shared/domain/ids';
-import { Name } from 'src/modules/shared/value-objects/name';
 
 function createRole(name: string, permissions: Permission[]): Role {
-  return new Role(RoleId.create(), Name.create(name), permissions);
+  return Role.create({ name, permissions });
 }
 
 describe('AccessControlSyncService', () => {
