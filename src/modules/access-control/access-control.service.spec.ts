@@ -14,13 +14,14 @@ describe('AccessControlService', () => {
   const roleRepoMock = {
     upsert: jest.fn(),
     removeById: jest.fn(),
+    update: jest.fn(),
   };
-  const systemRole = {
+  const systemRoleMock = {
     isSystemRoleName: jest.fn(),
     hasId: jest.fn(),
     getCustomerRoleId: jest.fn(),
   };
-  const acsyncService = { upsertRole: jest.fn(), removeRole: jest.fn() };
+  const acsyncServiceMock = { upsertRole: jest.fn(), removeRole: jest.fn() };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -29,8 +30,8 @@ describe('AccessControlService', () => {
         AccessControlService,
         { provide: IUserRepository, useValue: userRepoMock },
         { provide: IRoleRepository, useValue: roleRepoMock },
-        { provide: SystemRolesRegistry, useValue: systemRole },
-        { provide: AccessControlSyncService, useValue: acsyncService },
+        { provide: SystemRolesRegistry, useValue: systemRoleMock },
+        { provide: AccessControlSyncService, useValue: acsyncServiceMock },
       ],
     }).compile();
     service = module.get(AccessControlService);
@@ -39,15 +40,15 @@ describe('AccessControlService', () => {
   describe('createRole', () => {
     it('should return null when attempting to create/update an existing system Role.', async () => {
       const adminRole = { name: 'admin', permissions: [] };
-      systemRole.isSystemRoleName.mockReturnValue(true);
+      systemRoleMock.isSystemRoleName.mockReturnValue(true);
       const result = await service.upsertRole(adminRole);
       expect(result).toBeNull();
-      expect(systemRole.isSystemRoleName).toHaveBeenCalledTimes(1);
+      expect(systemRoleMock.isSystemRoleName).toHaveBeenCalledTimes(1);
       expect(roleRepoMock.upsert).toHaveBeenCalledTimes(0);
     });
     it('should successfully upsert new role.', async () => {
       const devRoleDto = { name: 'developer', permissions: [] };
-      systemRole.isSystemRoleName.mockReturnValue(false);
+      systemRoleMock.isSystemRoleName.mockReturnValue(false);
 
       roleRepoMock.upsert.mockImplementation((role: Role) => role);
 
@@ -65,28 +66,56 @@ describe('AccessControlService', () => {
       expect(passedRole.name).toBe(devRoleDto.name);
       expect(passedRole.permissions).toEqual(devRoleDto.permissions);
 
-      expect(acsyncService.upsertRole).toHaveBeenCalledWith(passedRole);
-      expect(acsyncService.upsertRole).toHaveBeenCalledTimes(1);
-      expect(systemRole.isSystemRoleName).toHaveBeenCalledTimes(1);
+      expect(acsyncServiceMock.upsertRole).toHaveBeenCalledWith(passedRole);
+      expect(acsyncServiceMock.upsertRole).toHaveBeenCalledTimes(1);
+      expect(systemRoleMock.isSystemRoleName).toHaveBeenCalledTimes(1);
+    });
+  });
+  describe('updateRole', () => {
+    it('should return null when attempting to update system Role.', async () => {
+      const adminRole = Role.create({ name: 'admin', permissions: [] });
+      systemRoleMock.hasId.mockReturnValue(true);
+      const role = await service.updateRole(adminRole.id, {
+        name: adminRole.name,
+        permissions: [],
+      });
+      expect(role).toBeNull();
+      expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
+      expect(roleRepoMock.update).toHaveBeenCalledTimes(0);
+    });
+    it('should return role when attempting to update existing one.', async () => {
+      const adminRole = Role.create({ name: 'admin', permissions: [] });
+      roleRepoMock.update.mockImplementation((adminRole: Role) => adminRole);
+      systemRoleMock.hasId.mockReturnValue(false);
+      const role = await service.updateRole(adminRole.id, {
+        name: adminRole.name,
+        permissions: [],
+      });
+      expect(role).not.toBeNull();
+      expect(role).toStrictEqual(adminRole.toPrimitives());
+      expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
+      expect(roleRepoMock.update).toHaveBeenCalledWith(adminRole);
+      expect(roleRepoMock.update).toHaveBeenCalledTimes(1);
+      expect(acsyncServiceMock.upsertRole).toHaveBeenCalledWith(adminRole);
     });
   });
   describe('removeRole', () => {
     it('should throw when trying to remove a system role', async () => {
-      systemRole.hasId.mockReturnValue(true);
+      systemRoleMock.hasId.mockReturnValue(true);
 
       await expect(service.removeRole('role-id')).rejects.toThrow(
         new Error('System roles cannot be removed'),
       );
 
       expect(userRepoMock.reassignUsersRole).toHaveBeenCalledTimes(0);
-      expect(acsyncService.removeRole).toHaveBeenCalledTimes(0);
+      expect(acsyncServiceMock.removeRole).toHaveBeenCalledTimes(0);
       expect(roleRepoMock.removeById).toHaveBeenCalledTimes(0);
     });
     it('should remove a non-system role successfully', async () => {
-      systemRole.hasId.mockReturnValue(false);
-      systemRole.getCustomerRoleId.mockReturnValue('customer-id');
+      systemRoleMock.hasId.mockReturnValue(false);
+      systemRoleMock.getCustomerRoleId.mockReturnValue('customer-id');
       userRepoMock.reassignUsersRole.mockResolvedValue(undefined);
-      acsyncService.removeRole.mockResolvedValue(true);
+      acsyncServiceMock.removeRole.mockResolvedValue(true);
       roleRepoMock.removeById.mockResolvedValue(1);
 
       const result = await service.removeRole('role-id');
@@ -96,17 +125,17 @@ describe('AccessControlService', () => {
         'role-id',
         'customer-id',
       );
-      expect(acsyncService.removeRole).toHaveBeenCalledWith('role-id');
+      expect(acsyncServiceMock.removeRole).toHaveBeenCalledWith('role-id');
       expect(roleRepoMock.removeById).toHaveBeenCalledWith('role-id');
     });
     it('should propagate error when reassignUsersRole fails', async () => {
-      systemRole.hasId.mockReturnValue(false);
-      systemRole.getCustomerRoleId.mockReturnValue('customer-id');
+      systemRoleMock.hasId.mockReturnValue(false);
+      systemRoleMock.getCustomerRoleId.mockReturnValue('customer-id');
       userRepoMock.reassignUsersRole.mockRejectedValue(new Error('db failed'));
 
       await expect(service.removeRole('role-id')).rejects.toThrow('db failed');
 
-      expect(acsyncService.removeRole).toHaveBeenCalledTimes(0);
+      expect(acsyncServiceMock.removeRole).toHaveBeenCalledTimes(0);
       expect(roleRepoMock.removeById).toHaveBeenCalledTimes(0);
     });
   });
