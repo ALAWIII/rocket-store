@@ -62,7 +62,7 @@ export class AccessControlSyncService {
     const policies: string[][] = [];
 
     for (const role of roles) {
-      const rolePolicies = role.toFlatPermissions();
+      const rolePolicies = role.toFlatPolicies();
       for (const policy of rolePolicies) {
         const key = policy.join('::');
         if (seen.has(key)) continue;

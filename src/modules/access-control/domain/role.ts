@@ -53,7 +53,7 @@ export class Role {
     return this._permissions;
   }
 
-  toFlatPermissions(): string[][] {
+  toFlatPolicies(): string[][] {
     const permList: string[][] = [];
     for (const perm of this.permissions) {
       const permJson = perm.toJSON();

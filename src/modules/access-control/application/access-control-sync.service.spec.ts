@@ -67,8 +67,8 @@ describe('AccessControlSyncService', () => {
       expect(enforcerMock.clearPolicy).toHaveBeenCalledTimes(1);
       expect(enforcerMock.addPolicies).toHaveBeenCalledTimes(1);
       expect(enforcerMock.addPolicies).toHaveBeenCalledWith([
-        ...adminRole.toFlatPermissions(),
-        ...workerRole.toFlatPermissions(),
+        ...adminRole.toFlatPolicies(),
+        ...workerRole.toFlatPolicies(),
       ]);
       expect(loggerSpy).toHaveBeenCalledWith(
         'Casbin policies reloaded: 3 policies from 2 roles',
@@ -116,7 +116,7 @@ describe('AccessControlSyncService', () => {
       expect(enforcerMock.addPolicies).toHaveBeenCalledTimes(1);
       expect(enforcerMock.addPolicies).toHaveBeenCalledWith([
         // it removes the duplicated permissions when called toPolicies.
-        roles[0].toFlatPermissions()[0],
+        roles[0].toFlatPolicies()[0],
       ]);
     });
 
@@ -163,7 +163,7 @@ describe('AccessControlSyncService', () => {
         AllPermissions.product.ProductViewAll,
       ]);
 
-      const existingPolicies = adminRole.toFlatPermissions();
+      const existingPolicies = adminRole.toFlatPolicies();
 
       enforcerMock.getFilteredPolicy.mockResolvedValue(existingPolicies);
       enforcerMock.removePolicies.mockResolvedValue(true);
@@ -187,7 +187,7 @@ describe('AccessControlSyncService', () => {
         AllPermissions.product.ProductViewAll,
       ]);
 
-      const existingPolicies = adminRole.toFlatPermissions();
+      const existingPolicies = adminRole.toFlatPolicies();
 
       enforcerMock.getFilteredPolicy.mockResolvedValue(existingPolicies);
       enforcerMock.removePolicies.mockResolvedValue(false);
@@ -223,7 +223,7 @@ describe('AccessControlSyncService', () => {
 
       expect(enforcerMock.addPolicies).toHaveBeenCalledTimes(1);
       expect(enforcerMock.addPolicies).toHaveBeenCalledWith(
-        adminRole.toFlatPermissions(),
+        adminRole.toFlatPolicies(),
       );
       expect(result).toBe(true);
     });
@@ -239,7 +239,7 @@ describe('AccessControlSyncService', () => {
       const result = await service.addRole(adminRole);
 
       expect(enforcerMock.addPolicies).toHaveBeenCalledWith([
-        adminRole.toFlatPermissions()[0],
+        adminRole.toFlatPolicies()[0],
       ]);
       expect(result).toBe(true);
     });
@@ -264,7 +264,7 @@ describe('AccessControlSyncService', () => {
         AllPermissions.product.ProductViewAll,
       ]);
       enforcerMock.getFilteredPolicy.mockResolvedValue(
-        adminRole.toFlatPermissions(),
+        adminRole.toFlatPolicies(),
       );
 
       const result = await service.hasRole(adminRole.id);
