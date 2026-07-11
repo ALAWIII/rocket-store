@@ -1,3 +1,12 @@
+import { Err, Ok } from 'ts-results-es';
+import {
+  InvalidPermissionActionError,
+  InvalidPermissionEntityError,
+  InvalidPermissionFormatError,
+  InvalidPermissionScopeError,
+  PermissionResult,
+} from './permission.error';
+
 //======================= consider only update this matrix, and automatically it will generate for you the needed permission instances.
 const PermissionMatrix = {
   product: {
@@ -40,39 +49,32 @@ type PermissionProps<E extends Entity = Entity> = {
 export class Permission<E extends Entity = Entity> {
   private constructor(private readonly props: PermissionProps<E>) {}
 
-  static create<E extends Entity>(
-    entity: E,
-    action: Action<E>,
-    scope: Scope<E>,
-  ): Permission<E> {
-    return new Permission({ entity, action, scope });
-  }
   static fromPrimitives(data: {
     entity: string;
     action: string;
     scope: string;
-  }): Permission<Entity> {
+  }): PermissionResult<Permission> {
     if (!isEntity(data.entity)) {
-      throw new Error(`Unknown entity: ${data.entity}`);
+      return Err(new InvalidPermissionEntityError(data.entity));
     }
 
     if (!isActionForEntity(data.entity, data.action)) {
-      throw new Error(
-        `Unknown action "${data.entity}" for entity "${data.entity}"`,
-      );
+      return Err(new InvalidPermissionActionError(data.action, data.entity));
     }
 
     if (!isScopeForEntity(data.entity, data.scope)) {
-      throw new Error(
-        `Unknown scope "${data.scope}" for entity "${data.entity as string}"`,
-      );
+      return Err(new InvalidPermissionScopeError(data.scope, data.entity));
     }
-    return Permission.create(data.entity, data.action, data.scope);
+    return Ok(new Permission(data as PermissionProps));
   }
-  static fromString(value: string): Permission {
+  static fromString(value: string): PermissionResult<Permission> {
     const parts = value.toLowerCase().split('.');
     if (parts.length !== 3) {
-      throw new Error(`Inconsistent permission, length: ${parts.length}.`);
+      return Err(
+        new InvalidPermissionFormatError(
+          `Inconsistent permission, length: ${parts.length}.`,
+        ),
+      );
     }
     const [entity, action, scope] = parts;
 
@@ -142,7 +144,10 @@ function buildEntityPermissions<E extends Entity>(
       scopes.map((scope: Scope<E>) => {
         const key = `${capitalize(entity)}${capitalize(action)}${capitalize(scope)}`;
 
-        return [key, Permission.create(entity, action, scope)] as const;
+        return [
+          key,
+          Permission.fromPrimitives({ entity, action, scope }).unwrap(),
+        ] as const;
       }),
     ),
   ) as EntityPermissionMap<E>;
