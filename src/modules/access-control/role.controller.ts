@@ -5,8 +5,8 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
-  Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import { AccessControlService } from './access-control.service';
 import { CreateRoleDto } from './dto/create-role.dto';
@@ -27,7 +27,7 @@ export class RolesController {
     return await this.service.loadAll();
   }
 
-  @Patch(':id')
+  @Put(':id')
   async update(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Body() dto: UpdateRoleDto,
