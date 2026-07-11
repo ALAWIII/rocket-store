@@ -1,3 +1,6 @@
+import type { Result } from 'ts-results-es';
+import type { DatabaseError } from './database.error';
+
 export interface WithErrorContext {
   context: string[];
   withContext(ctx: string): this;
@@ -6,3 +9,5 @@ export interface WithErrorContext {
 export interface LoggableError {
   toLog(): unknown;
 }
+
+export type DBResult<T> = Result<T, DatabaseError>;
