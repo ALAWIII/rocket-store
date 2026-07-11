@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { IRoleRepository } from './role.repository';
 import { Role } from '../../domain/role';
-import { Action, Entity, Permission, Scope } from '../../domain/permission';
+import { Permission } from '../../domain/permission';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEntity } from '../entities/role.entity';
 import { In, Repository } from 'typeorm';
@@ -106,12 +106,9 @@ export class RoleRepository implements IRoleRepository {
   }
   private toDomain(r: RoleEntity): Role {
     const perms = r.permissions.map((p) =>
-      Permission.create(
-        p.entity as Entity,
-        p.action as Action,
-        p.scope as Scope,
-      ),
+      Permission.fromPrimitives(p).unwrap(),
     );
+
     return Role.restore({ ...r, permissions: perms });
   }
 }
