@@ -38,7 +38,7 @@
     "pg-query-stream": "^4.16.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "ts-results": "^3.3.0",
+    "ts-results-es": "^7.1.0",
     "typeorm": "^1.0.0",
     "typeorm-naming-strategies": "^4.1.0",
     "uuid": "^14.0.0"

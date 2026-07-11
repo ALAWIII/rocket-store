@@ -62,9 +62,9 @@ importers:
       rxjs:
         specifier: ^7.8.1
         version: 7.8.2
-      ts-results:
-        specifier: ^3.3.0
-        version: 3.3.0
+      ts-results-es:
+        specifier: ^7.1.0
+        version: 7.1.0
       typeorm:
         specifier: ^1.0.0
         version: 1.0.0(pg-query-stream@4.16.0(pg@8.22.0))(pg@8.22.0)(ts-node@10.9.2(@types/node@24.13.1)(typescript@5.9.3))
@@ -3271,8 +3271,8 @@ packages:
       '@swc/wasm':
         optional: true
 
-  ts-results@3.3.0:
-    resolution: {integrity: sha512-FWqxGX2NHp5oCyaMd96o2y2uMQmSu8Dey6kvyuFdRJ2AzfmWo3kWa4UsPlCGlfQ/qu03m09ZZtppMoY8EMHuiA==}
+  ts-results-es@7.1.0:
+    resolution: {integrity: sha512-s6BU3PE8ZimmclHbN0uDAUFJQEkDPX/rlSEKhe99F9WjpAtRZQoVVQEnntNGHRUrh3kQUv85gPpxVAJe0ung3Q==}
 
   tsconfig-paths-webpack-plugin@4.2.0:
     resolution: {integrity: sha512-zbem3rfRS8BgeNK50Zz5SIQgXzLafiHjOwUAvk/38/o1jHn/V5QAgVUcz884or7WYcPaH3N2CIfUc2u0ul7UcA==}
@@ -6890,7 +6890,7 @@ snapshots:
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
 
-  ts-results@3.3.0: {}
+  ts-results-es@7.1.0: {}
 
   tsconfig-paths-webpack-plugin@4.2.0:
     dependencies:
