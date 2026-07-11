@@ -66,18 +66,11 @@ export class Role {
     }
     return permList;
   }
-  toPrimitives() {
+  toJSON() {
     return {
       id: this.id,
       name: this.name,
       permissions: this.permissions.map((p) => p.toJSON()),
-    };
-  }
-  toJSON() {
-    return {
-      id: this._id,
-      name: this._name,
-      permissions: this.permissions.map((p) => p),
     };
   }
 }

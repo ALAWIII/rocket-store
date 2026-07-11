@@ -18,7 +18,7 @@ export class AccessControlService {
     private readonly acsyncService: AccessControlSyncService,
   ) {}
   async loadAll(): Promise<RoleResponseDto[]> {
-    const roles = (await this.roleRepo.loadAll()).map((r) => r.toPrimitives());
+    const roles = (await this.roleRepo.loadAll()).map((r) => r.toJSON());
     return roles;
   }
   async upsertRole(roleData: CreateRoleDto): Promise<RoleResponseDto | null> {
@@ -34,7 +34,7 @@ export class AccessControlService {
     const role = await this.roleRepo.upsert(newRole);
     await this.acsyncService.upsertRole(role);
 
-    return role.toPrimitives();
+    return role.toJSON();
   }
   async updateRole(
     id: string,
@@ -50,7 +50,7 @@ export class AccessControlService {
     });
     const role = await this.roleRepo.update(upRole);
     await this.acsyncService.upsertRole(role);
-    return role.toPrimitives();
+    return role.toJSON();
   }
   async removeRole(roleId: string): Promise<number> {
     const isSystemRole = this.systemRole.hasId(roleId);

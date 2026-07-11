@@ -92,7 +92,7 @@ describe('AccessControlService', () => {
         permissions: [],
       });
       expect(role).not.toBeNull();
-      expect(role).toStrictEqual(adminRole.toPrimitives());
+      expect(role).toStrictEqual(adminRole.toJSON());
       expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
       expect(roleRepoMock.update).toHaveBeenCalledWith(adminRole);
       expect(roleRepoMock.update).toHaveBeenCalledTimes(1);
