@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { ForbiddenException, Module } from '@nestjs/common';
 import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { RoleRepository } from './infrastructure/repositories/typeorm-role.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -24,7 +24,10 @@ import { SystemRolesProvider } from './application/system-roles.provider';
       },
       userFromContext: (ctx) => {
         const request = ctx.switchToHttp().getRequest<AuthenticatedRequest>();
-        return request.user.roleId ?? null;
+        if (!request.user.roleId) {
+          throw new ForbiddenException();
+        }
+        return request.user.roleId;
       },
     }),
   ],
