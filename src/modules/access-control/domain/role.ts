@@ -1,6 +1,8 @@
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Permission } from './permission';
 import { RoleId } from 'src/modules/shared/domain/ids';
+import { Result } from 'ts-results-es';
+import { InvalidValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 
 export class Role {
   private constructor(
@@ -8,11 +10,12 @@ export class Role {
     private _name: Name, // unique
     private _permissions: Permission[],
   ) {}
-  static create(roleData: { name: string; permissions: Permission[] }): Role {
-    return new Role(
-      RoleId.create(),
-      Name.create(roleData.name),
-      roleData.permissions,
+  static create(roleData: {
+    name: string;
+    permissions: Permission[];
+  }): Result<Role, InvalidValueObjectError> {
+    return Name.create(roleData.name).map(
+      (name) => new Role(RoleId.create(), name, roleData.permissions),
     );
   }
   static restore(data: {
@@ -22,7 +25,7 @@ export class Role {
   }): Role {
     return new Role(
       RoleId.create(data.id),
-      Name.create(data.name),
+      Name.create(data.name).unwrap(),
       data.permissions,
     );
   }
@@ -41,7 +44,7 @@ export class Role {
     this._permissions.splice(index, 1);
   }
   setName(name: string) {
-    this._name = Name.create(name);
+    this._name = Name.create(name).unwrap();
   }
   get name(): string {
     return this._name.value;
