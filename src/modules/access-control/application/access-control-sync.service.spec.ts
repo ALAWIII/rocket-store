@@ -5,6 +5,7 @@ import { AUTHZ_ENFORCER } from 'nest-authz';
 import { IRoleRepository } from '../infrastructure/repositories/role.repository';
 import { AllPermissions, Permission } from '../domain/permission';
 import { Role } from '../domain/role';
+import { Err, Ok } from 'ts-results-es';
 
 function createRole(name: string, permissions: Permission[]): Role {
   return Role.create({ name, permissions });
@@ -54,7 +55,7 @@ describe('AccessControlSyncService', () => {
         AllPermissions.order.OrderViewOwn,
       ]);
       const roles = [adminRole, workerRole];
-      roleRepositoryMock.loadAll.mockResolvedValue(roles);
+      roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
       enforcerMock.addPolicies.mockResolvedValue(true);
 
       const loggerSpy = jest
@@ -81,7 +82,7 @@ describe('AccessControlSyncService', () => {
       const adminRole = createRole('admin', []);
       const workerRole = createRole('worker', []);
       const roles = [adminRole, workerRole];
-      roleRepositoryMock.loadAll.mockResolvedValue(roles);
+      roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
 
       const loggerSpy = jest
         .spyOn(Logger.prototype, 'log')
@@ -107,7 +108,7 @@ describe('AccessControlSyncService', () => {
         createRole('admin', [duplicatePermissionA, duplicatePermissionB]),
       ];
 
-      roleRepositoryMock.loadAll.mockResolvedValue(roles);
+      roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
       enforcerMock.addPolicies.mockResolvedValue(true);
 
       await service.reloadFromDatabase();
@@ -122,9 +123,9 @@ describe('AccessControlSyncService', () => {
 
     it('should propagate repository errors', async () => {
       const error = new Error('db failed');
-      roleRepositoryMock.loadAll.mockRejectedValue(error);
+      roleRepositoryMock.loadAll.mockReturnValue(Err(error));
 
-      await expect(service.reloadFromDatabase()).rejects.toThrow('db failed');
+      await expect(service.reloadFromDatabase()).rejects.toThrow(error);
       expect(enforcerMock.clearPolicy).not.toHaveBeenCalled();
       expect(enforcerMock.addPolicies).not.toHaveBeenCalled();
     });
@@ -134,7 +135,7 @@ describe('AccessControlSyncService', () => {
         createRole('admin', [AllPermissions.product.ProductViewAll]),
       ];
 
-      roleRepositoryMock.loadAll.mockResolvedValue(roles);
+      roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
       enforcerMock.addPolicies.mockRejectedValue(new Error('casbin failed'));
 
       await expect(service.reloadFromDatabase()).rejects.toThrow(

@@ -34,8 +34,10 @@ export class AccessControlBootstrapService implements OnApplicationBootstrap {
     const roles = await this.roleRepository.loadByNames(
       this.systemRoleProvider.getNames(),
     );
-
+    if (roles.isErr()) {
+      throw roles.error;
+    }
     this.systemRolesRegistry.clear();
-    this.systemRolesRegistry.setMany(roles);
+    this.systemRolesRegistry.setMany(roles.unwrap());
   }
 }

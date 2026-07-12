@@ -3,7 +3,6 @@ import type { Enforcer } from 'casbin';
 
 import { IRoleRepository } from '../infrastructure/repositories/role.repository';
 import type { Role } from '../domain/role';
-import type { Permission } from '../domain/permission';
 import { AUTHZ_ENFORCER } from 'nest-authz';
 
 @Injectable()
@@ -19,7 +18,11 @@ export class AccessControlSyncService {
 
   async reloadFromDatabase(): Promise<void> {
     const roles = await this.roleRepository.loadAll();
-    const policies = this.toPolicies(roles);
+    if (roles.isErr()) {
+      throw roles.error;
+    }
+
+    const policies = this.toPolicies(roles.unwrap());
 
     this.enforcer.clearPolicy();
 
@@ -28,7 +31,7 @@ export class AccessControlSyncService {
     }
 
     this.logger.log(
-      `Casbin policies reloaded: ${policies.length} policies from ${roles.length} roles`,
+      `Casbin policies reloaded: ${policies.length} policies from ${roles.unwrap().length} roles`,
     );
   }
 

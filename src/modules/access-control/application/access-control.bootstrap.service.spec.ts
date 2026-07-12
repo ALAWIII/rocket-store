@@ -5,6 +5,7 @@ import { SystemRolesRegistry } from './system-roles.registry';
 import { IRoleRepository } from '../infrastructure/repositories/role.repository';
 import { SystemRolesProvider } from './system-roles.provider';
 import { Role } from '../domain/role';
+import { Ok } from 'ts-results-es';
 
 describe('AccessControlBootstrapService', () => {
   let service: AccessControlBootstrapService;
@@ -40,7 +41,7 @@ describe('AccessControlBootstrapService', () => {
       'worker',
       'customer',
     ]);
-    roleRepositoryMock.loadByNames.mockResolvedValue(systemRoles);
+    roleRepositoryMock.loadByNames.mockResolvedValue(Ok(systemRoles));
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
