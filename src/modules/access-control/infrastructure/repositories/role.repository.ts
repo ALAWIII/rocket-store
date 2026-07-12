@@ -8,6 +8,6 @@ export abstract class IRoleRepository {
   abstract findById(id: string): Promise<DBResult<Option<Role>>>;
   abstract findByName(name: string): Promise<DBResult<Option<Role>>>;
   abstract upsert(role: Role): Promise<DBResult<Role>>;
-  abstract update(role: Role): Promise<DBResult<Option<Role>>>;
+  abstract update(role: Role): Promise<DBResult<Role>>;
   abstract removeById(id: string): Promise<DBResult<number>>;
 }

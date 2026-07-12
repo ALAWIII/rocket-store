@@ -8,7 +8,10 @@ import { In, Repository } from 'typeorm';
 import type { DBResult } from 'src/modules/shared/errors/error.types';
 import { Err, None, Ok, Option, Some } from 'ts-results-es';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
-import { UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
+import {
+  RecordNotFoundError,
+  UnknownDatabaseError,
+} from 'src/modules/shared/errors/database.error';
 
 @Injectable()
 export class RoleRepository implements IRoleRepository {
@@ -55,7 +58,7 @@ export class RoleRepository implements IRoleRepository {
     }
   }
 
-  async update(role: Role): Promise<DBResult<Option<Role>>> {
+  async update(role: Role): Promise<DBResult<Role>> {
     const perms = role.permissions.map((p) => p.toJSON());
     try {
       const result = await this.roleRepo
@@ -65,10 +68,14 @@ export class RoleRepository implements IRoleRepository {
         .where('id = :id', { id: role.id })
         .returning('*')
         .execute();
-
       const rows = result.raw as RoleEntity[];
+      if (result.affected === 0 || rows.length === 0) {
+        throw new RecordNotFoundError(
+          `role to be updated was not found: ${role.id}`,
+        );
+      }
       const row = rows[0];
-      return Ok(row ? Some(this.toDomain(row)) : None);
+      return Ok(this.toDomain(row));
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
