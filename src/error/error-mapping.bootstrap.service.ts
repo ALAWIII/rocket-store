@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
   OnModuleInit,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { ErrorMapperRegistry } from './error-mapper.registry';
 import {
@@ -11,6 +12,7 @@ import {
   UniqueViolationError,
 } from 'src/modules/shared/errors/database.error';
 import { InvalidPermissionEntityError } from 'src/modules/access-control/domain/permission.error';
+import { InvalidValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 
 @Injectable()
 export class ErrorMappingBootstrap implements OnModuleInit {
@@ -22,6 +24,10 @@ export class ErrorMappingBootstrap implements OnModuleInit {
       .register(
         InvalidPermissionEntityError,
         (e) => new BadRequestException(e.message),
+      )
+      .register(
+        InvalidValueObjectError,
+        (e) => new UnprocessableEntityException(e.message),
       );
   }
 }
