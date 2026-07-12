@@ -5,6 +5,7 @@ import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { SystemRolesRegistry } from './application/system-roles.registry';
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { Role } from './domain/role';
+import { Ok } from 'ts-results-es';
 
 describe('AccessControlService', () => {
   let service: AccessControlService;
@@ -38,11 +39,13 @@ describe('AccessControlService', () => {
     expect(service).toBeDefined();
   });
   describe('createRole', () => {
-    it('should return null when attempting to create/update an existing system Role.', async () => {
+    it('should throw error when attempting to create/update an existing system Role.', async () => {
       const adminRole = { name: 'admin', permissions: [] };
       systemRoleMock.isSystemRoleName.mockReturnValue(true);
-      const result = await service.upsertRole(adminRole);
-      expect(result).toBeNull();
+
+      await expect(service.upsertRole(adminRole)).rejects.toThrow(
+        'System roles cannot be removed',
+      );
       expect(systemRoleMock.isSystemRoleName).toHaveBeenCalledTimes(1);
       expect(roleRepoMock.upsert).toHaveBeenCalledTimes(0);
     });
@@ -50,11 +53,10 @@ describe('AccessControlService', () => {
       const devRoleDto = { name: 'developer', permissions: [] };
       systemRoleMock.isSystemRoleName.mockReturnValue(false);
 
-      roleRepoMock.upsert.mockImplementation((role: Role) => role);
+      roleRepoMock.upsert.mockImplementation((role: Role) => Ok(role));
 
       const role = await service.upsertRole(devRoleDto);
 
-      expect(role).not.toBeNull();
       expect(role).toMatchObject({
         name: devRoleDto.name,
         permissions: devRoleDto.permissions,
@@ -72,17 +74,17 @@ describe('AccessControlService', () => {
     });
   });
   describe('updateRole', () => {
-    it('should return null when attempting to update system Role.', async () => {
+    it('should throw error when attempting to update system Role.', async () => {
       const adminRole = Role.create({
         name: 'admin',
         permissions: [],
       }).unwrap();
       systemRoleMock.hasId.mockReturnValue(true);
-      const role = await service.updateRole(adminRole.id, {
+      const role = service.updateRole(adminRole.id, {
         name: adminRole.name,
         permissions: [],
       });
-      expect(role).toBeNull();
+      await expect(role).rejects.toThrow('System roles cannot be removed');
       expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
       expect(roleRepoMock.update).toHaveBeenCalledTimes(0);
     });
@@ -91,13 +93,14 @@ describe('AccessControlService', () => {
         name: 'admin',
         permissions: [],
       }).unwrap();
-      roleRepoMock.update.mockImplementation((adminRole: Role) => adminRole);
+      roleRepoMock.update.mockImplementation((adminRole: Role) =>
+        Ok(adminRole),
+      );
       systemRoleMock.hasId.mockReturnValue(false);
       const role = await service.updateRole(adminRole.id, {
         name: adminRole.name,
         permissions: [],
       });
-      expect(role).not.toBeNull();
       expect(role).toStrictEqual(adminRole.toJSON());
       expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
       expect(roleRepoMock.update).toHaveBeenCalledWith(adminRole);
@@ -122,7 +125,7 @@ describe('AccessControlService', () => {
       systemRoleMock.getCustomerRoleId.mockReturnValue('customer-id');
       userRepoMock.reassignUsersRole.mockResolvedValue(undefined);
       acsyncServiceMock.removeRole.mockResolvedValue(true);
-      roleRepoMock.removeById.mockResolvedValue(1);
+      roleRepoMock.removeById.mockResolvedValue(Ok(1));
 
       const result = await service.removeRole('role-id');
 
