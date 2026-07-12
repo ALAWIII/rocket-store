@@ -22,8 +22,9 @@ export class AccessControlService {
     const roles = (await this.roleRepo.loadAll()).unwrap();
     return roles.map((r) => r.toJSON());
   }
-  async upsertRole(roleData: CreateRoleDto): Promise<RoleResponseDto | null> {
-    if (this.systemRole.isSystemRoleName(roleData.name)) return null; // the null means, cant modify system Role
+  async upsertRole(roleData: CreateRoleDto): Promise<RoleResponseDto> {
+    if (this.systemRole.isSystemRoleName(roleData.name))
+      throw new SystemRoleError('System roles cannot be removed');
 
     const newRole = Role.create({
       name: roleData.name,
@@ -31,7 +32,6 @@ export class AccessControlService {
         Permission.fromPrimitives(p).unwrap(),
       ),
     }).unwrap();
-    // make sure to handle when the upsertion success but no role were returned
     const role = (await this.roleRepo.upsert(newRole)).unwrap();
     await this.acsyncService.upsertRole(role);
 
