@@ -8,6 +8,7 @@ import { SystemRolesRegistry } from './application/system-roles.registry';
 import { RoleResponseDto } from './dto/role-response.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Role } from './domain/role';
+import { SystemRoleError } from './application/system-roles.error';
 
 @Injectable()
 export class AccessControlService {
@@ -18,8 +19,8 @@ export class AccessControlService {
     private readonly acsyncService: AccessControlSyncService,
   ) {}
   async loadAll(): Promise<RoleResponseDto[]> {
-    const roles = (await this.roleRepo.loadAll()).map((r) => r.toJSON());
-    return roles;
+    const roles = (await this.roleRepo.loadAll()).unwrap();
+    return roles.map((r) => r.toJSON());
   }
   async upsertRole(roleData: CreateRoleDto): Promise<RoleResponseDto | null> {
     if (this.systemRole.isSystemRoleName(roleData.name)) return null; // the null means, cant modify system Role
@@ -27,11 +28,11 @@ export class AccessControlService {
     const newRole = Role.create({
       name: roleData.name,
       permissions: roleData.permissions.map((p) =>
-        Permission.fromPrimitives(p),
+        Permission.fromPrimitives(p).unwrap(),
       ),
-    });
+    }).unwrap();
     // make sure to handle when the upsertion success but no role were returned
-    const role = await this.roleRepo.upsert(newRole);
+    const role = (await this.roleRepo.upsert(newRole)).unwrap();
     await this.acsyncService.upsertRole(role);
 
     return role.toJSON();
@@ -39,27 +40,30 @@ export class AccessControlService {
   async updateRole(
     id: string,
     updateData: UpdateRoleDto,
-  ): Promise<RoleResponseDto | null> {
-    if (this.systemRole.hasId(id)) return null;
+  ): Promise<RoleResponseDto> {
+    if (this.systemRole.hasId(id))
+      throw new SystemRoleError('System roles cannot be removed');
     const upRole = Role.restore({
       id,
       name: updateData.name,
       permissions: updateData.permissions.map((p) =>
-        Permission.fromPrimitives(p),
+        Permission.fromPrimitives(p).unwrap(),
       ),
     });
-    const role = await this.roleRepo.update(upRole);
+    const role = (await this.roleRepo.update(upRole)).unwrap();
+
     await this.acsyncService.upsertRole(role);
     return role.toJSON();
   }
   async removeRole(roleId: string): Promise<number> {
     const isSystemRole = this.systemRole.hasId(roleId);
-    if (isSystemRole) throw new Error('System roles cannot be removed');
+    if (isSystemRole)
+      throw new SystemRoleError('System roles cannot be removed');
     await this.userRepo.reassignUsersRole(
       roleId,
       this.systemRole.getCustomerRoleId(),
     );
     await this.acsyncService.removeRole(roleId);
-    return await this.roleRepo.removeById(roleId);
+    return (await this.roleRepo.removeById(roleId)).unwrap();
   }
 }
