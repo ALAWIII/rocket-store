@@ -14,10 +14,12 @@ import { CartsModule } from './modules/carts/carts.module';
 import { ConfigModule } from '@nestjs/config';
 import { AppAuthModule } from './auth/auth.module';
 import { AccessControlModule } from './modules/access-control/access-control.module';
+import { AppErrorModule } from './error/app-error.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    AppErrorModule,
     DatabaseModule,
     AppAuthModule,
     AuditLogModule,
