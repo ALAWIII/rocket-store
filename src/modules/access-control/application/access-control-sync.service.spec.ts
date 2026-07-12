@@ -8,7 +8,7 @@ import { Role } from '../domain/role';
 import { Err, Ok } from 'ts-results-es';
 
 function createRole(name: string, permissions: Permission[]): Role {
-  return Role.create({ name, permissions });
+  return Role.create({ name, permissions }).unwrap();
 }
 
 describe('AccessControlSyncService', () => {

@@ -73,7 +73,10 @@ describe('AccessControlService', () => {
   });
   describe('updateRole', () => {
     it('should return null when attempting to update system Role.', async () => {
-      const adminRole = Role.create({ name: 'admin', permissions: [] });
+      const adminRole = Role.create({
+        name: 'admin',
+        permissions: [],
+      }).unwrap();
       systemRoleMock.hasId.mockReturnValue(true);
       const role = await service.updateRole(adminRole.id, {
         name: adminRole.name,
@@ -84,7 +87,10 @@ describe('AccessControlService', () => {
       expect(roleRepoMock.update).toHaveBeenCalledTimes(0);
     });
     it('should return role when attempting to update existing one.', async () => {
-      const adminRole = Role.create({ name: 'admin', permissions: [] });
+      const adminRole = Role.create({
+        name: 'admin',
+        permissions: [],
+      }).unwrap();
       roleRepoMock.update.mockImplementation((adminRole: Role) => adminRole);
       systemRoleMock.hasId.mockReturnValue(false);
       const role = await service.updateRole(adminRole.id, {

@@ -8,7 +8,7 @@ export class SystemRolesProvider {
       Role.create({ name: 'admin', permissions: [] }),
       Role.create({ name: 'worker', permissions: [] }),
       Role.create({ name: 'customer', permissions: [] }),
-    ];
+    ].map((r) => r.unwrap());
   }
 
   getNames(): string[] {
