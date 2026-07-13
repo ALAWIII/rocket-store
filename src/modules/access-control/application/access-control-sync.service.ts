@@ -4,6 +4,7 @@ import type { Enforcer } from 'casbin';
 import { IRoleRepository } from '../infrastructure/repositories/role.repository';
 import type { Role } from '../domain/role';
 import { AUTHZ_ENFORCER } from 'nest-authz';
+import { Permission } from '../domain/permission';
 
 @Injectable()
 export class AccessControlSyncService {
@@ -34,7 +35,16 @@ export class AccessControlSyncService {
       `Casbin policies reloaded: ${policies.length} policies from ${roles.unwrap().length} roles`,
     );
   }
-
+  async getPermissions(roleId: string): Promise<Permission[]> {
+    const policies = await this.enforcer.getFilteredPolicy(0, roleId);
+    return policies.map((p) =>
+      Permission.fromPrimitives({
+        entity: p[1],
+        action: p[2],
+        scope: p[3],
+      }).unwrap(),
+    );
+  }
   async upsertRole(role: Role): Promise<void> {
     const removed = await this.removeRole(role.id);
     const added = await this.addRole(role);
