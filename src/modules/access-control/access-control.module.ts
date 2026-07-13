@@ -9,10 +9,11 @@ import { AccessControlService } from './access-control.service';
 import { SystemRolesRegistry } from './application/system-roles.registry';
 import { AUTHZ_ENFORCER, AuthZModule } from 'nest-authz';
 import { createCasbinEnforcer } from './infrastructure/casbin/casbin.factory';
-import { AuthenticatedRequest } from 'src/auth/auth.config';
+import { AppUser, AuthenticatedRequest } from 'src/auth/auth.config';
 import { UsersModule } from '../users/users.module';
 import { RolesController } from './role.controller';
 import { SystemRolesProvider } from './application/system-roles.provider';
+import { AccessGuard } from './guards/access-control.guard';
 @Module({
   imports: [
     UsersModule,
@@ -22,16 +23,17 @@ import { SystemRolesProvider } from './application/system-roles.provider';
         provide: AUTHZ_ENFORCER,
         useFactory: async () => createCasbinEnforcer(),
       },
-      userFromContext: (ctx) => {
+      userFromContext: (ctx): AppUser => {
         const request = ctx.switchToHttp().getRequest<AuthenticatedRequest>();
-        if (!request.user.roleId) {
+        if (!request.user || !request.user.roleId) {
           throw new ForbiddenException();
         }
-        return request.user.roleId;
+        return request.user;
       },
     }),
   ],
   providers: [
+    AccessGuard,
     AccessControlBootstrapService,
     AccessControlSyncService,
     AccessControlService,
@@ -40,6 +42,7 @@ import { SystemRolesProvider } from './application/system-roles.provider';
     { provide: IRoleRepository, useClass: RoleRepository },
   ],
   exports: [
+    AccessGuard,
     AccessControlService,
     AccessControlSyncService,
     SystemRolesRegistry,
