@@ -6,16 +6,20 @@ import {
   InvalidPermissionScopeError,
   PermissionResult,
 } from './permission.error';
-
 //======================= consider only update this matrix, and automatically it will generate for you the needed permission instances.
+// Own = can manage roles/resources that are within my effective permission set.
 const PermissionMatrix = {
+  role: {
+    actions: ['create', 'read', 'update', 'delete'],
+    scopes: ['own'],
+  },
   product: {
     actions: ['create', 'view', 'list', 'update', 'delete'],
-    scopes: ['own', 'others', 'all'],
+    scopes: ['own', 'any'],
   },
   order: {
     actions: ['view', 'list', 'cancel', 'refund'],
-    scopes: ['own', 'others', 'all'],
+    scopes: ['own', 'any'],
   },
   cart: {
     actions: ['view', 'update'],
@@ -23,7 +27,7 @@ const PermissionMatrix = {
   },
   user: {
     actions: ['create', 'view', 'list', 'update', 'delete'],
-    scopes: ['own', 'others', 'all'],
+    scopes: ['own', 'any'],
   },
 } as const;
 //==================================
