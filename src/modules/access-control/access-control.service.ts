@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { Permission } from './domain/permission';
@@ -9,6 +9,7 @@ import { RoleResponseDto } from './dto/role-response.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Role } from './domain/role';
 import { SystemRoleError } from './application/system-roles.error';
+import { RoleServiceError } from './access-control.error.service';
 
 @Injectable()
 export class AccessControlService {
@@ -22,9 +23,14 @@ export class AccessControlService {
     const roles = (await this.roleRepo.loadSimilarRoles(roleId)).unwrap();
     return roles.map((r) => r.toJSON());
   }
-  async upsertRole(roleData: CreateRoleDto): Promise<RoleResponseDto> {
+  async upsertRole(
+    userRoleId: string,
+    roleData: CreateRoleDto,
+  ): Promise<RoleResponseDto> {
     if (this.systemRole.isSystemRoleName(roleData.name))
-      throw new SystemRoleError('System roles cannot be removed');
+      throw new SystemRoleError(
+        'Try to create/override an existing system role.',
+      );
 
     const newRole = Role.create({
       name: roleData.name,
@@ -32,24 +38,37 @@ export class AccessControlService {
         Permission.fromPrimitives(p).unwrap(),
       ),
     }).unwrap();
+    const userPerms = await this.acsyncService.getPermissions(userRoleId);
+    if (!newRole.isSubsetOf(userPerms)) {
+      throw new RoleServiceError(
+        'Can not create role with permissions that are not owned by the user.',
+      );
+    }
     const role = (await this.roleRepo.upsert(newRole)).unwrap();
     await this.acsyncService.upsertRole(role);
 
     return role.toJSON();
   }
   async updateRole(
-    id: string,
+    userRoleId: string,
+    roleId: string,
     updateData: UpdateRoleDto,
   ): Promise<RoleResponseDto> {
-    if (this.systemRole.hasId(id))
-      throw new SystemRoleError('System roles cannot be removed');
+    if (this.systemRole.hasId(roleId))
+      throw new SystemRoleError('Try to update an existing System Role.');
     const upRole = Role.restore({
-      id,
+      id: roleId,
       name: updateData.name,
       permissions: updateData.permissions.map((p) =>
         Permission.fromPrimitives(p).unwrap(),
       ),
     });
+    const userPerms = await this.acsyncService.getPermissions(userRoleId);
+    if (!upRole.isSubsetOf(userPerms)) {
+      throw new RoleServiceError(
+        'Can not update role with permissions that are not owned by the user.',
+      );
+    }
     const role = (await this.roleRepo.update(upRole)).unwrap();
 
     await this.acsyncService.upsertRole(role);
