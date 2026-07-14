@@ -7,6 +7,7 @@ import { AccessControlSyncService } from './application/access-control-sync.serv
 import { Role } from './domain/role';
 import { Ok } from 'ts-results-es';
 import { AllPermissions, Permission } from './domain/permission';
+import { RoleServiceError } from './access-control.error.service';
 
 describe('AccessControlService', () => {
   let service: AccessControlService;
@@ -52,6 +53,44 @@ describe('AccessControlService', () => {
         service.upsertRole('not-important', adminRole),
       ).rejects.toThrow('Try to create/override an existing system role.');
       expect(systemRoleMock.isSystemRoleName).toHaveBeenCalledTimes(1);
+      expect(roleRepoMock.upsert).toHaveBeenCalledTimes(0);
+    });
+    it('should throw error when attempting to create role with permission list length greater than what the user have or provide.', async () => {
+      const newRole = {
+        name: 'role',
+        permissions: [AllPermissions.role.RoleReadOwn.toJSON()],
+      };
+      systemRoleMock.isSystemRoleName.mockReturnValue(false);
+      acsyncServiceMock.getPermissions.mockReturnValue(new Map());
+      const role = service.upsertRole('userRoleId', newRole);
+      await expect(role).rejects.toThrow(
+        'Can not create role with permissions that are not owned by the user.',
+      );
+      await expect(role).rejects.toBeInstanceOf(RoleServiceError);
+      expect(roleRepoMock.upsert).toHaveBeenCalledTimes(0);
+    });
+    it('should throw error when attempting to create role with at least one of permissions from the permission list isnt found in the user role permissions list.', async () => {
+      const newRole = {
+        name: 'role',
+        permissions: [AllPermissions.role.RoleReadOwn.toJSON()],
+      };
+      const userPermissionList = new Map([
+        [
+          AllPermissions.role.RoleCreateOwn.key(),
+          AllPermissions.role.RoleCreateOwn,
+        ],
+        [
+          AllPermissions.role.RoleUpdateOwn.key(),
+          AllPermissions.role.RoleUpdateOwn,
+        ],
+      ]);
+      systemRoleMock.isSystemRoleName.mockReturnValue(false);
+      acsyncServiceMock.getPermissions.mockReturnValue(userPermissionList);
+      const role = service.upsertRole('userRoleId', newRole);
+      await expect(role).rejects.toThrow(
+        'Can not create role with permissions that are not owned by the user.',
+      );
+      await expect(role).rejects.toBeInstanceOf(RoleServiceError);
       expect(roleRepoMock.upsert).toHaveBeenCalledTimes(0);
     });
     it('should successfully upsert new role.', async () => {
