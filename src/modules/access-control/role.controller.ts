@@ -26,8 +26,8 @@ export class RolesController {
 
   @Post()
   @RequirePermission(AllPermissions.role.RoleCreateOwn)
-  async create(@Body() dto: CreateRoleDto) {
-    return this.service.upsertRole(dto);
+  async create(@Session() session: AppSession, @Body() dto: CreateRoleDto) {
+    return this.service.upsertRole(session.user.roleId, dto);
   }
 
   @Get()
@@ -40,9 +40,10 @@ export class RolesController {
   @RequirePermission(AllPermissions.role.RoleUpdateOwn)
   async update(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Session() session: AppSession,
     @Body() dto: UpdateRoleDto,
   ) {
-    return await this.service.updateRole(id, dto);
+    return await this.service.updateRole(session.user.roleId, id, dto);
   }
 
   @Delete(':id')
