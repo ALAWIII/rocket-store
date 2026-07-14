@@ -4,6 +4,7 @@ import type { DBResult } from 'src/modules/shared/errors/error.types';
 
 export abstract class IRoleRepository {
   abstract loadAll(): Promise<DBResult<Role[]>>;
+  abstract loadSimilarRoles(roleId: string): Promise<DBResult<Role[]>>;
   abstract loadByNames(names: string[]): Promise<DBResult<Role[]>>;
   abstract findById(id: string): Promise<DBResult<Option<Role>>>;
   abstract findByName(name: string): Promise<DBResult<Option<Role>>>;

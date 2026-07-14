@@ -19,7 +19,24 @@ export class RoleRepository implements IRoleRepository {
     @InjectRepository(RoleEntity)
     private readonly roleRepo: Repository<RoleEntity>,
   ) {}
+  async loadSimilarRoles(roleId: string): Promise<DBResult<Role[]>> {
+    try {
+      const loadPerms = this.roleRepo
+        .createQueryBuilder('r')
+        .select('r.permissions', 'perms')
+        .where('r.id = :id', { id: roleId });
 
+      const loadRoles = await this.roleRepo
+        .createQueryBuilder('role')
+        .addCommonTableExpression(loadPerms, 'role_perms')
+        .where(`(SELECT perms FROM role_perms)::jsonb @> role.permissions`)
+        .getMany();
+
+      return Ok(loadRoles.map((r) => this.toDomain(r)));
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   async loadByNames(names: string[]): Promise<DBResult<Role[]>> {
     if (names.length === 0) return Ok([]);
     try {
