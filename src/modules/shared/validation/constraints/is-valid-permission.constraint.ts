@@ -10,13 +10,14 @@ type PermissionDto = {
   action?: string;
   scope?: string;
 };
+type CompletePermissionDto = Required<PermissionDto>;
+
 function hasCompletePermissionDto(
   dto: PermissionDto,
 ): dto is CompletePermissionDto {
   return !!dto.entity && !!dto.action && !!dto.scope;
 }
 
-type CompletePermissionDto = Required<PermissionDto>;
 @ValidatorConstraint({ name: 'isValidPermission', async: false })
 export class IsValidPermissionConstraint implements ValidatorConstraintInterface {
   validate(_: unknown, args: ValidationArguments): boolean {
