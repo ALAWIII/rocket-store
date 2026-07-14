@@ -6,6 +6,7 @@ import { SystemRolesRegistry } from './application/system-roles.registry';
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { Role } from './domain/role';
 import { Ok } from 'ts-results-es';
+import { AllPermissions, Permission } from './domain/permission';
 
 describe('AccessControlService', () => {
   let service: AccessControlService;
@@ -22,7 +23,11 @@ describe('AccessControlService', () => {
     hasId: jest.fn(),
     getCustomerRoleId: jest.fn(),
   };
-  const acsyncServiceMock = { upsertRole: jest.fn(), removeRole: jest.fn() };
+  const acsyncServiceMock = {
+    upsertRole: jest.fn(),
+    removeRole: jest.fn(),
+    getPermissions: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -43,19 +48,25 @@ describe('AccessControlService', () => {
       const adminRole = { name: 'admin', permissions: [] };
       systemRoleMock.isSystemRoleName.mockReturnValue(true);
 
-      await expect(service.upsertRole(adminRole)).rejects.toThrow(
-        'System roles cannot be removed',
-      );
+      await expect(
+        service.upsertRole('not-important', adminRole),
+      ).rejects.toThrow('Try to create/override an existing system role.');
       expect(systemRoleMock.isSystemRoleName).toHaveBeenCalledTimes(1);
       expect(roleRepoMock.upsert).toHaveBeenCalledTimes(0);
     });
     it('should successfully upsert new role.', async () => {
       const devRoleDto = { name: 'developer', permissions: [] };
+      const userPermissions = new Map<string, Permission>([
+        [
+          AllPermissions.role.RoleCreateOwn.key(),
+          AllPermissions.role.RoleCreateOwn,
+        ],
+      ]);
       systemRoleMock.isSystemRoleName.mockReturnValue(false);
-
+      acsyncServiceMock.getPermissions.mockReturnValue(userPermissions);
       roleRepoMock.upsert.mockImplementation((role: Role) => Ok(role));
 
-      const role = await service.upsertRole(devRoleDto);
+      const role = await service.upsertRole('roleId', devRoleDto);
 
       expect(role).toMatchObject({
         name: devRoleDto.name,
@@ -80,32 +91,41 @@ describe('AccessControlService', () => {
         permissions: [],
       }).unwrap();
       systemRoleMock.hasId.mockReturnValue(true);
-      const role = service.updateRole(adminRole.id, {
+      const role = service.updateRole('not-important', adminRole.id, {
         name: adminRole.name,
         permissions: [],
       });
-      await expect(role).rejects.toThrow('System roles cannot be removed');
+      await expect(role).rejects.toThrow(
+        'Try to update an existing System Role.',
+      );
       expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
       expect(roleRepoMock.update).toHaveBeenCalledTimes(0);
     });
     it('should return role when attempting to update existing one.', async () => {
-      const adminRole = Role.create({
-        name: 'admin',
-        permissions: [],
+      const worker2Role = Role.create({
+        name: 'workerx',
+        permissions: [AllPermissions.role.RoleCreateOwn],
       }).unwrap();
-      roleRepoMock.update.mockImplementation((adminRole: Role) =>
-        Ok(adminRole),
+      const userPermissions = new Map<string, Permission>([
+        [
+          AllPermissions.role.RoleCreateOwn.key(),
+          AllPermissions.role.RoleCreateOwn,
+        ],
+      ]);
+      acsyncServiceMock.getPermissions.mockReturnValue(userPermissions);
+      roleRepoMock.update.mockImplementation((worker2Role: Role) =>
+        Ok(worker2Role),
       );
       systemRoleMock.hasId.mockReturnValue(false);
-      const role = await service.updateRole(adminRole.id, {
-        name: adminRole.name,
-        permissions: [],
+      const role = await service.updateRole('roleId', worker2Role.id, {
+        name: worker2Role.name,
+        permissions: [AllPermissions.role.RoleCreateOwn.toJSON()],
       });
-      expect(role).toStrictEqual(adminRole.toJSON());
+      expect(role).toStrictEqual(worker2Role.toJSON());
       expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
-      expect(roleRepoMock.update).toHaveBeenCalledWith(adminRole);
+      expect(roleRepoMock.update).toHaveBeenCalledWith(worker2Role);
       expect(roleRepoMock.update).toHaveBeenCalledTimes(1);
-      expect(acsyncServiceMock.upsertRole).toHaveBeenCalledWith(adminRole);
+      expect(acsyncServiceMock.upsertRole).toHaveBeenCalledWith(worker2Role);
     });
   });
   describe('removeRole', () => {
