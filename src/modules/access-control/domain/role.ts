@@ -32,6 +32,14 @@ export class Role {
   findPermission(perm: Permission): number {
     return this._permissions.findIndex((p) => p.equals(perm));
   }
+  isSubsetOf(permissionMap: Map<string, Permission>): boolean {
+    if (this.permissions.length > permissionMap.size) return false;
+
+    for (const perm of this.permissions) {
+      if (!permissionMap.has(perm.key())) return false;
+    }
+    return true;
+  }
   addPermission(perm: Permission) {
     const index = this.findPermission(perm);
     if (index >= 0) return;
