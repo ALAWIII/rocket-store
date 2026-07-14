@@ -16,6 +16,8 @@ import { RoleResponseDto } from './dto/role-response.dto';
 import { AccessGuard } from './guards/access-control.guard';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
 import { AllPermissions } from './domain/permission';
+import { Session } from '@thallesp/nestjs-better-auth';
+import { type AppSession } from 'src/auth/auth.config';
 
 @UseGuards(AccessGuard)
 @Controller('roles')
@@ -30,8 +32,8 @@ export class RolesController {
 
   @Get()
   @RequirePermission(AllPermissions.role.RoleReadOwn)
-  async findAll(): Promise<RoleResponseDto[]> {
-    return await this.service.loadAll();
+  async findAll(@Session() session: AppSession): Promise<RoleResponseDto[]> {
+    return await this.service.loadAll(session.user.roleId);
   }
 
   @Put(':id')
