@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   ParseUUIDPipe,
   Post,
@@ -24,6 +25,12 @@ import { type AppSession } from 'src/auth/auth.config';
 export class RolesController {
   constructor(private readonly service: AccessControlService) {}
 
+  @Post('policies/reload')
+  @HttpCode(204)
+  @RequirePermission(AllPermissions.role.RoleReloadOwn)
+  async reloadPolicies() {
+    await this.service.reloadPolicies();
+  }
   @Post()
   @RequirePermission(AllPermissions.role.RoleCreateOwn)
   async create(@Session() session: AppSession, @Body() dto: CreateRoleDto) {
