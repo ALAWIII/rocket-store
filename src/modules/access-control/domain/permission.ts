@@ -10,7 +10,7 @@ import {
 // Own = can manage roles/resources that are within my effective permission set.
 const PermissionMatrix = {
   role: {
-    actions: ['create', 'read', 'update', 'delete'],
+    actions: ['create', 'read', 'update', 'delete', 'reload'],
     scopes: ['own'],
   },
   product: {
