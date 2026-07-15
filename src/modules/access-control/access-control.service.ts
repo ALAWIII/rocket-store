@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { Permission } from './domain/permission';
