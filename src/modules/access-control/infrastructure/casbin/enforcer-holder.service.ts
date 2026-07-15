@@ -15,7 +15,7 @@ export class EnforcerHolder implements IEnforcerHolder {
     action: string;
     scope: string;
   }): Promise<boolean> {
-    return this.get().enforce(
+    return await this.get().enforce(
       enforceData.roleId,
       enforceData.entity,
       enforceData.action,
