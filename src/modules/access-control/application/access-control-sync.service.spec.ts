@@ -1,11 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { AccessControlSyncService } from './access-control-sync.service';
-import { AUTHZ_ENFORCER } from 'nest-authz';
 import { IRoleRepository } from '../infrastructure/repositories/role.repository';
 import { AllPermissions, Permission } from '../domain/permission';
 import { Role } from '../domain/role';
 import { Err, Ok } from 'ts-results-es';
+import { IEnforcerHolder } from '../infrastructure/casbin/enforcer-holder';
+import * as casbinFactory from '../infrastructure/casbin/casbin.factory';
+import { Enforcer } from 'casbin';
 
 function createRole(name: string, permissions: Permission[]): Role {
   return Role.create({ name, permissions }).unwrap();
@@ -14,15 +16,23 @@ function createRole(name: string, permissions: Permission[]): Role {
 describe('AccessControlSyncService', () => {
   let service: AccessControlSyncService;
 
-  const enforcerMock = {
+  const enforcerHolderMock = {
+    set: jest.fn(),
     clearPolicy: jest.fn(),
     addPolicies: jest.fn(),
-    getFilteredPolicy: jest.fn(),
+    getPoliciesById: jest.fn(),
     removePolicies: jest.fn(),
   };
 
   const roleRepositoryMock = {
     loadAll: jest.fn(),
+  };
+  const addPoliciesMock = jest.fn() as jest.Mock<
+    Promise<boolean>,
+    [string[][]]
+  >;
+  const newEnforcerMock = {
+    addPolicies: addPoliciesMock,
   };
 
   beforeEach(async () => {
@@ -32,8 +42,8 @@ describe('AccessControlSyncService', () => {
       providers: [
         AccessControlSyncService,
         {
-          provide: AUTHZ_ENFORCER,
-          useValue: enforcerMock,
+          provide: IEnforcerHolder,
+          useValue: enforcerHolderMock,
         },
         {
           provide: IRoleRepository,
@@ -43,10 +53,12 @@ describe('AccessControlSyncService', () => {
     }).compile();
 
     service = module.get(AccessControlSyncService);
+    const spy = jest.spyOn(casbinFactory, 'createCasbinEnforcer');
+    spy.mockResolvedValue(newEnforcerMock as unknown as Enforcer);
   });
   //===================================================
   describe('reloadFromDatabase', () => {
-    it('should clear current policies and add reloaded policies from database', async () => {
+    it('should create new enforcer and call addPolicies to load a list of policies from database to the enforcer.', async () => {
       const adminRole = createRole('admin', [
         AllPermissions.role.RoleCreateOwn,
         AllPermissions.role.RoleDeleteOwn,
@@ -55,8 +67,8 @@ describe('AccessControlSyncService', () => {
         AllPermissions.order.OrderViewOwn,
       ]);
       const roles = [adminRole, workerRole];
+      //-----------------
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
-      enforcerMock.addPolicies.mockResolvedValue(true);
 
       const loggerSpy = jest
         .spyOn(Logger.prototype, 'log')
@@ -65,12 +77,9 @@ describe('AccessControlSyncService', () => {
       await service.reloadFromDatabase();
 
       expect(roleRepositoryMock.loadAll).toHaveBeenCalledTimes(1);
-      expect(enforcerMock.clearPolicy).toHaveBeenCalledTimes(1);
-      expect(enforcerMock.addPolicies).toHaveBeenCalledTimes(1);
-      expect(enforcerMock.addPolicies).toHaveBeenCalledWith([
-        ...adminRole.toFlatPolicies(),
-        ...workerRole.toFlatPolicies(),
-      ]);
+      expect(newEnforcerMock.addPolicies).toHaveBeenCalledTimes(1);
+      expect(enforcerHolderMock.set).toHaveBeenCalledWith(newEnforcerMock);
+
       expect(loggerSpy).toHaveBeenCalledWith(
         'Casbin policies reloaded: 3 policies from 2 roles',
       );
@@ -78,10 +87,9 @@ describe('AccessControlSyncService', () => {
       loggerSpy.mockRestore();
     });
 
-    it('should clear current policies and not call addPolicies when there are no policies', async () => {
-      const adminRole = createRole('admin', []);
-      const workerRole = createRole('worker', []);
-      const roles = [adminRole, workerRole];
+    it('should not call enforcer.addPolicies when there are no policies to load.', async () => {
+      const anyrole = createRole('anyrole', []);
+      const roles = [anyrole];
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
 
       const loggerSpy = jest
@@ -91,10 +99,11 @@ describe('AccessControlSyncService', () => {
       await service.reloadFromDatabase();
 
       expect(roleRepositoryMock.loadAll).toHaveBeenCalledTimes(1);
-      expect(enforcerMock.clearPolicy).toHaveBeenCalledTimes(1);
-      expect(enforcerMock.addPolicies).not.toHaveBeenCalled();
+      expect(newEnforcerMock.addPolicies).not.toHaveBeenCalled();
+      expect(enforcerHolderMock.set).toHaveBeenCalledWith(newEnforcerMock);
+
       expect(loggerSpy).toHaveBeenCalledWith(
-        'Casbin policies reloaded: 0 policies from 2 roles',
+        'Casbin policies reloaded: 0 policies from 1 roles',
       );
 
       loggerSpy.mockRestore();
@@ -109,13 +118,12 @@ describe('AccessControlSyncService', () => {
       ];
 
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
-      enforcerMock.addPolicies.mockResolvedValue(true);
+      enforcerHolderMock.addPolicies.mockResolvedValue(true);
 
       await service.reloadFromDatabase();
 
-      expect(enforcerMock.clearPolicy).toHaveBeenCalledTimes(1);
-      expect(enforcerMock.addPolicies).toHaveBeenCalledTimes(1);
-      expect(enforcerMock.addPolicies).toHaveBeenCalledWith([
+      expect(newEnforcerMock.addPolicies).toHaveBeenCalledTimes(1);
+      expect(newEnforcerMock.addPolicies).toHaveBeenCalledWith([
         // it removes the duplicated permissions when called toPolicies.
         roles[0].toFlatPolicies()[0],
       ]);
@@ -126,33 +134,32 @@ describe('AccessControlSyncService', () => {
       roleRepositoryMock.loadAll.mockReturnValue(Err(error));
 
       await expect(service.reloadFromDatabase()).rejects.toThrow(error);
-      expect(enforcerMock.clearPolicy).not.toHaveBeenCalled();
-      expect(enforcerMock.addPolicies).not.toHaveBeenCalled();
+      expect(newEnforcerMock.addPolicies).not.toHaveBeenCalled();
+      expect(enforcerHolderMock.set).not.toHaveBeenCalled();
     });
 
     it('should propagate enforcer addPolicies errors', async () => {
       const roles = [createRole('admin', [AllPermissions.role.RoleCreateOwn])];
 
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
-      enforcerMock.addPolicies.mockRejectedValue(new Error('casbin failed'));
+      newEnforcerMock.addPolicies.mockRejectedValue(new Error('casbin failed'));
 
       await expect(service.reloadFromDatabase()).rejects.toThrow(
         'casbin failed',
       );
-      expect(enforcerMock.clearPolicy).toHaveBeenCalledTimes(1);
-      expect(enforcerMock.addPolicies).toHaveBeenCalledTimes(1);
+      expect(newEnforcerMock.addPolicies).toHaveBeenCalledTimes(1);
     });
   });
   //===================================================
   describe('removeRole', () => {
     it('should return true and not call removePolicies when role has no policies', async () => {
-      enforcerMock.getFilteredPolicy.mockResolvedValue([]);
+      enforcerHolderMock.getPoliciesById.mockResolvedValue([]);
 
       const result = await service.removeRole('admin');
 
-      expect(enforcerMock.getFilteredPolicy).toHaveBeenCalledTimes(1);
-      expect(enforcerMock.getFilteredPolicy).toHaveBeenCalledWith(0, 'admin');
-      expect(enforcerMock.removePolicies).not.toHaveBeenCalled();
+      expect(enforcerHolderMock.getPoliciesById).toHaveBeenCalledTimes(1);
+      expect(enforcerHolderMock.getPoliciesById).toHaveBeenCalledWith('admin');
+      expect(enforcerHolderMock.removePolicies).not.toHaveBeenCalled();
       expect(result).toBe(true);
     });
 
@@ -164,17 +171,16 @@ describe('AccessControlSyncService', () => {
 
       const existingPolicies = adminRole.toFlatPolicies();
 
-      enforcerMock.getFilteredPolicy.mockResolvedValue(existingPolicies);
-      enforcerMock.removePolicies.mockResolvedValue(true);
+      enforcerHolderMock.getPoliciesById.mockResolvedValue(existingPolicies);
+      enforcerHolderMock.removePolicies.mockResolvedValue(true);
 
       const result = await service.removeRole(adminRole.id);
 
-      expect(enforcerMock.getFilteredPolicy).toHaveBeenCalledWith(
-        0,
+      expect(enforcerHolderMock.getPoliciesById).toHaveBeenCalledWith(
         adminRole.id,
       );
-      expect(enforcerMock.removePolicies).toHaveBeenCalledTimes(1);
-      expect(enforcerMock.removePolicies).toHaveBeenCalledWith(
+      expect(enforcerHolderMock.removePolicies).toHaveBeenCalledTimes(1);
+      expect(enforcerHolderMock.removePolicies).toHaveBeenCalledWith(
         existingPolicies,
       );
       expect(result).toBe(true);
@@ -188,12 +194,12 @@ describe('AccessControlSyncService', () => {
 
       const existingPolicies = adminRole.toFlatPolicies();
 
-      enforcerMock.getFilteredPolicy.mockResolvedValue(existingPolicies);
-      enforcerMock.removePolicies.mockResolvedValue(false);
+      enforcerHolderMock.getPoliciesById.mockResolvedValue(existingPolicies);
+      enforcerHolderMock.removePolicies.mockResolvedValue(false);
 
       const result = await service.removeRole(adminRole.id);
 
-      expect(enforcerMock.removePolicies).toHaveBeenCalledWith(
+      expect(enforcerHolderMock.removePolicies).toHaveBeenCalledWith(
         existingPolicies,
       );
       expect(result).toBe(false);
@@ -206,7 +212,7 @@ describe('AccessControlSyncService', () => {
 
       const result = await service.addRole(adminRole);
 
-      expect(enforcerMock.addPolicies).not.toHaveBeenCalled();
+      expect(enforcerHolderMock.addPolicies).not.toHaveBeenCalled();
       expect(result).toBe(true);
     });
 
@@ -216,12 +222,12 @@ describe('AccessControlSyncService', () => {
         AllPermissions.role.RoleReadOwn,
       ]);
 
-      enforcerMock.addPolicies.mockResolvedValue(true);
+      enforcerHolderMock.addPolicies.mockResolvedValue(true);
 
       const result = await service.addRole(adminRole);
 
-      expect(enforcerMock.addPolicies).toHaveBeenCalledTimes(1);
-      expect(enforcerMock.addPolicies).toHaveBeenCalledWith(
+      expect(enforcerHolderMock.addPolicies).toHaveBeenCalledTimes(1);
+      expect(enforcerHolderMock.addPolicies).toHaveBeenCalledWith(
         adminRole.toFlatPolicies(),
       );
       expect(result).toBe(true);
@@ -233,11 +239,11 @@ describe('AccessControlSyncService', () => {
         AllPermissions.role.RoleCreateOwn,
       ]);
 
-      enforcerMock.addPolicies.mockResolvedValue(true);
+      enforcerHolderMock.addPolicies.mockResolvedValue(true);
 
       const result = await service.addRole(adminRole);
 
-      expect(enforcerMock.addPolicies).toHaveBeenCalledWith([
+      expect(enforcerHolderMock.addPolicies).toHaveBeenCalledWith([
         adminRole.toFlatPolicies()[0],
       ]);
       expect(result).toBe(true);
@@ -248,11 +254,11 @@ describe('AccessControlSyncService', () => {
         AllPermissions.role.RoleCreateOwn,
       ]);
 
-      enforcerMock.addPolicies.mockResolvedValue(false);
+      enforcerHolderMock.addPolicies.mockResolvedValue(false);
 
       const result = await service.addRole(adminRole);
 
-      expect(enforcerMock.addPolicies).toHaveBeenCalledTimes(1);
+      expect(enforcerHolderMock.addPolicies).toHaveBeenCalledTimes(1);
       expect(result).toBe(false);
     });
   });
@@ -262,26 +268,24 @@ describe('AccessControlSyncService', () => {
       const adminRole = createRole('admin', [
         AllPermissions.role.RoleCreateOwn,
       ]);
-      enforcerMock.getFilteredPolicy.mockResolvedValue(
+      enforcerHolderMock.getPoliciesById.mockResolvedValue(
         adminRole.toFlatPolicies(),
       );
 
       const result = await service.hasRole(adminRole.id);
 
-      expect(enforcerMock.getFilteredPolicy).toHaveBeenCalledWith(
-        0,
+      expect(enforcerHolderMock.getPoliciesById).toHaveBeenCalledWith(
         adminRole.id,
       );
       expect(result).toBe(true);
     });
 
     it('should return false when no policies exist for role', async () => {
-      enforcerMock.getFilteredPolicy.mockResolvedValue([]);
+      enforcerHolderMock.getPoliciesById.mockResolvedValue([]);
 
       const result = await service.hasRole('admin-role-id');
 
-      expect(enforcerMock.getFilteredPolicy).toHaveBeenCalledWith(
-        0,
+      expect(enforcerHolderMock.getPoliciesById).toHaveBeenCalledWith(
         'admin-role-id',
       );
       expect(result).toBe(false);
