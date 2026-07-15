@@ -23,6 +23,9 @@ export class AccessControlService {
     const roles = (await this.roleRepo.loadSimilarRoles(roleId)).unwrap();
     return roles.map((r) => r.toJSON());
   }
+  async reloadPolicies() {
+    await this.acsyncService.reloadFromDatabase();
+  }
   async upsertRole(
     userRoleId: string,
     roleData: CreateRoleDto,
