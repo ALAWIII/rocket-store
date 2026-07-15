@@ -6,4 +6,10 @@ export abstract class IEnforcerHolder {
   abstract addPolicies(policies: string[][]): Promise<boolean>;
   abstract getPoliciesById(roleId: string): Promise<string[][]>;
   abstract removePolicies(policies: string[][]): Promise<boolean>;
+  abstract enforce(enforceData: {
+    roleId: string;
+    entity: string;
+    action: string;
+    scope: string;
+  }): Promise<boolean>;
 }
