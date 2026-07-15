@@ -7,21 +7,27 @@ import { AccessControlBootstrapService } from './application/access-control.boot
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { AccessControlService } from './access-control.service';
 import { SystemRolesRegistry } from './application/system-roles.registry';
-import { AUTHZ_ENFORCER, AuthZModule } from 'nest-authz';
+import { AuthZModule } from 'nest-authz';
 import { createCasbinEnforcer } from './infrastructure/casbin/casbin.factory';
 import { AppUser, AuthenticatedRequest } from 'src/auth/auth.config';
 import { UsersModule } from '../users/users.module';
 import { RolesController } from './role.controller';
 import { SystemRolesProvider } from './application/system-roles.provider';
 import { AccessGuard } from './guards/access-control.guard';
+import { IEnforcerHolder } from './infrastructure/casbin/enforcer-holder';
+import { EnforcerHolder } from './infrastructure/casbin/enforcer-holder.service';
 @Module({
   imports: [
     UsersModule,
     TypeOrmModule.forFeature([RoleEntity]),
     AuthZModule.register({
       enforcerProvider: {
-        provide: AUTHZ_ENFORCER,
-        useFactory: async () => createCasbinEnforcer(),
+        provide: IEnforcerHolder,
+        useFactory: async (): Promise<IEnforcerHolder> => {
+          const holder = new EnforcerHolder();
+          holder.set(await createCasbinEnforcer());
+          return holder;
+        },
       },
       userFromContext: (ctx): AppUser => {
         const request = ctx.switchToHttp().getRequest<AuthenticatedRequest>();
