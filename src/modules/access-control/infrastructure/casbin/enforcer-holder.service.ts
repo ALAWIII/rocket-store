@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { Enforcer } from 'casbin';
-import { createCasbinEnforcer } from './casbin.factory';
 import { IEnforcerHolder } from './enforcer-holder';
 
 @Injectable()
