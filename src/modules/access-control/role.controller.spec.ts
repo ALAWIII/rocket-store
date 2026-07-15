@@ -55,4 +55,16 @@ describe('RolesController', () => {
       expect(newRole).toBe(expectedRole);
     });
   });
+  describe('remove', () => {
+    it('should successfully remove and return number of affected', async () => {
+      const expectedRole = Role.create({
+        name: 'name',
+        permissions: [AllPermissions.role.RoleReloadOwn],
+      }).unwrap();
+      serviceMock.removeRole.mockReturnValue(1);
+      const removeResult = await controller.remove(expectedRole.id);
+      expect(serviceMock.removeRole).toHaveBeenCalledWith(expectedRole.id);
+      expect(removeResult).toBe(1);
+    });
+  });
 });
