@@ -40,7 +40,7 @@ export class RolesController {
   @Get()
   @RequirePermission(AllPermissions.role.RoleReadOwn)
   async findAll(@Session() session: AppSession): Promise<RoleResponseDto[]> {
-    return await this.service.loadAll(session.user.roleId);
+    return await this.service.findAll(session.user.roleId);
   }
 
   @Put(':id')

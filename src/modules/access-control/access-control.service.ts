@@ -19,7 +19,7 @@ export class AccessControlService {
     private readonly systemRole: SystemRolesRegistry,
     private readonly acsyncService: AccessControlSyncService,
   ) {}
-  async loadAll(roleId: string): Promise<RoleResponseDto[]> {
+  async findAll(roleId: string): Promise<RoleResponseDto[]> {
     const roles = (await this.roleRepo.loadSimilarRoles(roleId)).unwrap();
     return roles.map((r) => r.toJSON());
   }
