@@ -21,7 +21,7 @@ import path from 'path';
         ],
         autoLoadEntities: true,
         migrationsRun: true,
-        synchronize: config.getOrThrow<boolean>('DB_SYNC'), // for development only
+        synchronize: config.get<string>('DB_SYNC') === 'true', // for development only
         poolSize: 50,
       }),
     }),
