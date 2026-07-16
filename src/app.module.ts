@@ -15,10 +15,11 @@ import { ConfigModule } from '@nestjs/config';
 import { AppAuthModule } from './auth/auth.module';
 import { AccessControlModule } from './modules/access-control/access-control.module';
 import { AppErrorModule } from './error/app-error.module';
-
+import { AppLoggerModule } from './app-logger/app-logger.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    AppLoggerModule,
     AppErrorModule,
     DatabaseModule,
     AppAuthModule,
