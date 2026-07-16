@@ -20,7 +20,7 @@ const DEVELOPMENT_OPTIONS = {
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const isDev = config.get<string>('NODE_ENV') === 'production';
+        const isDev = config.get('NODE_ENV') === 'development';
         return {
           pinoHttp: {
             level: config.get<string>('LOG_LEVEL') ?? 'info',
