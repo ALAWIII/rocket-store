@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { LoggerModule } from 'nestjs-pino';
+import { ConfigService } from '@nestjs/config';
 import path from 'node:path';
 import { v7 } from 'uuid';
+import { LoggerModule } from 'nestjs-pino';
+import { AppLogLevel, toAppLogLevel } from './app-log.level';
 
 @Module({
   imports: [
     LoggerModule.forRootAsync({
-      imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        const level = config.get<string>('LOG_LEVEL') ?? 'info';
+        const level: AppLogLevel = toAppLogLevel(
+          config.get<string>('LOG_LEVEL'),
+        );
 
         return {
           pinoHttp: {
