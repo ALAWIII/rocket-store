@@ -5,6 +5,8 @@ import { v7 } from 'uuid';
 import argon2 from 'argon2';
 import { openAPI } from 'better-auth/plugins';
 import { Request } from 'express';
+import { Logger } from 'nestjs-pino';
+import { AppLogLevel, loggerMethodFor } from 'src/app-logger/app-log.level';
 
 async function betterHash(password: string) {
   return argon2.hash(password, {
@@ -17,9 +19,20 @@ async function betterHash(password: string) {
 async function betterVerify(data: { hash: string; password: string }) {
   return argon2.verify(data.hash, data.password);
 }
-export function createAuth(dataSource: DataSource) {
+export function createAuth(
+  dataSource: DataSource,
+  logger: Logger,
+  logLevel: AppLogLevel,
+) {
   return betterAuth({
     database: typeormAdapter(dataSource, { usePlural: true }),
+    logger: {
+      level: logLevel,
+      disableColors: true,
+      log: (level, message, ...args) => {
+        loggerMethodFor(level, logger)(message, ...(args as unknown[]));
+      },
+    },
     user: {
       additionalFields: {
         givenName: {
