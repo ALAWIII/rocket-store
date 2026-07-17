@@ -5,8 +5,15 @@ import { v7 } from 'uuid';
 import argon2 from 'argon2';
 import { openAPI } from 'better-auth/plugins';
 import { Request } from 'express';
-import { Logger } from 'nestjs-pino';
+import { PinoLogger } from 'nestjs-pino';
 import { AppLogLevel, loggerMethodFor } from 'src/app-logger/app-log.level';
+type Auth = ReturnType<typeof createAuth>;
+export type AppSession = Auth['$Infer']['Session'];
+export type AppUser = AppSession['user'];
+
+export interface AuthenticatedRequest extends Request {
+  user: AppUser;
+}
 
 async function betterHash(password: string) {
   return argon2.hash(password, {
@@ -21,7 +28,7 @@ async function betterVerify(data: { hash: string; password: string }) {
 }
 export function createAuth(
   dataSource: DataSource,
-  logger: Logger,
+  logger: PinoLogger,
   logLevel: AppLogLevel,
 ) {
   return betterAuth({
@@ -72,12 +79,4 @@ export function createAuth(
     disabledPaths: ['/update-user', '/delete-user'],
     plugins: [...(process.env.DEVELOPMENT_ENV === 'true' ? [openAPI()] : [])],
   });
-}
-
-type Auth = ReturnType<typeof createAuth>;
-export type AppSession = Auth['$Infer']['Session'];
-export type AppUser = AppSession['user'];
-
-export interface AuthenticatedRequest extends Request {
-  user: AppUser;
 }
