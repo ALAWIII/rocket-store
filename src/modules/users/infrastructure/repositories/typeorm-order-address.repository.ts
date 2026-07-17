@@ -37,6 +37,6 @@ export class OrderAddressRepositroy implements IOrderAddressRepository {
     return result ? this.toDomain(result) : null;
   }
   toDomain(oae: OrderAddressEntity): OrderAddress {
-    return OrderAddress.fromPrimitives({ ...oae });
+    return OrderAddress.fromPrimitives({ ...oae }).unwrap();
   }
 }

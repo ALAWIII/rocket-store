@@ -1,7 +1,9 @@
 import { UserId } from 'src/modules/shared/domain/ids';
+import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 import { Email } from 'src/modules/shared/value-objects/email';
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Phone } from 'src/modules/shared/value-objects/phone';
+import { Err, Ok, Result } from 'ts-results-es';
 
 type UserProps = {
   readonly id: UserId;
@@ -34,18 +36,26 @@ export class User {
   static restore(props: UserProps) {
     return new User(props);
   }
-  static fromPrimitives(data: UserPrimitives) {
-    return new User({
-      id: UserId.create(data.id),
+  static fromPrimitives(data: UserPrimitives): Result<User, Error> {
+    const dataValidate = unwrapResultObject({
       email: Email.create(data.email),
       name: Name.create(data.name),
       givenName: Name.create(data.givenName),
       familyName: Name.create(data.familyName),
-      roleId: data.roleId,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-      phone: data.phone !== undefined ? Phone.create(data.phone) : undefined,
+      phone:
+        data.phone !== undefined ? Phone.create(data.phone) : Ok(undefined),
     });
+    if (dataValidate.isErr()) return Err(dataValidate.error);
+
+    return Ok(
+      new User({
+        id: UserId.create(data.id),
+        ...dataValidate.value,
+        roleId: data.roleId,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      }),
+    );
   }
   update(props: UpdateUserProps) {
     if (props.givenName !== undefined) this.changeFirstName(props.givenName);

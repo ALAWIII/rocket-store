@@ -63,6 +63,6 @@ export class AddressRepository implements IAddressRepository {
     return this.toDomain(row);
   }
   toDomain(adrs: AddressEntity): Address {
-    return Address.fromPrimitives({ ...adrs });
+    return Address.fromPrimitives({ ...adrs }).unwrap();
   }
 }

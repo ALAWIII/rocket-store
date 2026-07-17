@@ -1,6 +1,8 @@
 import { AddressId, OrderId, UserId } from 'src/modules/shared/domain/ids';
+import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Phone } from 'src/modules/shared/value-objects/phone';
+import { Err, Ok, Result } from 'ts-results-es';
 
 type AddressProps = {
   readonly id: AddressId;
@@ -129,22 +131,28 @@ export class Address extends AddressBase<AddressProps> {
   get deletedAt(): Date | undefined {
     return this.props.deletedAt;
   }
-  static fromPrimitives(data: AddressPrimitives): Address {
-    return new Address({
-      id: AddressId.create(data.id),
-      userId: UserId.create(data.userId),
+  static fromPrimitives(data: AddressPrimitives): Result<Address, Error> {
+    const dataValidate = unwrapResultObject({
       fullName: Name.create(data.fullName),
       phone: Phone.create(data.phone),
       country: Name.create(data.country),
       city: Name.create(data.city),
       state: Name.create(data.state),
-      postalCode: data.postalCode,
-      addressLine1: data.addressLine1,
-      addressLine2: data.addressLine2,
-      createdAt: data.createdAt,
-      updatedAt: data.updatedAt,
-      deletedAt: data.deletedAt,
     });
+    if (dataValidate.isErr()) return Err(dataValidate.error);
+    return Ok(
+      new Address({
+        id: AddressId.create(data.id),
+        userId: UserId.create(data.userId),
+        postalCode: data.postalCode,
+        addressLine1: data.addressLine1,
+        addressLine2: data.addressLine2,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+        deletedAt: data.deletedAt,
+        ...dataValidate.value,
+      }),
+    );
   }
 
   toPrimitives(): AddressPrimitives {
@@ -210,21 +218,29 @@ export class OrderAddress extends AddressBase<OrderAddressProps> {
   static restore(data: OrderAddressProps): OrderAddress {
     return new OrderAddress(data);
   }
-  static fromPrimitives(data: OrderAddressPrimitives): OrderAddress {
-    return new OrderAddress({
-      id: AddressId.create(data.id),
-      orderId: OrderId.create(data.orderId),
-      addressType: data.addressType,
+  static fromPrimitives(
+    data: OrderAddressPrimitives,
+  ): Result<OrderAddress, Error> {
+    const dataValidate = unwrapResultObject({
       fullName: Name.create(data.fullName),
       phone: Phone.create(data.phone),
       country: Name.create(data.country),
       city: Name.create(data.city),
       state: Name.create(data.state),
-      postalCode: data.postalCode,
-      addressLine1: data.addressLine1,
-      addressLine2: data.addressLine2,
-      createdAt: data.createdAt,
     });
+    if (dataValidate.isErr()) return Err(dataValidate.error);
+    return Ok(
+      new OrderAddress({
+        id: AddressId.create(data.id),
+        orderId: OrderId.create(data.orderId),
+        addressType: data.addressType,
+        postalCode: data.postalCode,
+        addressLine1: data.addressLine1,
+        addressLine2: data.addressLine2,
+        createdAt: data.createdAt,
+        ...dataValidate.value,
+      }),
+    );
   }
 
   toPrimitives(): OrderAddressPrimitives {

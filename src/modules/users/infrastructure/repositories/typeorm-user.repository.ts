@@ -45,7 +45,7 @@ export class UserRepository implements IUserRepository {
     return updateResult.affected ?? 0;
   }
   private toDomain(userEntity: UserEntity): User {
-    return User.fromPrimitives({
+    const mappedUser = User.fromPrimitives({
       id: userEntity.id,
       email: userEntity.email,
       name: userEntity.name,
@@ -56,5 +56,7 @@ export class UserRepository implements IUserRepository {
       updatedAt: userEntity.updatedAt,
       createdAt: userEntity.createdAt,
     });
+
+    return mappedUser.unwrap();
   }
 }
