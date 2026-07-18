@@ -1,7 +1,7 @@
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Permission } from './permission';
 import { RoleId } from 'src/modules/shared/domain/ids';
-import { Result } from 'ts-results-es';
+import { Err, Ok, Result } from 'ts-results-es';
 import { InvalidValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 
 export class Role {
@@ -22,11 +22,11 @@ export class Role {
     id: string;
     name: string;
     permissions: Permission[];
-  }): Role {
-    return new Role(
-      RoleId.create(data.id),
-      Name.create(data.name).unwrap(),
-      data.permissions,
+  }): Result<Role, InvalidValueObjectError> {
+    const name = Name.create(data.name);
+    if (name.isErr()) return Err(name.error);
+    return Ok(
+      new Role(RoleId.create(data.id), name.unwrap(), data.permissions),
     );
   }
   findPermission(perm: Permission): number {
