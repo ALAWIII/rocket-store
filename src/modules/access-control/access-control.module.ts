@@ -7,27 +7,24 @@ import { AccessControlBootstrapService } from './application/access-control.boot
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { AccessControlService } from './access-control.service';
 import { SystemRolesRegistry } from './application/system-roles.registry';
-import { AuthZModule } from 'nest-authz';
-import { createCasbinEnforcer } from './infrastructure/casbin/casbin.factory';
+import { AUTHZ_ENFORCER, AuthZModule } from 'nest-authz';
 import { AppUser, AuthenticatedRequest } from 'src/auth/auth.config';
 import { UsersModule } from '../users/users.module';
 import { RolesController } from './role.controller';
 import { SystemRolesProvider } from './application/system-roles.provider';
 import { AccessGuard } from './guards/access-control.guard';
-import { IEnforcerHolder } from './infrastructure/casbin/enforcer-holder';
-import { EnforcerHolder } from './infrastructure/casbin/enforcer-holder.service';
+import { IEnforcerHolder } from './enforcer-holder/infrastructure/casbin/enforcer-holder';
+import { EnforcerHolderModule } from './enforcer-holder/enforcer-holder.module';
 @Module({
   imports: [
+    EnforcerHolderModule,
     UsersModule,
     TypeOrmModule.forFeature([RoleEntity]),
     AuthZModule.register({
+      imports: [EnforcerHolderModule],
       enforcerProvider: {
-        provide: IEnforcerHolder,
-        useFactory: async (): Promise<IEnforcerHolder> => {
-          const holder = new EnforcerHolder();
-          holder.set(await createCasbinEnforcer());
-          return holder;
-        },
+        provide: AUTHZ_ENFORCER,
+        useExisting: IEnforcerHolder,
       },
       userFromContext: (ctx): AppUser => {
         const request = ctx.switchToHttp().getRequest<AuthenticatedRequest>();
