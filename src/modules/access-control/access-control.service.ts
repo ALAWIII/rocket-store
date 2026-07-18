@@ -65,7 +65,7 @@ export class AccessControlService {
       permissions: updateData.permissions.map((p) =>
         Permission.fromPrimitives(p).unwrap(),
       ),
-    });
+    }).unwrap();
     const userPerms = await this.acsyncService.getPermissions(userRoleId);
     if (!upRole.isSubsetOf(userPerms)) {
       throw new RoleServiceError(
