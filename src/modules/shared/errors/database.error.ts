@@ -52,6 +52,3 @@ export class RecordNotFoundError extends DatabaseError {
 export class UnknownDatabaseError extends DatabaseError {
   readonly code = 'UNKNOWN' as const;
 }
-export class CorruptedPersistenceDataError extends DatabaseError {
-  readonly code = 'CORRUPTED_DATA_ERROR' as const;
-}
