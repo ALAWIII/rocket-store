@@ -3,8 +3,8 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { IRoleRepository } from '../infrastructure/repositories/role.repository';
 import type { Role } from '../domain/role';
 import { Permission } from '../domain/permission';
-import { createCasbinEnforcer } from '../infrastructure/casbin/casbin.factory';
-import { IEnforcerHolder } from '../infrastructure/casbin/enforcer-holder';
+import { createCasbinEnforcer } from '../enforcer-holder/infrastructure/casbin/casbin.factory';
+import { IEnforcerHolder } from '../enforcer-holder/infrastructure/casbin/enforcer-holder';
 
 @Injectable()
 export class AccessControlSyncService {

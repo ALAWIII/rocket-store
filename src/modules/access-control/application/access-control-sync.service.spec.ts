@@ -5,8 +5,8 @@ import { IRoleRepository } from '../infrastructure/repositories/role.repository'
 import { AllPermissions, Permission } from '../domain/permission';
 import { Role } from '../domain/role';
 import { Err, Ok } from 'ts-results-es';
-import { IEnforcerHolder } from '../infrastructure/casbin/enforcer-holder';
-import * as casbinFactory from '../infrastructure/casbin/casbin.factory';
+import { IEnforcerHolder } from '../enforcer-holder/infrastructure/casbin/enforcer-holder';
+import * as casbinFactory from '../enforcer-holder/infrastructure/casbin/casbin.factory';
 import { Enforcer } from 'casbin';
 
 function createRole(name: string, permissions: Permission[]): Role {

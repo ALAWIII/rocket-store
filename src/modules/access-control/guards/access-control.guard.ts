@@ -11,7 +11,7 @@ import {
   PermissionAttr,
 } from 'src/modules/shared/authorization/decorators/require-permission.decorator';
 import { AppUser } from 'src/auth/auth.config';
-import { IEnforcerHolder } from '../infrastructure/casbin/enforcer-holder';
+import { IEnforcerHolder } from '../enforcer-holder/infrastructure/casbin/enforcer-holder';
 
 @Injectable()
 export class AccessGuard implements CanActivate {
