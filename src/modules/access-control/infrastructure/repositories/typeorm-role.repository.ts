@@ -9,6 +9,7 @@ import type { DBResult } from 'src/modules/shared/errors/error.types';
 import { Err, None, Ok, Option, Some } from 'ts-results-es';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import {
+  CorruptedPersistenceDataError,
   RecordNotFoundError,
   UnknownDatabaseError,
 } from 'src/modules/shared/errors/database.error';
@@ -133,6 +134,14 @@ export class RoleRepository implements IRoleRepository {
       Permission.fromPrimitives(p).unwrap(),
     );
 
-    return Role.restore({ ...r, permissions: perms });
+    return Role.restore({ ...r, permissions: perms })
+      .mapErr(
+        (e) =>
+          new CorruptedPersistenceDataError(
+            `Failed to construct Role from RoleEntity.`,
+            e,
+          ),
+      )
+      .unwrap();
   }
 }
