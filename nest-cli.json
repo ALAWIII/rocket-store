@@ -7,7 +7,7 @@
     "watchAssets": true,
     "assets": [
       {
-        "include": "modules/access-control/infrastructure/casbin/*.conf",
+        "include": "modules/access-control/enforcer-holder/infrastructure/casbin/*.conf",
         "outDir": "dist/src/"
       }
     ]
