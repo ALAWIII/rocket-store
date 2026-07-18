@@ -2,6 +2,7 @@ import { AddressId, OrderId, UserId } from 'src/modules/shared/domain/ids';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Phone } from 'src/modules/shared/value-objects/phone';
+import { InvalidValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { Err, Ok, Result } from 'ts-results-es';
 
 type AddressProps = {
@@ -131,7 +132,9 @@ export class Address extends AddressBase<AddressProps> {
   get deletedAt(): Date | undefined {
     return this.props.deletedAt;
   }
-  static fromPrimitives(data: AddressPrimitives): Result<Address, Error> {
+  static fromPrimitives(
+    data: AddressPrimitives,
+  ): Result<Address, InvalidValueObjectError> {
     const dataValidate = unwrapResultObject({
       fullName: Name.create(data.fullName),
       phone: Phone.create(data.phone),
@@ -220,7 +223,7 @@ export class OrderAddress extends AddressBase<OrderAddressProps> {
   }
   static fromPrimitives(
     data: OrderAddressPrimitives,
-  ): Result<OrderAddress, Error> {
+  ): Result<OrderAddress, InvalidValueObjectError> {
     const dataValidate = unwrapResultObject({
       fullName: Name.create(data.fullName),
       phone: Phone.create(data.phone),

@@ -3,6 +3,7 @@ import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-resu
 import { Email } from 'src/modules/shared/value-objects/email';
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Phone } from 'src/modules/shared/value-objects/phone';
+import { InvalidValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { Err, Ok, Result } from 'ts-results-es';
 
 type UserProps = {
@@ -36,7 +37,9 @@ export class User {
   static restore(props: UserProps) {
     return new User(props);
   }
-  static fromPrimitives(data: UserPrimitives): Result<User, Error> {
+  static fromPrimitives(
+    data: UserPrimitives,
+  ): Result<User, InvalidValueObjectError> {
     const dataValidate = unwrapResultObject({
       email: Email.create(data.email),
       name: Name.create(data.name),
