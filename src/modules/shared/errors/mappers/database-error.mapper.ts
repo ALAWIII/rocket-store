@@ -13,12 +13,16 @@ type PgDriverError = Error & {
 };
 export function mapTypeOrmError(e: unknown): DatabaseError {
   if (e instanceof EntityNotFoundError)
-    return new RecordNotFoundError(e.message, e);
+    return new RecordNotFoundError('Resource Not Found', e);
   if (e instanceof QueryFailedError) {
     const driver = e.driverError as PgDriverError; // pg error code
-    if (driver.code === '23505') return new UniqueViolationError(e.message, e);
+    if (driver.code === '23505')
+      return new UniqueViolationError('Resource already exists', e);
     if (driver.code === '23503')
-      return new ForeignKeyViolationError(e.message, e);
+      return new ForeignKeyViolationError(
+        'Referenced resource was not found',
+        e,
+      );
   }
   return new UnknownDatabaseError('Unexpected database error', e);
 }
