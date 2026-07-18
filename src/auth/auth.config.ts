@@ -77,6 +77,6 @@ export function createAuth(
       autoSignInAfterVerification: true,
     },
     disabledPaths: ['/update-user', '/delete-user'],
-    plugins: [...(process.env.DEVELOPMENT_ENV === 'true' ? [openAPI()] : [])],
+    plugins: [...(process.env.NODE_ENV === 'development' ? [openAPI()] : [])],
   });
 }
