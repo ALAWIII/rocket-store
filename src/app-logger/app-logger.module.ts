@@ -35,10 +35,9 @@ import { AppLogLevel, toAppLogLevel } from './app-log.level';
                   level,
                   target: 'pino-roll',
                   options: {
-                    file: path.join('logs', 'app'),
+                    file: path.join('logs', 'app.jsonl'),
                     frequency: 'hourly',
                     dateFormat: 'yyyy-MM-dd-HH',
-                    extension: '.jsonl',
                     mkdir: true,
                     limit: { count: 168 }, // 7 days
                   },
