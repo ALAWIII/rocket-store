@@ -4,6 +4,7 @@ import { OrderAddress } from '../../domain/address';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderAddressEntity } from '../entities/address.entity';
 import { Repository } from 'typeorm';
+import { CorruptedPersistenceDataError } from 'src/modules/shared/errors/database.error';
 
 @Injectable()
 export class OrderAddressRepositroy implements IOrderAddressRepository {
@@ -36,7 +37,15 @@ export class OrderAddressRepositroy implements IOrderAddressRepository {
     const result = await this.orderAddressRepo.findOneBy({ id });
     return result ? this.toDomain(result) : null;
   }
-  toDomain(oae: OrderAddressEntity): OrderAddress {
-    return OrderAddress.fromPrimitives({ ...oae }).unwrap();
+  private toDomain(oae: OrderAddressEntity): OrderAddress {
+    return OrderAddress.fromPrimitives({ ...oae })
+      .mapErr(
+        (e) =>
+          new CorruptedPersistenceDataError(
+            `Failed to construct order address from OrderAddressEntity.`,
+            e,
+          ),
+      )
+      .unwrap();
   }
 }

@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { IUserRepository, UpdateUserRepoData } from './user.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { User } from '../../domain/user';
+import { CorruptedPersistenceDataError } from 'src/modules/shared/errors/database.error';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -55,7 +56,13 @@ export class UserRepository implements IUserRepository {
       phone: userEntity.phone ?? undefined,
       updatedAt: userEntity.updatedAt,
       createdAt: userEntity.createdAt,
-    });
+    }).mapErr(
+      (e) =>
+        new CorruptedPersistenceDataError(
+          `Failed to construct User from UserEntity`,
+          e,
+        ),
+    );
 
     return mappedUser.unwrap();
   }

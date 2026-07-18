@@ -4,6 +4,7 @@ import { IAddressRepository } from './address.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AddressEntity } from '../entities/address.entity';
 import { IsNull, Repository } from 'typeorm';
+import { CorruptedPersistenceDataError } from 'src/modules/shared/errors/database.error';
 
 @Injectable()
 export class AddressRepository implements IAddressRepository {
@@ -62,7 +63,15 @@ export class AddressRepository implements IAddressRepository {
 
     return this.toDomain(row);
   }
-  toDomain(adrs: AddressEntity): Address {
-    return Address.fromPrimitives({ ...adrs }).unwrap();
+  private toDomain(adrs: AddressEntity): Address {
+    return Address.fromPrimitives({ ...adrs })
+      .mapErr(
+        (e) =>
+          new CorruptedPersistenceDataError(
+            `Failed to construct address from AddressEntity.`,
+            e,
+          ),
+      )
+      .unwrap();
   }
 }
