@@ -1,16 +1,16 @@
-import { PinoLogger } from 'nestjs-pino';
+import { Logger } from 'nestjs-pino';
 
 const LOG_LEVELS = ['info', 'debug', 'warn', 'error'] as const;
 export type AppLogLevel = (typeof LOG_LEVELS)[number];
 
-export function loggerMethodFor(level: string, logger: PinoLogger) {
+export function loggerMethodFor(level: string, logger: Logger) {
   return (message: string, ...args: unknown[]) => {
     if (level === 'warn') return logger.warn(message, ...args);
     if (level === 'debug' || level === 'verbose')
       return logger.debug(message, ...args);
     if (level === 'fatal' || level === 'error')
       return logger.error(message, ...args);
-    return logger.info(message, ...args);
+    return logger.log(message, ...args);
   };
 }
 

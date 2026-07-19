@@ -5,16 +5,16 @@ import { DataSource } from 'typeorm';
 import { createAuth } from './auth.config';
 import { ConfigService } from '@nestjs/config';
 import { AppLogLevel, toAppLogLevel } from 'src/app-logger/app-log.level';
-import { PinoLogger } from 'nestjs-pino';
+import { Logger } from 'nestjs-pino';
 
 @Module({
   imports: [
     AuthModule.forRootAsync({
       imports: [DatabaseModule],
-      inject: [DataSource, PinoLogger, ConfigService],
+      inject: [DataSource, Logger, ConfigService],
       useFactory: (
         dataSource: DataSource,
-        logger: PinoLogger,
+        logger: Logger,
         config: ConfigService,
       ) => {
         const logLevel: AppLogLevel = toAppLogLevel(config.get('LOG_LEVEL'));

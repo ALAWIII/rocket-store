@@ -5,8 +5,8 @@ import { v7 } from 'uuid';
 import argon2 from 'argon2';
 import { openAPI } from 'better-auth/plugins';
 import { Request } from 'express';
-import { PinoLogger } from 'nestjs-pino';
 import { AppLogLevel, loggerMethodFor } from 'src/app-logger/app-log.level';
+import { Logger } from 'nestjs-pino';
 type Auth = ReturnType<typeof createAuth>;
 export type AppSession = Auth['$Infer']['Session'];
 export type AppUser = AppSession['user'];
@@ -28,7 +28,7 @@ async function betterVerify(data: { hash: string; password: string }) {
 }
 export function createAuth(
   dataSource: DataSource,
-  logger: PinoLogger,
+  logger: Logger,
   logLevel: AppLogLevel,
 ) {
   return betterAuth({
@@ -36,10 +36,12 @@ export function createAuth(
     logger: {
       level: logLevel,
       disableColors: true,
+      disabled: false,
       log: (level, message, ...args) => {
         loggerMethodFor(level, logger)(message, ...(args as unknown[]));
       },
     },
+
     user: {
       additionalFields: {
         givenName: {
