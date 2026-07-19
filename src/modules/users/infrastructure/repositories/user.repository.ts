@@ -1,4 +1,6 @@
+import { DBResult } from 'src/modules/shared/errors/error.types';
 import { User } from '../../domain/user';
+import { Option } from 'ts-results-es';
 
 export type UpdateUserRepoData = {
   name?: string;
@@ -9,14 +11,14 @@ export type UpdateUserRepoData = {
 };
 
 export abstract class IUserRepository {
-  abstract save(user: User): Promise<User>;
+  abstract save(user: User): Promise<DBResult<User>>;
   abstract updateById(
     id: string,
     data: UpdateUserRepoData,
-  ): Promise<User | null>;
-  abstract findById(id: string): Promise<User | null>;
+  ): Promise<DBResult<Option<User>>>;
+  abstract findById(id: string): Promise<DBResult<Option<User>>>;
   abstract reassignUsersRole(
     oldRoleId: string,
     newRoleId: string,
-  ): Promise<number>;
+  ): Promise<DBResult<number>>;
 }

@@ -88,10 +88,12 @@ export class AccessControlService {
     const isSystemRole = this.systemRole.hasId(roleId);
     if (isSystemRole)
       throw new SystemRoleError('System roles cannot be removed');
-    await this.userRepo.reassignUsersRole(
-      roleId,
-      this.systemRole.getCustomerRoleId(),
-    );
+    (
+      await this.userRepo.reassignUsersRole(
+        roleId,
+        this.systemRole.getCustomerRoleId(),
+      )
+    ).unwrap();
     const isRemoved = await this.acsyncService.removeRole(roleId);
     if (!isRemoved)
       throw new Error(

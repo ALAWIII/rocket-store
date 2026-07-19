@@ -1,10 +1,13 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { IUserRepository, UpdateUserRepoData } from './user.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { User } from '../../domain/user';
 import { CorruptedPersistenceDataError } from 'src/modules/shared/errors/database.error';
+import { DBResult } from 'src/modules/shared/errors/error.types';
+import { Err, None, Ok, Option, Some } from 'ts-results-es';
+import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 
 @Injectable()
 export class UserRepository implements IUserRepository {
@@ -12,38 +15,59 @@ export class UserRepository implements IUserRepository {
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
   ) {}
-  async save(user: User): Promise<User> {
-    const entity = this.userRepo.create(user.toJSON());
-    const saved = await this.userRepo.save(entity);
-    const fullUser = await this.findById(saved.id);
-    return fullUser!;
+  async save(user: User): Promise<DBResult<User>> {
+    try {
+      const entity = this.userRepo.create(user.toJSON());
+      const saved = await this.userRepo.save(entity);
+      const fullUser = await this.findById(saved.id);
+
+      return Ok(fullUser.unwrap().unwrap());
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
   }
-  async updateById(id: string, data: UpdateUserRepoData): Promise<User | null> {
-    const result = await this.userRepo
-      .createQueryBuilder()
-      .update(UserEntity)
-      .set({ ...data })
-      .where('id= :id', { id })
-      .returning('*')
-      .execute();
-    const rows = result.raw as UserEntity[];
-    const row = rows[0] ?? null;
-    return row ? this.toDomain(row) : null;
+  async updateById(
+    id: string,
+    data: UpdateUserRepoData,
+  ): Promise<DBResult<Option<User>>> {
+    try {
+      const result = await this.userRepo
+        .createQueryBuilder()
+        .update(UserEntity)
+        .set({ ...data })
+        .where('id= :id', { id })
+        .returning('*')
+        .execute();
+      const rows = result.raw as UserEntity[];
+      const row = rows[0] ?? null;
+
+      return Ok(row ? Some(this.toDomain(row)) : None);
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
   }
 
-  async findById(id: string): Promise<User | null> {
-    const entity = await this.userRepo.findOneBy({ id });
-    return entity ? this.toDomain(entity) : null;
+  async findById(id: string): Promise<DBResult<Option<User>>> {
+    try {
+      const entity = await this.userRepo.findOneBy({ id });
+      return Ok(entity ? Some(this.toDomain(entity)) : None);
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
   }
   async reassignUsersRole(
     oldRoleId: string,
     newRoleId: string,
-  ): Promise<number> {
-    const updateResult = await this.userRepo.update(
-      { roleId: oldRoleId },
-      { roleId: newRoleId },
-    );
-    return updateResult.affected ?? 0;
+  ): Promise<DBResult<number>> {
+    try {
+      const updateResult = await this.userRepo.update(
+        { roleId: oldRoleId },
+        { roleId: newRoleId },
+      );
+      return Ok(updateResult.affected ?? 0);
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
   }
   private toDomain(userEntity: UserEntity): User {
     const mappedUser = User.fromPrimitives({
