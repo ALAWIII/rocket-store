@@ -4,7 +4,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { User } from '../../domain/user';
-import { CorruptedPersistenceDataError } from 'src/modules/shared/errors/database.error';
+import {
+  CorruptedPersistenceDataError,
+  UnknownDatabaseError,
+} from 'src/modules/shared/errors/database.error';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Err, None, Ok, Option, Some } from 'ts-results-es';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
@@ -17,11 +20,20 @@ export class UserRepository implements IUserRepository {
   ) {}
   async save(user: User): Promise<DBResult<User>> {
     try {
-      const entity = this.userRepo.create(user.toJSON());
-      const saved = await this.userRepo.save(entity);
-      const fullUser = await this.findById(saved.id);
+      const result = await this.userRepo
+        .createQueryBuilder()
+        .insert()
+        .values(user.toJSON())
+        .returning('*')
+        .execute();
 
-      return Ok(fullUser.unwrap().unwrap());
+      const row = (result.raw as UserEntity[])[0];
+      if (!row) {
+        throw new UnknownDatabaseError(
+          'Failed to return the newly inserted user.',
+        );
+      }
+      return Ok(this.toDomain(row));
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
