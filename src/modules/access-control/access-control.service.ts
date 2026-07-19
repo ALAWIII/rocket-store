@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { Permission } from './domain/permission';
@@ -13,6 +13,8 @@ import { RoleServiceError } from './access-control.error.service';
 
 @Injectable()
 export class AccessControlService {
+  private readonly logger = new Logger(AccessControlService.name);
+
   constructor(
     private readonly userRepo: IUserRepository,
     private readonly roleRepo: IRoleRepository,
@@ -21,6 +23,7 @@ export class AccessControlService {
   ) {}
   async findAll(roleId: string): Promise<RoleResponseDto[]> {
     const roles = (await this.roleRepo.loadSimilarRoles(roleId)).unwrap();
+    this.logger.log(`Loaded ${roles.length} roles.`);
     return roles.map((r) => r.toJSON());
   }
   async reloadPolicies() {
@@ -41,6 +44,9 @@ export class AccessControlService {
         Permission.fromPrimitives(p).unwrap(),
       ),
     }).unwrap();
+    this.logger.log(`New role instantiated.`, {
+      roleId: newRole.id,
+    });
     const userPerms = await this.acsyncService.getPermissions(userRoleId);
     if (!newRole.isSubsetOf(userPerms)) {
       throw new RoleServiceError(
@@ -67,6 +73,7 @@ export class AccessControlService {
       ),
     }).unwrap();
     const userPerms = await this.acsyncService.getPermissions(userRoleId);
+    this.logger.log(`loaded ${userPerms.size} permissions.`);
     if (!upRole.isSubsetOf(userPerms)) {
       throw new RoleServiceError(
         'Can not update role with permissions that are not owned by the user.',
@@ -85,7 +92,11 @@ export class AccessControlService {
       roleId,
       this.systemRole.getCustomerRoleId(),
     );
-    await this.acsyncService.removeRole(roleId);
+    const isRemoved = await this.acsyncService.removeRole(roleId);
+    if (!isRemoved)
+      throw new Error(
+        `Failed to remove Casbin policies for role id: ${roleId}.`,
+      );
     return (await this.roleRepo.removeById(roleId)).unwrap();
   }
 }
