@@ -11,6 +11,7 @@ import {
   AddressEntity,
   OrderAddressEntity,
 } from './infrastructure/entities/address.entity';
+import { UsersService } from './users.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, AddressEntity, OrderAddressEntity]),
@@ -19,6 +20,7 @@ import {
     { provide: IUserRepository, useClass: UserRepository },
     { provide: IAddressRepository, useClass: AddressRepository },
     { provide: IOrderAddressRepository, useClass: OrderAddressRepositroy },
+    UsersService,
   ],
   exports: [IUserRepository, IAddressRepository, IOrderAddressRepository],
 })
