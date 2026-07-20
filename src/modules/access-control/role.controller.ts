@@ -34,7 +34,7 @@ export class RolesController {
   @Post()
   @RequirePermission(AllPermissions.role.RoleCreateOwn)
   async create(@Session() session: AppSession, @Body() dto: CreateRoleDto) {
-    return await this.service.upsertRole(session.user.roleId, dto);
+    return await this.service.createRole(session.user.roleId, dto);
   }
 
   @Get()

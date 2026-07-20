@@ -50,7 +50,7 @@ describe('AccessControlService', () => {
       systemRoleMock.isSystemRoleName.mockReturnValue(true);
 
       await expect(
-        service.upsertRole('not-important', adminRole),
+        service.createRole('not-important', adminRole),
       ).rejects.toThrow('Try to create/override an existing system role.');
       expect(systemRoleMock.isSystemRoleName).toHaveBeenCalledTimes(1);
       expect(roleRepoMock.upsert).toHaveBeenCalledTimes(0);
@@ -62,7 +62,7 @@ describe('AccessControlService', () => {
       };
       systemRoleMock.isSystemRoleName.mockReturnValue(false);
       acsyncServiceMock.getPermissions.mockReturnValue(new Map());
-      const role = service.upsertRole('userRoleId', newRole);
+      const role = service.createRole('userRoleId', newRole);
       await expect(role).rejects.toThrow(
         'Can not create role with permissions that are not owned by the user.',
       );
@@ -86,7 +86,7 @@ describe('AccessControlService', () => {
       ]);
       systemRoleMock.isSystemRoleName.mockReturnValue(false);
       acsyncServiceMock.getPermissions.mockReturnValue(userPermissionList);
-      const role = service.upsertRole('userRoleId', newRole);
+      const role = service.createRole('userRoleId', newRole);
       await expect(role).rejects.toThrow(
         'Can not create role with permissions that are not owned by the user.',
       );
@@ -105,7 +105,7 @@ describe('AccessControlService', () => {
       acsyncServiceMock.getPermissions.mockReturnValue(userPermissions);
       roleRepoMock.upsert.mockImplementation((role: Role) => Ok(role));
 
-      const role = await service.upsertRole('roleId', devRoleDto);
+      const role = await service.createRole('roleId', devRoleDto);
 
       expect(role).toMatchObject({
         name: devRoleDto.name,

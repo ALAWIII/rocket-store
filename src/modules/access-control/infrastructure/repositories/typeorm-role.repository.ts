@@ -20,6 +20,28 @@ export class RoleRepository implements IRoleRepository {
     @InjectRepository(RoleEntity)
     private readonly roleRepo: Repository<RoleEntity>,
   ) {}
+  async create(role: Role): Promise<DBResult<Role>> {
+    try {
+      const newRole = role.toJSON();
+      const result = await this.roleRepo
+        .createQueryBuilder()
+        .insert()
+        .values({
+          id: newRole.id,
+          name: newRole.name,
+          permissions: newRole.permissions,
+        })
+        .returning('*')
+        .execute();
+      const row = (result.raw as RoleEntity[])[0];
+      if (!row) {
+        return Err(new UnknownDatabaseError('Create did not return a row'));
+      }
+      return Ok(this.toDomain(row));
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   async loadSimilarRoles(roleId: string): Promise<DBResult<Role[]>> {
     try {
       const loadPerms = this.roleRepo
