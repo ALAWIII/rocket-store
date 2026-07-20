@@ -48,6 +48,14 @@ export class UserRepository implements IUserRepository {
       return Err(mapTypeOrmError(e));
     }
   }
+  async findByEmail(email: string): Promise<DBResult<Option<User>>> {
+    try {
+      const user = await this.userRepo.findOneBy({ email });
+      return Ok(user ? Some(this.toDomain(user)) : None);
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   async findBy(
     data: FilterUsersByData,
   ): Promise<DBResult<{ users: User[]; total: number }>> {
