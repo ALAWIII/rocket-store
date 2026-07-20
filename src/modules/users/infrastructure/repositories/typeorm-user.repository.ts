@@ -36,6 +36,14 @@ export class UserRepository implements IUserRepository {
       return Err(mapTypeOrmError(e));
     }
   }
+  async findById(id: string): Promise<DBResult<Option<User>>> {
+    try {
+      const entity = await this.userRepo.findOneBy({ id });
+      return Ok(entity ? Some(this.toDomain(entity)) : None);
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   async save(user: User): Promise<DBResult<User>> {
     try {
       const result = await this.userRepo
@@ -77,14 +85,6 @@ export class UserRepository implements IUserRepository {
     }
   }
 
-  async findById(id: string): Promise<DBResult<Option<User>>> {
-    try {
-      const entity = await this.userRepo.findOneBy({ id });
-      return Ok(entity ? Some(this.toDomain(entity)) : None);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
-  }
   async reassignUsersRole(
     oldRoleId: string,
     newRoleId: string,
