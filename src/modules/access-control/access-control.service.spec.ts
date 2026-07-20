@@ -5,7 +5,7 @@ import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { SystemRolesRegistry } from './application/system-roles.registry';
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { Role } from './domain/role';
-import { Ok } from 'ts-results-es';
+import { None, Ok } from 'ts-results-es';
 import { AllPermissions, Permission } from './domain/permission';
 import { RoleServiceError } from './access-control.error.service';
 
@@ -182,7 +182,7 @@ describe('AccessControlService', () => {
     it('should remove a non-system role successfully', async () => {
       systemRoleMock.hasId.mockReturnValue(false);
       systemRoleMock.getCustomerRoleId.mockReturnValue('customer-id');
-      userRepoMock.reassignUsersRole.mockResolvedValue(undefined);
+      userRepoMock.reassignUsersRole.mockResolvedValue(Ok(None));
       acsyncServiceMock.removeRole.mockResolvedValue(true);
       roleRepoMock.removeById.mockResolvedValue(Ok(1));
 
