@@ -15,7 +15,7 @@ describe('AccessControlService', () => {
     reassignUsersRole: jest.fn(),
   };
   const roleRepoMock = {
-    upsert: jest.fn(),
+    create: jest.fn(),
     removeById: jest.fn(),
     update: jest.fn(),
   };
@@ -53,7 +53,7 @@ describe('AccessControlService', () => {
         service.createRole('not-important', adminRole),
       ).rejects.toThrow('Try to create/override an existing system role.');
       expect(systemRoleMock.isSystemRoleName).toHaveBeenCalledTimes(1);
-      expect(roleRepoMock.upsert).toHaveBeenCalledTimes(0);
+      expect(roleRepoMock.create).toHaveBeenCalledTimes(0);
     });
     it('should throw error when attempting to create role with permission list length greater than what the user have or provide.', async () => {
       const newRole = {
@@ -67,7 +67,7 @@ describe('AccessControlService', () => {
         'Can not create role with permissions that are not owned by the user.',
       );
       await expect(role).rejects.toBeInstanceOf(RoleServiceError);
-      expect(roleRepoMock.upsert).toHaveBeenCalledTimes(0);
+      expect(roleRepoMock.create).toHaveBeenCalledTimes(0);
     });
     it('should throw error when attempting to create role with at least one of permissions from the permission list isnt found in the user role permissions list.', async () => {
       const newRole = {
@@ -91,7 +91,7 @@ describe('AccessControlService', () => {
         'Can not create role with permissions that are not owned by the user.',
       );
       await expect(role).rejects.toBeInstanceOf(RoleServiceError);
-      expect(roleRepoMock.upsert).toHaveBeenCalledTimes(0);
+      expect(roleRepoMock.create).toHaveBeenCalledTimes(0);
     });
     it('should successfully upsert new role.', async () => {
       const devRoleDto = { name: 'developer', permissions: [] };
@@ -103,7 +103,7 @@ describe('AccessControlService', () => {
       ]);
       systemRoleMock.isSystemRoleName.mockReturnValue(false);
       acsyncServiceMock.getPermissions.mockReturnValue(userPermissions);
-      roleRepoMock.upsert.mockImplementation((role: Role) => Ok(role));
+      roleRepoMock.create.mockImplementation((role: Role) => Ok(role));
 
       const role = await service.createRole('roleId', devRoleDto);
 
@@ -112,8 +112,8 @@ describe('AccessControlService', () => {
         permissions: devRoleDto.permissions,
       });
 
-      expect(roleRepoMock.upsert).toHaveBeenCalledTimes(1);
-      const passedRole = (roleRepoMock.upsert.mock.calls[0] as Role[])[0];
+      expect(roleRepoMock.create).toHaveBeenCalledTimes(1);
+      const passedRole = (roleRepoMock.create.mock.calls[0] as Role[])[0];
       expect(passedRole).toBeInstanceOf(Role);
       expect(passedRole.name).toBe(devRoleDto.name);
       expect(passedRole.permissions).toEqual(devRoleDto.permissions);
