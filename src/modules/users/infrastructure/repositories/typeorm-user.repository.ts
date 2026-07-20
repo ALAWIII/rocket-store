@@ -18,6 +18,24 @@ export class UserRepository implements IUserRepository {
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
   ) {}
+
+  async findAll(d: {
+    page: number;
+    limit: number;
+  }): Promise<DBResult<{ users: User[]; total: number }>> {
+    try {
+      const [items, total] = await this.userRepo
+        .createQueryBuilder()
+        .orderBy('createdAt', 'DESC')
+        .skip((d.page - 1) * d.limit)
+        .take(d.limit)
+        .getManyAndCount();
+
+      return Ok({ users: items.map((u) => this.toDomain(u)), total });
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   async save(user: User): Promise<DBResult<User>> {
     try {
       const result = await this.userRepo

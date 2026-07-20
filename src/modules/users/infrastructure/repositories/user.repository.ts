@@ -21,4 +21,8 @@ export abstract class IUserRepository {
     oldRoleId: string,
     newRoleId: string,
   ): Promise<DBResult<number>>;
+  abstract findAll(d: {
+    page: number;
+    limit: number;
+  }): Promise<DBResult<{ users: User[]; total: number }>>;
 }
