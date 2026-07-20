@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { IUserRepository, UpdateUserRepoData } from './user.repository';
+import {
+  FilterUsersByData,
+  IUserRepository,
+  UpdateUserRepoData,
+} from './user.repository';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { User } from '../../domain/user';
 import {
@@ -40,6 +44,42 @@ export class UserRepository implements IUserRepository {
     try {
       const entity = await this.userRepo.findOneBy({ id });
       return Ok(entity ? Some(this.toDomain(entity)) : None);
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
+  async findBy(
+    data: FilterUsersByData,
+  ): Promise<DBResult<{ users: User[]; total: number }>> {
+    try {
+      const qb = this.userRepo.createQueryBuilder('users');
+
+      if (data.name) {
+        qb.andWhere(
+          new Brackets((q) => {
+            q.where('users.name ILIKE :name', { name: `%${data.name}%` })
+              .orWhere('users.givenName ILIKE :name', {
+                name: `%${data.name}%`,
+              })
+              .orWhere('users.familyName ILIKE :name', {
+                name: `%${data.name}%`,
+              });
+          }),
+        );
+      }
+
+      if (data.email)
+        qb.andWhere('users.email ILIKE :email', { email: `%${data.email}%` });
+      if (data.roleId)
+        qb.andWhere('users.roleId = :roleId', { roleId: data.roleId });
+      if (data.phone)
+        qb.andWhere('users.phone ILIKE :phone', { phone: `%${data.phone}%` });
+
+      const [users, total] = await qb
+        .skip(((data.page ?? 1) - 1) * (data.limit ?? 100))
+        .take(data.limit ?? 100)
+        .getManyAndCount();
+      return Ok({ users: users.map((u) => this.toDomain(u)), total });
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
