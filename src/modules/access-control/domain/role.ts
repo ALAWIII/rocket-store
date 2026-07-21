@@ -1,69 +1,94 @@
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Permission } from './permission';
 import { RoleId } from 'src/modules/shared/domain/ids';
-import { Err, Ok, Result } from 'ts-results-es';
+import { Err, None, Ok, Option, Result, Some } from 'ts-results-es';
 import { InvalidValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 
+type RoleProps = {
+  id: RoleId;
+  name: Name; // unique
+  permissions: Map<string, Permission>;
+  assignScope?: Map<string, Permission>;
+  createScope?: Map<string, Permission>;
+};
+type CreateRoleProps = Omit<RoleProps, 'id'> & { name: string };
+type RestoreRoleProps = CreateRoleProps & { id: string };
 export class Role {
-  private constructor(
-    private readonly _id: RoleId,
-    private _name: Name, // unique
-    private _permissions: Permission[],
-  ) {}
-  static create(roleData: {
-    name: string;
-    permissions: Permission[];
-  }): Result<Role, InvalidValueObjectError> {
+  private constructor(private readonly props: RoleProps) {}
+  static create(
+    roleData: CreateRoleProps,
+  ): Result<Role, InvalidValueObjectError> {
     return Name.create(roleData.name).map(
-      (name) => new Role(RoleId.create(), name, roleData.permissions),
+      (name) => new Role({ id: RoleId.create(), ...roleData, name }),
     );
   }
-  static restore(data: {
-    id: string;
-    name: string;
-    permissions: Permission[];
-  }): Result<Role, InvalidValueObjectError> {
+  static restore(
+    data: RestoreRoleProps,
+  ): Result<Role, InvalidValueObjectError> {
     const name = Name.create(data.name);
     if (name.isErr()) return Err(name.error);
     return Ok(
-      new Role(RoleId.create(data.id), name.unwrap(), data.permissions),
+      new Role({ ...data, id: RoleId.create(data.id), name: name.unwrap() }),
     );
   }
-  findPermission(perm: Permission): number {
-    return this._permissions.findIndex((p) => p.equals(perm));
+  findPermission(perm: Permission): Option<Permission> {
+    const p = this.props.permissions.get(perm.key());
+    return p ? Some(p) : None;
   }
-  isSubsetOf(permissionMap: Map<string, Permission>): boolean {
-    if (this.permissions.length > permissionMap.size) return false;
+  isSupersetOf(perms: readonly Permission[]): boolean {
+    const localPerms = this.props.permissions;
+    return (
+      localPerms.size >= perms.length &&
+      perms.every((perm) => localPerms.has(perm.key()))
+    );
+  }
+  isAssignScopeSupersetOf(perms: readonly Permission[]): boolean {
+    const scope = this.props.assignScope;
+    if (!scope || scope.size < perms.length) return false;
+    return perms.every((perm) => scope.has(perm.key()));
+  }
 
-    for (const perm of this.permissions) {
-      if (!permissionMap.has(perm.key())) return false;
-    }
-    return true;
+  isCreateScopeSupersetOf(perms: readonly Permission[]): boolean {
+    const scope = this.props.createScope;
+    if (!scope || scope.size < perms.length) return false;
+    return perms.every((perm) => scope.has(perm.key()));
   }
   addPermission(perm: Permission) {
-    const index = this.findPermission(perm);
-    if (index >= 0) return;
-
-    this._permissions.push(perm);
+    this.props.permissions.set(perm.key(), perm);
   }
   removePermission(perm: Permission) {
-    const index = this.findPermission(perm);
-    if (index < 0) return;
-    this._permissions.splice(index, 1);
+    this.props.permissions.delete(perm.key());
   }
   setName(name: string) {
-    this._name = Name.create(name).unwrap();
+    this.props.name = Name.create(name).unwrap();
   }
   get name(): string {
-    return this._name.value;
+    return this.props.name.value;
   }
   get id(): string {
-    return this._id.toString();
+    return this.props.id.toString();
   }
-  get permissions(): Permission[] {
-    return this._permissions;
+  get permissions(): Readonly<Permission[]> {
+    const perms = [...this.props.permissions.values()];
+    perms.sort((p1, p2) => p1.key().localeCompare(p2.key()));
+    return perms;
   }
-
+  get assignScopePermissions(): Option<Readonly<Permission[]>> {
+    if (!this.props.assignScope) {
+      return None;
+    }
+    const perms = [...this.props.assignScope.values()];
+    perms.sort((p1, p2) => p1.key().localeCompare(p2.key()));
+    return Some(perms);
+  }
+  get createScopePermissions(): Option<Readonly<Permission[]>> {
+    if (!this.props.createScope) {
+      return None;
+    }
+    const perms = [...this.props.createScope.values()];
+    perms.sort((p1, p2) => p1.key().localeCompare(p2.key()));
+    return Some(perms);
+  }
   toFlatPolicies(): string[][] {
     const permList: string[][] = [];
     for (const perm of this.permissions) {
@@ -82,6 +107,12 @@ export class Role {
       id: this.id,
       name: this.name,
       permissions: this.permissions.map((p) => p.toJSON()),
+      assignScope: this.assignScopePermissions
+        .map((ps) => ps.map((p) => p.toJSON()))
+        .unwrapOr(undefined),
+      createScope: this.createScopePermissions
+        .map((ps) => ps.map((p) => p.toJSON()))
+        .unwrapOr(undefined),
     };
   }
 }
