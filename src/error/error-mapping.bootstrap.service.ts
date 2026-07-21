@@ -13,7 +13,7 @@ import {
   UniqueViolationError,
 } from 'src/modules/shared/errors/database.error';
 import { PermissionError } from 'src/modules/access-control/domain/permission.error';
-import { InvalidValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
+import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { SystemRoleError } from 'src/modules/access-control/application/system-roles.error';
 import { RoleServiceError } from 'src/modules/access-control/access-control.error.service';
 
@@ -26,7 +26,7 @@ export class ErrorMappingBootstrap implements OnModuleInit {
       .register(UniqueViolationError, (e) => new ConflictException(e.message))
       .register(PermissionError, (e) => new BadRequestException(e.message))
       .register(
-        InvalidValueObjectError,
+        ValueObjectError,
         (e) => new UnprocessableEntityException(e.message),
       )
       .register(SystemRoleError, (e) => new BadRequestException(e.message))
