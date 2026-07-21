@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { UserRepository } from './infrastructure/repositories/typeorm-user.repository';
+import { IUserRepository } from './infrastructure/repositories/user.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepo: UserRepository) {}
+  constructor(private readonly userRepo: IUserRepository) {}
   findAll() {}
 }
