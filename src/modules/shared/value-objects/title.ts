@@ -1,13 +1,13 @@
 import { Err, Ok, Result } from 'ts-results-es';
-import { InvalidValueObjectError } from './value-object.error';
+import { ValueObjectError } from './value-object.error';
 
 export class Title {
   private constructor(private _title: string) {}
-  static create(title: string): Result<Title, InvalidValueObjectError> {
+  static create(title: string): Result<Title, ValueObjectError> {
     const normalized = title.trim();
     if (normalized.length < 2 || normalized.length > 100)
       return Err(
-        new InvalidValueObjectError(
+        new ValueObjectError(
           'Invalid product title length must be between 2 and 100 characters.',
         ),
       );
