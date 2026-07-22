@@ -27,87 +27,53 @@ type CreateRoleProps = Omit<RolePropsPrimitives, 'id'>;
 export class Role {
   private constructor(private readonly props: RoleProps) {}
   static create(data: CreateRoleProps): Result<Role, RoleError> {
-    const name = Name.create(data.name).mapErr(
-      (e) => new InvalidRoleValueError(e.message),
-    );
-    if (name.isErr()) {
-      return Err(name.error);
-    }
-    const superPermsMap = new Map(data.permissions.map((p) => [p.key(), p]));
-    const assignScopeCondition =
-      (superPermsMap.has(AllPermissions.role.RoleAssignAny.key()) ||
-        superPermsMap.has(AllPermissions.role.RoleAssignOwn.key())) &&
-      data.assignScope !== undefined &&
-      data.assignScope.length > 0;
-    const createScopeCondition =
-      (superPermsMap.has(AllPermissions.role.RoleCreateAny.key()) ||
-        superPermsMap.has(AllPermissions.role.RoleCreateOwn.key())) &&
-      data.createScope !== undefined &&
-      data.createScope.length > 0;
-    if (!assignScopeCondition) {
-      superPermsMap.delete(AllPermissions.role.RoleAssignAny.key());
-      superPermsMap.delete(AllPermissions.role.RoleAssignOwn.key());
-    }
-    if (!createScopeCondition) {
-      superPermsMap.delete(AllPermissions.role.RoleCreateAny.key());
-      superPermsMap.delete(AllPermissions.role.RoleCreateOwn.key());
-    }
-    const result = this.validateSupersetPerms(superPermsMap, {
-      assignScope: assignScopeCondition ? data.assignScope : undefined,
-      createScope: createScopeCondition ? data.createScope : undefined,
-    });
-    if (result.isErr()) {
-      return Err(result.error);
-    }
-    const resultUnwrap = result.unwrap();
-    return Ok(
-      new Role({
-        id: RoleId.create(),
-        name: name.unwrap(),
-        permissions: superPermsMap,
-        assignScope: resultUnwrap.assignScope.unwrapOr(undefined),
-        createScope: resultUnwrap.createScope.unwrapOr(undefined),
-      }),
-    );
+    return this.build(RoleId.create(), data);
   }
+
   static restore(data: RolePropsPrimitives): Result<Role, RoleError> {
+    return this.build(RoleId.create(data.id), data);
+  }
+  private static build(
+    id: RoleId,
+    data: {
+      name: string;
+      permissions: Permission[];
+      assignScope?: Permission[];
+      createScope?: Permission[];
+    },
+  ): Result<Role, RoleError> {
     const name = Name.create(data.name).mapErr(
       (e) => new InvalidRoleValueError(e.message),
     );
     if (name.isErr()) return Err(name.error);
 
     const superPermsMap = new Map(data.permissions.map((p) => [p.key(), p]));
-    const assignScopeCondition =
-      (superPermsMap.has(AllPermissions.role.RoleAssignAny.key()) ||
-        superPermsMap.has(AllPermissions.role.RoleAssignOwn.key())) &&
-      data.assignScope !== undefined &&
-      data.assignScope.length > 0;
-    const createScopeCondition =
-      (superPermsMap.has(AllPermissions.role.RoleCreateAny.key()) ||
-        superPermsMap.has(AllPermissions.role.RoleCreateOwn.key())) &&
-      data.createScope !== undefined &&
-      data.createScope.length > 0;
-    if (!assignScopeCondition) {
-      superPermsMap.delete(AllPermissions.role.RoleAssignAny.key());
-      superPermsMap.delete(AllPermissions.role.RoleAssignOwn.key());
-    }
-    if (!createScopeCondition) {
-      superPermsMap.delete(AllPermissions.role.RoleCreateAny.key());
-      superPermsMap.delete(AllPermissions.role.RoleCreateOwn.key());
-    }
+
+    const assignScope = this.resolveScope(
+      superPermsMap,
+      AllPermissions.role.RoleAssignAny.key(),
+      AllPermissions.role.RoleAssignOwn.key(),
+      data.assignScope,
+    );
+
+    const createScope = this.resolveScope(
+      superPermsMap,
+      AllPermissions.role.RoleCreateAny.key(),
+      AllPermissions.role.RoleCreateOwn.key(),
+      data.createScope,
+    );
+
     const result = this.validateSupersetPerms(superPermsMap, {
-      assignScope: assignScopeCondition ? data.assignScope : undefined,
-      createScope: createScopeCondition ? data.createScope : undefined,
+      assignScope,
+      createScope,
     });
-    if (result.isErr()) {
-      return Err(result.error);
-    }
+    if (result.isErr()) return Err(result.error);
 
     const resultUnwrap = result.unwrap();
 
     return Ok(
       new Role({
-        id: RoleId.create(data.id),
+        id,
         name: name.unwrap(),
         permissions: superPermsMap,
         assignScope: resultUnwrap.assignScope.unwrapOr(undefined),
@@ -115,6 +81,25 @@ export class Role {
       }),
     );
   }
+  private static resolveScope(
+    superPermsMap: Map<string, Permission>,
+    anyPermKey: string,
+    ownPermKey: string,
+    scope?: Permission[],
+  ): Permission[] | undefined {
+    const hasScopePerm =
+      superPermsMap.has(anyPermKey) || superPermsMap.has(ownPermKey);
+    const isValid = hasScopePerm && !!scope && scope.length > 0;
+
+    if (!isValid) {
+      superPermsMap.delete(anyPermKey);
+      superPermsMap.delete(ownPermKey);
+      return undefined;
+    }
+
+    return scope;
+  }
+
   private static validateSupersetPerms(
     superPermsMap: Map<string, Permission>,
     permScopes: {
