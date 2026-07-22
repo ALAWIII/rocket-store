@@ -23,7 +23,7 @@ describe('Role', () => {
     it('success create Role that has no special permissions.', () => {
       const permissions = [
         AllPermissions.role.RoleReadAny,
-        AllPermissions.role.RoleUpdateOwn,
+        AllPermissions.role.RoleUpdateAny,
       ];
       const result = Role.create({
         name: 'hello',

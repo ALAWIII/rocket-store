@@ -52,7 +52,6 @@ export class Role {
     const assignScope = this.resolveScope(
       superPermsMap,
       AllPermissions.role.RoleAssignAny.key(),
-      AllPermissions.role.RoleAssignOwn.key(),
       data.assignScope,
       'assignScope',
     );
@@ -60,7 +59,6 @@ export class Role {
     const createScope = this.resolveScope(
       superPermsMap,
       AllPermissions.role.RoleCreateAny.key(),
-      AllPermissions.role.RoleCreateOwn.key(),
       data.createScope,
       'createScope',
     );
@@ -87,12 +85,10 @@ export class Role {
   private static resolveScope(
     superPermsMap: ReadonlyMap<string, Permission>,
     anyPermKey: string,
-    ownPermKey: string,
     scope: Permission[] | undefined,
     scopeName: 'assignScope' | 'createScope',
   ): Result<Permission[] | undefined, InvalidRoleValueError> {
-    const hasScopePerm =
-      superPermsMap.has(anyPermKey) || superPermsMap.has(ownPermKey);
+    const hasScopePerm = superPermsMap.has(anyPermKey);
 
     const hasScopeValues = !!scope && scope.length > 0;
 

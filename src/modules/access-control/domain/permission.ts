@@ -9,14 +9,14 @@ import {
 //======================= consider only update this matrix, and automatically it will generate for you the needed permission instances.
 // an action shouldnt be empty or its useless.
 // Own = can manage roles/resources that are of my creations.
-// Any = can manage roles/resources that are within my effective permission set. (inheritance)
+// Any = may create/assign any role whose permission set is ⊆ allowed scope (herarachical, inheritance)
 const Matrix = {
   role: {
-    create: ['own', 'any'],
-    read: ['own', 'any'],
-    update: ['own', 'any'],
-    delete: ['own', 'any'],
-    assign: ['own', 'any'],
+    create: ['any'],
+    read: ['any'],
+    update: ['any'],
+    delete: ['any'],
+    assign: ['any'],
   },
   product: {
     create: ['own', 'any'],
