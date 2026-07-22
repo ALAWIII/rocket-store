@@ -42,7 +42,7 @@ export class AccessControlSyncService {
       Permission.fromPrimitives({
         entity: p[1],
         action: p[2],
-        scope: p[3],
+        visibility: p[3],
       }).unwrap(),
     );
     return policies;
