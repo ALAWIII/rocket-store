@@ -9,20 +9,6 @@ import { IEnforcerHolder } from '../enforcer-holder/infrastructure/casbin/enforc
 import * as casbinFactory from '../enforcer-holder/infrastructure/casbin/casbin.factory';
 import { Enforcer } from 'casbin';
 
-function createRole(
-  name: string,
-  permissions: readonly Permission[],
-  assignScope?: readonly Permission[],
-  createScope?: readonly Permission[],
-): Role {
-  return Role.create({
-    name,
-    permissions: [...permissions],
-    assignScope: assignScope ? [...assignScope] : undefined,
-    createScope: createScope ? [...createScope] : undefined,
-  }).unwrap();
-}
-
 describe('AccessControlSyncService', () => {
   let service: AccessControlSyncService;
 
@@ -69,13 +55,17 @@ describe('AccessControlSyncService', () => {
   //===================================================
   describe('reloadFromDatabase', () => {
     it('should create new enforcer and call addPolicies to load a list of policies from database to the enforcer.', async () => {
-      const adminRole = createRole('admin', [
-        AllPermissions.role.RoleCreateOwn,
-        AllPermissions.role.RoleDeleteOwn,
-      ] as Permission[]);
-      const workerRole = createRole('worker', [
-        AllPermissions.order.OrderReadOwn,
-      ] as Permission[]);
+      const adminRole = Role.create({
+        name: 'admin',
+        permissions: [
+          AllPermissions.role.RoleReadAny,
+          AllPermissions.role.RoleUpdateAny,
+        ] as Permission[],
+      }).unwrap();
+      const workerRole = Role.create({
+        name: 'worker',
+        permissions: [AllPermissions.order.OrderReadOwn] as Permission[],
+      }).unwrap();
       const roles = [adminRole, workerRole];
       //-----------------
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
@@ -98,7 +88,10 @@ describe('AccessControlSyncService', () => {
     });
 
     it('should not call enforcer.addPolicies when there are no policies to load.', async () => {
-      const anyrole = createRole('anyrole', []);
+      const anyrole = Role.create({
+        name: 'anyrole',
+        permissions: [],
+      }).unwrap();
       const roles = [anyrole];
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
 
@@ -121,10 +114,13 @@ describe('AccessControlSyncService', () => {
 
     it('should ignore duplicated policies while reloading', async () => {
       const roles = [
-        createRole('admin', [
-          AllPermissions.role.RoleCreateOwn,
-          AllPermissions.role.RoleCreateOwn,
-        ] as Permission[]),
+        Role.create({
+          name: 'admin',
+          permissions: [
+            AllPermissions.role.RoleReadAny,
+            AllPermissions.role.RoleReadAny,
+          ] as Permission[],
+        }).unwrap(),
       ];
 
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
@@ -150,9 +146,10 @@ describe('AccessControlSyncService', () => {
 
     it('should propagate enforcer addPolicies errors', async () => {
       const roles = [
-        createRole('admin', [
-          AllPermissions.role.RoleCreateOwn,
-        ] as Permission[]),
+        Role.create({
+          name: 'admin',
+          permissions: [AllPermissions.role.RoleReadAny] as Permission[],
+        }).unwrap(),
       ];
 
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
@@ -178,10 +175,13 @@ describe('AccessControlSyncService', () => {
     });
 
     it('should remove existing policies and return enforcer result', async () => {
-      const adminRole = createRole('admin', [
-        AllPermissions.role.RoleCreateOwn,
-        AllPermissions.role.RoleReadOwn,
-      ] as Permission[]);
+      const adminRole = Role.create({
+        name: 'admin',
+        permissions: [
+          AllPermissions.role.RoleReadAny,
+          AllPermissions.role.RoleUpdateAny,
+        ] as Permission[],
+      }).unwrap();
 
       const existingPolicies = adminRole.toFlatPolicies();
 
@@ -201,10 +201,13 @@ describe('AccessControlSyncService', () => {
     });
 
     it('should return false when enforcer removePolicies returns false', async () => {
-      const adminRole = createRole('admin', [
-        AllPermissions.role.RoleCreateOwn,
-        AllPermissions.role.RoleReadOwn,
-      ] as Permission[]);
+      const adminRole = Role.create({
+        name: 'admin',
+        permissions: [
+          AllPermissions.role.RoleReadAny,
+          AllPermissions.role.RoleUpdateAny,
+        ] as Permission[],
+      }).unwrap();
 
       const existingPolicies = adminRole.toFlatPolicies();
 
@@ -222,7 +225,10 @@ describe('AccessControlSyncService', () => {
   //===================================================
   describe('addRole', () => {
     it('should return true and not call addPolicies when role has no permissions', async () => {
-      const adminRole = createRole('admin', []);
+      const adminRole = Role.create({
+        name: 'admin',
+        permissions: [],
+      }).unwrap();
 
       const result = await service.addRole(adminRole);
 
@@ -231,10 +237,13 @@ describe('AccessControlSyncService', () => {
     });
 
     it('should add policies for role permissions and return enforcer result', async () => {
-      const adminRole = createRole('admin', [
-        AllPermissions.role.RoleCreateOwn,
-        AllPermissions.role.RoleReadOwn,
-      ] as Permission[]);
+      const adminRole = Role.create({
+        name: 'admin',
+        permissions: [
+          AllPermissions.role.RoleReadAny,
+          AllPermissions.role.RoleUpdateAny,
+        ] as Permission[],
+      }).unwrap();
 
       enforcerHolderMock.addPolicies.mockResolvedValue(true);
 
@@ -248,10 +257,13 @@ describe('AccessControlSyncService', () => {
     });
 
     it('should ignore duplicate permissions when adding role', async () => {
-      const adminRole = createRole('admin', [
-        AllPermissions.role.RoleCreateOwn,
-        AllPermissions.role.RoleCreateOwn,
-      ] as Permission[]);
+      const adminRole = Role.create({
+        name: 'admin',
+        permissions: [
+          AllPermissions.role.RoleReadAny,
+          AllPermissions.role.RoleReadAny,
+        ] as Permission[],
+      }).unwrap();
 
       enforcerHolderMock.addPolicies.mockResolvedValue(true);
 
@@ -264,9 +276,10 @@ describe('AccessControlSyncService', () => {
     });
 
     it('should return false when enforcer addPolicies returns false', async () => {
-      const adminRole = createRole('admin', [
-        AllPermissions.role.RoleCreateOwn,
-      ] as Permission[]);
+      const adminRole = Role.create({
+        name: 'admin',
+        permissions: [AllPermissions.role.RoleReadAny] as Permission[],
+      }).unwrap();
 
       enforcerHolderMock.addPolicies.mockResolvedValue(false);
 
@@ -279,9 +292,10 @@ describe('AccessControlSyncService', () => {
   //===================================================
   describe('hasRole', () => {
     it('should return true when policies exist for role', async () => {
-      const adminRole = createRole('admin', [
-        AllPermissions.role.RoleCreateOwn,
-      ] as Permission[]);
+      const adminRole = Role.create({
+        name: 'admin',
+        permissions: [AllPermissions.role.RoleReadAny] as Permission[],
+      }).unwrap();
       enforcerHolderMock.getPoliciesById.mockResolvedValue(
         adminRole.toFlatPolicies(),
       );
@@ -308,9 +322,10 @@ describe('AccessControlSyncService', () => {
   //===================================================
   describe('upsertRole', () => {
     it('should remove then add role policies successfully', async () => {
-      const adminRole = createRole('admin', [
-        AllPermissions.role.RoleCreateOwn,
-      ] as Permission[]);
+      const adminRole = Role.create({
+        name: 'admin',
+        permissions: [AllPermissions.role.RoleReadAny] as Permission[],
+      }).unwrap();
 
       const removeRoleSpy = jest
         .spyOn(service, 'removeRole')
@@ -330,9 +345,10 @@ describe('AccessControlSyncService', () => {
     });
 
     it('should throw when addRole returns false', async () => {
-      const adminRole = createRole('admin', [
-        AllPermissions.role.RoleCreateOwn,
-      ] as Permission[]);
+      const adminRole = Role.create({
+        name: 'admin',
+        permissions: [AllPermissions.role.RoleReadAny] as Permission[],
+      }).unwrap();
 
       jest.spyOn(service, 'removeRole').mockResolvedValue(true);
       jest.spyOn(service, 'addRole').mockResolvedValue(false);
@@ -343,9 +359,10 @@ describe('AccessControlSyncService', () => {
     });
 
     it('should propagate removeRole errors', async () => {
-      const workerRole = createRole('worker', [
-        AllPermissions.role.RoleCreateOwn,
-      ] as Permission[]);
+      const workerRole = Role.create({
+        name: 'worker',
+        permissions: [AllPermissions.role.RoleReadAny] as Permission[],
+      }).unwrap();
 
       jest
         .spyOn(service, 'removeRole')
@@ -357,9 +374,10 @@ describe('AccessControlSyncService', () => {
     });
 
     it('should propagate addRole errors', async () => {
-      const workerRole = createRole('worker', [
-        AllPermissions.role.RoleCreateOwn,
-      ] as Permission[]);
+      const workerRole = Role.create({
+        name: 'worker',
+        permissions: [AllPermissions.role.RoleReadAny] as Permission[],
+      }).unwrap();
       jest.spyOn(service, 'removeRole').mockResolvedValue(true);
       jest.spyOn(service, 'addRole').mockRejectedValue(new Error('add failed'));
 
