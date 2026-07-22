@@ -7,57 +7,75 @@ import {
   PermissionResult,
 } from './permission.error';
 //======================= consider only update this matrix, and automatically it will generate for you the needed permission instances.
+// an action shouldnt be empty or its useless.
 // Own = can manage roles/resources that are of my creations.
 // Any = can manage roles/resources that are within my effective permission set. (inheritance)
-const PermissionMatrix = {
+const Matrix = {
   role: {
-    actions: ['create', 'read', 'update', 'delete', 'reload', 'assign'],
-    scopes: ['own', 'any'],
+    create: ['own', 'any'],
+    read: ['own', 'any'],
+    update: ['own', 'any'],
+    delete: ['own', 'any'],
+    assign: ['own', 'any'],
   },
   product: {
-    actions: ['create', 'view', 'list', 'update', 'delete'],
-    scopes: ['own', 'any'],
+    create: ['own', 'any'],
+    read: ['own', 'any'],
+    update: ['own', 'any'],
+    delete: ['own', 'any'],
   },
   order: {
-    actions: ['view', 'list', 'cancel', 'refund'],
-    scopes: ['own', 'any'],
+    create: ['own', 'any'],
+    read: ['own', 'any'],
+    update: ['own', 'any'],
+    delete: ['own', 'any'],
   },
   cart: {
-    actions: ['view', 'update'],
-    scopes: ['own'],
+    create: ['own', 'any'],
+    read: ['own', 'any'],
+    update: ['own', 'any'],
+    delete: ['own', 'any'],
   },
   user: {
-    actions: ['create', 'view', 'list', 'update', 'delete'],
-    scopes: ['own', 'any'],
+    create: ['own', 'any'],
+    read: ['own', 'any'],
+    update: ['own', 'any'],
+    delete: ['own', 'any'],
   },
 } as const;
 //==================================
+
 type StringKeyOf<T> = Extract<keyof T, string>;
-type CapitalizeWord<T extends string> = Capitalize<T>;
+type Matrix = typeof Matrix;
 
-type PermissionMatrix = typeof PermissionMatrix;
+export type Entity = StringKeyOf<Matrix>;
+export type Action<E extends Entity = Entity> = StringKeyOf<Matrix[E]>;
 
-export type Entity = StringKeyOf<PermissionMatrix>;
+export type Visibility<
+  E extends Entity = Entity,
+  A extends Action<E> = Action<E>,
+> = Extract<Matrix[E][A], readonly string[]>[number];
 
-export type Action<E extends Entity = Entity> =
-  PermissionMatrix[E]['actions'][number];
-
-export type Scope<E extends Entity = Entity> =
-  PermissionMatrix[E]['scopes'][number];
-
-type PermissionProps<E extends Entity = Entity> = {
+//=================================
+type PermissionProps<
+  E extends Entity = Entity,
+  A extends Action<E> = Action<E>,
+> = {
   entity: E;
-  action: Action<E>;
-  scope: Scope<E>;
+  action: A;
+  visibility: Visibility<E, A>;
 };
 
-export class Permission<E extends Entity = Entity> {
-  private constructor(private readonly props: PermissionProps<E>) {}
+export class Permission<
+  E extends Entity = Entity,
+  A extends Action<E> = Action<E>,
+> {
+  private constructor(private readonly props: PermissionProps<E, A>) {}
 
   static fromPrimitives(data: {
     entity: string;
     action: string;
-    scope: string;
+    visibility: string;
   }): PermissionResult<Permission> {
     if (!isEntity(data.entity)) {
       return Err(new InvalidPermissionEntityError(data.entity));
@@ -67,8 +85,8 @@ export class Permission<E extends Entity = Entity> {
       return Err(new InvalidPermissionActionError(data.action, data.entity));
     }
 
-    if (!isScopeForEntity(data.entity, data.scope)) {
-      return Err(new InvalidPermissionScopeError(data.scope, data.entity));
+    if (!isScopeForEntity(data.entity, data.action, data.visibility)) {
+      return Err(new InvalidPermissionScopeError(data.visibility, data.entity));
     }
     return Ok(new Permission(data as PermissionProps));
   }
@@ -81,9 +99,9 @@ export class Permission<E extends Entity = Entity> {
         ),
       );
     }
-    const [entity, action, scope] = parts;
+    const [entity, action, visibility] = parts;
 
-    return this.fromPrimitives({ entity, action, scope });
+    return this.fromPrimitives({ entity, action, visibility });
   }
 
   equals(other: Permission): boolean {
@@ -94,42 +112,40 @@ export class Permission<E extends Entity = Entity> {
     return this.toString();
   }
 
-  toString(): `${E}.${Action<E>}.${Scope<E>}` {
-    const { entity, action, scope } = this.props;
-    return `${entity}.${action}.${scope}`;
+  toString(): string {
+    const { entity, action, visibility } = this.props;
+    return `${entity}.${action}.${visibility}`;
   }
 
   toJSON(): Readonly<PermissionProps<E>> {
     return { ...this.props };
   }
 }
-
-function capitalize<T extends string>(value: T): Capitalize<T> {
-  return (value.charAt(0).toUpperCase() + value.slice(1)) as Capitalize<T>;
-}
-
+//================== Permission class validators =========
 function isEntity(value: string): value is Entity {
-  return value in PermissionMatrix;
+  return value in Matrix;
 }
 
 function isActionForEntity<E extends Entity>(
   entity: E,
   value: string,
 ): value is Action<E> {
-  return (PermissionMatrix[entity].actions as readonly string[]).includes(
-    value,
-  );
+  return value in Matrix[entity];
 }
 
-function isScopeForEntity<E extends Entity>(
+function isScopeForEntity<E extends Entity, A extends Action<E>>(
   entity: E,
+  action: A,
   value: string,
-): value is Scope<E> {
-  return (PermissionMatrix[entity].scopes as readonly string[]).includes(value);
+): value is Visibility<E, A> {
+  return (Matrix[entity][action] as readonly string[]).includes(value);
 }
+// =================================== summing up ============================
+type CapitalizeWord<T extends string> = Capitalize<T>;
 
-type PermissionKey<E extends Entity> =
-  `${CapitalizeWord<E>}${CapitalizeWord<Action<E>>}${CapitalizeWord<Scope<E>>}`;
+type PermissionKey<E extends Entity> = {
+  [A in Action<E>]: `${CapitalizeWord<E>}${CapitalizeWord<A>}${CapitalizeWord<Visibility<E, A>>}`;
+}[Action<E>];
 
 type EntityPermissionMap<E extends Entity> = {
   [K in PermissionKey<E>]: Permission<E>;
@@ -139,27 +155,40 @@ type AllPermissionsMap = {
   [E in Entity]: EntityPermissionMap<E>;
 };
 
+function capitalize<T extends string>(value: T): Capitalize<T> {
+  return (value.charAt(0).toUpperCase() + value.slice(1)) as Capitalize<T>;
+}
 function buildEntityPermissions<E extends Entity>(
   entity: E,
 ): EntityPermissionMap<E> {
-  const { actions, scopes } = PermissionMatrix[entity];
+  const actions = Object.keys(Matrix[entity]) as Action<E>[];
 
   return Object.fromEntries(
-    actions.flatMap((action: Action<E>) =>
-      scopes.map((scope: Scope<E>) => {
-        const key = `${capitalize(entity)}${capitalize(action)}${capitalize(scope)}`;
+    actions.flatMap((action) => {
+      const visibilities = Matrix[entity][action] as readonly Visibility<
+        E,
+        typeof action
+      >[];
+
+      return visibilities.map((visibility) => {
+        const key =
+          `${capitalize(entity)}${capitalize(action)}${capitalize(visibility)}` as const;
 
         return [
           key,
-          Permission.fromPrimitives({ entity, action, scope }).unwrap(),
+          Permission.fromPrimitives({
+            entity,
+            action,
+            visibility,
+          }).unwrap(),
         ] as const;
-      }),
-    ),
-  ) as EntityPermissionMap<E>;
+      });
+    }),
+  ) as unknown as EntityPermissionMap<E>;
 }
 
 export const AllPermissions: AllPermissionsMap = Object.fromEntries(
-  (Object.keys(PermissionMatrix) as Entity[]).map((entity) => {
+  (Object.keys(Matrix) as Entity[]).map((entity) => {
     return [entity, buildEntityPermissions(entity)] as const;
   }),
 ) as AllPermissionsMap;
