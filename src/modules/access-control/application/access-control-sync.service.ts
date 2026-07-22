@@ -37,7 +37,7 @@ export class AccessControlSyncService {
       `Casbin policies reloaded: ${policies.length} policies from ${allRoles.length} roles`,
     );
   }
-  async getPermissions(roleId: string): Promise<Map<string, Permission>> {
+  async getPermissions(roleId: string): Promise<Permission[]> {
     const policies = (await this.enforcer.getPoliciesById(roleId)).map((p) =>
       Permission.fromPrimitives({
         entity: p[1],
@@ -45,8 +45,7 @@ export class AccessControlSyncService {
         scope: p[3],
       }).unwrap(),
     );
-    const permissionMap = new Map(policies.map((p) => [p.key(), p]));
-    return permissionMap;
+    return policies;
   }
   async upsertRole(role: Role): Promise<void> {
     const removed = await this.removeRole(role.id);
