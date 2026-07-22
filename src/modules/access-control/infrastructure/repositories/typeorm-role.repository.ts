@@ -13,6 +13,7 @@ import {
   RecordNotFoundError,
   UnknownDatabaseError,
 } from 'src/modules/shared/errors/database.error';
+import { PermissionError } from '../../domain/permission.error';
 
 @Injectable()
 export class RoleRepository implements IRoleRepository {
@@ -30,6 +31,8 @@ export class RoleRepository implements IRoleRepository {
           id: newRole.id,
           name: newRole.name,
           permissions: newRole.permissions,
+          assignScope: newRole.assignScope,
+          createScope: newRole.createScope,
         })
         .returning('*')
         .execute();
@@ -152,11 +155,31 @@ export class RoleRepository implements IRoleRepository {
     }
   }
   private toDomain(r: RoleEntity): Role {
-    const perms = r.permissions.map((p) =>
-      Permission.fromPrimitives(p).unwrap(),
+    const permError = (e: PermissionError) =>
+      new CorruptedPersistenceDataError(
+        'Failed to construct Permission at the database level',
+        e,
+      );
+    const permissions = r.permissions.map((p) =>
+      Permission.fromPrimitives(p).mapErr(permError).unwrap(),
     );
-
-    return Role.restore({ ...r, permissions: perms })
+    const assignScope = r.assignScope
+      ? r.assignScope.map((p) =>
+          Permission.fromPrimitives(p).mapErr(permError).unwrap(),
+        )
+      : undefined;
+    const createScope = r.createScope
+      ? r.createScope.map((p) =>
+          Permission.fromPrimitives(p).mapErr(permError).unwrap(),
+        )
+      : undefined;
+    return Role.restore({
+      id: r.id,
+      name: r.name,
+      permissions,
+      assignScope,
+      createScope,
+    })
       .mapErr(
         (e) =>
           new CorruptedPersistenceDataError(
