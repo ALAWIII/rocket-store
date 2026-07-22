@@ -85,7 +85,7 @@ export class Permission<
       return Err(new InvalidPermissionActionError(data.action, data.entity));
     }
 
-    if (!isScopeForEntity(data.entity, data.action, data.visibility)) {
+    if (!isVisibilityForEntity(data.entity, data.action, data.visibility)) {
       return Err(new InvalidPermissionScopeError(data.visibility, data.entity));
     }
     return Ok(new Permission(data as PermissionProps));
@@ -133,7 +133,7 @@ function isActionForEntity<E extends Entity>(
   return value in Matrix[entity];
 }
 
-function isScopeForEntity<E extends Entity, A extends Action<E>>(
+function isVisibilityForEntity<E extends Entity, A extends Action<E>>(
   entity: E,
   action: A,
   value: string,
