@@ -54,18 +54,21 @@ export class Role {
       AllPermissions.role.RoleAssignAny.key(),
       AllPermissions.role.RoleAssignOwn.key(),
       data.assignScope,
+      'assignScope',
     );
-
+    if (assignScope.isErr()) return Err(assignScope.error);
     const createScope = this.resolveScope(
       superPermsMap,
       AllPermissions.role.RoleCreateAny.key(),
       AllPermissions.role.RoleCreateOwn.key(),
       data.createScope,
+      'createScope',
     );
+    if (createScope.isErr()) return Err(createScope.error);
 
     const result = this.validateSupersetPerms(superPermsMap, {
-      assignScope,
-      createScope,
+      assignScope: assignScope.unwrap(),
+      createScope: createScope.unwrap(),
     });
     if (result.isErr()) return Err(result.error);
 
@@ -82,22 +85,26 @@ export class Role {
     );
   }
   private static resolveScope(
-    superPermsMap: Map<string, Permission>,
+    superPermsMap: ReadonlyMap<string, Permission>,
     anyPermKey: string,
     ownPermKey: string,
-    scope?: Permission[],
-  ): Permission[] | undefined {
+    scope: Permission[] | undefined,
+    scopeName: 'assignScope' | 'createScope',
+  ): Result<Permission[] | undefined, InvalidRoleValueError> {
     const hasScopePerm =
       superPermsMap.has(anyPermKey) || superPermsMap.has(ownPermKey);
-    const isValid = hasScopePerm && !!scope && scope.length > 0;
 
-    if (!isValid) {
-      superPermsMap.delete(anyPermKey);
-      superPermsMap.delete(ownPermKey);
-      return undefined;
+    const hasScopeValues = !!scope && scope.length > 0;
+
+    if (hasScopePerm !== hasScopeValues) {
+      return Err(
+        new InvalidRoleValueError(
+          `${scopeName} must be provided if and only if its related scoped permission exists.`,
+        ),
+      );
     }
 
-    return scope;
+    return Ok(scope);
   }
 
   private static validateSupersetPerms(
