@@ -9,8 +9,18 @@ import { IEnforcerHolder } from '../enforcer-holder/infrastructure/casbin/enforc
 import * as casbinFactory from '../enforcer-holder/infrastructure/casbin/casbin.factory';
 import { Enforcer } from 'casbin';
 
-function createRole(name: string, permissions: Permission[]): Role {
-  return Role.create({ name, permissions }).unwrap();
+function createRole(
+  name: string,
+  permissions: readonly Permission[],
+  assignScope?: readonly Permission[],
+  createScope?: readonly Permission[],
+): Role {
+  return Role.create({
+    name,
+    permissions: [...permissions],
+    assignScope: assignScope ? [...assignScope] : undefined,
+    createScope: createScope ? [...createScope] : undefined,
+  }).unwrap();
 }
 
 describe('AccessControlSyncService', () => {
@@ -62,10 +72,10 @@ describe('AccessControlSyncService', () => {
       const adminRole = createRole('admin', [
         AllPermissions.role.RoleCreateOwn,
         AllPermissions.role.RoleDeleteOwn,
-      ]);
+      ] as Permission[]);
       const workerRole = createRole('worker', [
-        AllPermissions.order.OrderViewOwn,
-      ]);
+        AllPermissions.order.OrderReadOwn,
+      ] as Permission[]);
       const roles = [adminRole, workerRole];
       //-----------------
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
@@ -110,11 +120,11 @@ describe('AccessControlSyncService', () => {
     });
 
     it('should ignore duplicated policies while reloading', async () => {
-      const duplicatePermissionA = AllPermissions.role.RoleCreateOwn;
-      const duplicatePermissionB = AllPermissions.role.RoleCreateOwn;
-
       const roles = [
-        createRole('admin', [duplicatePermissionA, duplicatePermissionB]),
+        createRole('admin', [
+          AllPermissions.role.RoleCreateOwn,
+          AllPermissions.role.RoleCreateOwn,
+        ] as Permission[]),
       ];
 
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
@@ -139,7 +149,11 @@ describe('AccessControlSyncService', () => {
     });
 
     it('should propagate enforcer addPolicies errors', async () => {
-      const roles = [createRole('admin', [AllPermissions.role.RoleCreateOwn])];
+      const roles = [
+        createRole('admin', [
+          AllPermissions.role.RoleCreateOwn,
+        ] as Permission[]),
+      ];
 
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
       newEnforcerMock.addPolicies.mockRejectedValue(new Error('casbin failed'));
@@ -167,7 +181,7 @@ describe('AccessControlSyncService', () => {
       const adminRole = createRole('admin', [
         AllPermissions.role.RoleCreateOwn,
         AllPermissions.role.RoleReadOwn,
-      ]);
+      ] as Permission[]);
 
       const existingPolicies = adminRole.toFlatPolicies();
 
@@ -190,7 +204,7 @@ describe('AccessControlSyncService', () => {
       const adminRole = createRole('admin', [
         AllPermissions.role.RoleCreateOwn,
         AllPermissions.role.RoleReadOwn,
-      ]);
+      ] as Permission[]);
 
       const existingPolicies = adminRole.toFlatPolicies();
 
@@ -220,7 +234,7 @@ describe('AccessControlSyncService', () => {
       const adminRole = createRole('admin', [
         AllPermissions.role.RoleCreateOwn,
         AllPermissions.role.RoleReadOwn,
-      ]);
+      ] as Permission[]);
 
       enforcerHolderMock.addPolicies.mockResolvedValue(true);
 
@@ -237,7 +251,7 @@ describe('AccessControlSyncService', () => {
       const adminRole = createRole('admin', [
         AllPermissions.role.RoleCreateOwn,
         AllPermissions.role.RoleCreateOwn,
-      ]);
+      ] as Permission[]);
 
       enforcerHolderMock.addPolicies.mockResolvedValue(true);
 
@@ -252,7 +266,7 @@ describe('AccessControlSyncService', () => {
     it('should return false when enforcer addPolicies returns false', async () => {
       const adminRole = createRole('admin', [
         AllPermissions.role.RoleCreateOwn,
-      ]);
+      ] as Permission[]);
 
       enforcerHolderMock.addPolicies.mockResolvedValue(false);
 
@@ -267,7 +281,7 @@ describe('AccessControlSyncService', () => {
     it('should return true when policies exist for role', async () => {
       const adminRole = createRole('admin', [
         AllPermissions.role.RoleCreateOwn,
-      ]);
+      ] as Permission[]);
       enforcerHolderMock.getPoliciesById.mockResolvedValue(
         adminRole.toFlatPolicies(),
       );
@@ -296,7 +310,7 @@ describe('AccessControlSyncService', () => {
     it('should remove then add role policies successfully', async () => {
       const adminRole = createRole('admin', [
         AllPermissions.role.RoleCreateOwn,
-      ]);
+      ] as Permission[]);
 
       const removeRoleSpy = jest
         .spyOn(service, 'removeRole')
@@ -318,7 +332,7 @@ describe('AccessControlSyncService', () => {
     it('should throw when addRole returns false', async () => {
       const adminRole = createRole('admin', [
         AllPermissions.role.RoleCreateOwn,
-      ]);
+      ] as Permission[]);
 
       jest.spyOn(service, 'removeRole').mockResolvedValue(true);
       jest.spyOn(service, 'addRole').mockResolvedValue(false);
@@ -331,7 +345,7 @@ describe('AccessControlSyncService', () => {
     it('should propagate removeRole errors', async () => {
       const workerRole = createRole('worker', [
         AllPermissions.role.RoleCreateOwn,
-      ]);
+      ] as Permission[]);
 
       jest
         .spyOn(service, 'removeRole')
@@ -345,7 +359,7 @@ describe('AccessControlSyncService', () => {
     it('should propagate addRole errors', async () => {
       const workerRole = createRole('worker', [
         AllPermissions.role.RoleCreateOwn,
-      ]);
+      ] as Permission[]);
       jest.spyOn(service, 'removeRole').mockResolvedValue(true);
       jest.spyOn(service, 'addRole').mockRejectedValue(new Error('add failed'));
 
