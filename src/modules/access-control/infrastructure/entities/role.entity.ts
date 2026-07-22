@@ -4,7 +4,7 @@ import { Entity, Column, Index } from 'typeorm';
 type PermissionJson = {
   entity: string;
   action: string;
-  scope: string;
+  visibility: string;
 };
 
 @Entity('roles')
