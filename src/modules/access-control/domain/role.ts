@@ -219,7 +219,7 @@ export class Role {
         this.id,
         permJson.entity,
         permJson.action,
-        permJson.scope,
+        permJson.visibility,
       ]);
     }
     return permList;
