@@ -7,11 +7,12 @@ import {
   PermissionResult,
 } from './permission.error';
 //======================= consider only update this matrix, and automatically it will generate for you the needed permission instances.
-// Own = can manage roles/resources that are within my effective permission set.
+// Own = can manage roles/resources that are of my creations.
+// Any = can manage roles/resources that are within my effective permission set. (inheritance)
 const PermissionMatrix = {
   role: {
-    actions: ['create', 'read', 'update', 'delete', 'reload'],
-    scopes: ['own'],
+    actions: ['create', 'read', 'update', 'delete', 'reload', 'assign'],
+    scopes: ['own', 'any'],
   },
   product: {
     actions: ['create', 'view', 'list', 'update', 'delete'],
