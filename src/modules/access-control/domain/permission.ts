@@ -148,7 +148,7 @@ type PermissionKey<E extends Entity> = {
 }[Action<E>];
 
 type EntityPermissionMap<E extends Entity> = {
-  [K in PermissionKey<E>]: Permission<E>;
+  [K in PermissionKey<E>]: Permission<Entity>;
 };
 
 type AllPermissionsMap = {
