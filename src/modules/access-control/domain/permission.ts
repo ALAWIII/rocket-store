@@ -164,13 +164,13 @@ function buildEntityPermissions<E extends Entity>(
   const actions = Object.keys(Matrix[entity]) as Action<E>[];
 
   return Object.fromEntries(
-    actions.flatMap((action) => {
+    actions.flatMap((action: Action<E>) => {
       const visibilities = Matrix[entity][action] as readonly Visibility<
         E,
         typeof action
       >[];
 
-      return visibilities.map((visibility) => {
+      return visibilities.map((visibility: Visibility<E, Action<E>>) => {
         const key =
           `${capitalize(entity)}${capitalize(action)}${capitalize(visibility)}` as const;
 
