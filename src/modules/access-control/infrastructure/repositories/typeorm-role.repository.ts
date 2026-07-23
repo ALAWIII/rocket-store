@@ -21,25 +21,53 @@ export class RoleRepository implements IRoleRepository {
     @InjectRepository(RoleEntity)
     private readonly roleRepo: Repository<RoleEntity>,
   ) {}
-  async create(role: Role): Promise<DBResult<Role>> {
+  async create(role: Role, creatorRoleId: string): Promise<DBResult<Role>> {
     try {
       const newRole = role.toJSON();
+
       const result = await this.roleRepo
         .createQueryBuilder()
         .insert()
-        .values({
+        .into(RoleEntity, [
+          'id',
+          'name',
+          'permissions',
+          'assignScope',
+          'createScope',
+        ])
+        .valuesFromSelect((qb) =>
+          qb
+            .select([
+              ':id',
+              ':name',
+              ':permissions',
+              ':assignScope',
+              ':createScope',
+            ])
+            .from(RoleEntity, 'creator')
+            .where('creator.id = :creatorRoleId')
+            .andWhere('creator.create_scope @> :permissions'),
+        )
+        .setParameters({
           id: newRole.id,
           name: newRole.name,
           permissions: newRole.permissions,
           assignScope: newRole.assignScope,
           createScope: newRole.createScope,
+          creatorRoleId,
         })
         .returning('*')
         .execute();
+
       const row = (result.raw as RoleEntity[])[0];
       if (!row) {
-        return Err(new UnknownDatabaseError('Create did not return a row'));
+        return Err(
+          new UnknownDatabaseError(
+            'Creator create_scope does not contain new role permissions.',
+          ),
+        );
       }
+
       return Ok(this.toDomain(row));
     } catch (e) {
       return Err(mapTypeOrmError(e));

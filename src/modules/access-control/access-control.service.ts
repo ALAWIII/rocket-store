@@ -59,7 +59,7 @@ export class AccessControlService {
         'Can not create role with permissions that are not owned by the user.',
       );
     }
-    const role = (await this.roleRepo.create(newRole)).unwrap();
+    const role = (await this.roleRepo.create(newRole, userRoleId)).unwrap();
     await this.acsyncService.upsertRole(role);
 
     return role.toJSON();
