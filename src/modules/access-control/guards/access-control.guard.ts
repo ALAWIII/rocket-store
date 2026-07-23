@@ -23,18 +23,23 @@ export class AccessGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const permission = this.reflector.getAllAndOverride<PermissionAttr>(
+    const permissions = this.reflector.getAllAndMerge<PermissionAttr[]>(
       PERMISSION_KEY,
       [context.getHandler(), context.getClass()],
     );
-    if (!permission) return true;
+
+    if (!permissions?.length) return true;
 
     const user = this.options.userFromContext(context) as AppUser;
-    return await this.enforcerHolder.enforce({
-      roleId: user.roleId,
-      entity: permission.entity,
-      action: permission.action,
-      visibility: permission.visibility,
-    });
+    for (const perm of permissions) {
+      const isMatch = await this.enforcerHolder.enforce({
+        roleId: user.roleId,
+        entity: perm.entity,
+        action: perm.action,
+        visibility: perm.visibility,
+      });
+      if (isMatch) return true;
+    }
+    return false;
   }
 }
