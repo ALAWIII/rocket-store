@@ -10,6 +10,7 @@ import { UpdateRoleDto } from './dto/update-role.dto';
 import { Role } from './domain/role';
 import { SystemRoleError } from './application/system-roles.error';
 import { RoleServiceError } from './access-control.error.service';
+import { permissionDepsTable } from './domain/permission-dependency.table';
 
 @Injectable()
 export class AccessControlService {
@@ -37,18 +38,21 @@ export class AccessControlService {
       throw new SystemRoleError(
         'Try to create/override an existing system role.',
       );
-
+    const permissions = roleData.permissions
+      .map((p) => Permission.fromPrimitives(p).unwrap())
+      .flatMap((p) => permissionDepsTable.getDependenciesTreeFor(p));
+    const assignScope = roleData.assignScope
+      ?.map((p) => Permission.fromPrimitives(p).unwrap())
+      .flatMap((p) => permissionDepsTable.getDependenciesTreeFor(p));
+    const createScope = roleData.createScope
+      ?.map((p) => Permission.fromPrimitives(p).unwrap())
+      .flatMap((p) => permissionDepsTable.getDependenciesTreeFor(p));
+    // deduplication, normalization and subset validations are holded internally by .create() method call.
     const newRole = Role.create({
       name: roleData.name,
-      permissions: roleData.permissions.map((p) =>
-        Permission.fromPrimitives(p).unwrap(),
-      ),
-      assignScope: roleData.assignScope?.map((p) =>
-        Permission.fromPrimitives(p).unwrap(),
-      ),
-      createScope: roleData.createScope?.map((p) =>
-        Permission.fromPrimitives(p).unwrap(),
-      ),
+      permissions,
+      assignScope,
+      createScope,
     }).unwrap();
     this.logger.log(`New role instantiated.`, {
       roleId: newRole.id,
