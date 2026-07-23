@@ -9,17 +9,30 @@ export class EnforcerHolder implements IEnforcerHolder {
   set(enforcer: Enforcer) {
     this.enforcer = enforcer;
   }
-  async enforce(enforceData: {
+  async enforce(policy: {
     roleId: string;
     entity: string;
     action: string;
     visibility: string;
   }): Promise<boolean> {
     return await this.get().enforce(
-      enforceData.roleId,
-      enforceData.entity,
-      enforceData.action,
-      enforceData.visibility,
+      policy.roleId,
+      policy.entity,
+      policy.action,
+      policy.visibility,
+    );
+  }
+  async hasPolicy(policy: {
+    roleId: string;
+    entity: string;
+    action: string;
+    visibility: string;
+  }): Promise<boolean> {
+    return await this.get().hasPolicy(
+      policy.roleId,
+      policy.entity,
+      policy.action,
+      policy.visibility,
     );
   }
   private get(): Enforcer {

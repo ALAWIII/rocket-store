@@ -56,6 +56,9 @@ export class AccessControlSyncService {
       );
     }
   }
+  async hasPolicy(roleId: string, perm: Permission): Promise<boolean> {
+    return await this.enforcer.hasPolicy({ roleId, ...perm.toJSON() });
+  }
   async removeRole(roleId: string): Promise<boolean> {
     const currentPolicies = await this.enforcer.getPoliciesById(roleId);
 
