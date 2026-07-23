@@ -6,7 +6,7 @@ export const PERMISSION_KEY = 'permission';
 export interface PermissionAttr {
   entity: string;
   action: string;
-  scope: string;
+  visibility: string;
 }
 
 export const RequirePermission = (permission: Permission) =>
