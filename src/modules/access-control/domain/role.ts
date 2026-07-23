@@ -152,6 +152,15 @@ export class Role {
     return Ok(result);
   }
 
+  get permissionsLength(): number {
+    return this.props.permissions.size;
+  }
+  get assignScopePermissionsLength(): number {
+    return this.props.assignScope?.size ?? 0;
+  }
+  get createScopePermissionsLength(): number {
+    return this.props.createScope?.size ?? 0;
+  }
   private static isSuperSetOf(
     superPermsMap: Map<string, Permission>,
     subsetPerms: Permission[],
@@ -159,11 +168,12 @@ export class Role {
     if (superPermsMap.size < subsetPerms.length) return false;
     return subsetPerms.every((perm) => superPermsMap.has(perm.key()));
   }
-
+  isProperSupersetOf(perms: Permission[]): boolean {
+    return this.isSupersetOf(perms) && this.permissionsLength > perms.length;
+  }
   isSupersetOf(perms: Permission[]): boolean {
     return Role.isSuperSetOf(this.props.permissions, perms);
   }
-
   isAssignScopeSupersetOf(perms: Permission[]): boolean {
     const scope = this.props.assignScope;
     return scope ? Role.isSuperSetOf(scope, perms) : false;
