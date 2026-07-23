@@ -8,14 +8,14 @@ import { Permission } from 'src/modules/access-control/domain/permission';
 type PermissionDto = {
   entity?: string;
   action?: string;
-  scope?: string;
+  visibility?: string;
 };
 type CompletePermissionDto = Required<PermissionDto>;
 
 function hasCompletePermissionDto(
   dto: PermissionDto,
 ): dto is CompletePermissionDto {
-  return !!dto.entity && !!dto.action && !!dto.scope;
+  return !!dto.entity && !!dto.action && !!dto.visibility;
 }
 
 @ValidatorConstraint({ name: 'isValidPermission', async: false })
