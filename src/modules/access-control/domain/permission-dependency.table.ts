@@ -74,4 +74,5 @@ class PermissionDependencyTable {
   }
 }
 
-export const table = new PermissionDependencyTableBuilder().compile();
+export const permissionDepsTable =
+  new PermissionDependencyTableBuilder().compile();
