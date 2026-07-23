@@ -13,13 +13,13 @@ export class EnforcerHolder implements IEnforcerHolder {
     roleId: string;
     entity: string;
     action: string;
-    scope: string;
+    visibility: string;
   }): Promise<boolean> {
     return await this.get().enforce(
       enforceData.roleId,
       enforceData.entity,
       enforceData.action,
-      enforceData.scope,
+      enforceData.visibility,
     );
   }
   private get(): Enforcer {

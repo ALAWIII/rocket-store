@@ -10,6 +10,6 @@ export abstract class IEnforcerHolder {
     roleId: string;
     entity: string;
     action: string;
-    scope: string;
+    visibility: string;
   }): Promise<boolean>;
 }

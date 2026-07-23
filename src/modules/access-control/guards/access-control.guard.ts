@@ -34,7 +34,7 @@ export class AccessGuard implements CanActivate {
       roleId: user.roleId,
       entity: permission.entity,
       action: permission.action,
-      scope: permission.scope,
+      visibility: permission.visibility,
     });
   }
 }
