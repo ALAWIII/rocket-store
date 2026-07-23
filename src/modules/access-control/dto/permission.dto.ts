@@ -9,7 +9,7 @@ export class PermissionDto {
   action!: string;
 
   @IsString()
-  scope!: string;
+  visibility!: string;
 
   @IsValidPermission()
   private readonly __permissionCheck?: never;
