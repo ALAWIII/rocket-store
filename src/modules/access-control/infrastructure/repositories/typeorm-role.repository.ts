@@ -101,13 +101,12 @@ export class RoleRepository implements IRoleRepository {
     }
   }
 
-  async update(role: Role): Promise<DBResult<Role>> {
-    const perms = role.permissions.map((p) => p.toJSON());
+  async rename(role: Role): Promise<DBResult<Role>> {
     try {
       const result = await this.roleRepo
         .createQueryBuilder()
         .update(RoleEntity)
-        .set({ name: role.name, permissions: perms })
+        .set({ name: role.name })
         .where('id = :id', { id: role.id })
         .returning('*')
         .execute();
