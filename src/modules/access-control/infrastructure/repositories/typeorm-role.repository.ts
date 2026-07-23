@@ -123,15 +123,20 @@ export class RoleRepository implements IRoleRepository {
     }
   }
   async upsert(role: Role): Promise<DBResult<Role>> {
-    const perms = role.permissions.map((p) => p.toJSON());
-
+    const perms = role.toJSON();
     try {
       const result = await this.roleRepo
         .createQueryBuilder()
         .insert()
         .into(RoleEntity)
-        .values({ id: role.id, name: role.name, permissions: perms })
-        .orUpdate(['permissions'], ['name'])
+        .values({
+          id: role.id,
+          name: role.name,
+          permissions: perms.permissions,
+          assignScope: perms.assignScope,
+          createScope: perms.createScope,
+        })
+        .orUpdate(['permissions', 'assign_scope', 'create_scope'], ['name'])
         .returning('*')
         .execute();
 
