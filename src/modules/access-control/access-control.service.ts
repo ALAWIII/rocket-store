@@ -105,7 +105,12 @@ export class AccessControlService {
     }
     return (await this.roleRepo.rename(targetRole)).unwrap().toJSON();
   }
-  async removeRole(roleId: string): Promise<number> {
+  async removeRole(userRoleId: string, roleId: string): Promise<number> {
+    if (userRoleId === roleId) {
+      throw new RoleServiceError(
+        'Deleting user requester Role is forbidden, should only be able to delete other than his current role.',
+      );
+    }
     const isSystemRole = this.systemRole.hasId(roleId);
     if (isSystemRole)
       throw new SystemRoleError('System roles cannot be removed');
