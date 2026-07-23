@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { AccessControlSyncService } from './application/access-control-sync.service';
-import { Permission } from './domain/permission';
+import { AllPermissions, Permission } from './domain/permission';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { IUserRepository } from '../users/infrastructure/repositories/user.repository';
 import { SystemRolesRegistry } from './application/system-roles.registry';
@@ -43,12 +43,18 @@ export class AccessControlService {
       permissions: roleData.permissions.map((p) =>
         Permission.fromPrimitives(p).unwrap(),
       ),
+      assignScope: roleData.assignScope?.map((p) =>
+        Permission.fromPrimitives(p).unwrap(),
+      ),
+      createScope: roleData.createScope?.map((p) =>
+        Permission.fromPrimitives(p).unwrap(),
+      ),
     }).unwrap();
     this.logger.log(`New role instantiated.`, {
       roleId: newRole.id,
     });
     const userPerms = await this.acsyncService.getPermissions(userRoleId);
-    if (!newRole.isSubsetOf(userPerms)) {
+    if (newRole.isSupersetOf(userPerms)) {
       throw new RoleServiceError(
         'Can not create role with permissions that are not owned by the user.',
       );
@@ -58,31 +64,42 @@ export class AccessControlService {
 
     return role.toJSON();
   }
-  async updateRole(
+  async renameRole(
     userRoleId: string,
     roleId: string,
     updateData: UpdateRoleDto,
   ): Promise<RoleResponseDto> {
     if (this.systemRole.hasId(roleId))
-      throw new SystemRoleError('Try to update an existing System Role.');
-    const upRole = Role.restore({
+      throw new SystemRoleError('Try to rename an existing System Role.');
+
+    const [targetPerms, userPerms, canUpdateLessOrEqual] = await Promise.all([
+      this.acsyncService.getPermissions(roleId),
+      this.acsyncService.getPermissions(userRoleId),
+      this.acsyncService.hasPolicy(
+        userRoleId,
+        AllPermissions.role.RoleUpdateLessOrEqual,
+      ),
+    ]);
+
+    const targetRole = Role.restore({
       id: roleId,
       name: updateData.name,
-      permissions: updateData.permissions.map((p) =>
-        Permission.fromPrimitives(p).unwrap(),
-      ),
+      permissions: targetPerms,
     }).unwrap();
-    const userPerms = await this.acsyncService.getPermissions(userRoleId);
-    this.logger.log(`loaded ${userPerms.size} permissions.`);
-    if (!upRole.isSubsetOf(userPerms)) {
+
+    if (targetRole.isProperSupersetOf(userPerms)) {
       throw new RoleServiceError(
         'Can not update role with permissions that are not owned by the user.',
       );
     }
-    const role = (await this.roleRepo.update(upRole)).unwrap();
-
-    await this.acsyncService.upsertRole(role);
-    return role.toJSON();
+    // this condition only after checking superset !!!
+    const isEqual = targetPerms.length === userPerms.length;
+    if (isEqual && !canUpdateLessOrEqual) {
+      throw new RoleServiceError(
+        'Cannot update a role at the same permission level without RoleUpdateLessOrEqual.',
+      );
+    }
+    return (await this.roleRepo.rename(targetRole)).unwrap().toJSON();
   }
   async removeRole(roleId: string): Promise<number> {
     const isSystemRole = this.systemRole.hasId(roleId);
