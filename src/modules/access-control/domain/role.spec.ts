@@ -22,8 +22,8 @@ describe('Role', () => {
     //======================
     it('success create Role that has no special permissions.', () => {
       const permissions = [
-        AllPermissions.role.RoleReadAny,
-        AllPermissions.role.RoleUpdateAny,
+        AllPermissions.role.RoleReadLessOrEqual,
+        AllPermissions.role.RoleUpdateLessOrEqual,
       ];
       const result = Role.create({
         name: 'hello',
@@ -33,8 +33,8 @@ describe('Role', () => {
     });
     it('success create Role and throw away the duplicated permissions.', () => {
       const permissions = [
-        AllPermissions.role.RoleReadAny,
-        AllPermissions.role.RoleReadAny,
+        AllPermissions.role.RoleReadLessOrEqual,
+        AllPermissions.role.RoleReadLessOrEqual,
       ];
       const result = Role.create({
         name: 'hello',
@@ -45,46 +45,46 @@ describe('Role', () => {
     });
     it('success create Role with one special permission.', () => {
       const permissions = [
-        AllPermissions.role.RoleAssignAny,
-        AllPermissions.role.RoleReadAny,
+        AllPermissions.role.RoleAssignLessOrEqual,
+        AllPermissions.role.RoleReadLessOrEqual,
       ];
       const result = Role.create({
         name: 'hello',
         permissions,
-        assignScope: [AllPermissions.role.RoleReadAny],
+        assignScope: [AllPermissions.role.RoleReadLessOrEqual],
       }).unwrap();
       expect(result.permissions).toEqual(permissions);
       expect(result.permissions.length).toStrictEqual(2);
       expect(result.assignScopePermissions.unwrap()).toEqual([
-        AllPermissions.role.RoleReadAny,
+        AllPermissions.role.RoleReadLessOrEqual,
       ]);
     });
     it('success create Role with two special permission.', () => {
       const permissions = [
-        AllPermissions.role.RoleAssignAny,
-        AllPermissions.role.RoleCreateAny,
-        AllPermissions.role.RoleReadAny,
+        AllPermissions.role.RoleAssignLessOrEqual,
+        AllPermissions.role.RoleCreateLessOrEqual,
+        AllPermissions.role.RoleReadLessOrEqual,
       ];
       const result = Role.create({
         name: 'hello',
         permissions,
-        assignScope: [AllPermissions.role.RoleReadAny],
-        createScope: [AllPermissions.role.RoleReadAny],
+        assignScope: [AllPermissions.role.RoleReadLessOrEqual],
+        createScope: [AllPermissions.role.RoleReadLessOrEqual],
       }).unwrap();
       expect(result.permissions).toEqual(permissions);
       expect(result.permissions.length).toStrictEqual(3);
       expect(result.assignScopePermissions.unwrap()).toEqual([
-        AllPermissions.role.RoleReadAny,
+        AllPermissions.role.RoleReadLessOrEqual,
       ]);
       expect(result.createScopePermissions.unwrap()).toEqual([
-        AllPermissions.role.RoleReadAny,
+        AllPermissions.role.RoleReadLessOrEqual,
       ]);
     });
     it('should create Role with two special permission and the special permissions are provided in the scopes.', () => {
       const permissions = [
-        AllPermissions.role.RoleAssignAny,
-        AllPermissions.role.RoleCreateAny,
-        AllPermissions.role.RoleReadAny,
+        AllPermissions.role.RoleAssignLessOrEqual,
+        AllPermissions.role.RoleCreateLessOrEqual,
+        AllPermissions.role.RoleReadLessOrEqual,
       ];
 
       const result = Role.create({
@@ -103,8 +103,8 @@ describe('Role', () => {
     //=====================================
     it('should fail creating Role when special permission is provided and scope permission list is undefined.', () => {
       const permissions = [
-        AllPermissions.role.RoleAssignAny,
-        AllPermissions.role.RoleReadAny,
+        AllPermissions.role.RoleAssignLessOrEqual,
+        AllPermissions.role.RoleReadLessOrEqual,
       ];
       const result = Role.create({
         name: 'hello',
@@ -120,11 +120,11 @@ describe('Role', () => {
       }
     });
     it('should fail creating Role when special permission is missing scope permission list is provided.', () => {
-      const permissions = [AllPermissions.role.RoleReadAny];
+      const permissions = [AllPermissions.role.RoleReadLessOrEqual];
       const result = Role.create({
         name: 'hello',
         permissions,
-        assignScope: [AllPermissions.role.RoleReadAny],
+        assignScope: [AllPermissions.role.RoleReadLessOrEqual],
       });
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
@@ -137,15 +137,15 @@ describe('Role', () => {
     });
     it('should fail creating Role when special permission and its scope list are provided but the scope list isnt a subset of the role permissions.', () => {
       const permissions = [
-        AllPermissions.role.RoleReadAny,
-        AllPermissions.role.RoleAssignAny,
+        AllPermissions.role.RoleReadLessOrEqual,
+        AllPermissions.role.RoleAssignLessOrEqual,
       ];
       const result = Role.create({
         name: 'hello',
         permissions,
         assignScope: [
-          AllPermissions.role.RoleReadAny,
-          AllPermissions.role.RoleUpdateAny,
+          AllPermissions.role.RoleReadLessOrEqual,
+          AllPermissions.role.RoleUpdateLessOrEqual,
         ],
       });
       expect(result.isErr()).toBe(true);

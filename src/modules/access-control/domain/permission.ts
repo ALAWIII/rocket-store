@@ -12,11 +12,12 @@ import {
 // Any = may create/assign any role whose permission set is ⊆ allowed scope (herarachical, inheritance)
 const Matrix = {
   role: {
-    create: ['any'],
-    read: ['any'],
-    update: ['any'],
-    delete: ['any'],
-    assign: ['any'],
+    create: ['lessOrEqual'],
+    read: ['lessOrEqual'],
+    update: ['less', 'lessOrEqual'],
+    delete: ['less'],
+    assign: ['less', 'lessOrEqual'],
+    reload: ['all'],
   },
   product: {
     create: ['own', 'any'],

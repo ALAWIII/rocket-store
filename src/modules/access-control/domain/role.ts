@@ -51,14 +51,14 @@ export class Role {
 
     const assignScope = this.resolveScope(
       superPermsMap,
-      AllPermissions.role.RoleAssignAny.key(),
+      AllPermissions.role.RoleAssignLessOrEqual.key(),
       data.assignScope,
       'assignScope',
     );
     if (assignScope.isErr()) return Err(assignScope.error);
     const createScope = this.resolveScope(
       superPermsMap,
-      AllPermissions.role.RoleCreateAny.key(),
+      AllPermissions.role.RoleCreateLessOrEqual.key(),
       data.createScope,
       'createScope',
     );
