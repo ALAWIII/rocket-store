@@ -3,7 +3,6 @@ import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { AllPermissions, Permission } from './domain/permission';
 import { CreateRoleDto } from './dto/create-role.dto';
-import { IUserRepository } from '../users/infrastructure/repositories/user.repository';
 import { SystemRolesRegistry } from './application/system-roles.registry';
 import { RoleResponseDto } from './dto/role-response.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
@@ -17,7 +16,6 @@ export class AccessControlService {
   private readonly logger = new Logger(AccessControlService.name);
 
   constructor(
-    private readonly userRepo: IUserRepository,
     private readonly roleRepo: IRoleRepository,
     private readonly systemRole: SystemRolesRegistry,
     private readonly acsyncService: AccessControlSyncService,
