@@ -14,6 +14,7 @@ import {
   UnknownDatabaseError,
 } from 'src/modules/shared/errors/database.error';
 import { PermissionError } from '../../domain/permission.error';
+import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 
 @Injectable()
 export class RoleRepository implements IRoleRepository {
@@ -178,10 +179,46 @@ export class RoleRepository implements IRoleRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  async removeById(id: string): Promise<DBResult<number>> {
+  async deleteById(ids: {
+    requesterRoleId: string;
+    targetRoleId: string;
+    defaultRoleId: string;
+  }): Promise<DBResult<number>> {
     try {
-      const deleteResult = await this.roleRepo.delete({ id });
-      return Ok(deleteResult.affected ?? 0);
+      const requesterCreateScopeCte = this.roleRepo
+        .createQueryBuilder('requester')
+        .select('requester.create_scope', 'create_scope')
+        .where('requester.id = :requesterRoleId', {
+          requesterRoleId: ids.requesterRoleId,
+        });
+
+      const deletableTargetCte = this.roleRepo
+        .createQueryBuilder('target')
+        .select('target.id', 'id')
+        .where('target.id = :targetRoleId', { targetRoleId: ids.targetRoleId })
+        .andWhere(
+          'target.permissions <@ (SELECT create_scope FROM requester_scope)',
+        );
+
+      const reassignedUsersCte = this.roleRepo.manager
+        .createQueryBuilder()
+        .update(UserEntity)
+        .set({ roleId: ids.defaultRoleId })
+        .where('role_id IN (SELECT id FROM deletable_target)')
+        .returning('id');
+
+      const result = await this.roleRepo
+        .createQueryBuilder()
+        .addCommonTableExpression(requesterCreateScopeCte, 'requester_scope')
+        .addCommonTableExpression(deletableTargetCte, 'deletable_target')
+        .addCommonTableExpression(reassignedUsersCte, 'reassigned_users')
+        .delete()
+        .from(RoleEntity)
+        .where('id IN (SELECT id FROM deletable_target)')
+        .andWhere('(SELECT COUNT(*) FROM reassigned_users) >= 0')
+        .execute();
+
+      return Ok(result.affected ?? 0);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }

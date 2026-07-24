@@ -112,19 +112,21 @@ export class AccessControlService {
       );
     }
     const isSystemRole = this.systemRole.hasId(roleId);
-    if (isSystemRole)
+    if (isSystemRole) {
       throw new SystemRoleError('System roles cannot be removed');
-    (
-      await this.userRepo.reassignUsersRole(
-        roleId,
-        this.systemRole.getCustomerRoleId(),
-      )
+    }
+    const deleteResult = (
+      await this.roleRepo.deleteById({
+        requesterRoleId: userRoleId,
+        targetRoleId: roleId,
+        defaultRoleId: this.systemRole.getCustomerRoleId(),
+      })
     ).unwrap();
     const isRemoved = await this.acsyncService.removeRole(roleId);
     if (!isRemoved)
       throw new Error(
         `Failed to remove Casbin policies for role id: ${roleId}.`,
       );
-    return (await this.roleRepo.removeById(roleId)).unwrap();
+    return deleteResult;
   }
 }

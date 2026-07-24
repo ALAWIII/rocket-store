@@ -11,5 +11,9 @@ export abstract class IRoleRepository {
   abstract upsert(role: Role): Promise<DBResult<Role>>;
   abstract create(role: Role, creatorRoleId: string): Promise<DBResult<Role>>;
   abstract rename(role: Role): Promise<DBResult<Role>>;
-  abstract removeById(id: string): Promise<DBResult<number>>;
+  abstract deleteById(ids: {
+    requesterRoleId: string;
+    targetRoleId: string;
+    defaultRoleId: string;
+  }): Promise<DBResult<number>>;
 }
