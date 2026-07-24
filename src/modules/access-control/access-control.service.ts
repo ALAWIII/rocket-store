@@ -66,12 +66,7 @@ export class AccessControlService {
     this.logger.log(`New role instantiated.`, {
       roleId: newRole.id,
     });
-    const userPerms = await this.acsyncService.getPermissions(userRoleId);
-    if (newRole.isSupersetOf(userPerms)) {
-      throw new RoleServiceError(
-        'Can not create role with permissions that are not owned by the user.',
-      );
-    }
+
     const role = (await this.roleRepo.create(newRole, userRoleId)).unwrap();
     await this.acsyncService.upsertRole(role);
 
