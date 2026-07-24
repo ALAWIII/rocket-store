@@ -1,4 +1,4 @@
-import { Permission } from './permission';
+import { AllPermissions, Permission } from './permission';
 
 class PermissionNode {
   constructor(
@@ -73,6 +73,27 @@ class PermissionDependencyTable {
     return [...(this.table.get(perm.key())?.dependencies ?? [])];
   }
 }
-
-export const permissionDepsTable =
-  new PermissionDependencyTableBuilder().compile();
+const rolePermissions = AllPermissions.role;
+export const permissionDepsTable = new PermissionDependencyTableBuilder()
+  .register(rolePermissions.RoleAssignLessOrEqual, [
+    rolePermissions.RoleReadLessOrEqual,
+  ])
+  .register(rolePermissions.RoleAssignLess, [
+    rolePermissions.RoleReadLessOrEqual,
+  ])
+  .register(rolePermissions.RoleCreateLessOrEqual, [
+    rolePermissions.RoleReadLessOrEqual,
+  ])
+  .register(rolePermissions.RoleDeleteLess, [
+    rolePermissions.RoleCreateLessOrEqual,
+  ])
+  .register(rolePermissions.RoleUpdateLessOrEqual, [
+    // users can rename only what can they create
+    rolePermissions.RoleCreateLessOrEqual,
+  ])
+  .register(rolePermissions.RoleUpdateLess, [
+    rolePermissions.RoleCreateLessOrEqual,
+  ])
+  .register(rolePermissions.RoleReadLessOrEqual, [])
+  .register(rolePermissions.RoleReloadAll, [])
+  .compile();
