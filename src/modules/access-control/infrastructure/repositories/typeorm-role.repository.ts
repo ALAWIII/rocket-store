@@ -4,7 +4,7 @@ import { Role } from '../../domain/role';
 import { Permission } from '../../domain/permission';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEntity } from '../entities/role.entity';
-import { In, Repository } from 'typeorm';
+import { Brackets, In, Repository } from 'typeorm';
 import type { DBResult } from 'src/modules/shared/errors/error.types';
 import { Err, None, Ok, Option, Some } from 'ts-results-es';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
@@ -74,17 +74,28 @@ export class RoleRepository implements IRoleRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  async loadSimilarRoles(roleId: string): Promise<DBResult<Role[]>> {
+  async loadManageableRoles(roleId: string): Promise<DBResult<Role[]>> {
     try {
       const loadPerms = this.roleRepo
         .createQueryBuilder('r')
-        .select('r.permissions', 'perms')
+        .select([
+          'r.create_scope AS create_scope',
+          'r.assign_scope AS assign_scope',
+        ])
         .where('r.id = :id', { id: roleId });
 
       const loadRoles = await this.roleRepo
         .createQueryBuilder('role')
         .addCommonTableExpression(loadPerms, 'role_perms')
-        .where(`(SELECT perms FROM role_perms)::jsonb @> role.permissions`)
+        .where(
+          new Brackets((qb) => {
+            qb.where(
+              `COALESCE((SELECT create_scope FROM role_perms), '{}'::jsonb) @> role.permissions`,
+            ).orWhere(
+              `COALESCE((SELECT assign_scope FROM role_perms), '{}'::jsonb) @> role.permissions`,
+            );
+          }),
+        )
         .getMany();
 
       return Ok(loadRoles.map((r) => this.toDomain(r)));
