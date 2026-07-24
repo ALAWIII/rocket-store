@@ -27,34 +27,37 @@ export class RolesController {
 
   @Post('policies/reload')
   @HttpCode(204)
-  @RequirePermission(AllPermissions.role.RoleReloadOwn)
+  @RequirePermission(AllPermissions.role.RoleReloadAll)
   async reloadPolicies() {
     await this.service.reloadPolicies();
   }
   @Post()
-  @RequirePermission(AllPermissions.role.RoleCreateOwn)
+  @RequirePermission(AllPermissions.role.RoleCreateLessOrEqual)
   async create(@Session() session: AppSession, @Body() dto: CreateRoleDto) {
     return await this.service.createRole(session.user.roleId, dto);
   }
 
   @Get()
-  @RequirePermission(AllPermissions.role.RoleReadOwn)
+  @RequirePermission(AllPermissions.role.RoleReadLessOrEqual)
   async findAll(@Session() session: AppSession): Promise<RoleResponseDto[]> {
     return await this.service.findAll(session.user.roleId);
   }
 
   @Put(':id')
-  @RequirePermission(AllPermissions.role.RoleUpdateOwn)
+  @RequirePermission(
+    AllPermissions.role.RoleUpdateLess,
+    AllPermissions.role.RoleUpdateLessOrEqual,
+  )
   async update(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Session() session: AppSession,
     @Body() dto: UpdateRoleDto,
   ) {
-    return await this.service.updateRole(session.user.roleId, id, dto);
+    return await this.service.renameRole(session.user.roleId, id, dto);
   }
 
   @Delete(':id')
-  @RequirePermission(AllPermissions.role.RoleDeleteOwn)
+  @RequirePermission(AllPermissions.role.RoleDeleteLess)
   async remove(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string) {
     return await this.service.removeRole(id);
   }
