@@ -9,5 +9,8 @@ export interface PermissionAttr {
   visibility: string;
 }
 
-export const RequirePermission = (permission: Permission) =>
-  SetMetadata<string, PermissionAttr>(PERMISSION_KEY, permission.toJSON());
+export const RequirePermission = (...permissions: Permission[]) =>
+  SetMetadata(
+    PERMISSION_KEY,
+    permissions.map((permission) => permission.toJSON()),
+  );
