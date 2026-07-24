@@ -58,7 +58,7 @@ describe('AccessControlService', () => {
     it('should throw error when attempting to create role with permission list length greater than what the user have or provide.', async () => {
       const newRole = {
         name: 'role',
-        permissions: [AllPermissions.role.RoleReadOwn.toJSON()],
+        permissions: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
       };
       systemRoleMock.isSystemRoleName.mockReturnValue(false);
       acsyncServiceMock.getPermissions.mockReturnValue(new Map());
@@ -72,16 +72,16 @@ describe('AccessControlService', () => {
     it('should throw error when attempting to create role with at least one of permissions from the permission list isnt found in the user role permissions list.', async () => {
       const newRole = {
         name: 'role',
-        permissions: [AllPermissions.role.RoleReadOwn.toJSON()],
+        permissions: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
       };
       const userPermissionList = new Map([
         [
-          AllPermissions.role.RoleCreateOwn.key(),
-          AllPermissions.role.RoleCreateOwn,
+          AllPermissions.role.RoleCreateLessOrEqual.key(),
+          AllPermissions.role.RoleCreateLessOrEqual,
         ],
         [
-          AllPermissions.role.RoleUpdateOwn.key(),
-          AllPermissions.role.RoleUpdateOwn,
+          AllPermissions.role.RoleUpdateLess.key(),
+          AllPermissions.role.RoleUpdateLess,
         ],
       ]);
       systemRoleMock.isSystemRoleName.mockReturnValue(false);
@@ -97,8 +97,8 @@ describe('AccessControlService', () => {
       const devRoleDto = { name: 'developer', permissions: [] };
       const userPermissions = new Map<string, Permission>([
         [
-          AllPermissions.role.RoleCreateOwn.key(),
-          AllPermissions.role.RoleCreateOwn,
+          AllPermissions.role.RoleCreateLessOrEqual.key(),
+          AllPermissions.role.RoleCreateLessOrEqual,
         ],
       ]);
       systemRoleMock.isSystemRoleName.mockReturnValue(false);
@@ -130,9 +130,8 @@ describe('AccessControlService', () => {
         permissions: [],
       }).unwrap();
       systemRoleMock.hasId.mockReturnValue(true);
-      const role = service.updateRole('not-important', adminRole.id, {
+      const role = service.renameRole('not-important', adminRole.id, {
         name: adminRole.name,
-        permissions: [],
       });
       await expect(role).rejects.toThrow(
         'Try to update an existing System Role.',
@@ -143,12 +142,12 @@ describe('AccessControlService', () => {
     it('should return role when attempting to update existing one.', async () => {
       const worker2Role = Role.create({
         name: 'workerx',
-        permissions: [AllPermissions.role.RoleCreateOwn],
+        permissions: [AllPermissions.role.RoleCreateLessOrEqual],
       }).unwrap();
       const userPermissions = new Map<string, Permission>([
         [
-          AllPermissions.role.RoleCreateOwn.key(),
-          AllPermissions.role.RoleCreateOwn,
+          AllPermissions.role.RoleCreateLessOrEqual.key(),
+          AllPermissions.role.RoleCreateLessOrEqual,
         ],
       ]);
       acsyncServiceMock.getPermissions.mockReturnValue(userPermissions);
@@ -156,9 +155,8 @@ describe('AccessControlService', () => {
         Ok(worker2Role),
       );
       systemRoleMock.hasId.mockReturnValue(false);
-      const role = await service.updateRole('roleId', worker2Role.id, {
+      const role = await service.renameRole('roleId', worker2Role.id, {
         name: worker2Role.name,
-        permissions: [AllPermissions.role.RoleCreateOwn.toJSON()],
       });
       expect(role).toStrictEqual(worker2Role.toJSON());
       expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
@@ -171,9 +169,9 @@ describe('AccessControlService', () => {
     it('should throw when trying to remove a system role', async () => {
       systemRoleMock.hasId.mockReturnValue(true);
 
-      await expect(service.removeRole('role-id')).rejects.toThrow(
-        new Error('System roles cannot be removed'),
-      );
+      await expect(
+        service.removeRole('user-role-id', 'role-id'),
+      ).rejects.toThrow(new Error('System roles cannot be removed'));
 
       expect(userRepoMock.reassignUsersRole).toHaveBeenCalledTimes(0);
       expect(acsyncServiceMock.removeRole).toHaveBeenCalledTimes(0);
@@ -186,7 +184,7 @@ describe('AccessControlService', () => {
       acsyncServiceMock.removeRole.mockResolvedValue(true);
       roleRepoMock.removeById.mockResolvedValue(Ok(1));
 
-      const result = await service.removeRole('role-id');
+      const result = await service.removeRole('user-role-id', 'role-id');
 
       expect(result).toBe(1);
       expect(userRepoMock.reassignUsersRole).toHaveBeenCalledWith(
@@ -201,7 +199,9 @@ describe('AccessControlService', () => {
       systemRoleMock.getCustomerRoleId.mockReturnValue('customer-id');
       userRepoMock.reassignUsersRole.mockRejectedValue(new Error('db failed'));
 
-      await expect(service.removeRole('role-id')).rejects.toThrow('db failed');
+      await expect(
+        service.removeRole('user-role-id', 'role-id'),
+      ).rejects.toThrow('db failed');
 
       expect(acsyncServiceMock.removeRole).toHaveBeenCalledTimes(0);
       expect(roleRepoMock.removeById).toHaveBeenCalledTimes(0);
