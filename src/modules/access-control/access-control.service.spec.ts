@@ -14,7 +14,7 @@ describe('AccessControlService', () => {
   const roleRepoMock = {
     create: jest.fn(),
     removeById: jest.fn(),
-    update: jest.fn(),
+    rename: jest.fn(),
   };
   const systemRoleMock = {
     isSystemRoleName: jest.fn(),
@@ -54,10 +54,14 @@ describe('AccessControlService', () => {
     it('should throw error when attempting to create role with permission list length greater than what the user have or provide.', async () => {
       const newRole = {
         name: 'role',
-        permissions: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
+        permissions: [
+          AllPermissions.role.RoleReadLessOrEqual.toJSON(),
+          AllPermissions.role.RoleCreateLessOrEqual.toJSON(),
+        ],
+        createScope: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
       };
       systemRoleMock.isSystemRoleName.mockReturnValue(false);
-      acsyncServiceMock.getPermissions.mockReturnValue(new Map());
+      acsyncServiceMock.getPermissions.mockReturnValue([]); // mock user requester permissions.
       const role = service.createRole('userRoleId', newRole);
       await expect(role).rejects.toThrow(
         'Can not create role with permissions that are not owned by the user.',
@@ -133,7 +137,7 @@ describe('AccessControlService', () => {
         'Try to update an existing System Role.',
       );
       expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
-      expect(roleRepoMock.update).toHaveBeenCalledTimes(0);
+      expect(roleRepoMock.rename).toHaveBeenCalledTimes(0);
     });
     it('should return role when attempting to update existing one.', async () => {
       const worker2Role = Role.create({
@@ -147,7 +151,7 @@ describe('AccessControlService', () => {
         ],
       ]);
       acsyncServiceMock.getPermissions.mockReturnValue(userPermissions);
-      roleRepoMock.update.mockImplementation((worker2Role: Role) =>
+      roleRepoMock.rename.mockImplementation((worker2Role: Role) =>
         Ok(worker2Role),
       );
       systemRoleMock.hasId.mockReturnValue(false);
@@ -156,8 +160,8 @@ describe('AccessControlService', () => {
       });
       expect(role).toStrictEqual(worker2Role.toJSON());
       expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
-      expect(roleRepoMock.update).toHaveBeenCalledWith(worker2Role);
-      expect(roleRepoMock.update).toHaveBeenCalledTimes(1);
+      expect(roleRepoMock.rename).toHaveBeenCalledWith(worker2Role);
+      expect(roleRepoMock.rename).toHaveBeenCalledTimes(1);
       expect(acsyncServiceMock.upsertRole).toHaveBeenCalledWith(worker2Role);
     });
   });
