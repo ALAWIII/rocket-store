@@ -90,9 +90,9 @@ export class RoleRepository implements IRoleRepository {
         .where(
           new Brackets((qb) => {
             qb.where(
-              `COALESCE((SELECT create_scope FROM role_perms), '{}'::jsonb) @> role.permissions`,
+              `COALESCE((SELECT create_scope FROM role_perms), '[]'::jsonb) @> role.permissions`,
             ).orWhere(
-              `COALESCE((SELECT assign_scope FROM role_perms), '{}'::jsonb) @> role.permissions`,
+              `COALESCE((SELECT assign_scope FROM role_perms), '[]'::jsonb) @> role.permissions`,
             );
           }),
         )
