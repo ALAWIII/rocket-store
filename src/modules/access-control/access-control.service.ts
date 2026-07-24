@@ -25,6 +25,17 @@ export class AccessControlService {
     this.logger.log(`Loaded ${roles.length} roles.`);
     return roles.map((r) => r.toJSON());
   }
+  async findCreatedRoles(roleId: string): Promise<RoleResponseDto[]> {
+    const roles = (await this.roleRepo.loadCreatableRoles(roleId)).unwrap();
+    this.logger.log(`Loaded ${roles.length} creatable roles.`);
+    return roles.map((r) => r.toJSON());
+  }
+
+  async findAssignableRoles(roleId: string): Promise<RoleResponseDto[]> {
+    const roles = (await this.roleRepo.loadAssignableRoles(roleId)).unwrap();
+    this.logger.log(`Loaded ${roles.length} assignable roles.`);
+    return roles.map((r) => r.toJSON());
+  }
   async reloadPolicies() {
     await this.acsyncService.reloadFromDatabase();
   }
