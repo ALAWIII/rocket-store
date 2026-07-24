@@ -103,6 +103,26 @@ export class RoleRepository implements IRoleRepository {
       return Err(mapTypeOrmError(e));
     }
   }
+  async loadAssignableRoles(roleId: string): Promise<DBResult<Role[]>> {
+    try {
+      const loadPerms = this.roleRepo
+        .createQueryBuilder('r')
+        .select('r.assign_scope', 'assign_scope')
+        .where('r.id = :id', { id: roleId });
+
+      const loadRoles = await this.roleRepo
+        .createQueryBuilder('role')
+        .addCommonTableExpression(loadPerms, 'role_perms')
+        .where(
+          `COALESCE((SELECT assign_scope FROM role_perms), '[]'::jsonb) @> role.permissions`,
+        )
+        .getMany();
+
+      return Ok(loadRoles.map((r) => this.toDomain(r)));
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   async loadByNames(names: string[]): Promise<DBResult<Role[]>> {
     if (names.length === 0) return Ok([]);
     try {
