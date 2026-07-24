@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { AccessControlService } from './access-control.service';
@@ -19,6 +20,7 @@ import { RequirePermission } from '../shared/authorization/decorators/require-pe
 import { AllPermissions } from './domain/permission';
 import { Session } from '@thallesp/nestjs-better-auth';
 import { type AppSession } from 'src/auth/auth.config';
+import { FindRolesQueryDto } from './dto/find-roles.query.dto';
 
 @UseGuards(AccessGuard)
 @Controller('roles')
@@ -38,11 +40,20 @@ export class RolesController {
   }
 
   @Get()
-  @RequirePermission(AllPermissions.role.RoleReadLessOrEqual)
-  async findAll(@Session() session: AppSession): Promise<RoleResponseDto[]> {
-    return await this.service.findAll(session.user.roleId);
-  }
+  async findAll(
+    @Session() session: AppSession,
+    @Query() query: FindRolesQueryDto,
+  ): Promise<RoleResponseDto[]> {
+    if (query.scope === 'assignable') {
+      return this.service.findAssignableRoles(session.user.roleId);
+    }
 
+    if (query.scope === 'creatable') {
+      return this.service.findCreatedRoles(session.user.roleId);
+    }
+
+    return this.service.findAll(session.user.roleId);
+  }
   @Put(':id')
   @RequirePermission(
     AllPermissions.role.RoleUpdateLess,
