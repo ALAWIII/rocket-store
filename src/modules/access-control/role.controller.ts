@@ -58,7 +58,10 @@ export class RolesController {
 
   @Delete(':id')
   @RequirePermission(AllPermissions.role.RoleDeleteLess)
-  async remove(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string) {
-    return await this.service.removeRole(id);
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Session() session: AppSession,
+  ) {
+    return await this.service.removeRole(session.user.roleId, id);
   }
 }
