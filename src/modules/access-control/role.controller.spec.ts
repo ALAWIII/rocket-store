@@ -12,9 +12,11 @@ describe('RolesController', () => {
   let controller: RolesController;
 
   const serviceMock = {
+    findAssignableRoles: jest.fn(),
+    findCreatedRoles: jest.fn(),
     reloadPolicies: jest.fn(),
-    upsertRole: jest.fn(),
-    updateRole: jest.fn(),
+    createRole: jest.fn(),
+    renameRole: jest.fn(),
     removeRole: jest.fn(),
     findAll: jest.fn(),
   };
@@ -37,10 +39,10 @@ describe('RolesController', () => {
     it('should successfully create and return Role', async () => {
       const expectedRole = Role.create({
         name: 'name',
-        permissions: [AllPermissions.role.RoleReloadOwn],
+        permissions: [AllPermissions.role.RoleReloadAll],
       }).unwrap();
       const roleJson = expectedRole.toJSON();
-      serviceMock.upsertRole.mockReturnValue(expectedRole);
+      serviceMock.createRole.mockReturnValue(expectedRole);
       const roleDto = {
         name: roleJson.name,
         permissions: roleJson.permissions,
@@ -51,7 +53,7 @@ describe('RolesController', () => {
         } as AppSession,
         roleDto,
       );
-      expect(serviceMock.upsertRole).toHaveBeenCalledWith('user', roleDto);
+      expect(serviceMock.createRole).toHaveBeenCalledWith('user', roleDto);
       expect(newRole).toBe(expectedRole);
     });
   });
@@ -59,11 +61,16 @@ describe('RolesController', () => {
     it('should successfully remove and return number of affected', async () => {
       const expectedRole = Role.create({
         name: 'name',
-        permissions: [AllPermissions.role.RoleReloadOwn],
+        permissions: [AllPermissions.role.RoleReloadAll],
       }).unwrap();
       serviceMock.removeRole.mockReturnValue(1);
-      const removeResult = await controller.remove(expectedRole.id);
-      expect(serviceMock.removeRole).toHaveBeenCalledWith(expectedRole.id);
+      const removeResult = await controller.remove(expectedRole.id, {
+        user: { roleId: 'user' },
+      } as AppSession);
+      expect(serviceMock.removeRole).toHaveBeenCalledWith(
+        'user',
+        expectedRole.id,
+      );
       expect(removeResult).toBe(1);
     });
   });
