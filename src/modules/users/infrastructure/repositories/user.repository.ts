@@ -9,25 +9,35 @@ export type UpdateUserRepoData = {
   roleId?: string;
   phone?: string;
 };
-
-export type FilterUsersByData = {
+export type UserFilters = {
   name?: string; // this will be matched against 3 name fields (name,givenName,familyName) and with OR operator
   email?: string;
   roleId?: string;
   phone?: string;
+};
+export type FindAllUsersParams = {
+  requesterRoleId: string;
   page?: number;
   limit?: number;
 };
+export type FindUsersByParams = {
+  requesterRoleId: string;
+  filters?: UserFilters;
+  page?: number;
+  limit?: number;
+};
+
 export abstract class IUserRepository {
-  abstract findAll(d: {
-    page: number;
-    limit: number;
-  }): Promise<DBResult<{ users: User[]; total: number }>>;
-  abstract findById(id: string): Promise<DBResult<Option<User>>>;
-  abstract findBy(
-    data: FilterUsersByData,
+  abstract findAll(
+    d: FindAllUsersParams,
   ): Promise<DBResult<{ users: User[]; total: number }>>;
-  abstract findByEmail(email: string): Promise<DBResult<Option<User>>>;
+  abstract findById(data: {
+    requesterRoleId: string;
+    userId: string;
+  }): Promise<DBResult<User>>;
+  abstract findBy(
+    data: FindUsersByParams,
+  ): Promise<DBResult<{ users: User[]; total: number }>>;
   abstract save(user: User): Promise<DBResult<User>>;
   abstract updateById(
     id: string,
