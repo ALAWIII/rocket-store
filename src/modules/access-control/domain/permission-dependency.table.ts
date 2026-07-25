@@ -87,11 +87,8 @@ export const permissionDepsTable = new PermissionDependencyTableBuilder()
   .register(rolePermissions.RoleDeleteLess, [
     rolePermissions.RoleCreateLessOrEqual,
   ])
-  .register(rolePermissions.RoleUpdateLessOrEqual, [
+  .register(rolePermissions.RoleRenameLessOrEqual, [
     // users can rename only what can they create
-    rolePermissions.RoleCreateLessOrEqual,
-  ])
-  .register(rolePermissions.RoleUpdateLess, [
     rolePermissions.RoleCreateLessOrEqual,
   ])
   .register(rolePermissions.RoleReadLessOrEqual, [])

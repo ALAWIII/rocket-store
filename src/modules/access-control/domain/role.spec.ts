@@ -23,7 +23,7 @@ describe('Role', () => {
     it('success create Role that has no special permissions.', () => {
       const permissions = [
         AllPermissions.role.RoleReadLessOrEqual,
-        AllPermissions.role.RoleUpdateLessOrEqual,
+        AllPermissions.role.RoleRenameLessOrEqual,
       ];
       const result = Role.create({
         name: 'hello',
@@ -145,7 +145,7 @@ describe('Role', () => {
         permissions,
         assignScope: [
           AllPermissions.role.RoleReadLessOrEqual,
-          AllPermissions.role.RoleUpdateLessOrEqual,
+          AllPermissions.role.RoleRenameLessOrEqual,
         ],
       });
       expect(result.isErr()).toBe(true);

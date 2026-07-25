@@ -55,10 +55,7 @@ export class RolesController {
     return this.service.findAll(session.user.roleId);
   }
   @Put(':id')
-  @RequirePermission(
-    AllPermissions.role.RoleUpdateLess,
-    AllPermissions.role.RoleUpdateLessOrEqual,
-  )
+  @RequirePermission(AllPermissions.role.RoleRenameLessOrEqual)
   async update(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Session() session: AppSession,

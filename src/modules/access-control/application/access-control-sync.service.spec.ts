@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { Logger } from '@nestjs/common';
 import { AccessControlSyncService } from './access-control-sync.service';
 import { IRoleRepository } from '../infrastructure/repositories/role.repository';
-import { AllPermissions, Permission } from '../domain/permission';
+import { AllPermissions } from '../domain/permission';
 import { Role } from '../domain/role';
 import { Err, Ok } from 'ts-results-es';
 import { IEnforcerHolder } from '../enforcer-holder/infrastructure/casbin/enforcer-holder';
@@ -59,7 +59,7 @@ describe('AccessControlSyncService', () => {
         name: 'admin',
         permissions: [
           AllPermissions.role.RoleReadLessOrEqual,
-          AllPermissions.role.RoleUpdateLessOrEqual,
+          AllPermissions.role.RoleRenameLessOrEqual,
         ],
       }).unwrap();
       const workerRole = Role.create({
@@ -179,7 +179,7 @@ describe('AccessControlSyncService', () => {
         name: 'admin',
         permissions: [
           AllPermissions.role.RoleReadLessOrEqual,
-          AllPermissions.role.RoleUpdateLessOrEqual,
+          AllPermissions.role.RoleRenameLessOrEqual,
         ],
       }).unwrap();
 
@@ -205,7 +205,7 @@ describe('AccessControlSyncService', () => {
         name: 'admin',
         permissions: [
           AllPermissions.role.RoleReadLessOrEqual,
-          AllPermissions.role.RoleUpdateLessOrEqual,
+          AllPermissions.role.RoleRenameLessOrEqual,
         ],
       }).unwrap();
 
@@ -241,7 +241,7 @@ describe('AccessControlSyncService', () => {
         name: 'admin',
         permissions: [
           AllPermissions.role.RoleReadLessOrEqual,
-          AllPermissions.role.RoleUpdateLessOrEqual,
+          AllPermissions.role.RoleRenameLessOrEqual,
         ],
       }).unwrap();
 

@@ -14,7 +14,7 @@ const Matrix = {
   role: {
     create: ['lessOrEqual'],
     read: ['lessOrEqual'],
-    update: ['less', 'lessOrEqual'],
+    rename: ['lessOrEqual'],
     delete: ['less'],
     assign: ['less', 'lessOrEqual'],
     reload: ['all'],
