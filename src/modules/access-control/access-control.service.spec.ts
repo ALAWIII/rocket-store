@@ -75,8 +75,8 @@ describe('AccessControlService', () => {
       expect(systemRoleMock.isSystemRoleName).toHaveBeenCalledTimes(1);
     });
   });
-  describe('updateRole', () => {
-    it('should throw error when attempting to update system Role.', async () => {
+  describe('renameRole', () => {
+    it('should throw error when attempting to rename system Role.', async () => {
       const adminRole = Role.create({
         name: 'admin',
         permissions: [],
@@ -86,25 +86,19 @@ describe('AccessControlService', () => {
         name: adminRole.name,
       });
       await expect(role).rejects.toThrow(
-        'Try to update an existing System Role.',
+        'Try to rename an existing System Role.',
       );
       expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
       expect(roleRepoMock.rename).toHaveBeenCalledTimes(0);
     });
-    it('should return role when attempting to update existing one.', async () => {
+    it('should return role when attempting to rename existing one.', async () => {
       const worker2Role = Role.create({
         name: 'workerx',
-        permissions: [AllPermissions.role.RoleCreateLessOrEqual],
+        permissions: [],
       }).unwrap();
-      const userPermissions = new Map<string, Permission>([
-        [
-          AllPermissions.role.RoleCreateLessOrEqual.key(),
-          AllPermissions.role.RoleCreateLessOrEqual,
-        ],
-      ]);
-      acsyncServiceMock.getPermissions.mockReturnValue(userPermissions);
-      roleRepoMock.rename.mockImplementation((worker2Role: Role) =>
-        Ok(worker2Role),
+
+      roleRepoMock.rename.mockImplementation(
+        (data: { userRoleId: string; role: Role }) => Ok(worker2Role),
       );
       systemRoleMock.hasId.mockReturnValue(false);
       const role = await service.renameRole('roleId', worker2Role.id, {
@@ -112,9 +106,11 @@ describe('AccessControlService', () => {
       });
       expect(role).toStrictEqual(worker2Role.toJSON());
       expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
-      expect(roleRepoMock.rename).toHaveBeenCalledWith(worker2Role);
+      expect(roleRepoMock.rename).toHaveBeenCalledWith({
+        role: worker2Role,
+        userRoleId: 'roleId',
+      });
       expect(roleRepoMock.rename).toHaveBeenCalledTimes(1);
-      expect(acsyncServiceMock.upsertRole).toHaveBeenCalledWith(worker2Role);
     });
   });
   describe('removeRole', () => {
