@@ -113,7 +113,58 @@ export class UserRepository implements IUserRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-
+  async assignUserRole(d: {
+    requesterRoleId: string;
+    targetUserId: string;
+    targetRoleId: string;
+  }) {
+    try {
+      const oldUserRoleIdCTE = this.userRepo
+        .createQueryBuilder('user')
+        .select('user.role_id', 'id')
+        .where('user.id= :targetUserId', { targetUserId: d.targetUserId });
+      const targetUserPermissons = this.userRepo.manager
+        .createQueryBuilder(RoleEntity, 'role')
+        .select('role.permissions', 'old_permissions')
+        .where('role.id= (select id from old_user_role_id)');
+      const targetRolePermissions = this.userRepo.manager
+        .createQueryBuilder(RoleEntity, 'role')
+        .select('role.permissions', 'target_permissions')
+        .where('role.id=:targetRoleId', { targetRoleId: d.targetRoleId });
+      const requesterRoleAssignScope = this.userRepo.manager
+        .createQueryBuilder(RoleEntity, 'role')
+        .select('role.assign_scope', 'assign_scope')
+        .where('role.id=:requesterRoleId', {
+          requesterRoleId: d.requesterRoleId,
+        });
+      const updateResult = await this.userRepo
+        .createQueryBuilder('user')
+        .addCommonTableExpression(oldUserRoleIdCTE, 'old_user_role_id')
+        .addCommonTableExpression(targetUserPermissons, 'old_role_permissions')
+        .addCommonTableExpression(
+          targetRolePermissions,
+          'target_role_permissions',
+        )
+        .addCommonTableExpression(
+          requesterRoleAssignScope,
+          'requester_assign_scope',
+        )
+        .update(UserEntity)
+        .set({ roleId: d.targetRoleId })
+        .where(
+          `COALESCE((select assign_scope from requester_assign_scope),'[]'::jsonb) @> (select old_permissions from old_role_permissions)`,
+        )
+        .andWhere(
+          `COALESCE((select assign_scope from requester_assign_scope),'[]'::jsonb) @> (select target_permissions from target_role_permissions)`,
+        )
+        .returning('*')
+        .execute();
+      const [row] = updateResult.raw as UserEntity[];
+      return Ok(this.toDomain(row));
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   async reassignUsersRole(
     oldRoleId: string,
     newRoleId: string,
