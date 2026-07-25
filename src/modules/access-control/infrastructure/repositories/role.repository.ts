@@ -12,7 +12,10 @@ export abstract class IRoleRepository {
   abstract findByName(name: string): Promise<DBResult<Option<Role>>>;
   abstract upsert(role: Role): Promise<DBResult<Role>>;
   abstract create(role: Role, creatorRoleId: string): Promise<DBResult<Role>>;
-  abstract rename(role: Role): Promise<DBResult<Role>>;
+  abstract rename(data: {
+    userRoleId: string;
+    role: Role;
+  }): Promise<DBResult<Role>>;
   abstract deleteById(ids: {
     requesterRoleId: string;
     targetRoleId: string;

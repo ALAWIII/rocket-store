@@ -181,23 +181,38 @@ export class RoleRepository implements IRoleRepository {
     }
   }
 
-  async rename(role: Role): Promise<DBResult<Role>> {
+  async rename(data: {
+    userRoleId: string;
+    role: Role;
+  }): Promise<DBResult<Role>> {
     try {
+      const requesterScope = this.roleRepo
+        .createQueryBuilder('r')
+        .select('r.create_scope', 'create_scope')
+        .where('r.id = :requesterId', { requesterId: data.userRoleId });
+
       const result = await this.roleRepo
         .createQueryBuilder()
+        .addCommonTableExpression(requesterScope, 'requester_scope')
         .update(RoleEntity)
-        .set({ name: role.name })
-        .where('id = :id', { id: role.id })
+        .set({ name: data.role.name })
+        .where('id = :targetId', { targetId: data.role.id })
+        .andWhere(
+          `COALESCE((select create_scope from requester_scope), '[]'::jsonb)
+             @> (select permissions from roles where id = :targetId)`,
+        )
         .returning('*')
         .execute();
-      const rows = result.raw as RoleEntity[];
-      if (result.affected === 0 || rows.length === 0) {
+
+      const [updatedRow] = result.raw as RoleEntity[];
+
+      if (result.affected === 0 || !updatedRow) {
         throw new RecordNotFoundError(
-          `role to be updated was not found: ${role.id}`,
+          `role to be updated was not found: ${data.role.id}`,
         );
       }
-      const row = rows[0];
-      return Ok(this.toDomain(row));
+
+      return Ok(this.toDomain(updatedRow));
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
