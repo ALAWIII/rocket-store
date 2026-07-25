@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { AccessControlSyncService } from './application/access-control-sync.service';
-import { AllPermissions, Permission } from './domain/permission';
+import { Permission } from './domain/permission';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { SystemRolesRegistry } from './application/system-roles.registry';
 import { RoleResponseDto } from './dto/role-response.dto';

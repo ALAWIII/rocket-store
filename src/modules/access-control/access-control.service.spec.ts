@@ -5,7 +5,6 @@ import { SystemRolesRegistry } from './application/system-roles.registry';
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { Role } from './domain/role';
 import { Ok } from 'ts-results-es';
-import { AllPermissions, Permission } from './domain/permission';
 
 describe('AccessControlService', () => {
   let service: AccessControlService;
