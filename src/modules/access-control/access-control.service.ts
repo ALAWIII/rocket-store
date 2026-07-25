@@ -44,9 +44,7 @@ export class AccessControlService {
     roleData: CreateRoleDto,
   ): Promise<RoleResponseDto> {
     if (this.systemRole.isSystemRoleName(roleData.name))
-      throw new SystemRoleError(
-        'Try to create/override an existing system role.',
-      );
+      throw new SystemRoleError('Try to create an existing system role.');
     const permissions = roleData.permissions
       .map((p) => Permission.fromPrimitives(p).unwrap())
       .flatMap((p) => permissionDepsTable.getDependenciesTreeFor(p));
