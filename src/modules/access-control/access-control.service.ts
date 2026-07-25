@@ -78,34 +78,15 @@ export class AccessControlService {
     if (this.systemRole.hasId(roleId))
       throw new SystemRoleError('Try to rename an existing System Role.');
 
-    const [targetPerms, userPerms, canUpdateLessOrEqual] = await Promise.all([
-      this.acsyncService.getPermissions(roleId),
-      this.acsyncService.getPermissions(userRoleId),
-      this.acsyncService.hasPolicy(
-        userRoleId,
-        AllPermissions.role.RoleUpdateLessOrEqual,
-      ),
-    ]);
-
     const targetRole = Role.restore({
       id: roleId,
       name: updateData.name,
-      permissions: targetPerms,
+      permissions: [],
     }).unwrap();
 
-    if (targetRole.isProperSupersetOf(userPerms)) {
-      throw new RoleServiceError(
-        'Can not update role with permissions that are not owned by the user.',
-      );
-    }
-    // this condition only after checking superset !!!
-    const isEqual = targetPerms.length === userPerms.length;
-    if (isEqual && !canUpdateLessOrEqual) {
-      throw new RoleServiceError(
-        'Cannot update a role at the same permission level without RoleUpdateLessOrEqual.',
-      );
-    }
-    return (await this.roleRepo.rename(targetRole)).unwrap().toJSON();
+    return (await this.roleRepo.rename({ role: targetRole, userRoleId }))
+      .unwrap()
+      .toJSON();
   }
   async removeRole(userRoleId: string, roleId: string): Promise<number> {
     if (userRoleId === roleId) {
