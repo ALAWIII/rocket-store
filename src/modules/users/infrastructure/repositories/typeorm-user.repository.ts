@@ -417,6 +417,7 @@ export class UserRepository implements IUserRepository {
       name: userEntity.name,
       givenName: userEntity.givenName,
       familyName: userEntity.familyName,
+      image: userEntity.image ?? undefined,
       roleId: userEntity.roleId,
       phone: userEntity.phone ?? undefined,
       updatedAt: userEntity.updatedAt,
