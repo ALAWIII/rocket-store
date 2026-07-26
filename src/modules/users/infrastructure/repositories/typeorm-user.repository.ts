@@ -194,15 +194,54 @@ export class UserRepository implements IUserRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  async reassignUsersRole(
-    oldRoleId: string,
-    newRoleId: string,
-  ): Promise<DBResult<number>> {
+  async reassignUsersRole(d: {
+    requesterRoleId: string;
+    oldRoleId: string;
+    newRoleId: string;
+  }): Promise<DBResult<number>> {
     try {
-      const updateResult = await this.userRepo.update(
-        { roleId: oldRoleId },
-        { roleId: newRoleId },
-      );
+      const requesterScope = this.userRepo.manager
+        .createQueryBuilder(RoleEntity, 'role')
+        .select('role.assign_scope', 'assign_scope')
+        .where('role.id = :requesterRoleId', {
+          requesterRoleId: d.requesterRoleId,
+        });
+
+      const oldPermissions = this.userRepo.manager
+        .createQueryBuilder(RoleEntity, 'role')
+        .select('role.permissions', 'permissions')
+        .where('role.id = :oldRoleId', { oldRoleId: d.oldRoleId });
+
+      const newPermissions = this.userRepo.manager
+        .createQueryBuilder(RoleEntity, 'role')
+        .select('role.permissions', 'permissions')
+        .where('role.id = :newRoleId', { newRoleId: d.newRoleId });
+
+      const updateResult = await this.userRepo
+        .createQueryBuilder()
+        .addCommonTableExpression(requesterScope, 'req_assign_scope')
+        .addCommonTableExpression(oldPermissions, 'old_role_permissions')
+        .addCommonTableExpression(newPermissions, 'new_role_permissions')
+        .update(UserEntity)
+        .set({ roleId: d.newRoleId })
+        .where('role_id = :oldRoleId', { oldRoleId: d.oldRoleId })
+        .andWhere(
+          `
+           COALESCE(
+             (select assign_scope from req_assign_scope),
+             '[]'::jsonb
+           ) @> (select permissions from old_role_permissions)
+         `,
+        )
+        .andWhere(
+          `
+           COALESCE(
+             (select assign_scope from req_assign_scope),
+             '[]'::jsonb
+           ) @> (select permissions from new_role_permissions)
+         `,
+        )
+        .execute();
       return Ok(updateResult.affected ?? 0);
     } catch (e) {
       return Err(mapTypeOrmError(e));
