@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { IUserRepository } from './infrastructure/repositories/user.repository';
 import { FindUsersByParamsDto } from './dto/find-users-by-filter.dto';
 import { FindAllUsersDto } from './dto/find-all-users.dto';
 import { AssignRoleToUserDto } from './dto/assign-role-to-user.dto';
 import { AssignRoleToUsersDto } from './dto/assign-role-to-users.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -53,5 +54,12 @@ export class UsersService {
       requesterRoleId,
     });
     return result.unwrap();
+  }
+  async updateUser(id: string, d: UpdateUserDto) {
+    const user = (await this.userRepo.updateById(id, d))
+      .map((u) => u.toResult(new NotFoundException(`User ${id} not found`)))
+      .unwrap()
+      .unwrap();
+    return user.toJSON();
   }
 }
