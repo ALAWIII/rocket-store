@@ -18,9 +18,9 @@ export class AddressRepository implements IAddressRepository {
     @InjectRepository(AddressEntity)
     private readonly addressRepo: Repository<AddressEntity>,
   ) {}
-  async loadAll(): Promise<DBResult<Address[]>> {
+  async findAll(d: { userId: string }): Promise<DBResult<Address[]>> {
     try {
-      const addresses = await this.addressRepo.find();
+      const addresses = await this.addressRepo.findBy({ userId: d.userId });
       return Ok(addresses.map((adrs) => this.toDomain(adrs)));
     } catch (e) {
       return Err(mapTypeOrmError(e));
@@ -37,7 +37,7 @@ export class AddressRepository implements IAddressRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  async remove(id: string): Promise<DBResult<number>> {
+  async delete(id: string): Promise<DBResult<number>> {
     try {
       return Ok((await this.addressRepo.softDelete({ id })).affected ?? 0);
     } catch (e) {

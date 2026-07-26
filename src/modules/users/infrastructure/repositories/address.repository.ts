@@ -3,8 +3,8 @@ import { Address } from '../../domain/address';
 import { Option } from 'ts-results-es';
 
 export abstract class IAddressRepository {
-  abstract loadAll(): Promise<DBResult<Address[]>>;
+  abstract findAll(d: { userId: string }): Promise<DBResult<Address[]>>;
   abstract upsert(adrs: Address): Promise<DBResult<Address>>;
   abstract findById(id: string): Promise<DBResult<Option<Address>>>;
-  abstract remove(id: string): Promise<DBResult<number>>;
+  abstract delete(id: string): Promise<DBResult<number>>;
 }
