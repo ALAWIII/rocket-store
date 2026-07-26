@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { IUserRepository } from './infrastructure/repositories/user.repository';
 import { FindUsersByParamsDto } from './dto/find-users-by-filter.dto';
 import { FindAllUsersDto } from './dto/find-all-users.dto';
+import { AssignRoleToUserDto } from './dto/assign-role-to-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -30,5 +31,11 @@ export class UsersService {
       await this.userRepo.findById({ requesterRoleId, userId })
     ).unwrap();
     return user.toJSON();
+  }
+  async assignRoleToUser(requesterRoleId: string, d: AssignRoleToUserDto) {
+    const user = (
+      await this.userRepo.assignUserRole({ ...d, requesterRoleId })
+    ).map((u) => u.toJSON());
+    return user.unwrap();
   }
 }
