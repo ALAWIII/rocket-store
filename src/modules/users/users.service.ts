@@ -25,4 +25,10 @@ export class UsersService {
     ).unwrap();
     return { users: users.users.map((u) => u.toJSON()), total: users.total };
   }
+  async findById(requesterRoleId: string, userId: string) {
+    const user = (
+      await this.userRepo.findById({ requesterRoleId, userId })
+    ).unwrap();
+    return user.toJSON();
+  }
 }
