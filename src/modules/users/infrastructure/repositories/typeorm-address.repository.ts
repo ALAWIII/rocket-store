@@ -37,9 +37,12 @@ export class AddressRepository implements IAddressRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  async delete(id: string): Promise<DBResult<number>> {
+  async delete(d: { id: string; userId: string }): Promise<DBResult<number>> {
     try {
-      return Ok((await this.addressRepo.softDelete({ id })).affected ?? 0);
+      return Ok(
+        (await this.addressRepo.softDelete({ id: d.id, userId: d.userId }))
+          .affected ?? 0,
+      );
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
