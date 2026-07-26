@@ -1,4 +1,5 @@
 import { IsOptional, IsString, IsUrl, Length } from 'class-validator';
+import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-least-one-defined.decorator';
 
 export class UpdateUserDto {
   @IsOptional()
@@ -25,4 +26,10 @@ export class UpdateUserDto {
   @IsString()
   @Length(2, 20)
   phone?: string;
+
+  @AtLeastOneDefined(
+    ['name', 'givenName', 'familyName', 'image', 'roleId', 'phone'],
+    { message: 'At least one field must be provided' },
+  )
+  private readonly __atLeast?: never;
 }
