@@ -44,7 +44,7 @@ export abstract class IUserRepository {
     id: string,
     data: UpdateUserRepoData,
   ): Promise<DBResult<Option<User>>>;
-  abstract reassignUsersRole(d: {
+  abstract assignUsersRole(d: {
     requesterRoleId: string;
     oldRoleId: string;
     newRoleId: string;

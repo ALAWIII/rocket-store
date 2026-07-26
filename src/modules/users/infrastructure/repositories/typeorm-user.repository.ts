@@ -204,7 +204,7 @@ export class UserRepository implements IUserRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  async reassignUsersRole(d: {
+  async assignUsersRole(d: {
     requesterRoleId: string;
     oldRoleId: string;
     newRoleId: string;

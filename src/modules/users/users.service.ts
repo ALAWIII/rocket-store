@@ -40,7 +40,7 @@ export class UsersService {
     return user.unwrap();
   }
   async assignRoleToUsers(requesterRoleId: string, d: AssignRoleToUsersDto) {
-    const result = await this.userRepo.reassignUsersRole({
+    const result = await this.userRepo.assignUsersRole({
       ...d,
       requesterRoleId,
     });
