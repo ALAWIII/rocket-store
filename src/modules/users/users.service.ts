@@ -2,7 +2,6 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { IUserRepository } from './infrastructure/repositories/user.repository';
 import { FindUsersByParamsDto } from './dto/find-users-by-filter.dto';
 import { FindAllUsersDto } from './dto/find-all-users.dto';
-import { AssignRoleToUserDto } from './dto/assign-role-to-user.dto';
 import { AssignRoleToUsersDto } from './dto/assign-role-to-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
