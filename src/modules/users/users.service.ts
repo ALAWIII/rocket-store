@@ -3,6 +3,7 @@ import { IUserRepository } from './infrastructure/repositories/user.repository';
 import { FindUsersByParamsDto } from './dto/find-users-by-filter.dto';
 import { FindAllUsersDto } from './dto/find-all-users.dto';
 import { AssignRoleToUserDto } from './dto/assign-role-to-user.dto';
+import { AssignRoleToUsersDto } from './dto/assign-role-to-users.dto';
 
 @Injectable()
 export class UsersService {
@@ -37,5 +38,12 @@ export class UsersService {
       await this.userRepo.assignUserRole({ ...d, requesterRoleId })
     ).map((u) => u.toJSON());
     return user.unwrap();
+  }
+  async assignRoleToUsers(requesterRoleId: string, d: AssignRoleToUsersDto) {
+    const result = await this.userRepo.reassignUsersRole({
+      ...d,
+      requesterRoleId,
+    });
+    return result.unwrap();
   }
 }
