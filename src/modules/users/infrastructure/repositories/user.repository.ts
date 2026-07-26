@@ -6,6 +6,7 @@ export type UpdateUserRepoData = {
   name?: string;
   givenName?: string;
   familyName?: string;
+  image?: string;
   roleId?: string;
   phone?: string;
 };
