@@ -4,21 +4,29 @@ import { FindUsersByParamsDto } from './dto/find-users-by-filter.dto';
 import { FindAllUsersDto } from './dto/find-all-users.dto';
 import { AssignRoleToUsersDto } from './dto/assign-role-to-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UserResponseDto } from './dto/user-response.dto';
+import { FindUsersResponseDto } from './dto/find-users-response.dto';
 
 @Injectable()
 export class UsersService {
   constructor(private readonly userRepo: IUserRepository) {}
-  async findAll(requesterRoleId: string, d: FindAllUsersDto) {
+  async findAll(
+    requesterRoleId: string,
+    d: FindAllUsersDto,
+  ): Promise<FindUsersResponseDto> {
     const result = (
       await this.userRepo.findAll({ ...d, requesterRoleId })
     ).unwrap();
     return { users: result.users.map((u) => u.toJSON()), total: result.total };
   }
-  async findUser(id: string) {
+  async findUser(id: string): Promise<UserResponseDto> {
     const user = (await this.userRepo.findUserRequester(id)).unwrap();
     return user.toJSON();
   }
-  async findBy(requesterRoleId: string, filters: FindUsersByParamsDto) {
+  async findBy(
+    requesterRoleId: string,
+    filters: FindUsersByParamsDto,
+  ): Promise<FindUsersResponseDto> {
     const users = (
       await this.userRepo.findBy({
         ...filters,
@@ -27,7 +35,10 @@ export class UsersService {
     ).unwrap();
     return { users: users.users.map((u) => u.toJSON()), total: users.total };
   }
-  async findById(requesterRoleId: string, userId: string) {
+  async findById(
+    requesterRoleId: string,
+    userId: string,
+  ): Promise<UserResponseDto> {
     const user = (
       await this.userRepo.findById({ requesterRoleId, userId })
     ).unwrap();
@@ -37,7 +48,7 @@ export class UsersService {
     requesterRoleId: string,
     targetUserId: string,
     targetRoleId: string,
-  ) {
+  ): Promise<UserResponseDto> {
     const user = (
       await this.userRepo.assignUserRole({
         targetRoleId,
@@ -47,14 +58,17 @@ export class UsersService {
     ).map((u) => u.toJSON());
     return user.unwrap();
   }
-  async assignRoleToUsers(requesterRoleId: string, d: AssignRoleToUsersDto) {
+  async assignRoleToUsers(
+    requesterRoleId: string,
+    d: AssignRoleToUsersDto,
+  ): Promise<number> {
     const result = await this.userRepo.assignUsersRole({
       ...d,
       requesterRoleId,
     });
     return result.unwrap();
   }
-  async updateUser(id: string, d: UpdateUserDto) {
+  async updateUser(id: string, d: UpdateUserDto): Promise<UserResponseDto> {
     const user = (await this.userRepo.updateById(id, d))
       .map((u) => u.toResult(new NotFoundException(`User ${id} not found`)))
       .unwrap()
