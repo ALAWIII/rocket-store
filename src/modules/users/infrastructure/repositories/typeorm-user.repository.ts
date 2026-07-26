@@ -117,49 +117,78 @@ export class UserRepository implements IUserRepository {
     requesterRoleId: string;
     targetUserId: string;
     targetRoleId: string;
-  }) {
+  }): Promise<DBResult<User>> {
     try {
-      const oldUserRoleIdCTE = this.userRepo
+      const oldUserRoleIdCte = this.userRepo
         .createQueryBuilder('user')
         .select('user.role_id', 'id')
-        .where('user.id= :targetUserId', { targetUserId: d.targetUserId });
-      const targetUserPermissons = this.userRepo.manager
+        .where('user.id = :targetUserId', {
+          targetUserId: d.targetUserId,
+        });
+
+      const oldRolePermissionsCte = this.userRepo.manager
         .createQueryBuilder(RoleEntity, 'role')
-        .select('role.permissions', 'old_permissions')
-        .where('role.id= (select id from old_user_role_id)');
-      const targetRolePermissions = this.userRepo.manager
+        .select('role.permissions', 'permissions')
+        .where('role.id = (select id from old_user_role_id)');
+
+      const targetRolePermissionsCte = this.userRepo.manager
         .createQueryBuilder(RoleEntity, 'role')
-        .select('role.permissions', 'target_permissions')
-        .where('role.id=:targetRoleId', { targetRoleId: d.targetRoleId });
-      const requesterRoleAssignScope = this.userRepo.manager
+        .select('role.permissions', 'permissions')
+        .where('role.id = :targetRoleId', {
+          targetRoleId: d.targetRoleId,
+        });
+
+      const requesterAssignScopeCte = this.userRepo.manager
         .createQueryBuilder(RoleEntity, 'role')
         .select('role.assign_scope', 'assign_scope')
-        .where('role.id=:requesterRoleId', {
+        .where('role.id = :requesterRoleId', {
           requesterRoleId: d.requesterRoleId,
         });
-      const updateResult = await this.userRepo
-        .createQueryBuilder('user')
-        .addCommonTableExpression(oldUserRoleIdCTE, 'old_user_role_id')
-        .addCommonTableExpression(targetUserPermissons, 'old_role_permissions')
+
+      const result = await this.userRepo
+        .createQueryBuilder()
+        .addCommonTableExpression(oldUserRoleIdCte, 'old_user_role_id')
+        .addCommonTableExpression(oldRolePermissionsCte, 'old_role_permissions')
         .addCommonTableExpression(
-          targetRolePermissions,
+          targetRolePermissionsCte,
           'target_role_permissions',
         )
         .addCommonTableExpression(
-          requesterRoleAssignScope,
+          requesterAssignScopeCte,
           'requester_assign_scope',
         )
         .update(UserEntity)
         .set({ roleId: d.targetRoleId })
-        .where(
-          `COALESCE((select assign_scope from requester_assign_scope),'[]'::jsonb) @> (select old_permissions from old_role_permissions)`,
+        .where('id = :targetUserId', {
+          targetUserId: d.targetUserId,
+        })
+        .andWhere(
+          `
+          COALESCE(
+            (select assign_scope from requester_assign_scope),
+            '[]'::jsonb
+          ) @> (select permissions from old_role_permissions)
+        `,
         )
         .andWhere(
-          `COALESCE((select assign_scope from requester_assign_scope),'[]'::jsonb) @> (select target_permissions from target_role_permissions)`,
+          `
+          COALESCE(
+            (select assign_scope from requester_assign_scope),
+            '[]'::jsonb
+          ) @> (select permissions from target_role_permissions)
+        `,
         )
         .returning('*')
         .execute();
-      const [row] = updateResult.raw as UserEntity[];
+
+      const [row] = result.raw as UserEntity[];
+
+      if (result.affected === 0 || !row) {
+        throw new RecordNotFoundError(
+          `user role could not be assigned: ${d.targetUserId}`,
+        );
+      }
+
       return Ok(this.toDomain(row));
     } catch (e) {
       return Err(mapTypeOrmError(e));

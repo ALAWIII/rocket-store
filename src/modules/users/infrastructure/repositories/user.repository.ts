@@ -47,4 +47,9 @@ export abstract class IUserRepository {
     oldRoleId: string,
     newRoleId: string,
   ): Promise<DBResult<number>>;
+  abstract assignUserRole(d: {
+    requesterRoleId: string;
+    targetUserId: string;
+    targetRoleId: string;
+  }): Promise<DBResult<User>>;
 }
