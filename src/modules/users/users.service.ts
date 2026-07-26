@@ -33,9 +33,17 @@ export class UsersService {
     ).unwrap();
     return user.toJSON();
   }
-  async assignRoleToUser(requesterRoleId: string, d: AssignRoleToUserDto) {
+  async assignRoleToUser(
+    requesterRoleId: string,
+    targetUserId: string,
+    targetRoleId: string,
+  ) {
     const user = (
-      await this.userRepo.assignUserRole({ ...d, requesterRoleId })
+      await this.userRepo.assignUserRole({
+        targetRoleId,
+        requesterRoleId,
+        targetUserId,
+      })
     ).map((u) => u.toJSON());
     return user.unwrap();
   }
