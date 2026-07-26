@@ -13,6 +13,7 @@ type UserProps = {
   givenName: Name;
   familyName: Name;
   roleId: string;
+  image?: string;
   phone?: Phone;
   updatedAt: Date;
   readonly createdAt: Date;
@@ -24,6 +25,7 @@ type UserPrimitives = {
   givenName: string;
   familyName: string;
   roleId: string;
+  image?: string;
   phone?: string;
   updatedAt: Date;
   createdAt: Date;
@@ -52,6 +54,7 @@ export class User {
       new User({
         id: UserId.create(data.id),
         ...dataValidate.value,
+        image: data.image,
         roleId: data.roleId,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
@@ -92,6 +95,7 @@ export class User {
       givenName: this.data.givenName.value,
       familyName: this.data.familyName.value,
       roleId: this.data.roleId,
+      image: this.data.image,
       phone: this.data.phone?.value,
       updatedAt: this.data.updatedAt,
       createdAt: this.data.createdAt,
