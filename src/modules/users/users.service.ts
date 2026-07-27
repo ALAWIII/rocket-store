@@ -1,10 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IUserRepository } from './infrastructure/repositories/user.repository';
-import { FindUsersByQueryDto } from './dto/find-users-by-filter.dto';
+import { FindUsersFlatQueryDto } from './dto/find-users-by-filter.dto';
 import { AssignRoleToUsersDto } from './dto/assign-role-to-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { FindUsersResponseDto } from './dto/find-users-response.dto';
+
+type Filters = Omit<FindUsersFlatQueryDto, 'limit' | 'page'>;
+type FindUsersByQueryDto = Pick<FindUsersFlatQueryDto, 'page' | 'limit'> & {
+  filters?: Filters;
+};
 
 @Injectable()
 export class UsersService {
