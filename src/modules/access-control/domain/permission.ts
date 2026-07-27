@@ -39,7 +39,7 @@ const Matrix = {
   },
   user: {
     create: ['own', 'any'],
-    read: ['own', 'any'],
+    read: ['own', 'lessOrEqual'],
     update: ['own', 'any'],
     delete: ['own', 'any'],
   },
