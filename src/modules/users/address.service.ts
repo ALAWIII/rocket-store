@@ -14,8 +14,8 @@ export class AddressService {
     const addresses = (await this.addressRepo.findAll(userId)).unwrap();
     return addresses.map((ad) => ad.toPrimitives());
   }
-  async findById(adrsId: string): Promise<AddressResponseDto> {
-    const address = (await this.addressRepo.findById(adrsId)).unwrap();
+  async findById(userId: string, adrsId: string): Promise<AddressResponseDto> {
+    const address = (await this.addressRepo.findById(userId, adrsId)).unwrap();
     if (address.isNone())
       throw new NotFoundException(`Address ${adrsId} not found.`);
 
