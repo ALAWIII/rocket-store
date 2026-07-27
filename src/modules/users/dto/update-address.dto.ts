@@ -1,3 +1,3 @@
 import { AddressPayloadDto } from './address-payload.dto';
 
-export class CreateAddressDto extends AddressPayloadDto {}
+export class UpdateAddressDto extends AddressPayloadDto {}
