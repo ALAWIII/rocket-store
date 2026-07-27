@@ -95,9 +95,17 @@ const roleTable = new PermissionDependencyTableBuilder()
     AllPermissions.role.RoleCreateLessOrEqual,
   ])
   .register(AllPermissions.role.RoleReadLessOrEqual, [])
-  .register(AllPermissions.role.RoleReloadAll, []);
+  .register(AllPermissions.role.RoleReloadAll, [])
+  .getTable();
+
+const userTable = new PermissionDependencyTableBuilder()
+  .register(AllPermissions.user.UserReadLessOrEqual, [
+    AllPermissions.role.RoleAssignLessOrEqual,
+  ])
+  .getTable();
 
 export const permissionDepsTable = new PermissionDependencyTableBuilder()
-  .mergeFrom(roleTable.getTable())
+  .mergeFrom(roleTable)
+  .mergeFrom(userTable)
   .compile();
 // permissionDepsTable
