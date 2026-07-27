@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IUserRepository } from './infrastructure/repositories/user.repository';
-import { FindUsersByParamsDto } from './dto/find-users-by-filter.dto';
+import { FindUsersByQueryDto } from './dto/find-users-by-filter.dto';
 import { AssignRoleToUsersDto } from './dto/assign-role-to-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
@@ -16,7 +16,7 @@ export class UsersService {
   }
   async findBy(
     requesterRoleId: string,
-    filters: FindUsersByParamsDto,
+    filters: FindUsersByQueryDto,
   ): Promise<FindUsersResponseDto> {
     const users = (
       await this.userRepo.findBy({

@@ -30,7 +30,7 @@ class UserFiltersDto {
   phone?: string;
 }
 
-export class FindUsersByParamsDto {
+export class FindUsersByQueryDto {
   @IsOptional()
   @ValidateNested()
   @Type(() => UserFiltersDto)
