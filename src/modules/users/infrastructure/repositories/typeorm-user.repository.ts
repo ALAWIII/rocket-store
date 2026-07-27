@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import {
-  FindAllUsersParams,
   FindUsersByParams,
   IUserRepository,
   UpdateUserRepoData,
@@ -43,15 +42,6 @@ export class UserRepository implements IUserRepository {
     private readonly userRepo: Repository<UserEntity>,
   ) {}
 
-  async findAll(
-    params: FindAllUsersParams,
-  ): Promise<DBResult<{ users: User[]; total: number }>> {
-    return this.findBy({
-      requesterRoleId: params.requesterRoleId,
-      page: params.page,
-      limit: params.limit,
-    });
-  }
   async findMe(id: string): Promise<DBResult<User>> {
     try {
       const result = await this.userRepo.findOneBy({ id });

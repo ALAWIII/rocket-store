@@ -16,11 +16,7 @@ export type UserFilters = {
   roleId?: string;
   phone?: string;
 };
-export type FindAllUsersParams = {
-  requesterRoleId: string;
-  page?: number;
-  limit?: number;
-};
+
 export type FindUsersByParams = {
   requesterRoleId: string;
   filters?: UserFilters;
@@ -29,9 +25,6 @@ export type FindUsersByParams = {
 };
 
 export abstract class IUserRepository {
-  abstract findAll(
-    d: FindAllUsersParams,
-  ): Promise<DBResult<{ users: User[]; total: number }>>;
   abstract findById(data: {
     requesterRoleId: string;
     userId: string;
