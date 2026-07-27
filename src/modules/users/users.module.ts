@@ -13,6 +13,7 @@ import {
 } from './infrastructure/entities/address.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
+import { AddressService } from './address.service';
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserEntity, AddressEntity, OrderAddressEntity]),
@@ -22,6 +23,7 @@ import { UsersController } from './users.controller';
     { provide: IAddressRepository, useClass: AddressRepository },
     { provide: IOrderAddressRepository, useClass: OrderAddressRepositroy },
     UsersService,
+    AddressService,
   ],
   exports: [IUserRepository, IAddressRepository, IOrderAddressRepository],
   controllers: [UsersController],
