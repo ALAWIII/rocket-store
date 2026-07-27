@@ -1,6 +1,6 @@
 import { IsUUID } from 'class-validator';
 
-export class AssignRoleToUsersDto {
+export class ReassignUsersRoleDto {
   @IsUUID('7')
   oldRoleId!: string;
   @IsUUID('7')
