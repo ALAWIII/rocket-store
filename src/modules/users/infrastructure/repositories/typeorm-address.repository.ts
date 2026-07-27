@@ -6,6 +6,7 @@ import { AddressEntity } from '../entities/address.entity';
 import { IsNull, Repository } from 'typeorm';
 import {
   CorruptedPersistenceDataError,
+  RecordNotFoundError,
   UnknownDatabaseError,
 } from 'src/modules/shared/errors/database.error';
 import { DBResult } from 'src/modules/shared/errors/error.types';
@@ -47,41 +48,28 @@ export class AddressRepository implements IAddressRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  async upsert(adrs: Address): Promise<DBResult<Address>> {
+  async update(adrs: Address): Promise<DBResult<Address>> {
     try {
-      const { createdAt, updatedAt, ...values } = adrs.toPrimitives();
+      const { id, userId, createdAt, updatedAt, deletedAt, ...values } =
+        adrs.toPrimitives();
 
       const result = await this.addressRepo
         .createQueryBuilder()
-        .insert()
-        .into(AddressEntity)
-        .values({
-          ...values,
-        })
-        .orUpdate(
-          [
-            'fullName',
-            'phone',
-            'country',
-            'city',
-            'state',
-            'postalCode',
-            'addressLine1',
-            'addressLine2',
-            'deletedAt',
-          ],
-          ['id'],
-          { skipUpdateIfNoValuesChanged: true },
-        )
+        .update(AddressEntity)
+        .set(values)
+        .where('id = :id', { id })
+        .andWhere('user_id = :userId', { userId })
+        .andWhere('deleted_at IS NULL')
         .returning('*')
         .execute();
 
       const rows = result.raw as AddressEntity[];
       const row = rows[0] ?? null;
-
       if (!row) {
-        throw new UnknownDatabaseError(
-          'Failed to upsert address, the address entity should be returned by success upsert operation.',
+        return Err(
+          new UnknownDatabaseError(
+            'Address update succeeded but no row was returned.',
+          ),
         );
       }
 
