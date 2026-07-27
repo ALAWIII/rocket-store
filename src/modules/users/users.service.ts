@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IUserRepository } from './infrastructure/repositories/user.repository';
 import { FindUsersFlatQueryDto } from './dto/find-users-by-filter.dto';
-import { AssignRoleToUsersDto } from './dto/assign-role-to-users.dto';
+import { ReassignUsersRoleDto } from './dto/reassign-users-role.dto';
 import { UpdateMeDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { FindUsersResponseDto } from './dto/find-users-response.dto';
@@ -56,7 +56,7 @@ export class UsersService {
   }
   async assignRoleToUsers(
     requesterRoleId: string,
-    d: AssignRoleToUsersDto,
+    d: ReassignUsersRoleDto,
   ): Promise<number> {
     const result = await this.userRepo.assignUsersRole({
       ...d,
