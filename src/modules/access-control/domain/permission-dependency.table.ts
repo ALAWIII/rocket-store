@@ -17,12 +17,19 @@ class PermissionNode {
 
 class PermissionDependencyTableBuilder {
   private readonly table = new Map<string, PermissionNode>();
-
+  mergeFrom(table: ReadonlyMap<string, PermissionNode>): this {
+    for (const [perm, permNode] of table) {
+      this.table.set(perm, permNode);
+    }
+    return this;
+  }
   register(perm: Permission, deps: Permission[]): this {
     this.table.set(perm.key(), new PermissionNode(perm, deps));
     return this;
   }
-
+  getTable(): ReadonlyMap<string, PermissionNode> {
+    return this.table;
+  }
   compile(): PermissionDependencyTable {
     return new PermissionDependencyTable(this.table);
   }
