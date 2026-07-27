@@ -52,7 +52,7 @@ export class UserRepository implements IUserRepository {
       limit: params.limit,
     });
   }
-  async findUserRequester(id: string): Promise<DBResult<User>> {
+  async findMe(id: string): Promise<DBResult<User>> {
     try {
       const result = await this.userRepo.findOneBy({ id });
       if (!result) {

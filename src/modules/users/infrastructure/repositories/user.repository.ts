@@ -36,7 +36,7 @@ export abstract class IUserRepository {
     requesterRoleId: string;
     userId: string;
   }): Promise<DBResult<User>>;
-  abstract findUserRequester(id: string): Promise<DBResult<User>>;
+  abstract findMe(id: string): Promise<DBResult<User>>;
   abstract findBy(
     data: FindUsersByParams,
   ): Promise<DBResult<{ users: User[]; total: number }>>;

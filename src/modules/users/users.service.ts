@@ -19,8 +19,8 @@ export class UsersService {
     ).unwrap();
     return { users: result.users.map((u) => u.toJSON()), total: result.total };
   }
-  async findUser(id: string): Promise<UserResponseDto> {
-    const user = (await this.userRepo.findUserRequester(id)).unwrap();
+  async findMe(id: string): Promise<UserResponseDto> {
+    const user = (await this.userRepo.findMe(id)).unwrap();
     return user.toJSON();
   }
   async findBy(
