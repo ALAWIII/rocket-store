@@ -40,6 +40,7 @@ export class RolesController {
   }
 
   @Get()
+  @RequirePermission(AllPermissions.role.RoleReadLessOrEqual)
   async findAll(
     @Session() session: AppSession,
     @Query() query: FindRolesQueryDto,
