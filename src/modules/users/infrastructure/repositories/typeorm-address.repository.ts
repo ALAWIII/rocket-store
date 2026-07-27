@@ -6,7 +6,6 @@ import { AddressEntity } from '../entities/address.entity';
 import { IsNull, Repository } from 'typeorm';
 import {
   CorruptedPersistenceDataError,
-  RecordNotFoundError,
   UnknownDatabaseError,
 } from 'src/modules/shared/errors/database.error';
 import { DBResult } from 'src/modules/shared/errors/error.types';
@@ -27,10 +26,14 @@ export class AddressRepository implements IAddressRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  async findById(id: string): Promise<DBResult<Option<Address>>> {
+  async findById(
+    userId: string,
+    id: string,
+  ): Promise<DBResult<Option<Address>>> {
     try {
       const result = await this.addressRepo.findOneBy({
         id,
+        userId,
         deletedAt: IsNull(),
       });
       return Ok(result ? Some(this.toDomain(result)) : None);

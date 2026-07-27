@@ -6,6 +6,9 @@ export abstract class IAddressRepository {
   abstract findAll(userId: string): Promise<DBResult<Address[]>>;
   abstract create(adrs: Address): Promise<DBResult<Address>>;
   abstract update(adrs: Address): Promise<DBResult<Address>>;
-  abstract findById(id: string): Promise<DBResult<Option<Address>>>;
+  abstract findById(
+    userId: string,
+    id: string,
+  ): Promise<DBResult<Option<Address>>>;
   abstract delete(d: { id: string; userId: string }): Promise<DBResult<number>>;
 }
