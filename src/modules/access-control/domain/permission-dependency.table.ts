@@ -80,21 +80,24 @@ class PermissionDependencyTable {
     return [...(this.table.get(perm.key())?.dependencies ?? [])];
   }
 }
-const rolePermissions = AllPermissions.role;
-export const permissionDepsTable = new PermissionDependencyTableBuilder()
-  .register(rolePermissions.RoleAssignLessOrEqual, [
-    rolePermissions.RoleReadLessOrEqual,
+const roleTable = new PermissionDependencyTableBuilder()
+  .register(AllPermissions.role.RoleAssignLessOrEqual, [
+    AllPermissions.role.RoleReadLessOrEqual,
   ])
-  .register(rolePermissions.RoleCreateLessOrEqual, [
-    rolePermissions.RoleReadLessOrEqual,
+  .register(AllPermissions.role.RoleCreateLessOrEqual, [
+    AllPermissions.role.RoleReadLessOrEqual,
   ])
-  .register(rolePermissions.RoleDeleteLess, [
-    rolePermissions.RoleCreateLessOrEqual,
+  .register(AllPermissions.role.RoleDeleteLess, [
+    AllPermissions.role.RoleCreateLessOrEqual,
   ])
-  .register(rolePermissions.RoleRenameLessOrEqual, [
+  .register(AllPermissions.role.RoleRenameLessOrEqual, [
     // users can rename only what can they create
-    rolePermissions.RoleCreateLessOrEqual,
+    AllPermissions.role.RoleCreateLessOrEqual,
   ])
-  .register(rolePermissions.RoleReadLessOrEqual, [])
-  .register(rolePermissions.RoleReloadAll, [])
+  .register(AllPermissions.role.RoleReadLessOrEqual, [])
+  .register(AllPermissions.role.RoleReloadAll, []);
+
+export const permissionDepsTable = new PermissionDependencyTableBuilder()
+  .mergeFrom(roleTable.getTable())
   .compile();
+// permissionDepsTable
