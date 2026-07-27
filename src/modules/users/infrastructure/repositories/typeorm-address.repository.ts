@@ -18,9 +18,9 @@ export class AddressRepository implements IAddressRepository {
     @InjectRepository(AddressEntity)
     private readonly addressRepo: Repository<AddressEntity>,
   ) {}
-  async findAll(d: { userId: string }): Promise<DBResult<Address[]>> {
+  async findAll(userId: string): Promise<DBResult<Address[]>> {
     try {
-      const addresses = await this.addressRepo.findBy({ userId: d.userId });
+      const addresses = await this.addressRepo.findBy({ userId });
       return Ok(addresses.map((adrs) => this.toDomain(adrs)));
     } catch (e) {
       return Err(mapTypeOrmError(e));
