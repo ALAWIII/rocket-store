@@ -40,6 +40,7 @@ const Matrix = {
   user: {
     read: ['lessOrEqual'],
   },
+  address: { read: ['lessOrEqual'] },
 } as const;
 //==================================
 
