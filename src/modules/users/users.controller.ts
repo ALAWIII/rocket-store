@@ -19,6 +19,7 @@ import { UserResponseDto } from './dto/user-response.dto';
 import { FindUsersFlatQueryDto } from './dto/find-users-by-filter.dto';
 import { UpdateMeDto } from './dto/update-user.dto';
 import { AssignRoleToUserDto } from './dto/assign-role-to-user.dto';
+import { ReassignUsersRoleDto } from './dto/reassign-users-role.dto';
 
 @UseGuards(AccessGuard)
 @Controller('users')
@@ -63,7 +64,7 @@ export class UsersController {
     return this.service.updateUser(session.user.id, body);
   }
   @Patch(':id/role')
-  @RequirePermission(AllPermissions.user.UserUpdateLessOrEqual)
+  @RequirePermission(AllPermissions.role.RoleAssignLessOrEqual)
   async assignRole(
     @Session() session: AppSession,
     @Param('id', new ParseUUIDPipe({ version: '7' })) targetUserId: string,
@@ -74,5 +75,13 @@ export class UsersController {
       targetUserId,
       body.roleId,
     );
+  }
+  @Patch('roles/reassign')
+  @RequirePermission(AllPermissions.role.RoleAssignLessOrEqual)
+  async reassignUsersRole(
+    @Session() session: AppSession,
+    @Body() dto: ReassignUsersRoleDto,
+  ): Promise<number> {
+    return this.service.assignRoleToUsers(session.user.roleId, dto);
   }
 }
