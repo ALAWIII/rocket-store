@@ -38,6 +38,19 @@ export class AddressRepository implements IAddressRepository {
       return Err(mapTypeOrmError(e));
     }
   }
+  async create(adrs: Address): Promise<DBResult<Address>> {
+    try {
+      const { createdAt, updatedAt, deletedAt, ...values } =
+        adrs.toPrimitives();
+
+      const entity = this.addressRepo.create(values);
+      const saved = await this.addressRepo.save(entity);
+
+      return Ok(this.toDomain(saved));
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   async delete(d: { id: string; userId: string }): Promise<DBResult<number>> {
     try {
       return Ok(
