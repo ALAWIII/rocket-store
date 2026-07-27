@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { IUserRepository } from './infrastructure/repositories/user.repository';
 import { FindUsersFlatQueryDto } from './dto/find-users-by-filter.dto';
 import { AssignRoleToUsersDto } from './dto/assign-role-to-users.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateMeDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { FindUsersResponseDto } from './dto/find-users-response.dto';
 
@@ -64,7 +64,7 @@ export class UsersService {
     });
     return result.unwrap();
   }
-  async updateUser(id: string, d: UpdateUserDto): Promise<UserResponseDto> {
+  async updateUser(id: string, d: UpdateMeDto): Promise<UserResponseDto> {
     const user = (await this.userRepo.updateById(id, d))
       .map((u) => u.toResult(new NotFoundException(`User ${id} not found`)))
       .unwrap()
