@@ -1,8 +1,10 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Query,
   UseGuards,
 } from '@nestjs/common';
@@ -15,6 +17,7 @@ import { AllPermissions } from '../access-control/domain/permission';
 import { FindUsersResponseDto } from './dto/find-users-response.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { FindUsersFlatQueryDto } from './dto/find-users-by-filter.dto';
+import { UpdateMeDto } from './dto/update-user.dto';
 
 @UseGuards(AccessGuard)
 @Controller('users')
@@ -53,5 +56,9 @@ export class UsersController {
   ): Promise<UserResponseDto> {
     const user = this.service.findById(session.user.roleId, id);
     return user;
+  }
+  @Patch('me')
+  async updateMe(@Session() session: AppSession, @Body() body: UpdateMeDto) {
+    return this.service.updateUser(session.user.id, body);
   }
 }
