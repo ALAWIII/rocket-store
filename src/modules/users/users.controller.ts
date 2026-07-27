@@ -26,7 +26,6 @@ import { ReassignUsersRoleDto } from './dto/reassign-users-role.dto';
 export class UsersController {
   constructor(private readonly service: UsersService) {}
   @Get('me')
-  @RequirePermission(AllPermissions.user.UserReadOwn)
   async findMe(@Session() session: AppSession): Promise<UserResponseDto> {
     const me = await this.service.findMe(session.user.id);
     return me;
