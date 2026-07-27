@@ -78,9 +78,6 @@ export const permissionDepsTable = new PermissionDependencyTableBuilder()
   .register(rolePermissions.RoleAssignLessOrEqual, [
     rolePermissions.RoleReadLessOrEqual,
   ])
-  .register(rolePermissions.RoleAssignLess, [
-    rolePermissions.RoleReadLessOrEqual,
-  ])
   .register(rolePermissions.RoleCreateLessOrEqual, [
     rolePermissions.RoleReadLessOrEqual,
   ])

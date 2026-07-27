@@ -16,7 +16,7 @@ const Matrix = {
     read: ['lessOrEqual'],
     rename: ['lessOrEqual'],
     delete: ['less'],
-    assign: ['less', 'lessOrEqual'],
+    assign: ['lessOrEqual'],
     reload: ['all'],
   },
   product: {
@@ -38,10 +38,7 @@ const Matrix = {
     delete: ['own', 'any'],
   },
   user: {
-    create: ['own', 'any'],
-    read: ['own', 'lessOrEqual'],
-    update: ['own', 'lessOrEqual'],
-    delete: ['own', 'any'],
+    read: ['lessOrEqual'],
   },
 } as const;
 //==================================
