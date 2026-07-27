@@ -3,14 +3,13 @@ import {
   IsOptional,
   IsString,
   Length,
-  ValidateNested,
   IsInt,
   Min,
   IsEmail,
   IsUUID,
 } from 'class-validator';
 
-class UserFiltersDto {
+export class FindUsersFlatQueryDto {
   @IsOptional()
   @IsString()
   @Length(2, 50)
@@ -28,13 +27,6 @@ class UserFiltersDto {
   @IsString()
   @Length(2, 20)
   phone?: string;
-}
-
-export class FindUsersByQueryDto {
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => UserFiltersDto)
-  filters?: UserFiltersDto;
 
   @IsOptional()
   @Type(() => Number)
