@@ -21,6 +21,9 @@ export class AddressService {
 
     return address.unwrap().toPrimitives();
   }
+  async deleteAdrs(userId: string, adrsId: string): Promise<number> {
+    return (await this.addressRepo.delete({ userId, id: adrsId })).unwrap();
+  }
   async createAdrs(
     userId: string,
     data: CreateAddressDto,
