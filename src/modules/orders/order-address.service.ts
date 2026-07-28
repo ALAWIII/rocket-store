@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { IOrderAddressRepository } from './infrastructure/repositories/order-address.repository';
-import { CreateOrderAddressDto } from '../users/dto/create-order-address.dto';
+import { CreateOrderAddressDto } from './dto/create-order-address.dto';
 
 @Injectable()
 export class OrderAddressService {
