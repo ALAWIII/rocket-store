@@ -16,7 +16,7 @@ export class OrderAddressService {
     ).unwrap();
     return oadrs.map((oad) => oad.toJSON());
   }
-  async createOAdrs(
+  async createOrderAddress(
     userId: string,
     orderId: string,
     data: CreateOrderAddressDto,
