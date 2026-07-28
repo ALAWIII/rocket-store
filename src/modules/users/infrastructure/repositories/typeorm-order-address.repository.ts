@@ -26,7 +26,7 @@ export class OrderAddressRepositroy implements IOrderAddressRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  async save(oa: OrderAddress): Promise<DBResult<OrderAddress>> {
+  async create(oa: OrderAddress): Promise<DBResult<OrderAddress>> {
     try {
       const result = await this.orderAddressRepo
         .createQueryBuilder()
