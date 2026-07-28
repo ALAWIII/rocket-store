@@ -43,8 +43,7 @@ export class AddressRepository implements IAddressRepository {
   }
   async create(adrs: Address): Promise<DBResult<Address>> {
     try {
-      const { createdAt, updatedAt, deletedAt, ...values } =
-        adrs.toPrimitives();
+      const { createdAt, updatedAt, deletedAt, ...values } = adrs.toJSON();
 
       const entity = this.addressRepo.create(values);
       const saved = await this.addressRepo.save(entity);
@@ -67,7 +66,7 @@ export class AddressRepository implements IAddressRepository {
   async update(adrs: Address): Promise<DBResult<Address>> {
     try {
       const { id, userId, createdAt, updatedAt, deletedAt, ...values } =
-        adrs.toPrimitives();
+        adrs.toJSON();
 
       const result = await this.addressRepo
         .createQueryBuilder()

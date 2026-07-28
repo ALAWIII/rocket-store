@@ -12,14 +12,14 @@ export class AddressService {
 
   async findAll(userId: string): Promise<AddressResponseDto[]> {
     const addresses = (await this.addressRepo.findAll(userId)).unwrap();
-    return addresses.map((ad) => ad.toPrimitives());
+    return addresses.map((ad) => ad.toJSON());
   }
   async findById(userId: string, adrsId: string): Promise<AddressResponseDto> {
     const address = (await this.addressRepo.findById(userId, adrsId)).unwrap();
     if (address.isNone())
       throw new NotFoundException(`Address ${adrsId} not found.`);
 
-    return address.unwrap().toPrimitives();
+    return address.unwrap().toJSON();
   }
   async deleteAdrs(userId: string, adrsId: string): Promise<number> {
     return (await this.addressRepo.delete({ userId, id: adrsId })).unwrap();
@@ -29,14 +29,11 @@ export class AddressService {
     data: CreateAddressDto,
   ): Promise<AddressResponseDto> {
     const newDate = new Date();
-    const newAdrs = Address.fromPrimitives({
-      id: AddressId.create().toString(),
+    const newAdrs = Address.create({
       userId,
       ...data,
-      createdAt: newDate,
-      updatedAt: newDate,
     }).unwrap();
-    return (await this.addressRepo.create(newAdrs)).unwrap().toPrimitives();
+    return (await this.addressRepo.create(newAdrs)).unwrap().toJSON();
   }
   async updateAdrs(
     userId: string,
@@ -50,6 +47,6 @@ export class AddressService {
       createdAt: new Date(),
       updatedAt: new Date(),
     }).unwrap();
-    return (await this.addressRepo.update(adrs)).unwrap().toPrimitives();
+    return (await this.addressRepo.update(adrs)).unwrap().toJSON();
   }
 }
