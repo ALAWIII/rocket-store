@@ -11,7 +11,7 @@ import {
   UnknownDatabaseError,
 } from 'src/modules/shared/errors/database.error';
 import { DBResult } from 'src/modules/shared/errors/error.types';
-import { Err, None, Ok, Option, Some } from 'ts-results-es';
+import { Err, Ok } from 'ts-results-es';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { OrderEntity } from 'src/modules/orders/infrastructure/entities/order.entity';
 import { OrderAddressEntity } from '../entities/order-address.entity';
