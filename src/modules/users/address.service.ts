@@ -36,8 +36,8 @@ export class AddressService {
     return (await this.addressRepo.create(newAdrs)).unwrap().toPrimitives();
   }
   async updateAdrs(
-    id: string,
     userId: string,
+    id: string,
     data: UpdateAddressDto,
   ): Promise<AddressResponseDto> {
     const adrs = Address.fromPrimitives({

@@ -33,10 +33,7 @@ export class MyAddressesController {
     return this.service.findById(session.user.id, id);
   }
   @Post()
-  async createAdrs(
-    @Session() session: AppSession,
-    @Body() d: CreateAddressDto,
-  ) {
+  async create(@Session() session: AppSession, @Body() d: CreateAddressDto) {
     return await this.service.createAdrs(session.user.id, d);
   }
   @Put(':id')
@@ -45,7 +42,7 @@ export class MyAddressesController {
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Body() d: UpdateAddressDto,
   ) {
-    return await this.service.updateAdrs(id, session.user.id, d);
+    return await this.service.updateAdrs(session.user.id, id, d);
   }
 }
 
