@@ -1,8 +1,10 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
   ParseUUIDPipe,
+  Post,
   UseGuards,
 } from '@nestjs/common';
 import { AccessGuard } from '../access-control/guards/access-control.guard';
@@ -11,8 +13,9 @@ import { Session } from '@thallesp/nestjs-better-auth';
 import { type AppSession } from 'src/auth/auth.config';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
 import { AllPermissions } from '../access-control/domain/permission';
+import { CreateAddressDto } from './dto/create-address.dto';
 
-@Controller('me/addresses')
+@Controller('users/me/addresses')
 export class MyAddressesController {
   constructor(private readonly service: AddressService) {}
 
@@ -26,6 +29,13 @@ export class MyAddressesController {
     @Session() session: AppSession,
   ) {
     return this.service.findById(session.user.id, id);
+  }
+  @Post()
+  async createAdrs(
+    @Session() session: AppSession,
+    @Body() d: CreateAddressDto,
+  ) {
+    return await this.service.createAdrs(session.user.id, d);
   }
 }
 
