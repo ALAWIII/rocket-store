@@ -94,14 +94,7 @@ export class OrderAddressRepositroy implements IOrderAddressRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  async findById(id: string): Promise<DBResult<Option<OrderAddress>>> {
-    try {
-      const result = await this.orderAddressRepo.findOneBy({ id });
-      return Ok(result ? Some(this.toDomain(result)) : None);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
-  }
+
   private toDomain(oae: OrderAddressEntity): OrderAddress {
     return OrderAddress.fromPrimitives({ ...oae })
       .mapErr(

@@ -14,5 +14,4 @@ export abstract class IOrderAddressRepository {
     userId: string,
     adrs: createOrderAddressData,
   ): Promise<DBResult<OrderAddress>>;
-  abstract findById(id: string): Promise<DBResult<Option<OrderAddress>>>;
 }
