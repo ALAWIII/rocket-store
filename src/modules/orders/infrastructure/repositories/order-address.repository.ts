@@ -1,6 +1,6 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
-import { OrderAddress } from '../../domain/address';
 import { Option } from 'ts-results-es';
+import { OrderAddress } from '../../domain/order-address';
 
 export type createOrderAddressData = {
   addressId: string;

@@ -3,9 +3,8 @@ import {
   createOrderAddressData,
   IOrderAddressRepository,
 } from './order-address.repository';
-import { OrderAddress } from '../../domain/address';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AddressEntity, OrderAddressEntity } from '../entities/address.entity';
+
 import { Repository } from 'typeorm';
 import {
   CorruptedPersistenceDataError,
@@ -15,6 +14,9 @@ import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Err, None, Ok, Option, Some } from 'ts-results-es';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { OrderEntity } from 'src/modules/orders/infrastructure/entities/order.entity';
+import { OrderAddressEntity } from '../entities/order-address.entity';
+import { OrderAddress } from '../../domain/order-address';
+import { AddressEntity } from 'src/modules/users/infrastructure/entities/address.entity';
 
 @Injectable()
 export class OrderAddressRepositroy implements IOrderAddressRepository {

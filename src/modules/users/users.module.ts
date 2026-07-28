@@ -5,27 +5,19 @@ import { IUserRepository } from './infrastructure/repositories/user.repository';
 import { UserRepository } from './infrastructure/repositories/typeorm-user.repository';
 import { IAddressRepository } from './infrastructure/repositories/address.repository';
 import { AddressRepository } from './infrastructure/repositories/typeorm-address.repository';
-import { IOrderAddressRepository } from './infrastructure/repositories/order-address.repository';
-import { OrderAddressRepositroy } from './infrastructure/repositories/typeorm-order-address.repository';
-import {
-  AddressEntity,
-  OrderAddressEntity,
-} from './infrastructure/entities/address.entity';
+import { AddressEntity } from './infrastructure/entities/address.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { AddressService } from './address.service';
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([UserEntity, AddressEntity, OrderAddressEntity]),
-  ],
+  imports: [TypeOrmModule.forFeature([UserEntity, AddressEntity])],
   providers: [
     { provide: IUserRepository, useClass: UserRepository },
     { provide: IAddressRepository, useClass: AddressRepository },
-    { provide: IOrderAddressRepository, useClass: OrderAddressRepositroy },
     UsersService,
     AddressService,
   ],
-  exports: [IUserRepository, IAddressRepository, IOrderAddressRepository],
+  exports: [IUserRepository, IAddressRepository],
   controllers: [UsersController],
 })
 export class UsersModule {}
