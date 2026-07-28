@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { IOrderAddressRepository } from './order-address.repository';
+import {
+  createOrderAddressData,
+  IOrderAddressRepository,
+} from './order-address.repository';
 import { OrderAddress } from '../../domain/address';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OrderAddressEntity } from '../entities/address.entity';
+import { AddressEntity, OrderAddressEntity } from '../entities/address.entity';
 import { Repository } from 'typeorm';
 import {
   CorruptedPersistenceDataError,
@@ -11,6 +14,7 @@ import {
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Err, None, Ok, Option, Some } from 'ts-results-es';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
+import { OrderEntity } from 'src/modules/orders/infrastructure/entities/order.entity';
 
 @Injectable()
 export class OrderAddressRepositroy implements IOrderAddressRepository {
@@ -26,15 +30,54 @@ export class OrderAddressRepositroy implements IOrderAddressRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  async create(oa: OrderAddress): Promise<DBResult<OrderAddress>> {
+  async create(
+    userId: string,
+    d: createOrderAddressData,
+  ): Promise<DBResult<OrderAddress>> {
     try {
+      const isAddressOwner = this.orderAddressRepo.manager
+        .createQueryBuilder(OrderEntity, 'orders')
+        .select('1')
+        .where('orders.id = :orderId', { orderId: d.orderId })
+        .andWhere('orders.user_id = :userId', { userId });
+
+      const selectedFields = this.orderAddressRepo.manager
+        .createQueryBuilder(AddressEntity, 'addresses')
+        .select('addresses.full_name', 'full_name')
+        .addSelect('addresses.phone', 'phone')
+        .addSelect('addresses.country', 'country')
+        .addSelect('addresses.city', 'city')
+        .addSelect('addresses.state', 'state')
+        .addSelect('addresses.postal_code', 'postal_code')
+        .addSelect('addresses.address_line1', 'address_line1')
+        .addSelect('addresses.address_line2', 'address_line2')
+        .addSelect(':addressType', 'address_type')
+        .addSelect(':orderId', 'order_id')
+        .where('addresses.id = :adrsId', { adrsId: d.addressId })
+        .andWhere('addresses.user_id= :userId', { userId })
+        .andWhereExists(isAddressOwner)
+        .setParameters({ addressType: d.addressType, orderId: d.orderId });
+
       const result = await this.orderAddressRepo
         .createQueryBuilder()
+        .addCommonTableExpression(isAddressOwner, 'is_address_owner')
         .insert()
-        .into(OrderAddressEntity)
-        .values({ ...oa.toPrimitives() })
+        .into(OrderAddressEntity, [
+          'full_name',
+          'phone',
+          'country',
+          'city',
+          'state',
+          'postal_code',
+          'address_line1',
+          'address_line2',
+          'address_type',
+          'order_id',
+        ])
+        .valuesFromSelect(selectedFields)
         .returning('*')
         .execute();
+
       const rows = result.raw as OrderAddressEntity[];
       const row = rows[0] ?? null;
 
