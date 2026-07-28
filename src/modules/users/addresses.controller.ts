@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -43,6 +44,13 @@ export class MyAddressesController {
     @Body() d: UpdateAddressDto,
   ) {
     return await this.service.updateAdrs(session.user.id, id, d);
+  }
+  @Delete(':id')
+  async delete(
+    @Session() session: AppSession,
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+  ) {
+    return this.service.deleteAdrs(session.user.id, id);
   }
 }
 
