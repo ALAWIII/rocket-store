@@ -24,10 +24,19 @@ export class OrderAddressRepositroy implements IOrderAddressRepository {
     @InjectRepository(OrderAddressEntity)
     private readonly orderAddressRepo: Repository<OrderAddressEntity>,
   ) {}
-  async findByOrderId(orderId: string): Promise<DBResult<OrderAddress[]>> {
+  async findByOrderId(
+    userId: string,
+    orderId: string,
+  ): Promise<DBResult<OrderAddress[]>> {
     try {
-      const ordAddresses = await this.orderAddressRepo.findBy({ orderId });
-      return Ok(ordAddresses.map((oae) => this.toDomain(oae)));
+      const entities = await this.orderAddressRepo
+        .createQueryBuilder('orderAddress')
+        .innerJoin(OrderEntity, 'order', 'order.id = orderAddress.order_id')
+        .where('orderAddress.order_id = :orderId', { orderId })
+        .andWhere('order.user_id = :userId', { userId })
+        .getMany();
+
+      return Ok(entities.map((entity) => this.toDomain(entity)));
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }

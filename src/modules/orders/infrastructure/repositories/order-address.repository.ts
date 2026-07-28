@@ -8,7 +8,10 @@ export type createOrderAddressData = {
 };
 
 export abstract class IOrderAddressRepository {
-  abstract findByOrderId(orderId: string): Promise<DBResult<OrderAddress[]>>;
+  abstract findByOrderId(
+    userId: string,
+    orderId: string,
+  ): Promise<DBResult<OrderAddress[]>>;
   abstract create(
     userId: string,
     adrs: createOrderAddressData,
