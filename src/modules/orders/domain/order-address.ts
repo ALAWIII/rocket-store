@@ -1,13 +1,20 @@
-import { AddressId, OrderId, UserId } from 'src/modules/shared/domain/ids';
+import { AddressId, OrderId } from 'src/modules/shared/domain/ids';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Phone } from 'src/modules/shared/value-objects/phone';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { Err, Ok, Result } from 'ts-results-es';
 
-type AddressProps = {
+export const AddressType = {
+  Billing: 'billing',
+  Shipping: 'shipping',
+} as const;
+export type AddressType = (typeof AddressType)[keyof typeof AddressType];
+
+type OrderAddressProps = {
   readonly id: AddressId;
-  readonly userId: UserId;
+  readonly orderId: OrderId;
+  addressType: AddressType;
   fullName: Name;
   phone: Phone;
   country: Name;
@@ -17,48 +24,40 @@ type AddressProps = {
   addressLine1: string;
   addressLine2?: string;
   createdAt: Date;
-  updatedAt: Date;
-  deletedAt?: Date;
 };
 
-type AddressPrimitives = {
+export type OrderAddressPrimitives = {
   id: string;
-  userId: string;
   fullName: string;
+  orderId: string;
   phone: string;
   country: string;
   city: string;
   state: string;
   postalCode: string;
+  addressType: AddressType;
   addressLine1: string;
   addressLine2?: string;
   createdAt: Date;
-  updatedAt: Date;
-  deletedAt?: Date;
 };
-type CreateAddressProps = Omit<
-  AddressPrimitives,
-  'id' | 'createdAt' | 'updatedAt' | 'deletedAt'
->;
-export class Address {
-  private constructor(private props: AddressProps) {}
+type CreateOrderAddressProps = Omit<OrderAddressPrimitives, 'id' | 'createdAt'>;
+export class OrderAddress {
+  private constructor(private props: OrderAddressProps) {}
 
-  static create(data: CreateAddressProps) {
-    const now = new Date();
-    const adrsData = {
-      ...data,
+  static create(
+    data: CreateOrderAddressProps,
+  ): Result<OrderAddress, ValueObjectError> {
+    const newAdrs = {
       id: AddressId.create().toString(),
-      createdAt: now,
-      updatedAt: now,
+      createdAt: new Date(),
+      ...data,
     };
-    const newAdrs = Address.fromPrimitives(adrsData);
-
-    return newAdrs;
+    return OrderAddress.fromPrimitives(newAdrs);
   }
 
   static fromPrimitives(
-    data: AddressPrimitives,
-  ): Result<Address, ValueObjectError> {
+    data: OrderAddressPrimitives,
+  ): Result<OrderAddress, ValueObjectError> {
     const dataValidate = unwrapResultObject({
       fullName: Name.create(data.fullName),
       phone: Phone.create(data.phone),
@@ -68,24 +67,24 @@ export class Address {
     });
     if (dataValidate.isErr()) return Err(dataValidate.error);
     return Ok(
-      new Address({
+      new OrderAddress({
         id: AddressId.create(data.id),
-        userId: UserId.create(data.userId),
+        orderId: OrderId.create(data.orderId),
+        addressType: data.addressType,
         postalCode: data.postalCode,
         addressLine1: data.addressLine1,
         addressLine2: data.addressLine2,
         createdAt: data.createdAt,
-        updatedAt: data.updatedAt,
-        deletedAt: data.deletedAt,
         ...dataValidate.value,
       }),
     );
   }
 
-  toPrimitives(): AddressPrimitives {
+  toPrimitives(): OrderAddressPrimitives {
     return {
       id: this.props.id.toString(),
-      userId: this.props.userId.toString(),
+      orderId: this.props.orderId.toString(),
+      addressType: this.props.addressType,
       fullName: this.props.fullName.value,
       phone: this.props.phone.value,
       country: this.props.country.value,
@@ -95,8 +94,6 @@ export class Address {
       addressLine1: this.props.addressLine1,
       addressLine2: this.props.addressLine2,
       createdAt: this.props.createdAt,
-      updatedAt: this.props.updatedAt,
-      deletedAt: this.props.deletedAt,
     };
   }
 }
