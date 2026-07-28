@@ -1,17 +1,16 @@
-import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 import { Column, Entity, ForeignKey, Unique } from 'typeorm';
-import { UserEntity } from './user.entity';
-import {
-  CreateDateColumnTz,
-  DeleteDateColumnTz,
-  UpdateDateColumnTz,
-} from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
+import { OrderEntity } from './order.entity';
+import { AddressType } from '../../domain/order-address';
+import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 
-@Entity('addresses')
-export class AddressEntity {
+@Entity('order_addresses')
+@Unique(['orderId', 'addressType'])
+export class OrderAddressEntity {
   @UuidV7PrimaryColumn()
   id!: string;
-
+  @Column({ type: 'varchar', length: 20 })
+  addressType!: AddressType;
   @Column('varchar', { length: 50 })
   fullName!: string;
 
@@ -38,14 +37,7 @@ export class AddressEntity {
 
   @CreateDateColumnTz()
   createdAt!: Date;
-
-  @UpdateDateColumnTz()
-  updatedAt!: Date;
-
-  @DeleteDateColumnTz()
-  deletedAt?: Date;
-
-  @Column({ type: 'uuid', name: 'user_id' })
-  @ForeignKey(() => UserEntity, (u) => u.id)
-  userId!: string;
+  @Column({ type: 'uuid', name: 'order_id' })
+  @ForeignKey(() => OrderEntity, (o) => o.id)
+  orderId!: string;
 }
