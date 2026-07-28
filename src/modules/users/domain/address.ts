@@ -82,7 +82,7 @@ export class Address {
     );
   }
 
-  toPrimitives(): AddressPrimitives {
+  toJSON(): AddressPrimitives {
     return {
       id: this.props.id.toString(),
       userId: this.props.userId.toString(),
