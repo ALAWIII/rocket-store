@@ -5,6 +5,7 @@ import {
   Param,
   ParseUUIDPipe,
   Post,
+  Put,
   UseGuards,
 } from '@nestjs/common';
 import { AccessGuard } from '../access-control/guards/access-control.guard';
@@ -14,6 +15,7 @@ import { type AppSession } from 'src/auth/auth.config';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
 import { AllPermissions } from '../access-control/domain/permission';
 import { CreateAddressDto } from './dto/create-address.dto';
+import { UpdateAddressDto } from './dto/update-address.dto';
 
 @Controller('users/me/addresses')
 export class MyAddressesController {
@@ -36,6 +38,14 @@ export class MyAddressesController {
     @Body() d: CreateAddressDto,
   ) {
     return await this.service.createAdrs(session.user.id, d);
+  }
+  @Put(':id')
+  async update(
+    @Session() session: AppSession,
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Body() d: UpdateAddressDto,
+  ) {
+    return await this.service.updateAdrs(id, session.user.id, d);
   }
 }
 
