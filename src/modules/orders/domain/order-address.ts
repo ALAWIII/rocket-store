@@ -80,7 +80,7 @@ export class OrderAddress {
     );
   }
 
-  toPrimitives(): OrderAddressPrimitives {
+  toJSON(): OrderAddressPrimitives {
     return {
       id: this.props.id.toString(),
       orderId: this.props.orderId.toString(),

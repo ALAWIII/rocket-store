@@ -12,14 +12,14 @@ export class OrderAddressService {
         `Order Address with id: ${adrsId} is not found.`,
       );
     }
-    return oadrs.unwrap().toPrimitives();
+    return oadrs.unwrap().toJSON();
   }
   async findByOrderId(orderId: string) {
     const oadrs = (await this.oAdrsRepo.findByOrderId(orderId)).unwrap();
 
-    return oadrs.map((oad) => oad.toPrimitives());
+    return oadrs.map((oad) => oad.toJSON());
   }
   async createOAdrs(userId: string, data: CreateOrderAddressDto) {
-    return (await this.oAdrsRepo.create(userId, data)).unwrap().toPrimitives();
+    return (await this.oAdrsRepo.create(userId, data)).unwrap().toJSON();
   }
 }
