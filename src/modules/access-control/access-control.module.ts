@@ -49,6 +49,7 @@ import { SystemRolesSeedService } from './application/system-roles/system-roles.
     AccessControlService,
     AccessControlSyncService,
     SystemRolesRegistry,
+    SystemRolesSeedService,
   ],
   controllers: [RolesController],
 })
