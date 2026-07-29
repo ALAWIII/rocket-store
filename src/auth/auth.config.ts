@@ -70,6 +70,9 @@ export function createAuth(
       },
       deleteUser: { enabled: false },
     },
+    session: {
+      expiresIn: 60 * 60 * 24 * 30, // expires after 30 days
+    },
     //-------------------
     secret: process.env.BETTER_AUTH_SECRET,
     baseURL: process.env.BETTER_AUTH_URL,
