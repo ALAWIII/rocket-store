@@ -14,6 +14,7 @@ import { RolesController } from './role.controller';
 import { AccessGuard } from './guards/access-control.guard';
 import { IEnforcerHolder } from './enforcer-holder/infrastructure/casbin/enforcer-holder';
 import { EnforcerHolderModule } from './enforcer-holder/enforcer-holder.module';
+import { SystemRolesSeedService } from './application/system-roles/system-roles.seed.service';
 @Module({
   imports: [
     EnforcerHolderModule,
@@ -35,6 +36,7 @@ import { EnforcerHolderModule } from './enforcer-holder/enforcer-holder.module';
     }),
   ],
   providers: [
+    SystemRolesSeedService,
     AccessGuard,
     AccessControlBootstrapService,
     AccessControlSyncService,
