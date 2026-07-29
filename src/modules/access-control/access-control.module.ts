@@ -16,7 +16,7 @@ import { IEnforcerHolder } from './enforcer-holder/infrastructure/casbin/enforce
 import { EnforcerHolderModule } from './enforcer-holder/enforcer-holder.module';
 import { SystemRolesSeedService } from './application/system-roles/system-roles.seed.service';
 import { APP_GUARD } from '@nestjs/core';
-@Global()
+
 @Module({
   imports: [
     EnforcerHolderModule,
