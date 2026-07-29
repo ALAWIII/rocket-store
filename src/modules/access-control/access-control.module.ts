@@ -3,15 +3,14 @@ import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { RoleRepository } from './infrastructure/repositories/typeorm-role.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RoleEntity } from './infrastructure/entities/role.entity';
-import { AccessControlBootstrapService } from './application/access-control.bootstrap.service';
+import { AccessControlBootstrapService } from './application/bootstrap/access-control.bootstrap.service';
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { AccessControlService } from './access-control.service';
-import { SystemRolesRegistry } from './application/system-roles.registry';
+import { SystemRolesRegistry } from './application/system-roles/system-roles.registry';
 import { AUTHZ_ENFORCER, AuthZModule } from 'nest-authz';
 import { AppUser, AuthenticatedRequest } from 'src/auth/auth.config';
 import { UsersModule } from '../users/users.module';
 import { RolesController } from './role.controller';
-import { SystemRolesProvider } from './application/system-roles.provider';
 import { AccessGuard } from './guards/access-control.guard';
 import { IEnforcerHolder } from './enforcer-holder/infrastructure/casbin/enforcer-holder';
 import { EnforcerHolderModule } from './enforcer-holder/enforcer-holder.module';
@@ -41,7 +40,6 @@ import { EnforcerHolderModule } from './enforcer-holder/enforcer-holder.module';
     AccessControlSyncService,
     AccessControlService,
     SystemRolesRegistry,
-    SystemRolesProvider,
     { provide: IRoleRepository, useClass: RoleRepository },
   ],
   exports: [

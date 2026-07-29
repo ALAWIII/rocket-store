@@ -3,11 +3,11 @@ import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { Permission } from './domain/permission';
 import { CreateRoleDto } from './dto/create-role.dto';
-import { SystemRolesRegistry } from './application/system-roles.registry';
+import { SystemRolesRegistry } from './application/system-roles/system-roles.registry';
 import { RoleResponseDto } from './dto/role-response.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Role } from './domain/role';
-import { SystemRoleError } from './application/system-roles.error';
+import { SystemRoleError } from './application/system-roles/system-roles.error';
 import { RoleServiceError } from './access-control.error.service';
 import { permissionDepsTable } from './domain/permission-dependency.table';
 

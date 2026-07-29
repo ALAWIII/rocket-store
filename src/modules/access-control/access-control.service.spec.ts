@@ -1,7 +1,7 @@
 import { AccessControlService } from './access-control.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IRoleRepository } from './infrastructure/repositories/role.repository';
-import { SystemRolesRegistry } from './application/system-roles.registry';
+import { SystemRolesRegistry } from './application/system-roles/system-roles.registry';
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { Role } from './domain/role';
 import { Ok } from 'ts-results-es';
