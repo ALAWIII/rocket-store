@@ -32,4 +32,22 @@ export class ResendEmailService {
       );
     }
   }
+  async sendPasswordResetEmail(to: string, url: string): Promise<void> {
+    const { error } = await this.resend.emails.send({
+      from: this.from,
+      to: [to],
+      subject: 'Reset your Rocket Store password',
+      html: `
+        <p>We received a request to reset your Rocket Store password.</p>
+        <p><a href="${url}">Reset your password</a></p>
+        <p>If you did not request this, you can safely ignore this email.</p>
+      `,
+    });
+
+    if (error) {
+      this.logger.error(
+        `Failed to send password-reset email to ${to}: ${error.message}`,
+      );
+    }
+  }
 }

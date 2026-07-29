@@ -36,6 +36,7 @@ export function createAuth(
 ) {
   return betterAuth({
     database: typeormAdapter(dataSource, { usePlural: true }),
+    //--------------------------
     logger: {
       level: logLevel,
       disableColors: true,
@@ -44,7 +45,7 @@ export function createAuth(
         loggerMethodFor(level, logger)(message, ...(args as unknown[]));
       },
     },
-
+    //----------------------
     user: {
       additionalFields: {
         givenName: {
@@ -69,15 +70,20 @@ export function createAuth(
       },
       deleteUser: { enabled: false },
     },
+    //-------------------
     secret: process.env.BETTER_AUTH_SECRET,
     baseURL: process.env.BETTER_AUTH_URL,
     advanced: { database: { generateId: () => v7() } },
+    //--------------------
     emailAndPassword: {
       enabled: true,
       requireEmailVerification: true,
       password: {
         hash: betterHash,
         verify: betterVerify,
+      },
+      sendResetPassword: async ({ user, url }) => {
+        await emailService.sendPasswordResetEmail(user.email, url);
       },
     },
     emailVerification: {
@@ -87,6 +93,7 @@ export function createAuth(
         await emailService.sendVerificationEmail(user.email, url);
       },
     },
+    //-------------------
     disabledPaths: ['/update-user', '/delete-user'],
     plugins: [...(process.env.NODE_ENV === 'development' ? [openAPI()] : [])],
   });
