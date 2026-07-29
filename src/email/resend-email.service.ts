@@ -6,11 +6,8 @@ import { Resend } from 'resend';
 export class ResendEmailService {
   private readonly resend: Resend;
   private readonly from: string;
-
-  constructor(
-    config: ConfigService,
-    private readonly logger: Logger,
-  ) {
+  private readonly logger: Logger = new Logger(ResendEmailService.name);
+  constructor(config: ConfigService) {
     this.resend = new Resend(config.getOrThrow<string>('RESEND_API_KEY'));
     this.from = config.getOrThrow<string>('MAIL_FROM');
   }
