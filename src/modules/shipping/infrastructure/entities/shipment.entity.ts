@@ -1,7 +1,6 @@
 import { OrderEntity } from 'src/modules/orders/infrastructure/entities/order.entity';
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { Column, Entity, ForeignKey } from 'typeorm';
-import { OrderAddressEntity } from 'src/modules/users/infrastructure/entities/address.entity';
 import { ShipmentMethod } from '../../domain/shipping-method';
 import { ShipmentStatus } from '../../domain/shipping-status';
 import { ShippingProviderEntity } from './shipping-provider.entity';
@@ -9,6 +8,7 @@ import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
 } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
+import { OrderAddressEntity } from 'src/modules/orders/infrastructure/entities/order-address.entity';
 
 @Entity('shipments')
 export class ShipmentEntity {
