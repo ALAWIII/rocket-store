@@ -7,6 +7,7 @@ import { openAPI } from 'better-auth/plugins';
 import { Request } from 'express';
 import { AppLogLevel, loggerMethodFor } from 'src/app-logger/app-log.level';
 import { Logger } from 'nestjs-pino';
+import { ResendEmailService } from 'src/email/resend-email.service';
 type Auth = ReturnType<typeof createAuth>;
 export type AppSession = Auth['$Infer']['Session'];
 export type AppUser = AppSession['user'];
@@ -31,6 +32,7 @@ export function createAuth(
   logger: Logger,
   logLevel: AppLogLevel,
   customerRoleId: string,
+  emailService: ResendEmailService,
 ) {
   return betterAuth({
     database: typeormAdapter(dataSource, { usePlural: true }),
@@ -79,7 +81,11 @@ export function createAuth(
       },
     },
     emailVerification: {
+      sendOnSignUp: true,
       autoSignInAfterVerification: true,
+      sendVerificationEmail: async ({ user, url }) => {
+        await emailService.sendVerificationEmail(user.email, url);
+      },
     },
     disabledPaths: ['/update-user', '/delete-user'],
     plugins: [...(process.env.NODE_ENV === 'development' ? [openAPI()] : [])],
