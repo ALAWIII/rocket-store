@@ -30,6 +30,7 @@ export function createAuth(
   dataSource: DataSource,
   logger: Logger,
   logLevel: AppLogLevel,
+  customerRoleId: string,
 ) {
   return betterAuth({
     database: typeormAdapter(dataSource, { usePlural: true }),
@@ -59,6 +60,8 @@ export function createAuth(
           fieldName: 'role_id',
           type: 'string',
           required: true,
+          input: false,
+          defaultValue: customerRoleId,
           references: { model: 'roles', field: 'id' },
         },
       },
