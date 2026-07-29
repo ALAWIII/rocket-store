@@ -6,10 +6,8 @@ import {
   ParseUUIDPipe,
   Patch,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { AccessGuard } from '../access-control/guards/access-control.guard';
 import { type AppSession } from 'src/auth/auth.config';
 import { Session } from '@thallesp/nestjs-better-auth';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
@@ -20,8 +18,6 @@ import { FindUsersFlatQueryDto } from './dto/find-users-by-filter.dto';
 import { UpdateMeDto } from './dto/update-user.dto';
 import { AssignRoleToUserDto } from './dto/assign-role-to-user.dto';
 import { ReassignUsersRoleDto } from './dto/reassign-users-role.dto';
-
-@UseGuards(AccessGuard)
 @Controller('users')
 export class UsersController {
   constructor(private readonly service: UsersService) {}

@@ -1,4 +1,4 @@
-import { ForbiddenException, Module } from '@nestjs/common';
+import { ForbiddenException, Global, Module } from '@nestjs/common';
 import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { RoleRepository } from './infrastructure/repositories/typeorm-role.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -15,6 +15,8 @@ import { AccessGuard } from './guards/access-control.guard';
 import { IEnforcerHolder } from './enforcer-holder/infrastructure/casbin/enforcer-holder';
 import { EnforcerHolderModule } from './enforcer-holder/enforcer-holder.module';
 import { SystemRolesSeedService } from './application/system-roles/system-roles.seed.service';
+import { APP_GUARD } from '@nestjs/core';
+@Global()
 @Module({
   imports: [
     EnforcerHolderModule,
@@ -43,14 +45,9 @@ import { SystemRolesSeedService } from './application/system-roles/system-roles.
     AccessControlService,
     SystemRolesRegistry,
     { provide: IRoleRepository, useClass: RoleRepository },
+    { provide: APP_GUARD, useClass: AccessGuard },
   ],
-  exports: [
-    AccessGuard,
-    AccessControlService,
-    AccessControlSyncService,
-    SystemRolesRegistry,
-    SystemRolesSeedService,
-  ],
+  exports: [SystemRolesRegistry, SystemRolesSeedService],
   controllers: [RolesController],
 })
 export class AccessControlModule {}

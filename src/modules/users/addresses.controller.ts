@@ -7,9 +7,7 @@ import {
   ParseUUIDPipe,
   Post,
   Put,
-  UseGuards,
 } from '@nestjs/common';
-import { AccessGuard } from '../access-control/guards/access-control.guard';
 import { AddressService } from './address.service';
 import { Session } from '@thallesp/nestjs-better-auth';
 import { type AppSession } from 'src/auth/auth.config';
@@ -54,7 +52,6 @@ export class MyAddressesController {
   }
 }
 
-@UseGuards(AccessGuard)
 @Controller('users/:userId/addresses')
 export class UserAddressesController {
   constructor(private readonly service: AddressService) {}

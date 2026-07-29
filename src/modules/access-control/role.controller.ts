@@ -9,20 +9,17 @@ import {
   Post,
   Put,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { AccessControlService } from './access-control.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RoleResponseDto } from './dto/role-response.dto';
-import { AccessGuard } from './guards/access-control.guard';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
 import { AllPermissions } from './domain/permission';
 import { Session } from '@thallesp/nestjs-better-auth';
 import { type AppSession } from 'src/auth/auth.config';
 import { FindRolesQueryDto } from './dto/find-roles.query.dto';
 
-@UseGuards(AccessGuard)
 @Controller('roles')
 export class RolesController {
   constructor(private readonly service: AccessControlService) {}
