@@ -10,7 +10,7 @@ import {
   Put,
   Query,
 } from '@nestjs/common';
-import { AccessControlService } from './access-control.service';
+import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { RoleResponseDto } from './dto/role-response.dto';
@@ -22,7 +22,7 @@ import { FindRolesQueryDto } from './dto/find-roles.query.dto';
 
 @Controller('roles')
 export class RolesController {
-  constructor(private readonly service: AccessControlService) {}
+  constructor(private readonly service: RoleService) {}
 
   @Post('policies/reload')
   @HttpCode(204)

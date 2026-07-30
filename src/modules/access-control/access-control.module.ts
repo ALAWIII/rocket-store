@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { RoleEntity } from './infrastructure/entities/role.entity';
 import { AccessControlBootstrapService } from './application/bootstrap/access-control.bootstrap.service';
 import { AccessControlSyncService } from './application/access-control-sync.service';
-import { AccessControlService } from './access-control.service';
+import { RoleService } from './role.service';
 import { SystemRolesRegistry } from './application/system-roles/system-roles.registry';
 import { AUTHZ_ENFORCER, AuthZModule } from 'nest-authz';
 import { AppUser, AuthenticatedRequest } from 'src/auth/auth.config';
@@ -42,7 +42,7 @@ import { APP_GUARD } from '@nestjs/core';
     AccessGuard,
     AccessControlBootstrapService,
     AccessControlSyncService,
-    AccessControlService,
+    RoleService,
     SystemRolesRegistry,
     { provide: IRoleRepository, useClass: RoleRepository },
     { provide: APP_GUARD, useClass: AccessGuard },

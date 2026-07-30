@@ -1,4 +1,4 @@
-import { AccessControlService } from './access-control.service';
+import { RoleService } from './role.service';
 import { Test, TestingModule } from '@nestjs/testing';
 import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { SystemRolesRegistry } from './application/system-roles/system-roles.registry';
@@ -7,7 +7,7 @@ import { Role } from './domain/role';
 import { Ok } from 'ts-results-es';
 
 describe('AccessControlService', () => {
-  let service: AccessControlService;
+  let service: RoleService;
 
   const roleRepoMock = {
     create: jest.fn(),
@@ -29,13 +29,13 @@ describe('AccessControlService', () => {
     jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        AccessControlService,
+        RoleService,
         { provide: IRoleRepository, useValue: roleRepoMock },
         { provide: SystemRolesRegistry, useValue: systemRoleMock },
         { provide: AccessControlSyncService, useValue: acsyncServiceMock },
       ],
     }).compile();
-    service = module.get(AccessControlService);
+    service = module.get(RoleService);
     expect(service).toBeDefined();
   });
   describe('createRole', () => {

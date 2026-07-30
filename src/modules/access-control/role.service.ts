@@ -8,12 +8,12 @@ import { RoleResponseDto } from './dto/role-response.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
 import { Role } from './domain/role';
 import { SystemRoleError } from './application/system-roles/system-roles.error';
-import { RoleServiceError } from './access-control.error.service';
+import { RoleServiceError } from './role.error.service';
 import { permissionDepsTable } from './domain/permission-dependency.table';
 
 @Injectable()
-export class AccessControlService {
-  private readonly logger = new Logger(AccessControlService.name);
+export class RoleService {
+  private readonly logger = new Logger(RoleService.name);
 
   constructor(
     private readonly roleRepo: IRoleRepository,

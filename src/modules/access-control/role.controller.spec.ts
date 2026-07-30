@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RolesController } from './role.controller';
-import { AccessControlService } from './access-control.service';
+import { RoleService } from './role.service';
 import { AccessGuard } from './guards/access-control.guard';
 import { AllPermissions } from './domain/permission';
 import { Role } from './domain/role';
@@ -23,7 +23,7 @@ describe('RolesController', () => {
   const accessGuard = { canActivate: jest.fn().mockReturnValue(true) };
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [{ provide: AccessControlService, useValue: serviceMock }],
+      providers: [{ provide: RoleService, useValue: serviceMock }],
       controllers: [RolesController],
     })
       .overrideGuard(AccessGuard)

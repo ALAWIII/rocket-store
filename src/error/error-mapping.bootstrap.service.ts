@@ -15,7 +15,7 @@ import {
 import { PermissionError } from 'src/modules/access-control/domain/permission.error';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { SystemRoleError } from 'src/modules/access-control/application/system-roles/system-roles.error';
-import { RoleServiceError } from 'src/modules/access-control/access-control.error.service';
+import { RoleServiceError } from 'src/modules/access-control/role.error.service';
 
 @Injectable()
 export class ErrorMappingBootstrap implements OnModuleInit {
