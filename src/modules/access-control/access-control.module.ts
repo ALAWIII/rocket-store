@@ -1,4 +1,4 @@
-import { ForbiddenException, Global, Module } from '@nestjs/common';
+import { ForbiddenException, Module } from '@nestjs/common';
 import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { RoleRepository } from './infrastructure/repositories/typeorm-role.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
