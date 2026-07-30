@@ -15,6 +15,8 @@ import {
 } from 'src/modules/shared/errors/database.error';
 import { PermissionError } from '../../domain/permission.error';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
+import { plainToInstance } from 'class-transformer';
+import { RoleDatabaseDto } from '../dto/role-database-response.dto';
 
 @Injectable()
 export class RoleRepository implements IRoleRepository {
@@ -60,7 +62,9 @@ export class RoleRepository implements IRoleRepository {
         .returning('*')
         .execute();
 
-      const row = (result.raw as RoleEntity[])[0];
+      const [row] = plainToInstance(RoleDatabaseDto, result.raw as unknown[], {
+        excludeExtraneousValues: false,
+      });
       if (!row) {
         return Err(
           new UnknownDatabaseError(
@@ -204,38 +208,37 @@ export class RoleRepository implements IRoleRepository {
         .returning('*')
         .execute();
 
-      const [updatedRow] = result.raw as RoleEntity[];
+      const [row] = plainToInstance(RoleDatabaseDto, result.raw as unknown[], {
+        excludeExtraneousValues: false,
+      });
 
-      if (result.affected === 0 || !updatedRow) {
+      if (result.affected === 0 || !row) {
         throw new RecordNotFoundError(
           `role to be updated was not found: ${data.role.id}`,
         );
       }
 
-      return Ok(this.toDomain(updatedRow));
+      return Ok(this.toDomain(row));
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
   }
   async upsert(role: Role): Promise<DBResult<Role>> {
-    const perms = role.toJSON();
     try {
       const result = await this.roleRepo
         .createQueryBuilder()
         .insert()
         .into(RoleEntity)
         .values({
-          id: role.id,
-          name: role.name,
-          permissions: perms.permissions,
-          assignScope: perms.assignScope,
-          createScope: perms.createScope,
+          ...role.toJSON(),
         })
         .orUpdate(['permissions', 'assign_scope', 'create_scope'], ['name'])
         .returning('*')
         .execute();
 
-      const row = (result.raw as RoleEntity[])[0];
+      const [row] = plainToInstance(RoleDatabaseDto, result.raw as unknown[], {
+        excludeExtraneousValues: false,
+      });
       if (!row) {
         return Err(new UnknownDatabaseError('Upsert did not return a row'));
       }
