@@ -7,7 +7,7 @@ import { openAPI } from 'better-auth/plugins';
 import { Request } from 'express';
 import { AppLogLevel, loggerMethodFor } from 'src/app-logger/app-log.level';
 import { Logger } from 'nestjs-pino';
-import { ResendEmailService } from 'src/email/resend-email.service';
+import { IAuthEmailService } from 'src/email/auth-email.service';
 type Auth = ReturnType<typeof createAuth>;
 export type AppSession = Auth['$Infer']['Session'];
 export type AppUser = AppSession['user'];
@@ -32,7 +32,7 @@ export function createAuth(
   logger: Logger,
   logLevel: AppLogLevel,
   customerRoleId: string,
-  emailService: ResendEmailService,
+  emailService: IAuthEmailService,
 ) {
   return betterAuth({
     database: typeormAdapter(dataSource, { usePlural: true }),
@@ -101,14 +101,14 @@ export function createAuth(
         verify: betterVerify,
       },
       sendResetPassword: async ({ user, url }) => {
-        await emailService.sendPasswordResetEmail(user.email, url);
+        await emailService.sendPasswordResetEmail({ to: user.email, url });
       },
     },
     emailVerification: {
       sendOnSignUp: true,
       autoSignInAfterVerification: true,
       sendVerificationEmail: async ({ user, url }) => {
-        await emailService.sendVerificationEmail(user.email, url);
+        await emailService.sendVerificationEmail({ to: user.email, url });
       },
     },
     //-------------------

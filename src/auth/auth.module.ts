@@ -8,9 +8,9 @@ import { AppLogLevel, toAppLogLevel } from 'src/app-logger/app-log.level';
 import { Logger } from 'nestjs-pino';
 import { AccessControlModule } from 'src/modules/access-control/access-control.module';
 import { EmailModule } from 'src/email/email.module';
-import { ResendEmailService } from 'src/email/resend-email.service';
 import { SystemRolesSeedService } from 'src/modules/access-control/application/system-roles/system-roles.seed.service';
 import { SystemRolesRegistry } from 'src/modules/access-control/application/system-roles/system-roles.registry';
+import { IAuthEmailService } from 'src/email/auth-email.service';
 
 @Module({
   imports: [
@@ -22,7 +22,7 @@ import { SystemRolesRegistry } from 'src/modules/access-control/application/syst
         ConfigService,
         SystemRolesRegistry,
         SystemRolesSeedService,
-        ResendEmailService,
+        IAuthEmailService,
       ],
       useFactory: async (
         dataSource: DataSource,
@@ -30,7 +30,7 @@ import { SystemRolesRegistry } from 'src/modules/access-control/application/syst
         config: ConfigService,
         systemRoles: SystemRolesRegistry,
         systemRolesSeed: SystemRolesSeedService,
-        emailService: ResendEmailService,
+        emailService: IAuthEmailService,
       ) => {
         await systemRolesSeed.ensureSeeded();
         const logLevel: AppLogLevel = toAppLogLevel(config.get('LOG_LEVEL'));
