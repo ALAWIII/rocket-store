@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ResendAuthEmailService } from './resend-email.service';
+import { ResendAuthEmailService } from './resend-auth-email.service';
 import { IAuthEmailService } from './auth-email.service';
 
 @Module({
