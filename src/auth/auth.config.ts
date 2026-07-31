@@ -47,6 +47,21 @@ export function createAuth(
     },
     //----------------------
     user: {
+      changeEmail: {
+        enabled: true,
+        sendChangeEmailConfirmation: async (
+          { user, newEmail, url, token },
+          request,
+        ) => {
+          await emailService.sendChangeEmailConfirmation({
+            to: user.email,
+            currentEmail: user.email,
+            newEmail,
+            url,
+            name: user.name,
+          });
+        },
+      },
       additionalFields: {
         givenName: {
           fieldName: 'given_name',
