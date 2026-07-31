@@ -7,17 +7,19 @@ import { IAuthEmailService, SendEmailParams } from './auth-email.service';
 @Injectable()
 export class ResendAuthEmailService implements IAuthEmailService {
   private readonly resend: Resend;
+  private readonly storeName: string;
   private readonly from: string;
   private readonly logger: Logger = new Logger(IAuthEmailService.name);
-  private readonly logoUrl: string;
+  private readonly logoUrl: string | undefined;
   constructor(config: ConfigService) {
     this.resend = new Resend(config.getOrThrow<string>('RESEND_API_KEY'));
     this.from = config.getOrThrow<string>('MAIL_FROM');
-    this.logoUrl = config.getOrThrow<string>('LOGO_URL');
+    this.storeName = config.get<string>('STORE_NAME') ?? 'Nuclear Store';
+    this.logoUrl = config.get<string>('LOGO_URL');
   }
   async sendVerificationEmail(params: SendEmailParams): Promise<void> {
     const html = buildAuthEmailHtml({
-      storeName: 'Rocket Store',
+      storeName: this.storeName,
       logoUrl: this.logoUrl,
       recipientName: params.name,
       heading: 'Verify your email',
@@ -42,7 +44,7 @@ export class ResendAuthEmailService implements IAuthEmailService {
 
   async sendPasswordResetEmail(params: SendEmailParams): Promise<void> {
     const html = buildAuthEmailHtml({
-      storeName: 'Rocket Store',
+      storeName: this.storeName,
       logoUrl: this.logoUrl,
       recipientName: params.name,
       heading: 'Reset your password',
@@ -74,7 +76,7 @@ export class ResendAuthEmailService implements IAuthEmailService {
     const { to, currentEmail, newEmail, url, name } = params;
 
     const html = buildAuthEmailHtml({
-      storeName: 'Rocket Store',
+      storeName: this.storeName,
       recipientName: name,
       heading: 'Confirm email change',
       message: `We received a request to change your account email from ${currentEmail} to ${newEmail}. If this was you, confirm the change below.`,
