@@ -1,8 +1,11 @@
 import { MailhogClient } from 'mailhog-awesome';
 
-export function createMailhogClient() {
+export function createMailhogClient(options?: {
+  host?: string;
+  port?: number;
+}): MailhogClient {
   return new MailhogClient({
-    host: process.env.MAILHOG_API_HOST ?? '127.0.0.1',
-    port: Number(process.env.MAILHOG_API_PORT ?? 1025),
+    host: options?.host ?? '127.0.0.1',
+    port: options?.port ?? 1025,
   });
 }
