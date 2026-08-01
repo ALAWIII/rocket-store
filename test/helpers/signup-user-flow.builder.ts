@@ -31,7 +31,7 @@ export type SignupResponse = {
   body: SignupResponseBody;
 };
 
-type BuildResult = {
+export type BuildResult = {
   payload: UserPayload;
   signup: SignupResponse;
   verificationUrl?: string;
@@ -55,12 +55,7 @@ export class SignupUserFlowBuilder {
   }
 
   random(): this {
-    const value = v7();
-    this.payload = {
-      name: value,
-      email: `${value}@shawarma.com`,
-      password: value,
-    };
+    this.payload = this.randomPayload();
     return this;
   }
 
@@ -107,8 +102,8 @@ export class SignupUserFlowBuilder {
   private randomPayload(): UserPayload {
     const value = v7();
     return {
-      name: value,
-      email: `${value}@shawarma.com`,
+      name: 'storetest',
+      email: `${value}@resend.dev`,
       password: value,
     };
   }
@@ -118,7 +113,8 @@ export class SignupUserFlowBuilder {
   ): Promise<SignupResponse> {
     const response = await this.props.httpClient
       .post('/api/auth/sign-up/email')
-      .send(payload);
+      .send(payload)
+      .expect(200);
 
     return {
       response,
