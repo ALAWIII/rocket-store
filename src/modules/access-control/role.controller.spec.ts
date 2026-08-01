@@ -5,22 +5,22 @@ import { AccessGuard } from './guards/access-control.guard';
 import { AllPermissions } from './domain/permission';
 import { Role } from './domain/role';
 import { AppSession } from 'src/auth/auth.config';
-jest.mock('@thallesp/nestjs-better-auth', () => ({
+vi.mock('@thallesp/nestjs-better-auth', () => ({
   Session: () => () => undefined,
 }));
 describe('RolesController', () => {
   let controller: RolesController;
 
   const serviceMock = {
-    findAssignableRoles: jest.fn(),
-    findCreatedRoles: jest.fn(),
-    reloadPolicies: jest.fn(),
-    createRole: jest.fn(),
-    renameRole: jest.fn(),
-    removeRole: jest.fn(),
-    findAll: jest.fn(),
+    findAssignableRoles: vi.fn(),
+    findCreatedRoles: vi.fn(),
+    reloadPolicies: vi.fn(),
+    createRole: vi.fn(),
+    renameRole: vi.fn(),
+    removeRole: vi.fn(),
+    findAll: vi.fn(),
   };
-  const accessGuard = { canActivate: jest.fn().mockReturnValue(true) };
+  const accessGuard = { canActivate: vi.fn().mockReturnValue(true) };
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [{ provide: RoleService, useValue: serviceMock }],

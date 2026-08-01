@@ -1,29 +1,27 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from '../src/app.module';
+import { TestDatabase } from './helpers/database-test.helper';
+import { createConfigServiceMock } from './helpers/config-test.helper';
+import { TEST_ENV } from './helpers/env-test-values';
+import { TestApp } from './helpers/app-test.helper';
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: TestApp;
 
   beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
-
-    app = moduleFixture.createNestApplication();
-    await app.init();
+    const db = await TestDatabase.create({
+      host: TEST_ENV.DB_HOST,
+      port: TEST_ENV.DB_PORT,
+      user: TEST_ENV.DB_USERNAME,
+      password: TEST_ENV.DB_PASSWORD,
+      database: TEST_ENV.ADMIN_DATABASE,
+    });
+    const configServiceMock = createConfigServiceMock({
+      DATABASE_URL: db.databaseUrl,
+      DB_NAME: db.databaseName,
+    });
+    app = await TestApp.create(configServiceMock);
   });
 
   it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!');
-  });
-
-  afterEach(async () => {
-    await app.close();
+    return app.httpClient.get('/').expect(200).expect('Hello World!');
   });
 });

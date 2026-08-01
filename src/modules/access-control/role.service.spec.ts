@@ -10,23 +10,23 @@ describe('AccessControlService', () => {
   let service: RoleService;
 
   const roleRepoMock = {
-    create: jest.fn(),
-    deleteById: jest.fn(),
-    rename: jest.fn(),
+    create: vi.fn(),
+    deleteById: vi.fn(),
+    rename: vi.fn(),
   };
   const systemRoleMock = {
-    isSystemRoleName: jest.fn(),
-    hasId: jest.fn(),
-    getCustomerRoleId: jest.fn(),
+    isSystemRoleName: vi.fn(),
+    hasId: vi.fn(),
+    getCustomerRoleId: vi.fn(),
   };
   const acsyncServiceMock = {
-    upsertRole: jest.fn(),
-    removeRole: jest.fn(),
-    getPermissions: jest.fn(),
+    upsertRole: vi.fn(),
+    removeRole: vi.fn(),
+    getPermissions: vi.fn(),
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RoleService,

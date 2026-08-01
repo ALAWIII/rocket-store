@@ -13,26 +13,22 @@ describe('AccessControlSyncService', () => {
   let service: AccessControlSyncService;
 
   const enforcerHolderMock = {
-    set: jest.fn(),
-    clearPolicy: jest.fn(),
-    addPolicies: jest.fn(),
-    getPoliciesById: jest.fn(),
-    removePolicies: jest.fn(),
+    set: vi.fn(),
+    clearPolicy: vi.fn(),
+    addPolicies: vi.fn(),
+    getPoliciesById: vi.fn(),
+    removePolicies: vi.fn(),
   };
 
   const roleRepositoryMock = {
-    loadAll: jest.fn(),
+    loadAll: vi.fn(),
   };
-  const addPoliciesMock = jest.fn() as jest.Mock<
-    Promise<boolean>,
-    [string[][]]
-  >;
   const newEnforcerMock = {
-    addPolicies: addPoliciesMock,
+    addPolicies: vi.fn(),
   };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -49,7 +45,7 @@ describe('AccessControlSyncService', () => {
     }).compile();
 
     service = module.get(AccessControlSyncService);
-    const spy = jest.spyOn(casbinFactory, 'createCasbinEnforcer');
+    const spy = vi.spyOn(casbinFactory, 'createCasbinEnforcer');
     spy.mockResolvedValue(newEnforcerMock as unknown as Enforcer);
   });
   //===================================================
@@ -70,7 +66,7 @@ describe('AccessControlSyncService', () => {
       //-----------------
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
 
-      const loggerSpy = jest
+      const loggerSpy = vi
         .spyOn(Logger.prototype, 'log')
         .mockImplementation(() => undefined);
 
@@ -95,7 +91,7 @@ describe('AccessControlSyncService', () => {
       const roles = [anyrole];
       roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
 
-      const loggerSpy = jest
+      const loggerSpy = vi
         .spyOn(Logger.prototype, 'log')
         .mockImplementation(() => undefined);
 
@@ -327,10 +323,10 @@ describe('AccessControlSyncService', () => {
         permissions: [AllPermissions.role.RoleReadLessOrEqual],
       }).unwrap();
 
-      const removeRoleSpy = jest
+      const removeRoleSpy = vi
         .spyOn(service, 'removeRole')
         .mockResolvedValue(true);
-      const addRoleSpy = jest.spyOn(service, 'addRole').mockResolvedValue(true);
+      const addRoleSpy = vi.spyOn(service, 'addRole').mockResolvedValue(true);
 
       await expect(service.upsertRole(adminRole)).resolves.toBeUndefined();
 
@@ -350,8 +346,8 @@ describe('AccessControlSyncService', () => {
         permissions: [AllPermissions.role.RoleReadLessOrEqual],
       }).unwrap();
 
-      jest.spyOn(service, 'removeRole').mockResolvedValue(true);
-      jest.spyOn(service, 'addRole').mockResolvedValue(false);
+      vi.spyOn(service, 'removeRole').mockResolvedValue(true);
+      vi.spyOn(service, 'addRole').mockResolvedValue(false);
 
       await expect(service.upsertRole(adminRole)).rejects.toThrow(
         `Failed adding Casbin policies for role ${adminRole.id}`,
@@ -364,9 +360,9 @@ describe('AccessControlSyncService', () => {
         permissions: [AllPermissions.role.RoleReadLessOrEqual],
       }).unwrap();
 
-      jest
-        .spyOn(service, 'removeRole')
-        .mockRejectedValue(new Error('remove failed'));
+      vi.spyOn(service, 'removeRole').mockRejectedValue(
+        new Error('remove failed'),
+      );
 
       await expect(service.upsertRole(workerRole)).rejects.toThrow(
         'remove failed',
@@ -378,8 +374,8 @@ describe('AccessControlSyncService', () => {
         name: 'worker',
         permissions: [AllPermissions.role.RoleReadLessOrEqual],
       }).unwrap();
-      jest.spyOn(service, 'removeRole').mockResolvedValue(true);
-      jest.spyOn(service, 'addRole').mockRejectedValue(new Error('add failed'));
+      vi.spyOn(service, 'removeRole').mockResolvedValue(true);
+      vi.spyOn(service, 'addRole').mockRejectedValue(new Error('add failed'));
 
       await expect(service.upsertRole(workerRole)).rejects.toThrow(
         'add failed',
