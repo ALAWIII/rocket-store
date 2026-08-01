@@ -13,8 +13,8 @@ import path from 'path';
         url: config.getOrThrow('DATABASE_URL'),
         namingStrategy: new SnakeNamingStrategy(),
         entities: [
-          path.join(__dirname, '/../**/*.entity{.ts,.js}'),
-          path.join(process.cwd(), 'dist/typeorm/entities/**/*.js'),
+          path.join(process.cwd(), 'dist/**/*.entity.js'),
+          path.join(process.cwd(), 'dist/typeorm/entities/*.js'),
         ],
         migrations: [
           path.join(process.cwd(), 'dist/typeorm/migrations/**/*.js'),
