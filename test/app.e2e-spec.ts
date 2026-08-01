@@ -5,9 +5,9 @@ import { TestApp } from './helpers/app-test.helper';
 
 describe('AppController (e2e)', () => {
   let app: TestApp;
-
+  let db: TestDatabase;
   beforeEach(async () => {
-    const db = await TestDatabase.create({
+    db = await TestDatabase.create({
       host: TEST_ENV.DB_HOST,
       port: TEST_ENV.DB_PORT,
       user: TEST_ENV.DB_USERNAME,
@@ -21,7 +21,12 @@ describe('AppController (e2e)', () => {
     app = await TestApp.create(configServiceMock);
   });
 
-  it('/ (GET)', () => {
-    return app.httpClient.get('/').expect(200).expect('Hello World!');
+  it('GET /api/auth/ok it should return 200 success', () => {
+    const response = app.httpClient.get('/api/auth/ok');
+    return response.expect(200);
+  });
+  afterEach(async () => {
+    await db.cleanup();
+    await app.cleanup();
   });
 });
