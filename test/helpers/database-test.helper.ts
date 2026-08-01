@@ -13,7 +13,7 @@ export class TestDatabase {
   constructor(
     readonly databaseName: string,
     readonly databaseUrl: string,
-    readonly testClient: Client,
+    readonly dbClient: Client,
     private readonly adminOptions: CreateTestDatabaseOptions,
   ) {}
 
@@ -35,7 +35,7 @@ export class TestDatabase {
   }
 
   async cleanup() {
-    await this.testClient.end();
+    await this.dbClient.end();
 
     const adminClient = new Client({ ...this.adminOptions });
     await adminClient.connect();
