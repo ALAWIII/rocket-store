@@ -35,6 +35,7 @@ export type SignupResponse = {
 };
 
 export type BuildResult = {
+  userDb: UserDatabaseDto;
   payload: UserPayload;
   signup: SignupResponse;
   verificationUrl?: string;
@@ -99,6 +100,7 @@ export class SignupUserFlowBuilder {
     expect(user.emailVerified).toStrictEqual(this.shouldVerify);
     expect(userRole.name).toStrictEqual(this.roleName ?? 'customer');
     return {
+      userDb: user,
       payload,
       signup,
       verificationUrl,
