@@ -112,7 +112,12 @@ export function createAuth(
       },
     },
     //-------------------
-    disabledPaths: ['/update-user', '/delete-user'],
+    disabledPaths: [
+      '/update-user',
+      '/delete-user',
+      '/delete-user/callback',
+      '/account-info',
+    ],
     plugins: [...(process.env.NODE_ENV === 'development' ? [openAPI()] : [])],
   });
 }
