@@ -6,6 +6,7 @@ import { Client } from 'pg';
 import { plainToInstance } from 'class-transformer';
 import { RoleDatabaseDto } from 'src/modules/access-control/infrastructure/dto/role-database-response.dto';
 import { UserDatabaseDto } from 'src/modules/users/infrastructure/dto/user-database-response.dto';
+import { extractUrlsFromHtml } from 'test/utils/extract-url-from-html.util';
 
 type UserPayload = {
   name: string;
@@ -161,7 +162,7 @@ export class SignupUserFlowBuilder {
       throw new Error(`Verification email was not found for ${email}`);
     }
 
-    const urls = this.extractHref(message.html ?? '');
+    const urls = extractUrlsFromHtml(message.html ?? '');
 
     const verificationUrl =
       urls.find((u) => u.includes('/api/auth/verify-email')) ?? urls[0];
@@ -172,10 +173,7 @@ export class SignupUserFlowBuilder {
 
     return verificationUrl;
   }
-  private extractHref(html: string): string[] {
-    const matches = [...html.matchAll(/href=["']([^"']+)["']/gi)];
-    return matches.map((m) => m[1]);
-  }
+
   private async verifySignup(verificationUrl: string): Promise<void> {
     const url = new URL(verificationUrl);
     await this.props.httpClient.get(`${url.pathname}${url.search}`).expect(302);
