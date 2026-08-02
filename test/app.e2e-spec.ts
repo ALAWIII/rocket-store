@@ -8,6 +8,7 @@ import {
   BuildResult,
   SignupUserFlowBuilder,
 } from './helpers/signup-user-flow.builder';
+import { SigninUserFlowBuilder } from './helpers/signin-user.helper';
 
 describe('AppController (e2e)', () => {
   let app: TestApp;
@@ -37,6 +38,10 @@ describe('AppController (e2e)', () => {
       .verified()
       .asRole('admin')
       .build();
+    await new SigninUserFlowBuilder(app.httpClient).signin({
+      email: adminUserResult.payload.email,
+      password: adminUserResult.payload.password,
+    });
   });
 
   it('GET /api/auth/ok it should return 200 success', () => {
