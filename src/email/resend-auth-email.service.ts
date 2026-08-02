@@ -58,7 +58,7 @@ export class ResendAuthEmailService implements IAuthEmailService {
     const { error } = await this.resend.emails.send({
       from: this.from,
       to: [params.to],
-      subject: 'Reset your Rocket Store password',
+      subject: 'Reset your password',
       html,
     });
     if (error)
