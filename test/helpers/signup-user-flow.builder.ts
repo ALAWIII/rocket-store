@@ -3,6 +3,9 @@ import { HttpClient } from './app-test.helper';
 import { Response } from 'supertest';
 import { MailhogClient } from 'mailhog-awesome';
 import { Client } from 'pg';
+import { plainToInstance } from 'class-transformer';
+import { RoleDatabaseDto } from 'src/modules/access-control/infrastructure/dto/role-database-response.dto';
+import { UserDatabaseDto } from 'src/modules/users/infrastructure/dto/user-database-response.dto';
 
 type UserPayload = {
   name: string;
@@ -91,14 +94,38 @@ export class SignupUserFlowBuilder {
     if (this.roleName) {
       await this.changeUserRole(signup.body.user.id, this.roleName);
     }
-
+    const user = await this.fetchUserFromDatabase(signup.body.user.id);
+    const userRole = await this.fetchRoleFromDatabase(user.roleId);
+    expect(user.emailVerified).toStrictEqual(this.shouldVerify);
+    expect(userRole.name).toStrictEqual(this.roleName ?? 'customer');
     return {
       payload,
       signup,
       verificationUrl,
     };
   }
+  //==================
+  private async fetchUserFromDatabase(
+    userId: string,
+  ): Promise<UserDatabaseDto> {
+    const raw = await this.props.dbClient.query<UserDatabaseDto>(
+      `select * from users where id = $1`,
+      [userId],
+    );
 
+    return plainToInstance(UserDatabaseDto, raw.rows[0]);
+  }
+  private async fetchRoleFromDatabase(
+    roleId: string,
+  ): Promise<RoleDatabaseDto> {
+    const raw = await this.props.dbClient.query<RoleDatabaseDto>(
+      `select * from roles where id = $1`,
+      [roleId],
+    );
+
+    return plainToInstance(RoleDatabaseDto, raw.rows[0]);
+  }
+  //==================
   private randomPayload(): UserPayload {
     const value = v7();
     return {
