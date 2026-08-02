@@ -33,12 +33,11 @@ import { IAuthEmailService } from 'src/email/auth-email.service';
         emailService: IAuthEmailService,
       ) => {
         await systemRolesSeed.ensureSeeded();
-        const logLevel: AppLogLevel = toAppLogLevel(config.get('LOG_LEVEL'));
         return {
           auth: createAuth(
             dataSource,
             logger,
-            logLevel,
+            config,
             systemRoles.getCustomerRoleId(),
             emailService,
           ),

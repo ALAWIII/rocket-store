@@ -5,9 +5,14 @@ import { v7 } from 'uuid';
 import argon2 from 'argon2';
 import { openAPI } from 'better-auth/plugins';
 import { Request } from 'express';
-import { AppLogLevel, loggerMethodFor } from 'src/app-logger/app-log.level';
+import {
+  AppLogLevel,
+  loggerMethodFor,
+  toAppLogLevel,
+} from 'src/app-logger/app-log.level';
 import { Logger } from 'nestjs-pino';
 import { IAuthEmailService } from 'src/email/auth-email.service';
+import { ConfigService } from '@nestjs/config';
 type Auth = ReturnType<typeof createAuth>;
 export type AppSession = Auth['$Infer']['Session'];
 export type AppUser = AppSession['user'];
@@ -30,7 +35,7 @@ async function betterVerify(data: { hash: string; password: string }) {
 export function createAuth(
   dataSource: DataSource,
   logger: Logger,
-  logLevel: AppLogLevel,
+  config: ConfigService,
   customerRoleId: string,
   emailService: IAuthEmailService,
 ) {
@@ -38,7 +43,7 @@ export function createAuth(
     database: typeormAdapter(dataSource, { usePlural: true }),
     //--------------------------
     logger: {
-      level: logLevel,
+      level: toAppLogLevel(config.get('LOG_LEVEL')),
       disableColors: true,
       disabled: false,
       log: (level, message, ...args) => {
