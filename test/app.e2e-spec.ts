@@ -2,11 +2,20 @@ import { TestDatabase } from './helpers/database-test.helper';
 import { createConfigServiceMock } from './helpers/config-test.helper';
 import { TEST_ENV } from './helpers/env-test-values';
 import { TestApp } from './helpers/app-test.helper';
+import { MailhogClient } from 'mailhog-awesome';
+import { createMailhogClient } from './helpers/mailhog-client.helper';
+import {
+  BuildResult,
+  SignupUserFlowBuilder,
+} from './helpers/signup-user-flow.builder';
 
 describe('AppController (e2e)', () => {
   let app: TestApp;
   let db: TestDatabase;
+  let mailClient: MailhogClient;
+  let adminUserResult: BuildResult;
   beforeEach(async () => {
+    mailClient = createMailhogClient();
     db = await TestDatabase.create({
       host: TEST_ENV.DB_HOST,
       port: TEST_ENV.DB_PORT,
@@ -19,6 +28,15 @@ describe('AppController (e2e)', () => {
       DB_NAME: db.databaseName,
     });
     app = await TestApp.create(configServiceMock);
+    adminUserResult = await SignupUserFlowBuilder.create({
+      mailhogClient: mailClient,
+      dbClient: db.dbClient,
+      httpClient: app.httpClient,
+    })
+      .random()
+      .verified()
+      .asRole('admin')
+      .build();
   });
 
   it('GET /api/auth/ok it should return 200 success', () => {
