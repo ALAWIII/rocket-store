@@ -132,7 +132,8 @@ export class SignupUserFlowBuilder {
       throw new Error(`Verification email was not found for ${email}`);
     }
 
-    const urls = this.props.mailhogClient.extractUrls(message.html ?? '');
+    const urls = this.extractHref(message.html ?? '');
+
     const verificationUrl =
       urls.find((u) => u.includes('/api/auth/verify-email')) ?? urls[0];
 
@@ -142,10 +143,13 @@ export class SignupUserFlowBuilder {
 
     return verificationUrl;
   }
-
+  private extractHref(html: string): string[] {
+    const matches = [...html.matchAll(/href=["']([^"']+)["']/gi)];
+    return matches.map((m) => m[1]);
+  }
   private async verifySignup(verificationUrl: string): Promise<void> {
     const url = new URL(verificationUrl);
-    await this.props.httpClient.get(`${url.pathname}${url.search}`).expect(200);
+    await this.props.httpClient.get(`${url.pathname}${url.search}`).expect(302);
   }
 
   private async changeUserRole(
