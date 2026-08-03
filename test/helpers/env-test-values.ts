@@ -17,4 +17,6 @@ export const TEST_ENV = {
   MAILHOG_API_HOST: '127.0.0.1',
   MAILHOG_API_PORT: '1025',
   ADMIN_DATABASE: 'postgres',
+  GOOGLE_WEB_CLIENT_ID: 'google-web-client-id',
+  GOOGLE_CLIENT_SECRET: 'google-client-secret',
 } as const;
