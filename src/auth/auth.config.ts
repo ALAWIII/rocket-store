@@ -51,7 +51,7 @@ export function createAuth(
       google: {
         prompt: 'select_account',
         clientSecret: config.getOrThrow<string>('GOOGLE_CLIENT_SECRET'),
-        clientId: [config.getOrThrow<string>('GOOGLE_WEB_CLIENT_ID')],
+        clientId: config.getOrThrow<string>('GOOGLE_WEB_CLIENT_ID'),
       },
     },
     //----------------------
