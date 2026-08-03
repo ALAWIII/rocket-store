@@ -1,46 +1,22 @@
 import { TestDatabase } from './helpers/database-test.helper';
-import { createConfigServiceMock } from './helpers/config-test.helper';
-import { TEST_ENV } from './helpers/env-test-values';
 import { TestApp } from './helpers/app-test.helper';
 import { MailhogClient } from 'mailhog-awesome';
-import { createMailhogClient } from './helpers/mailhog-client.helper';
-import {
-  BuildResult,
-  SignupUserFlowBuilder,
-} from './helpers/signup-user-flow.builder';
+import { BuildResult } from './helpers/signup-user-flow.builder';
 import { SigninUserHelper } from './helpers/signin-user.helper';
+import { createAuthenticatedTestContext } from './fixtures/create-authenticated-test-context.fixture';
 
 describe('AppController (e2e)', () => {
   let app: TestApp;
   let db: TestDatabase;
   let mailClient: MailhogClient;
-  let adminUserResult: BuildResult;
+  let adminUser: BuildResult;
   beforeEach(async () => {
-    mailClient = createMailhogClient();
-    db = await TestDatabase.create({
-      host: TEST_ENV.DB_HOST,
-      port: TEST_ENV.DB_PORT,
-      user: TEST_ENV.DB_USERNAME,
-      password: TEST_ENV.DB_PASSWORD,
-      database: TEST_ENV.ADMIN_DATABASE,
-    });
-    const configServiceMock = createConfigServiceMock({
-      DATABASE_URL: db.databaseUrl,
-      DB_NAME: db.databaseName,
-    });
-    app = await TestApp.create(configServiceMock);
-    adminUserResult = await SignupUserFlowBuilder.create({
-      mailhogClient: mailClient,
-      dbClient: db.dbClient,
-      httpClient: app.httpClient,
-    })
-      .random()
-      .verified()
-      .asRole('admin')
-      .build();
+    ({ app, db, mailClient, adminUser } =
+      await createAuthenticatedTestContext());
+
     await new SigninUserHelper(app.httpClient).signin({
-      email: adminUserResult.payload.email,
-      password: adminUserResult.payload.password,
+      email: adminUser.payload.email,
+      password: adminUser.payload.password,
     });
   });
 
@@ -51,5 +27,6 @@ describe('AppController (e2e)', () => {
   afterEach(async () => {
     await db.cleanup();
     await app.cleanup();
+    await mailClient.deleteEmails({ to: adminUser.userDb.email });
   });
 });
