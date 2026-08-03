@@ -12,7 +12,9 @@ import { AppModule } from 'src/app.module';
 import { IAuthEmailService } from 'src/email/auth-email.service';
 import { MailHogAuthEmailService } from 'test/doubles/mailhog-auth-email.service';
 import { ConfigServiceMock } from './config-test.helper';
+
 export type HttpClient = ReturnType<typeof request>;
+export type UserAgent = ReturnType<typeof request.agent>;
 export class TestApp {
   constructor(
     readonly app: INestApplication<Server>,
@@ -27,7 +29,9 @@ export class TestApp {
 
     return new TestApp(app, moduleRef, httpClient);
   }
-
+  createAgent(): UserAgent {
+    return request.agent(this.app.getHttpServer());
+  }
   private static async createTestingModule(
     configServiceMock: ConfigServiceMock,
   ): Promise<TestingModule> {
