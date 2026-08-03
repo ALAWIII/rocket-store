@@ -1,5 +1,5 @@
 import { v7 } from 'uuid';
-import { HttpClient } from './app-test.helper';
+import { UserAgent } from './app-test.helper';
 import { Response } from 'supertest';
 import { MailhogClient } from 'mailhog-awesome';
 import { Client } from 'pg';
@@ -36,6 +36,7 @@ export type SignupResponse = {
 };
 
 export type BuildResult = {
+  userAgent: UserAgent;
   userDb: UserDatabaseDto;
   payload: UserPayload;
   signup: SignupResponse;
@@ -44,7 +45,7 @@ export type BuildResult = {
 
 type Props = {
   dbClient: Client;
-  httpClient: HttpClient;
+  userAgent: UserAgent;
   mailhogClient: MailhogClient;
 };
 
@@ -102,6 +103,7 @@ export class SignupUserFlowBuilder {
     expect(userRole.name).toStrictEqual(this.roleName ?? 'customer');
     return {
       userDb: user,
+      userAgent: this.props.userAgent,
       payload,
       signup,
       verificationUrl,
@@ -141,7 +143,7 @@ export class SignupUserFlowBuilder {
   private async sendSignupRequest(
     payload: UserPayload,
   ): Promise<SignupResponse> {
-    const response = await this.props.httpClient
+    const response = await this.props.userAgent
       .post('/api/auth/sign-up/email')
       .send(payload)
       .expect(200);
@@ -176,7 +178,7 @@ export class SignupUserFlowBuilder {
 
   private async verifySignup(verificationUrl: string): Promise<void> {
     const url = new URL(verificationUrl);
-    await this.props.httpClient.get(`${url.pathname}${url.search}`).expect(302);
+    await this.props.userAgent.get(`${url.pathname}${url.search}`).expect(302);
   }
 
   private async changeUserRole(
