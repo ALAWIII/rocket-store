@@ -1,42 +1,8 @@
-import { LoggableError, WithErrorContext } from './error.types';
-
-export abstract class DatabaseError
-  extends Error
-  implements LoggableError, WithErrorContext
-{
+export abstract class DatabaseError extends Error {
   abstract readonly code: string;
-  protected _context: string[] = [];
   constructor(message: string, cause?: unknown) {
     super(message, { cause });
     this.name = new.target.name;
-  }
-  withContext(msg: string): this {
-    this._context.push(msg);
-    return this;
-  }
-  withContextList(ctxs: string[]): this {
-    this._context = [...this._context, ...ctxs];
-    return this;
-  }
-  get context(): string[] {
-    return [...this._context];
-  }
-  toLog() {
-    return {
-      name: this.name,
-      code: this.code,
-      message: this.message,
-      context: this.context,
-      stack: this.stack,
-      cause:
-        this.cause instanceof Error
-          ? {
-              name: this.cause.name,
-              message: this.cause.message,
-              stack: this.cause.stack,
-            }
-          : this.cause,
-    };
   }
 }
 

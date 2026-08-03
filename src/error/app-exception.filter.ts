@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ErrorMapperRegistry } from './error-mapper.registry';
-import { isLoggableError } from 'src/modules/shared/errors/error.types';
 
 @Catch()
 export class AppExceptionFilter implements ExceptionFilter {
@@ -26,10 +25,6 @@ export class AppExceptionFilter implements ExceptionFilter {
     res.status(httpException.getStatus()).json(httpException.getResponse());
   }
   private logException(exception: unknown) {
-    if (isLoggableError(exception)) {
-      this.logger.error(exception.toLog());
-      return;
-    }
     if (exception instanceof Error) {
       this.logger.error({
         name: exception.name,
