@@ -3,6 +3,7 @@ import { createConfigServiceMock } from 'test/helpers/config-test.helper';
 import { TestDatabase } from 'test/helpers/database-test.helper';
 import { TEST_ENV } from 'test/helpers/env-test-values';
 import { createMailhogClient } from 'test/helpers/mailhog-client.helper';
+import { SigninUserHelper } from 'test/helpers/signin-user.helper';
 import { SignupUserFlowBuilder } from 'test/helpers/signup-user-flow.builder';
 
 export async function createAuthenticatedTestContext() {
@@ -19,14 +20,19 @@ export async function createAuthenticatedTestContext() {
     DB_NAME: db.databaseName,
   });
   const app = await TestApp.create(configServiceMock);
+  const adminAgent = app.createAgent();
   const adminUserResult = await SignupUserFlowBuilder.create({
     mailhogClient: mailClient,
     dbClient: db.dbClient,
-    httpClient: app.httpClient,
+    userAgent: adminAgent,
   })
     .random()
     .verified()
     .asRole('admin')
     .build();
+  await new SigninUserHelper(adminAgent).signin({
+    email: adminUserResult.payload.email,
+    password: adminUserResult.payload.password,
+  });
   return { app, db, mailClient, adminUser: adminUserResult };
 }
