@@ -3,6 +3,7 @@ import { TestApp } from './helpers/app-test.helper';
 import { MailhogClient } from 'mailhog-awesome';
 import { BuildResult } from './helpers/signup-user-flow.builder';
 import { createAuthenticatedTestContext } from './fixtures/create-authenticated-test-context.fixture';
+import { extractRawSessionToken } from './helpers/extract-session-token.helper';
 
 describe('AppController (e2e)', () => {
   let app: TestApp;
@@ -17,6 +18,17 @@ describe('AppController (e2e)', () => {
   it('GET /api/auth/ok it should return 200 success', () => {
     const response = app.httpClient.get('/api/auth/ok');
     return response.expect(200);
+  });
+
+  it('admin user cookie session token must be stored in database sessions table.', async () => {
+    const token = extractRawSessionToken(adminUser.userAgent);
+    const dbToken = await db.dbClient.query(
+      'select token from sessions where "userId" = $1',
+      [adminUser.userDb.id],
+    );
+    expect(
+      dbToken.rows.some((row: { token: string }) => row.token === token),
+    ).toBe(true);
   });
   afterEach(async () => {
     await db.cleanup();
