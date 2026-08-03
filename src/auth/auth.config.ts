@@ -5,11 +5,7 @@ import { v7 } from 'uuid';
 import argon2 from 'argon2';
 import { openAPI } from 'better-auth/plugins';
 import { Request } from 'express';
-import {
-  AppLogLevel,
-  loggerMethodFor,
-  toAppLogLevel,
-} from 'src/app-logger/app-log.level';
+import { loggerMethodFor, toAppLogLevel } from 'src/app-logger/app-log.level';
 import { Logger } from 'nestjs-pino';
 import { IAuthEmailService } from 'src/email/auth-email.service';
 import { ConfigService } from '@nestjs/config';
@@ -48,6 +44,14 @@ export function createAuth(
       disabled: false,
       log: (level, message, ...args) => {
         loggerMethodFor(level, logger)(message, ...(args as unknown[]));
+      },
+    },
+    //-----------------------
+    socialProviders: {
+      google: {
+        prompt: 'select_account',
+        clientSecret: config.getOrThrow<string>('GOOGLE_CLIENT_SECRET'),
+        clientId: [config.getOrThrow<string>('GOOGLE_WEB_CLIENT_ID')],
       },
     },
     //----------------------
