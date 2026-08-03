@@ -98,8 +98,8 @@ export function createAuth(
       expiresIn: 60 * 60 * 24 * 30, // expires after 30 days
     },
     //-------------------
-    secret: process.env.BETTER_AUTH_SECRET,
-    baseURL: process.env.BETTER_AUTH_URL,
+    secret: config.getOrThrow<string>('BETTER_AUTH_SECRET'),
+    baseURL: config.getOrThrow<string>('BETTER_AUTH_URL'),
     advanced: { database: { generateId: () => v7() } },
     //--------------------
     emailAndPassword: {
@@ -127,6 +127,10 @@ export function createAuth(
       '/delete-user/callback',
       '/account-info',
     ],
-    plugins: [...(process.env.NODE_ENV === 'development' ? [openAPI()] : [])],
+    plugins: [
+      ...(config.getOrThrow<string>('NODE_ENV') === 'development'
+        ? [openAPI()]
+        : []),
+    ],
   });
 }

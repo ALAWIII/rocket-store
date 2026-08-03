@@ -4,7 +4,6 @@ import { DatabaseModule } from 'src/database/database.module';
 import { DataSource } from 'typeorm';
 import { createAuth } from './auth.config';
 import { ConfigService } from '@nestjs/config';
-import { AppLogLevel, toAppLogLevel } from 'src/app-logger/app-log.level';
 import { Logger } from 'nestjs-pino';
 import { AccessControlModule } from 'src/modules/access-control/access-control.module';
 import { EmailModule } from 'src/email/email.module';
