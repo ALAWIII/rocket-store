@@ -21,7 +21,7 @@ describe('AppController (e2e)', () => {
   });
 
   it('admin user cookie session token must be stored in database sessions table.', async () => {
-    const token = extractRawSessionToken(adminUser.userAgent);
+    const token = extractRawSessionToken(adminUser.userAgent).split('.')[0];
     const dbToken = await db.dbClient.query(
       'select token from sessions where "userId" = $1',
       [adminUser.userDb.id],
