@@ -21,7 +21,7 @@ describe('users (e2e)', () => {
     });
   });
   describe('GET /api/auth/get-session', () => {
-    it('should return user profile.', async () => {
+    it('should return session user profile.', async () => {
       const response = await adminUser.userAgent.get('/api/auth/get-session');
 
       console.log(response.status, response.body);
