@@ -3,12 +3,13 @@ import { typeormAdapter } from '@hedystia/better-auth-typeorm';
 import { DataSource } from 'typeorm';
 import { v7 } from 'uuid';
 import argon2 from 'argon2';
-import { openAPI } from 'better-auth/plugins';
+import { customSession, openAPI } from 'better-auth/plugins';
 import { Request } from 'express';
 import { loggerMethodFor, toAppLogLevel } from 'src/app-logger/app-log.level';
 import { Logger } from 'nestjs-pino';
 import { IAuthEmailService } from 'src/email/auth-email.service';
 import { ConfigService } from '@nestjs/config';
+import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 type Auth = ReturnType<typeof createAuth>;
 export type AppSession = Auth['$Infer']['Session'];
 export type AppUser = AppSession['user'];
@@ -89,7 +90,6 @@ export function createAuth(
           required: true,
           input: false,
           defaultValue: customerRoleId,
-          references: { model: 'roles', field: 'id' },
         },
       },
       deleteUser: { enabled: false },
@@ -128,6 +128,24 @@ export function createAuth(
       '/account-info',
     ],
     plugins: [
+      customSession(async ({ user, session }) => {
+        const dbUser = await dataSource
+          .getRepository(UserEntity)
+          .findOneBy({ id: user.id });
+
+        if (!dbUser) {
+          throw new Error(`User ${user.id} not found while building session`);
+        }
+        return {
+          user: {
+            ...user,
+            roleId: dbUser.roleId,
+            givenName: dbUser.givenName,
+            familyName: dbUser.familyName,
+          },
+          session,
+        };
+      }),
       ...(config.getOrThrow<string>('NODE_ENV') === 'development'
         ? [openAPI()]
         : []),
