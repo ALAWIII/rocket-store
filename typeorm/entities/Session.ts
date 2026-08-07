@@ -35,4 +35,6 @@ export class Session {
   @ManyToOne(() => UserEntity, { onDelete: 'CASCADE', nullable: false })
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user!: UserEntity;
+  @Column({ type: 'uuid', name: 'roleId' })
+  roleId!: string;
 }

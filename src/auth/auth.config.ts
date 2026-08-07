@@ -91,9 +91,9 @@ export function createAuth(
     session: {
       additionalFields: {
         roleId: {
-          fieldName: 'role_id',
+          fieldName: 'roleId',
           type: 'string',
-          required: false,
+          required: true,
           input: false,
           returned: true,
         },
