@@ -10,6 +10,7 @@ import { Logger } from 'nestjs-pino';
 import { IAuthEmailService } from 'src/email/auth-email.service';
 import { ConfigService } from '@nestjs/config';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
+import { UnauthorizedException } from '@nestjs/common';
 type Auth = ReturnType<typeof createAuth>;
 export type AppSession = Auth['$Infer']['Session'];
 export type AppUser = AppSession['user'];
@@ -129,16 +130,27 @@ export function createAuth(
     ],
     plugins: [
       customSession(async ({ user, session }) => {
-        const dbUser = await dataSource
-          .getRepository(UserEntity)
-          .findOneBy({ id: user.id });
+        let dbUser: UserEntity | null;
+        try {
+          dbUser = await dataSource
+            .getRepository(UserEntity)
+            .findOneBy({ id: user.id });
+        } catch (error) {
+          throw new Error(
+            `Database failure while fetching user info for session construction.`,
+            { cause: error },
+          );
+        }
 
         if (!dbUser) {
-          throw new Error(`User ${user.id} not found while building session`);
+          throw new UnauthorizedException(
+            `User ${user.id} not found while building session.`,
+          );
         }
         return {
           user: {
             ...user,
+            phone: dbUser.phone,
             roleId: dbUser.roleId,
             givenName: dbUser.givenName,
             familyName: dbUser.familyName,
