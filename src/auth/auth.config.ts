@@ -11,25 +11,18 @@ import { IAuthEmailService } from 'src/email/auth-email.service';
 import { ConfigService } from '@nestjs/config';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 import { UnauthorizedException } from '@nestjs/common';
+
+//========================= Types
 type Auth = ReturnType<typeof createAuth>;
 export type AppSession = Auth['$Infer']['Session'];
 export type AppUser = AppSession['user'];
-
 export interface AuthenticatedRequest extends Request {
   user: AppUser;
 }
-
-async function betterHash(password: string) {
-  return argon2.hash(password, {
-    type: argon2.argon2id,
-    memoryCost: 19456,
-    timeCost: 2,
-    parallelism: 1,
-  });
+interface SessionWithRoleId {
+  roleId: string;
 }
-async function betterVerify(data: { hash: string; password: string }) {
-  return argon2.verify(data.hash, data.password);
-}
+//======================== Auth Config
 export function createAuth(
   dataSource: DataSource,
   logger: Logger,
@@ -96,7 +89,49 @@ export function createAuth(
       deleteUser: { enabled: false },
     },
     session: {
+      additionalFields: {
+        roleId: {
+          fieldName: 'role_id',
+          type: 'string',
+          required: false,
+          input: false,
+          returned: true,
+        },
+      },
+      cookieCache: {
+        enabled: true,
+        maxAge: 60 * 60,
+        refreshCache: true,
+        strategy: 'jwt',
+      },
       expiresIn: 60 * 60 * 24 * 30, // expires after 30 days
+    },
+    //------------------------
+    databaseHooks: {
+      session: {
+        create: {
+          before: async (session) => {
+            let dbUser: UserEntity | null;
+            try {
+              dbUser = await dataSource
+                .getRepository(UserEntity)
+                .findOneBy({ id: session.userId });
+            } catch (error) {
+              throw new Error(
+                `Database failure while fetching user info for session construction.`,
+                { cause: error },
+              );
+            }
+
+            if (!dbUser) {
+              throw new UnauthorizedException(
+                `User ${session.userId} not found while building session.`,
+              );
+            }
+            return { data: { ...session, roleId: dbUser.roleId } };
+          },
+        },
+      },
     },
     //-------------------
     secret: config.getOrThrow<string>('BETTER_AUTH_SECRET'),
@@ -130,31 +165,13 @@ export function createAuth(
     ],
     plugins: [
       customSession(async ({ user, session }) => {
-        let dbUser: UserEntity | null;
-        try {
-          dbUser = await dataSource
-            .getRepository(UserEntity)
-            .findOneBy({ id: user.id });
-        } catch (error) {
+        if (!hasRoleId(session)) {
           throw new Error(
-            `Database failure while fetching user info for session construction.`,
-            { cause: error },
-          );
-        }
-
-        if (!dbUser) {
-          throw new UnauthorizedException(
-            `User ${user.id} not found while building session.`,
+            'Expected roleId on session — check databaseHooks.session.create',
           );
         }
         return {
-          user: {
-            ...user,
-            phone: dbUser.phone,
-            roleId: dbUser.roleId,
-            givenName: dbUser.givenName,
-            familyName: dbUser.familyName,
-          },
+          user: { ...user, roleId: session.roleId },
           session,
         };
       }),
@@ -163,4 +180,20 @@ export function createAuth(
         : []),
     ],
   });
+}
+function hasRoleId(session: object): session is SessionWithRoleId {
+  return typeof (session as Record<string, unknown>).roleId === 'string';
+}
+
+//=======================  Hashing/verifying helper functions ============================
+async function betterHash(password: string) {
+  return argon2.hash(password, {
+    type: argon2.argon2id,
+    memoryCost: 19456,
+    timeCost: 2,
+    parallelism: 1,
+  });
+}
+async function betterVerify(data: { hash: string; password: string }) {
+  return argon2.verify(data.hash, data.password);
 }
