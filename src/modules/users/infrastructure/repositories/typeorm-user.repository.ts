@@ -75,10 +75,15 @@ export class UserRepository implements IUserRepository {
   }
   async save(user: User): Promise<DBResult<User>> {
     try {
+      const userJson = user.toJSON();
       const result = await this.userRepo
         .createQueryBuilder()
         .insert()
-        .values(user.toJSON())
+        .values({
+          ...userJson,
+          givenName: userJson.givenName ?? undefined,
+          familyName: userJson.familyName ?? undefined,
+        })
         .returning('*')
         .execute();
 
