@@ -1,6 +1,9 @@
 import { UserAgent } from './app-test.helper';
 
-export function extractRawSessionToken(userAgent: UserAgent): string {
+export function extractRawCookieToken(
+  userAgent: UserAgent,
+  cookieName: string,
+): string {
   const cookies = userAgent.jar.getCookies({
     domain: '127.0.0.1',
     path: '/',
@@ -8,18 +11,19 @@ export function extractRawSessionToken(userAgent: UserAgent): string {
     script: false,
   });
 
-  const sessionCookie = cookies.find(
-    (cookie) => cookie.name === 'better-auth.session_token',
-  );
+  const sessionCookie = cookies.find((cookie) => cookie.name === cookieName);
 
   if (!sessionCookie?.value) {
-    throw new Error('better-auth.session_token was not found');
+    throw new Error(`${cookieName} was not found`);
   }
 
   return sessionCookie.value;
 }
 
-export function extractFullDecodedSessionToken(userAgent: UserAgent): string {
-  const rawToken = extractRawSessionToken(userAgent);
+export function extractDecodedSessionToken(userAgent: UserAgent): string {
+  const rawToken = extractRawCookieToken(
+    userAgent,
+    'better-auth.session_token',
+  );
   return decodeURIComponent(rawToken);
 }
