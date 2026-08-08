@@ -28,7 +28,7 @@ export class UserEntity {
   @Column('text', { name: 'image', nullable: true })
   image!: string | null;
 
-  @Column({ type: 'uuid', name: 'role_id' })
+  @Column({ type: 'uuid' })
   @ForeignKey(() => RoleEntity, (r) => r.id)
   roleId!: string;
   @UpdateDateColumnTz({ name: 'updatedAt' })

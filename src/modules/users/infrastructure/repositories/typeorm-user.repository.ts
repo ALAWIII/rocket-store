@@ -126,7 +126,7 @@ export class UserRepository implements IUserRepository {
     try {
       const oldUserRoleIdCte = this.userRepo
         .createQueryBuilder('user')
-        .select('user.role_id', 'id')
+        .select('user.roleId', 'id')
         .where('user.id = :targetUserId', {
           targetUserId: d.targetUserId,
         });
@@ -145,7 +145,7 @@ export class UserRepository implements IUserRepository {
 
       const requesterAssignScopeCte = this.userRepo.manager
         .createQueryBuilder(RoleEntity, 'role')
-        .select('role.assign_scope', 'assign_scope')
+        .select('role.assignScope', 'assignScope')
         .where('role.id = :requesterRoleId', {
           requesterRoleId: d.requesterRoleId,
         });
@@ -170,7 +170,7 @@ export class UserRepository implements IUserRepository {
         .andWhere(
           `
           COALESCE(
-            (select assign_scope from requester_assign_scope),
+            (select "assignScope" from requester_assign_scope),
             '[]'::jsonb
           ) @> (select permissions from old_role_permissions)
         `,
@@ -178,7 +178,7 @@ export class UserRepository implements IUserRepository {
         .andWhere(
           `
           COALESCE(
-            (select assign_scope from requester_assign_scope),
+            (select "assignScope" from requester_assign_scope),
             '[]'::jsonb
           ) @> (select permissions from target_role_permissions)
         `,
@@ -207,7 +207,7 @@ export class UserRepository implements IUserRepository {
     try {
       const requesterScope = this.userRepo.manager
         .createQueryBuilder(RoleEntity, 'role')
-        .select('role.assign_scope', 'assign_scope')
+        .select('role.assignScope', 'assignScope')
         .where('role.id = :requesterRoleId', {
           requesterRoleId: d.requesterRoleId,
         });
@@ -229,11 +229,11 @@ export class UserRepository implements IUserRepository {
         .addCommonTableExpression(newPermissions, 'new_role_permissions')
         .update(UserEntity)
         .set({ roleId: d.newRoleId })
-        .where('role_id = :oldRoleId', { oldRoleId: d.oldRoleId })
+        .where('roleId = :oldRoleId', { oldRoleId: d.oldRoleId })
         .andWhere(
           `
            COALESCE(
-             (select assign_scope from req_assign_scope),
+             (select "assignScope" from req_assign_scope),
              '[]'::jsonb
            ) @> (select permissions from old_role_permissions)
          `,
@@ -241,7 +241,7 @@ export class UserRepository implements IUserRepository {
         .andWhere(
           `
            COALESCE(
-             (select assign_scope from req_assign_scope),
+             (select "assignScope" from req_assign_scope),
              '[]'::jsonb
            ) @> (select permissions from new_role_permissions)
          `,
@@ -291,14 +291,14 @@ export class UserRepository implements IUserRepository {
     qb: SelectQueryBuilder<UserEntity>,
     requesterRoleId: string,
   ): void {
-    // bring assign_scope of user requester.
+    // bring assignScope of user requester.
     const requesterScopeCte = this.userRepo.manager
       .createQueryBuilder(RoleEntity, 'requester_role')
-      .select('requester_role.assign_scope', 'assign_scope')
+      .select('requester_role.assignScope', 'assignScope')
       .where('requester_role.id = :requesterRoleId', { requesterRoleId });
-    // register userRequester.role.assign_scope as CTE
+    // register userRequester.role.assignScope as CTE
     qb.addCommonTableExpression(requesterScopeCte, 'requester_scope');
-    // fire a sub-query to find all roles that are subset or equal to userRequester.role.assign_scope.
+    // fire a sub-query to find all roles that are subset or equal to userRequester.role.assignScope.
     qb.andWhere((subQb) => {
       const allowedRolesSubQuery = subQb
         .subQuery()
@@ -307,13 +307,13 @@ export class UserRepository implements IUserRepository {
         .where(
           `
             candidate_role.permissions <@ COALESCE(
-              (SELECT assign_scope FROM requester_scope),
+              (SELECT "assignScope" FROM requester_scope),
               '[]'::jsonb
             )`,
         )
         .getQuery();
       // here return a query for fetching all users that their roles fall in this list of role Id's
-      return `user.role_id IN ${allowedRolesSubQuery}`;
+      return `user.roleId IN ${allowedRolesSubQuery}`;
     });
   }
 
