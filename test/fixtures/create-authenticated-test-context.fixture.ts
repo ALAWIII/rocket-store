@@ -3,7 +3,7 @@ import { createConfigServiceMock } from 'test/helpers/config-test.helper';
 import { TestDatabase } from 'test/helpers/database-test.helper';
 import { TEST_ENV } from 'test/helpers/env-test-values';
 import { createMailhogClient } from 'test/helpers/mailhog-client.helper';
-import { UserAuthFlowBuilder } from 'test/helpers/signup-user-flow.builder';
+import { UserAuthFlowBuilder } from 'test/helpers/auth-user-flow.builder';
 
 export async function createAuthenticatedTestContext() {
   const mailClient = createMailhogClient();
