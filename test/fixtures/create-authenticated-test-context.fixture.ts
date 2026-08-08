@@ -23,7 +23,7 @@ export async function createAuthenticatedTestContext() {
   const adminAgent = app.createAgent();
   const adminUserResult = await SignupUserFlowBuilder.create({
     mailhogClient: mailClient,
-    dbClient: db.dbClient,
+    dbDataSource: db.dataSource,
     userAgent: adminAgent,
   })
     .random()

@@ -25,13 +25,13 @@ describe('AppController (e2e)', () => {
       adminUser.userAgent,
       'better-auth.session_token',
     ).split('.')[0];
-    const dbToken = await db.dbClient.query(
+    const dbToken = await db.dataSource.query<{ token: string }[]>(
       'select token from sessions where "userId" = $1',
       [adminUser.userDb.id],
     );
-    expect(
-      dbToken.rows.some((row: { token: string }) => row.token === token),
-    ).toBe(true);
+    expect(dbToken.some((row: { token: string }) => row.token === token)).toBe(
+      true,
+    );
   });
   afterEach(async () => {
     await db.cleanup();

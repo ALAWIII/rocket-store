@@ -2,11 +2,10 @@ import { v7 } from 'uuid';
 import { UserAgent } from './app-test.helper';
 import { Response } from 'supertest';
 import { MailhogClient } from 'mailhog-awesome';
-import { Client } from 'pg';
-import { plainToInstance } from 'class-transformer';
-import { RoleDatabaseDto } from 'src/modules/access-control/infrastructure/dto/role-database-response.dto';
-import { UserDatabaseDto } from 'src/modules/users/infrastructure/dto/user-database-response.dto';
 import { extractUrlsFromHtml } from 'test/utils/extract-url-from-html.util';
+import { DataSource } from 'typeorm';
+import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
+import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 
 type UserPayload = {
   name: string;
@@ -45,7 +44,7 @@ export type SignupResult = {
 };
 
 type Props = {
-  dbClient: Client;
+  dbDataSource: DataSource;
   userAgent: UserAgent;
   mailhogClient: MailhogClient;
 };
@@ -112,26 +111,27 @@ export class SignupUserFlowBuilder {
   }
   //==================
   private async fetchUserFromDatabase(userId: string): Promise<UserProps> {
-    const raw = await this.props.dbClient.query<UserDatabaseDto>(
-      `select * from users where id = $1`,
-      [userId],
-    );
-    const userDb = plainToInstance(UserDatabaseDto, raw.rows[0]);
+    const user = await this.props.dbDataSource
+      .getRepository(UserEntity)
+      .findOneByOrFail({ id: userId });
     return {
-      ...userDb,
-      createdAt: userDb.createdAt.toISOString(),
-      updatedAt: userDb.updatedAt.toISOString(),
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      roleId: user.roleId,
+      emailVerified: user.emailVerified,
+      image: user.image,
+      phone: user.phone,
+      givenName: user.givenName,
+      familyName: user.familyName,
+      createdAt: user.createdAt.toISOString(),
+      updatedAt: user.updatedAt.toISOString(),
     };
   }
-  private async fetchRoleFromDatabase(
-    roleId: string,
-  ): Promise<RoleDatabaseDto> {
-    const raw = await this.props.dbClient.query<RoleDatabaseDto>(
-      `select * from roles where id = $1`,
-      [roleId],
-    );
-
-    return plainToInstance(RoleDatabaseDto, raw.rows[0]);
+  private async fetchRoleFromDatabase(roleId: string): Promise<RoleEntity> {
+    return await this.props.dbDataSource
+      .getRepository(RoleEntity)
+      .findOneByOrFail({ id: roleId });
   }
   //==================
   private randomPayload(): UserPayload {
@@ -188,20 +188,16 @@ export class SignupUserFlowBuilder {
     userId: string,
     roleName: string,
   ): Promise<void> {
-    const roleQuery = await this.props.dbClient.query<{ id: string }>(
-      `select id from roles where name = $1 limit 1`,
-      [roleName],
-    );
+    const role = await this.props.dbDataSource
+      .getRepository(RoleEntity)
+      .findOneByOrFail({ name: roleName });
 
-    const role = roleQuery.rows[0];
+    const result = await this.props.dbDataSource
+      .getRepository(UserEntity)
+      .update({ id: userId }, { roleId: role.id });
 
-    if (!role) {
-      throw new Error(`Role '${roleName}' was not found`);
+    if (result.affected !== 1) {
+      throw new Error(`User was not found: ${userId}`);
     }
-
-    await this.props.dbClient.query(
-      `update users set role_id = $1 where id = $2`,
-      [role.id, userId],
-    );
   }
 }
