@@ -6,13 +6,13 @@ export class AddAssignRoleScopePermissions1784632588358 implements MigrationInte
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(`
       ALTER TABLE "roles"
-      ADD COLUMN IF NOT EXISTS "assign_scope" jsonb NULL
+      ADD COLUMN IF NOT EXISTS "assignScope" jsonb NULL
     `);
 
     await queryRunner.query(`
       CREATE INDEX IF NOT EXISTS "idx_roles_assign_role_scope_gin"
       ON "roles"
-      USING gin ("assign_scope" jsonb_path_ops)
+      USING gin ("assignScope" jsonb_path_ops)
     `);
   }
 
@@ -23,7 +23,7 @@ export class AddAssignRoleScopePermissions1784632588358 implements MigrationInte
 
     await queryRunner.query(`
       ALTER TABLE "roles"
-      DROP COLUMN IF EXISTS "assign_scope"
+      DROP COLUMN IF EXISTS "assignScope"
     `);
   }
 }

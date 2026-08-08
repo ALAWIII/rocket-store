@@ -9,8 +9,8 @@ export class CreateRolesTable1784028100847 implements MigrationInterface {
         "id" uuid PRIMARY KEY DEFAULT uuidv7(),
         "name" varchar(50) NOT NULL UNIQUE,
         "permissions" jsonb NOT NULL DEFAULT '[]'::jsonb,
-        "create_scope" jsonb NULL,
-        "assign_scope" jsonb NULL
+        "createScope" jsonb NULL,
+        "assignScope" jsonb NULL
       );
     `);
   }

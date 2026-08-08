@@ -9,19 +9,19 @@ export class AddUniqueIndexesRoles1784635932916 implements MigrationInterface {
 
     await queryRunner.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS "uq_roles_permissions_create_scope"
-      ON "roles" ("permissions", "create_scope")
+      ON "roles" ("permissions", "createScope")
       NULLS NOT DISTINCT
     `);
 
     await queryRunner.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS "uq_roles_permissions_assign_scope"
-      ON "roles" ("permissions", "assign_scope")
+      ON "roles" ("permissions", "assignScope")
       NULLS NOT DISTINCT
     `);
 
     await queryRunner.query(`
       CREATE UNIQUE INDEX IF NOT EXISTS "uq_roles_permissions_assign_create_scope"
-      ON "roles" ("permissions", "assign_scope", "create_scope")
+      ON "roles" ("permissions", "assignScope", "createScope")
       NULLS NOT DISTINCT
     `);
   }
