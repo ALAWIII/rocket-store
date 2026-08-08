@@ -87,7 +87,7 @@ export class UserRepository implements IUserRepository {
         .returning('*')
         .execute();
 
-      const row = (result.raw as UserEntity[])[0];
+      const [row] = result.raw as UserEntity[];
       if (!row) {
         throw new UnknownDatabaseError(
           'Failed to return the newly inserted user.',
@@ -110,8 +110,7 @@ export class UserRepository implements IUserRepository {
         .where('id= :id', { id })
         .returning('*')
         .execute();
-      const rows = result.raw as UserEntity[];
-      const row = rows[0] ?? null;
+      const [row] = result.raw as UserEntity[];
 
       return Ok(row ? Some(this.toDomain(row)) : None);
     } catch (e) {
