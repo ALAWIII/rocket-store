@@ -39,6 +39,14 @@ describe('access-control (e2e)', () => {
       await customer.userAgent.get('/api/v1/roles').expect(403);
     });
   });
+  describe('POST /api/v1/roles/policies/reload', () => {
+    it('should successfully reload policies in the system internally.', async () => {
+      const resp = await adminUser.userAgent
+        .post('/api/v1/roles/policies/reload')
+        .expect(200);
+      expect(resp.body).toStrictEqual({ attempt: 2 });
+    });
+  });
   afterEach(async () => {
     await db.cleanup();
     await app.cleanup();
