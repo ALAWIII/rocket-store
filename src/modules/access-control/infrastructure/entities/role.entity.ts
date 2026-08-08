@@ -14,10 +14,10 @@ export class RoleEntity {
   permissions!: PermissionDatabaseDto[];
 
   @Index('idx_roles_create_role_scope_gin', { synchronize: false })
-  @Column({ name: 'create_scope', type: 'jsonb', nullable: true })
+  @Column({ type: 'jsonb', nullable: true })
   createScope!: PermissionDatabaseDto[] | null;
 
   @Index('idx_roles_assign_role_scope_gin', { synchronize: false })
-  @Column({ name: 'assign_scope', type: 'jsonb', nullable: true })
+  @Column({ type: 'jsonb', nullable: true })
   assignScope!: PermissionDatabaseDto[] | null;
 }

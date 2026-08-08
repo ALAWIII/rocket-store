@@ -15,8 +15,6 @@ import {
 } from 'src/modules/shared/errors/database.error';
 import { PermissionError } from '../../domain/permission.error';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
-import { plainToInstance } from 'class-transformer';
-import { RoleDatabaseDto } from '../dto/role-database-response.dto';
 
 @Injectable()
 export class RoleRepository implements IRoleRepository {
@@ -49,7 +47,7 @@ export class RoleRepository implements IRoleRepository {
             ])
             .from(RoleEntity, 'creator')
             .where('creator.id = :creatorRoleId')
-            .andWhere('creator.create_scope @> :permissions'),
+            .andWhere('creator.createScope @> :permissions'),
         )
         .setParameters({
           id: newRole.id,
@@ -61,14 +59,11 @@ export class RoleRepository implements IRoleRepository {
         })
         .returning('*')
         .execute();
-
-      const [row] = plainToInstance(RoleDatabaseDto, result.raw as unknown[], {
-        excludeExtraneousValues: false,
-      });
+      const [row] = result.raw as RoleEntity[];
       if (!row) {
         return Err(
           new UnknownDatabaseError(
-            'Creator create_scope does not contain new role permissions.',
+            'Creator createScope does not contain new role permissions.',
           ),
         );
       }
@@ -83,8 +78,8 @@ export class RoleRepository implements IRoleRepository {
       const loadPerms = this.roleRepo
         .createQueryBuilder('r')
         .select([
-          'r.create_scope AS create_scope',
-          'r.assign_scope AS assign_scope',
+          'r.createScope AS createScope',
+          'r.assignScope AS assignScope',
         ])
         .where('r.id = :id', { id: roleId });
 
@@ -94,9 +89,9 @@ export class RoleRepository implements IRoleRepository {
         .where(
           new Brackets((qb) => {
             qb.where(
-              `COALESCE((SELECT create_scope FROM role_perms), '[]'::jsonb) @> role.permissions`,
+              `COALESCE((SELECT createScope FROM role_perms), '[]'::jsonb) @> role.permissions`,
             ).orWhere(
-              `COALESCE((SELECT assign_scope FROM role_perms), '[]'::jsonb) @> role.permissions`,
+              `COALESCE((SELECT assignScope FROM role_perms), '[]'::jsonb) @> role.permissions`,
             );
           }),
         )
@@ -111,14 +106,14 @@ export class RoleRepository implements IRoleRepository {
     try {
       const loadPerms = this.roleRepo
         .createQueryBuilder('r')
-        .select('r.assign_scope', 'assign_scope')
+        .select('r.assignScope', 'assignScope')
         .where('r.id = :id', { id: roleId });
 
       const loadRoles = await this.roleRepo
         .createQueryBuilder('role')
         .addCommonTableExpression(loadPerms, 'role_perms')
         .where(
-          `COALESCE((SELECT assign_scope FROM role_perms), '[]'::jsonb) @> role.permissions`,
+          `COALESCE((SELECT assignScope FROM role_perms), '[]'::jsonb) @> role.permissions`,
         )
         .getMany();
 
@@ -131,14 +126,14 @@ export class RoleRepository implements IRoleRepository {
     try {
       const loadPerms = this.roleRepo
         .createQueryBuilder('r')
-        .select('r.create_scope', 'create_scope')
+        .select('r.createScope', 'createScope')
         .where('r.id = :id', { id: roleId });
 
       const loadRoles = await this.roleRepo
         .createQueryBuilder('role')
         .addCommonTableExpression(loadPerms, 'role_perms')
         .where(
-          `COALESCE((SELECT create_scope FROM role_perms), '[]'::jsonb) @> role.permissions`,
+          `COALESCE((SELECT createScope FROM role_perms), '[]'::jsonb) @> role.permissions`,
         )
         .getMany();
 
@@ -192,7 +187,7 @@ export class RoleRepository implements IRoleRepository {
     try {
       const requesterScope = this.roleRepo
         .createQueryBuilder('r')
-        .select('r.create_scope', 'create_scope')
+        .select('r.createScope', 'createScope')
         .where('r.id = :requesterId', { requesterId: data.userRoleId });
 
       const result = await this.roleRepo
@@ -202,16 +197,13 @@ export class RoleRepository implements IRoleRepository {
         .set({ name: data.role.name })
         .where('id = :targetId', { targetId: data.role.id })
         .andWhere(
-          `COALESCE((select create_scope from requester_scope), '[]'::jsonb)
+          `COALESCE((select createScope from requester_scope), '[]'::jsonb)
              @> (select permissions from roles where id = :targetId)`,
         )
         .returning('*')
         .execute();
 
-      const [row] = plainToInstance(RoleDatabaseDto, result.raw as unknown[], {
-        excludeExtraneousValues: false,
-      });
-
+      const [row] = result.raw as RoleEntity[];
       if (result.affected === 0 || !row) {
         throw new RecordNotFoundError(
           `role to be updated was not found: ${data.role.id}`,
@@ -232,13 +224,10 @@ export class RoleRepository implements IRoleRepository {
         .values({
           ...role.toJSON(),
         })
-        .orUpdate(['permissions', 'assign_scope', 'create_scope'], ['name'])
+        .orUpdate(['permissions', 'assignScope', 'createScope'], ['name'])
         .returning('*')
         .execute();
-
-      const [row] = plainToInstance(RoleDatabaseDto, result.raw as unknown[], {
-        excludeExtraneousValues: false,
-      });
+      const [row] = result.raw as RoleEntity[];
       if (!row) {
         return Err(new UnknownDatabaseError('Upsert did not return a row'));
       }
@@ -256,7 +245,7 @@ export class RoleRepository implements IRoleRepository {
     try {
       const requesterCreateScopeCte = this.roleRepo
         .createQueryBuilder('requester')
-        .select('requester.create_scope', 'create_scope')
+        .select('requester.createScope', 'createScope')
         .where('requester.id = :requesterRoleId', {
           requesterRoleId: ids.requesterRoleId,
         });
@@ -266,7 +255,7 @@ export class RoleRepository implements IRoleRepository {
         .select('target.id', 'id')
         .where('target.id = :targetRoleId', { targetRoleId: ids.targetRoleId })
         .andWhere(
-          'target.permissions <@ (SELECT create_scope FROM requester_scope)',
+          'target.permissions <@ (SELECT createScope FROM requester_scope)',
         );
 
       const reassignedUsersCte = this.roleRepo.manager
