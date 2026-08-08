@@ -1,7 +1,7 @@
 import { TestDatabase } from './helpers/database-test.helper';
 import { TestApp } from './helpers/app-test.helper';
 import { MailhogClient } from 'mailhog-awesome';
-import { BuildResult } from './helpers/signup-user-flow.builder';
+import { SignupResult } from './helpers/signup-user-flow.builder';
 import { createAuthenticatedTestContext } from './fixtures/create-authenticated-test-context.fixture';
 import { extractRawCookieToken } from './helpers/extract-session-token.helper';
 
@@ -9,7 +9,7 @@ describe('AppController (e2e)', () => {
   let app: TestApp;
   let db: TestDatabase;
   let mailClient: MailhogClient;
-  let adminUser: BuildResult;
+  let adminUser: SignupResult;
   beforeEach(async () => {
     ({ app, db, mailClient, adminUser } =
       await createAuthenticatedTestContext());
