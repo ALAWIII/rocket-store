@@ -14,30 +14,31 @@ type UserPayload = {
   password: string;
 };
 
+export type UserProps = {
+  id: string;
+  name: string;
+  email: string;
+  roleId?: string;
+  emailVerified?: boolean;
+  image?: string | null;
+  phone?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  givenName?: null | string; //the givenName, familyName and roleId fields appears when firing a request second time to signup endpoint.
+  familyName?: null | string;
+};
 export type SignupResponseBody = {
   token: string | null;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    roleId?: string;
-    emailVerified: boolean;
-    image: string | null;
-    phone: string | null;
-    createdAt: string;
-    updatedAt: string;
-    givenName?: null | string; //the givenName, familyName and roleId fields appears when firing a request second time to signup endpoint.
-    familyName?: null | string;
-  };
+  user: UserProps;
 };
 export type SignupResponse = {
   response: Response;
   body: SignupResponseBody;
 };
 
-export type BuildResult = {
+export type SignupResult = {
   userAgent: UserAgent;
-  userDb: UserDatabaseDto;
+  userDb: UserProps;
   payload: UserPayload;
   signup: SignupResponse;
   verificationUrl?: string;
@@ -81,7 +82,7 @@ export class SignupUserFlowBuilder {
     return this;
   }
 
-  async build(): Promise<BuildResult> {
+  async build(): Promise<SignupResult> {
     const payload = this.payload ?? this.randomPayload();
     const signup = await this.sendSignupRequest(payload);
 
@@ -98,7 +99,7 @@ export class SignupUserFlowBuilder {
       await this.changeUserRole(signup.body.user.id, this.roleName);
     }
     const user = await this.fetchUserFromDatabase(signup.body.user.id);
-    const userRole = await this.fetchRoleFromDatabase(user.roleId);
+    const userRole = await this.fetchRoleFromDatabase(user.roleId!);
     expect(user.emailVerified).toStrictEqual(this.shouldVerify);
     expect(userRole.name).toStrictEqual(this.roleName ?? 'customer');
     return {
@@ -110,15 +111,17 @@ export class SignupUserFlowBuilder {
     };
   }
   //==================
-  private async fetchUserFromDatabase(
-    userId: string,
-  ): Promise<UserDatabaseDto> {
+  private async fetchUserFromDatabase(userId: string): Promise<UserProps> {
     const raw = await this.props.dbClient.query<UserDatabaseDto>(
       `select * from users where id = $1`,
       [userId],
     );
-
-    return plainToInstance(UserDatabaseDto, raw.rows[0]);
+    const userDb = plainToInstance(UserDatabaseDto, raw.rows[0]);
+    return {
+      ...userDb,
+      createdAt: userDb.createdAt.toISOString(),
+      updatedAt: userDb.updatedAt.toISOString(),
+    };
   }
   private async fetchRoleFromDatabase(
     roleId: string,
