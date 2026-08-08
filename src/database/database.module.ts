@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
-import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import path from 'path';
 
 @Module({
@@ -11,7 +10,6 @@ import path from 'path';
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
         url: config.getOrThrow('DATABASE_URL'),
-        namingStrategy: new SnakeNamingStrategy(),
         entities: [
           path.join(process.cwd(), 'dist/**/*.entity.js'),
           path.join(process.cwd(), 'dist/typeorm/entities/*.js'),

@@ -68,18 +68,18 @@ export function createAuth(
       },
       additionalFields: {
         givenName: {
-          fieldName: 'given_name',
+          fieldName: 'givenName',
           type: 'string',
           required: false,
         },
         familyName: {
-          fieldName: 'family_name',
+          fieldName: 'familyName',
           type: 'string',
           required: false,
         },
         phone: { type: 'string', required: false },
         roleId: {
-          fieldName: 'role_id',
+          fieldName: 'roleId',
           type: 'string',
           required: true,
           input: false,
