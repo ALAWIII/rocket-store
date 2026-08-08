@@ -25,10 +25,10 @@ export class RolesController {
   constructor(private readonly service: RoleService) {}
 
   @Post('policies/reload')
-  @HttpCode(204)
+  @HttpCode(200)
   @RequirePermission(AllPermissions.role.RoleReloadAll)
   async reloadPolicies() {
-    return await this.service.reloadPolicies();
+    return { attempt: await this.service.reloadPolicies() };
   }
   @Post()
   @RequirePermission(AllPermissions.role.RoleCreateLessOrEqual)
