@@ -9,7 +9,7 @@ import { IEnforcerHolder } from '../enforcer-holder/infrastructure/casbin/enforc
 @Injectable()
 export class AccessControlSyncService {
   private readonly logger = new Logger(AccessControlSyncService.name);
-
+  private reloadAttempt = 0;
   constructor(
     @Inject(IEnforcerHolder)
     private readonly enforcer: IEnforcerHolder,
@@ -17,7 +17,7 @@ export class AccessControlSyncService {
     private readonly roleRepository: IRoleRepository,
   ) {}
 
-  async reloadFromDatabase(): Promise<void> {
+  async reloadFromDatabase(): Promise<number> {
     const roles = await this.roleRepository.loadAll();
     if (roles.isErr()) {
       throw roles.error;
@@ -32,10 +32,11 @@ export class AccessControlSyncService {
     }
 
     this.enforcer.set(newEnforcer);
-
+    this.reloadAttempt += 1;
     this.logger.log(
-      `Casbin policies reloaded: ${policies.length} policies from ${allRoles.length} roles`,
+      `Casbin policies reloaded: ${policies.length} policies from ${allRoles.length} roles, reload count= ${this.reloadAttempt}`,
     );
+    return this.reloadAttempt;
   }
   async getPermissions(roleId: string): Promise<Permission[]> {
     const policies = (await this.enforcer.getPoliciesById(roleId)).map((p) =>

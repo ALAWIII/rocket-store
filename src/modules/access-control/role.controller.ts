@@ -28,7 +28,7 @@ export class RolesController {
   @HttpCode(204)
   @RequirePermission(AllPermissions.role.RoleReloadAll)
   async reloadPolicies() {
-    await this.service.reloadPolicies();
+    return await this.service.reloadPolicies();
   }
   @Post()
   @RequirePermission(AllPermissions.role.RoleCreateLessOrEqual)

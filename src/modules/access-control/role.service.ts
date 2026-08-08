@@ -36,8 +36,8 @@ export class RoleService {
     this.logger.log(`Loaded ${roles.length} assignable roles.`);
     return roles.map((r) => r.toJSON());
   }
-  async reloadPolicies() {
-    await this.acsyncService.reloadFromDatabase();
+  async reloadPolicies(): Promise<number> {
+    return await this.acsyncService.reloadFromDatabase();
   }
   async createRole(
     userRoleId: string,
