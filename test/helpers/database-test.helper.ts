@@ -1,6 +1,8 @@
 import { Client } from 'pg';
 import { v7 } from 'uuid';
-
+import { DataSource } from 'typeorm';
+import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
+import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
 export interface CreateTestDatabaseOptions {
   host: string;
   port: number;
@@ -13,29 +15,34 @@ export class TestDatabase {
   constructor(
     readonly databaseName: string,
     readonly databaseUrl: string,
-    readonly dbClient: Client,
+    readonly dataSource: DataSource,
     private readonly adminOptions: CreateTestDatabaseOptions,
   ) {}
 
   static async create(options: CreateTestDatabaseOptions) {
     const databaseName = `test_${v7().replace(/-/g, '')}`;
-    const encodedUser = encodeURIComponent(options.user);
-    const encodedPassword = encodeURIComponent(options.password);
-    const databaseUrl = `postgresql://${encodedUser}:${encodedPassword}@${options.host}:${options.port}/${databaseName}`;
+    const databaseUrl = `postgresql://${encodeURIComponent(options.user)}:${encodeURIComponent(options.password)}@${options.host}:${options.port}/${databaseName}`;
 
+    // Keep your existing pg Client here to CREATE DATABASE.
     const adminClient = new Client({ ...options });
     await adminClient.connect();
     await adminClient.query(`CREATE DATABASE "${databaseName}"`);
     await adminClient.end();
 
-    const dbCon = new Client({ connectionString: databaseUrl });
-    await dbCon.connect();
+    const dataSource = new DataSource({
+      type: 'postgres',
+      url: databaseUrl,
+      entities: [UserEntity, RoleEntity],
+      migrations: [],
+    });
 
-    return new TestDatabase(databaseName, databaseUrl, dbCon, options);
+    await dataSource.initialize();
+
+    return new TestDatabase(databaseName, databaseUrl, dataSource, options);
   }
 
   async cleanup() {
-    await this.dbClient.end();
+    await this.dataSource.destroy();
 
     const adminClient = new Client({ ...this.adminOptions });
     await adminClient.connect();
