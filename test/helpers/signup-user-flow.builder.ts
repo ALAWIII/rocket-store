@@ -12,7 +12,27 @@ type UserPayload = {
   email: string;
   password: string;
 };
-
+export type SiginResponse = {
+  body: SigninResponseBody;
+  response: Response;
+};
+export type SigninResponseBody = {
+  redirect: boolean;
+  token: string;
+  user: {
+    name: string;
+    email: string;
+    emailVerified: boolean;
+    image: null | string;
+    createdAt: string;
+    updatedAt: string;
+    givenName: null | string;
+    familyName: null | string;
+    phone: null | string;
+    roleId: string;
+    id: string;
+  };
+};
 export type UserProps = {
   id: string;
   name: string;
@@ -35,11 +55,12 @@ export type SignupResponse = {
   body: SignupResponseBody;
 };
 
-export type SignupResult = {
+export type AuthUserResult = {
   userAgent: UserAgent;
   userDb: UserProps;
   payload: UserPayload;
   signup: SignupResponse;
+  sigin?: SiginResponse;
   verificationUrl?: string;
 };
 
@@ -49,15 +70,16 @@ type Props = {
   mailhogClient: MailhogClient;
 };
 
-export class SignupUserFlowBuilder {
+export class UserAuthFlowBuilder {
   private payload?: UserPayload;
   private shouldVerify = false;
+  private shouldSignin = false;
   private roleName?: string;
 
   private constructor(private readonly props: Props) {}
 
-  static create(props: Props): SignupUserFlowBuilder {
-    return new SignupUserFlowBuilder(props);
+  static create(props: Props): UserAuthFlowBuilder {
+    return new UserAuthFlowBuilder(props);
   }
 
   random(): this {
@@ -80,8 +102,11 @@ export class SignupUserFlowBuilder {
     this.roleName = roleName;
     return this;
   }
-
-  async build(): Promise<SignupResult> {
+  signin() {
+    this.shouldSignin = true;
+    return this;
+  }
+  async build(): Promise<AuthUserResult> {
     const payload = this.payload ?? this.randomPayload();
     const signup = await this.sendSignupRequest(payload);
 
@@ -101,11 +126,20 @@ export class SignupUserFlowBuilder {
     const userRole = await this.fetchRoleFromDatabase(user.roleId!);
     expect(user.emailVerified).toStrictEqual(this.shouldVerify);
     expect(userRole.name).toStrictEqual(this.roleName ?? 'customer');
+    let sigin: SiginResponse | undefined;
+    if (this.shouldSignin) {
+      sigin = await this.signinRequest({
+        email: payload.email,
+        password: payload.password,
+      });
+    }
+
     return {
       userDb: user,
       userAgent: this.props.userAgent,
       payload,
       signup,
+      sigin,
       verificationUrl,
     };
   }
@@ -154,6 +188,22 @@ export class SignupUserFlowBuilder {
     return {
       response,
       body: response.body as SignupResponseBody,
+    };
+  }
+  private async signinRequest(payload: {
+    email: string;
+    password: string;
+  }): Promise<SiginResponse> {
+    const siginrawResp = await this.props.userAgent
+      .post('/api/auth/sign-in/email')
+      .send({
+        ...payload,
+        rememberMe: true,
+      })
+      .expect(200);
+    return {
+      body: siginrawResp.body as SigninResponseBody,
+      response: siginrawResp,
     };
   }
 
