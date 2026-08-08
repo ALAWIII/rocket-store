@@ -9,8 +9,8 @@ export class UserDatabaseDto {
   emailVerified!: boolean;
   image!: string | null;
   phone!: string | null;
-  createdAt!: string;
-  updatedAt!: string;
+  createdAt!: Date;
+  updatedAt!: Date;
   @Expose({ name: 'given_name' })
   givenName!: null | string;
   @Expose({ name: 'family_name' })
