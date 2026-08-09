@@ -77,7 +77,7 @@ describe('AccessControlSyncService', () => {
       expect(enforcerHolderMock.set).toHaveBeenCalledWith(newEnforcerMock);
 
       expect(loggerSpy).toHaveBeenCalledWith(
-        'Casbin policies reloaded: 3 policies from 2 roles',
+        'Casbin policies reloaded: 3 policies from 2 roles, reload count= 1',
       );
 
       loggerSpy.mockRestore();
@@ -102,7 +102,7 @@ describe('AccessControlSyncService', () => {
       expect(enforcerHolderMock.set).toHaveBeenCalledWith(newEnforcerMock);
 
       expect(loggerSpy).toHaveBeenCalledWith(
-        'Casbin policies reloaded: 0 policies from 1 roles',
+        'Casbin policies reloaded: 0 policies from 1 roles, reload count= 1',
       );
 
       loggerSpy.mockRestore();
