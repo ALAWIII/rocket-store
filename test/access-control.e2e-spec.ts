@@ -130,6 +130,20 @@ describe('access-control (e2e)', () => {
           .toJSON(),
       );
     });
+    it('should fail creating new role when assign permission persist without its scope.', async () => {
+      const newRole = {
+        name: 'babyadmin',
+        permissions: [
+          AllPermissions.user.UserReadLessOrEqual,
+          AllPermissions.role.RoleReadLessOrEqual,
+          AllPermissions.role.RoleAssignLessOrEqual,
+        ],
+      };
+      const response = await adminUser.userAgent
+        .post('/api/v1/roles')
+        .send(newRole)
+        .expect(400);
+    });
   });
   afterEach(async () => {
     await db.cleanup();
