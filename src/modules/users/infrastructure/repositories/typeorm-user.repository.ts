@@ -270,15 +270,13 @@ export class UserRepository implements IUserRepository {
       this.applyPagination(qb, pagination);
 
       const [rows, total] = await qb.getManyAndCount();
-      const users = rows.map((row) => this.toDomain(row));
-      const findParseError = users.find((u) => u.isErr());
-      if (findParseError?.isErr()) {
-        return findParseError;
+      const users: User[] = [];
+      for (const row of rows) {
+        const result = this.toDomain(row);
+        if (result.isErr()) return result;
+        users.push(result.unwrap());
       }
-      return Ok({
-        users: users.map((u) => u.unwrap()),
-        total,
-      });
+      return Ok({ users, total });
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }

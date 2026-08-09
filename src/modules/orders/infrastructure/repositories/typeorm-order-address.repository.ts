@@ -36,7 +36,19 @@ export class OrderAddressRepositroy implements IOrderAddressRepository {
         .andWhere('order.user_id = :userId', { userId })
         .getMany();
 
-      return Ok(entities.map((entity) => this.toDomain(entity)));
+      const domains: OrderAddress[] = [];
+
+      for (const entity of entities) {
+        const result = this.toDomain(entity);
+
+        if (result.isErr()) {
+          return result;
+        }
+
+        domains.push(result.unwrap());
+      }
+
+      return Ok(domains);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -98,21 +110,19 @@ export class OrderAddressRepositroy implements IOrderAddressRepository {
         );
       }
 
-      return Ok(this.toDomain(row));
+      return this.toDomain(row);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
   }
 
-  private toDomain(oae: OrderAddressEntity): OrderAddress {
-    return OrderAddress.fromPrimitives({ ...oae })
-      .mapErr(
-        (e) =>
-          new CorruptedPersistenceDataError(
-            `Failed to construct order address from OrderAddressEntity.`,
-            e,
-          ),
-      )
-      .unwrap();
+  private toDomain(oae: OrderAddressEntity): DBResult<OrderAddress> {
+    return OrderAddress.fromPrimitives({ ...oae }).mapErr(
+      (e) =>
+        new CorruptedPersistenceDataError(
+          `Failed to construct order address from OrderAddressEntity.`,
+          e,
+        ),
+    );
   }
 }

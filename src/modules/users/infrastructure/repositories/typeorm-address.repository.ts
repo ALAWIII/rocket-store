@@ -21,7 +21,13 @@ export class AddressRepository implements IAddressRepository {
   async findAll(userId: string): Promise<DBResult<Address[]>> {
     try {
       const addresses = await this.addressRepo.findBy({ userId });
-      return Ok(addresses.map((adrs) => this.toDomain(adrs)));
+      const domain: Address[] = [];
+      for (const adrs of addresses) {
+        const result = this.toDomain(adrs);
+        if (result.isErr()) return result;
+        domain.push(result.unwrap());
+      }
+      return Ok(domain);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -36,7 +42,7 @@ export class AddressRepository implements IAddressRepository {
         userId,
         deletedAt: IsNull(),
       });
-      return Ok(result ? Some(this.toDomain(result)) : None);
+      return result ? this.toDomain(result).map((a) => Some(a)) : Ok(None);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -48,7 +54,7 @@ export class AddressRepository implements IAddressRepository {
       const entity = this.addressRepo.create(values);
       const saved = await this.addressRepo.save(entity);
 
-      return Ok(this.toDomain(saved));
+      return this.toDomain(saved);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -78,9 +84,8 @@ export class AddressRepository implements IAddressRepository {
         .returning('*')
         .execute();
 
-      const rows = result.raw as AddressEntity[];
-      const row = rows[0] ?? null;
-      if (!row) {
+      const [address] = result.raw as AddressEntity[];
+      if (!address) {
         return Err(
           new UnknownDatabaseError(
             'Address update succeeded but no row was returned.',
@@ -88,20 +93,18 @@ export class AddressRepository implements IAddressRepository {
         );
       }
 
-      return Ok(this.toDomain(row));
+      return this.toDomain(address);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
   }
-  private toDomain(adrs: AddressEntity): Address {
-    return Address.fromPrimitives({ ...adrs })
-      .mapErr(
-        (e) =>
-          new CorruptedPersistenceDataError(
-            `Failed to construct address from AddressEntity.`,
-            e,
-          ),
-      )
-      .unwrap();
+  private toDomain(adrs: AddressEntity): DBResult<Address> {
+    return Address.fromPrimitives({ ...adrs }).mapErr(
+      (e) =>
+        new CorruptedPersistenceDataError(
+          `Failed to construct address from AddressEntity.`,
+          e,
+        ),
+    );
   }
 }
