@@ -143,7 +143,9 @@ function isVisibilityForEntity<E extends Entity, A extends Action<E>>(
 type CapitalizeWord<T extends string> = Capitalize<T>;
 
 type PermissionKey<E extends Entity> = {
-  [A in Action<E>]: `${CapitalizeWord<E>}${CapitalizeWord<A>}${CapitalizeWord<Visibility<E, A>>}`;
+  [
+    A in Action<E>
+  ]: `${CapitalizeWord<E>}${CapitalizeWord<A>}${CapitalizeWord<Visibility<E, A>>}`;
 }[Action<E>];
 
 type EntityPermissionMap<E extends Entity> = {

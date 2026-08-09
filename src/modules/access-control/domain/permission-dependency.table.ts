@@ -85,6 +85,7 @@ class PermissionDependencyTable {
 const roleTable = new PermissionDependencyTableBuilder()
   .register(AllPermissions.role.RoleAssignLessOrEqual, [
     AllPermissions.role.RoleReadLessOrEqual,
+    AllPermissions.user.UserReadLessOrEqual,
   ])
   .register(AllPermissions.role.RoleCreateLessOrEqual, [
     AllPermissions.role.RoleReadLessOrEqual,
