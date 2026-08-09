@@ -38,40 +38,42 @@ class PermissionDependencyTableBuilder {
 class PermissionDependencyTable {
   constructor(private readonly table: ReadonlyMap<string, PermissionNode>) {}
 
-  getDependenciesTreeFor(
-    perm: Permission,
-    depth = Number.POSITIVE_INFINITY,
+  getDependenciesFor(
+    permission: Permission,
+    maxDepth = Number.POSITIVE_INFINITY,
   ): Permission[] {
     const collected = new Map<string, Permission>();
     const visiting = new Set<string>();
 
-    const visit = (current: Permission, currentDepth: number): void => {
-      if (currentDepth > depth) return;
-
+    const visit = (current: Permission, depth: number): void => {
       const key = current.key();
-      const node = this.table.get(key);
-      if (!node) return;
 
       if (visiting.has(key)) {
         throw new Error(`Circular permission dependency detected at "${key}"`);
       }
 
-      visiting.add(key);
-
-      for (const dep of node.dependencies) {
-        const depKey = dep.key();
-
-        if (!collected.has(depKey)) {
-          collected.set(depKey, dep);
-        }
-
-        visit(dep, currentDepth + 1);
+      if (collected.has(key)) {
+        return;
       }
 
-      visiting.delete(key);
+      visiting.add(key);
+
+      try {
+        if (depth < maxDepth) {
+          const node = this.table.get(key);
+
+          for (const dependency of node?.dependencies ?? []) {
+            visit(dependency, depth + 1);
+          }
+        }
+
+        collected.set(key, current);
+      } finally {
+        visiting.delete(key);
+      }
     };
 
-    visit(perm, 1);
+    visit(permission, 0);
 
     return [...collected.values()];
   }
@@ -99,9 +101,7 @@ const roleTable = new PermissionDependencyTableBuilder()
   .getTable();
 
 const userTable = new PermissionDependencyTableBuilder()
-  .register(AllPermissions.user.UserReadLessOrEqual, [
-    AllPermissions.role.RoleAssignLessOrEqual,
-  ])
+  .register(AllPermissions.user.UserReadLessOrEqual, [])
   .getTable();
 
 export const permissionDepsTable = new PermissionDependencyTableBuilder()
