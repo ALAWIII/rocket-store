@@ -30,12 +30,18 @@ describe('access-control (e2e)', () => {
       expect(response.body).toEqual(SYSTEM_ROLES.map((r) => r.toJSON()));
     });
     it('should return all assignable roles only.', async () => {
-      const role = ADMIN_ROLE.toJSON();
       const response = await adminUser.userAgent
         .get('/api/v1/roles?scope=assignable')
         .expect(200);
       expect(response.body).toEqual(SYSTEM_ROLES.map((r) => r.toJSON()));
     });
+    it('should return all creatable roles only.', async () => {
+      const response = await adminUser.userAgent
+        .get('/api/v1/roles?scope=creatable')
+        .expect(200);
+      expect(response.body).toEqual(SYSTEM_ROLES.map((r) => r.toJSON()));
+    });
+
     it('should return 403 forbidden when an unauthorized user request roles without having roles.read permission.', async () => {
       const userAgent = app.createAgent();
       const customer = await UserAuthFlowBuilder.create({
