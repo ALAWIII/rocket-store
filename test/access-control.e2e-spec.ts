@@ -6,10 +6,7 @@ import {
   UserAuthFlowBuilder,
 } from './helpers/auth-user-flow.builder';
 import { createAuthenticatedTestContext } from './fixtures/create-authenticated-test-context.fixture';
-import {
-  ADMIN_ROLE,
-  SYSTEM_ROLES,
-} from 'src/modules/access-control/application/system-roles/system-roles.definition';
+import { SYSTEM_ROLES } from 'src/modules/access-control/application/system-roles/system-roles.definition';
 import { AllPermissions } from 'src/modules/access-control/domain/permission';
 import { Role } from 'src/modules/access-control/domain/role';
 
@@ -35,11 +32,47 @@ describe('access-control (e2e)', () => {
         .expect(200);
       expect(response.body).toEqual(SYSTEM_ROLES.map((r) => r.toJSON()));
     });
-    it('should return all creatable roles only.', async () => {
-      const response = await adminUser.userAgent
+    it('should return subset of creatable roles for a user who has the manager role.', async () => {
+      const newRole = Role.create({
+        name: 'manager',
+        permissions: [
+          AllPermissions.role.RoleCreateLessOrEqual,
+          AllPermissions.address.AddressReadLessOrEqual,
+          AllPermissions.role.RoleReadLessOrEqual,
+        ],
+        createScope: [
+          AllPermissions.role.RoleReadLessOrEqual,
+          AllPermissions.role.RoleCreateLessOrEqual,
+          AllPermissions.address.AddressReadLessOrEqual,
+        ],
+      })
+        .unwrap()
+        .toJSON();
+      const responseRole = await adminUser.userAgent
+        .post('/api/v1/roles')
+        .send({
+          name: newRole.name,
+          permissions: newRole.permissions,
+          createScope: newRole.createScope,
+        })
+        .expect(201);
+      const newManager = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .random()
+        .asRole('manager')
+        .verified()
+        .signin()
+        .build();
+      const rolesResp = await newManager.userAgent
         .get('/api/v1/roles?scope=creatable')
         .expect(200);
-      expect(response.body).toEqual(SYSTEM_ROLES.map((r) => r.toJSON()));
+      expect(rolesResp.body).toEqual([
+        ...SYSTEM_ROLES.slice(1).map((r) => r.toJSON()),
+        responseRole.body,
+      ]);
     });
 
     it('should return 403 forbidden when an unauthorized user request roles without having roles.read permission.', async () => {
