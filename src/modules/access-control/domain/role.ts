@@ -47,50 +47,79 @@ export class Role {
     );
     if (name.isErr()) return Err(name.error);
 
-    const superPermsMap = new Map(data.permissions.map((p) => [p.key(), p]));
+    const superPermsMap = this.toMap(data.permissions);
+
+    //======================= validate if assign role permission persists and its scope permission list.
+    const assignScopeMap = data.assignScope
+      ? this.toMap(data.assignScope)
+      : undefined;
 
     const assignScope = this.resolveScope(
       superPermsMap,
       AllPermissions.role.RoleAssignLessOrEqual.key(),
-      data.assignScope,
       'assignScope',
+      assignScopeMap,
     );
     if (assignScope.isErr()) return Err(assignScope.error);
+    const resolvedAssign = assignScope.unwrap();
+    const assignResult = resolvedAssign
+      ? this.validateSupersetPerms(
+          superPermsMap,
+          resolvedAssign,
+          'assign scope',
+        )
+      : undefined;
+    if (assignResult?.isErr()) return Err(assignResult.error);
+
+    //======================= validate if create role permission persists and its scope permission list.
+    const createScopeMap = data.createScope
+      ? this.toMap(data.createScope)
+      : undefined;
     const createScope = this.resolveScope(
       superPermsMap,
       AllPermissions.role.RoleCreateLessOrEqual.key(),
-      data.createScope,
       'createScope',
+      createScopeMap,
     );
     if (createScope.isErr()) return Err(createScope.error);
 
-    const result = this.validateSupersetPerms(superPermsMap, {
-      assignScope: assignScope.unwrap(),
-      createScope: createScope.unwrap(),
-    });
-    if (result.isErr()) return Err(result.error);
-
-    const resultUnwrap = result.unwrap();
-
+    const resolvedCreate = createScope.unwrap();
+    const createResult = resolvedCreate
+      ? this.validateSupersetPerms(
+          superPermsMap,
+          resolvedCreate,
+          'create scope',
+        )
+      : undefined;
+    if (createResult?.isErr()) return Err(createResult.error);
+    //=======================
     return Ok(
       new Role({
         id,
         name: name.unwrap(),
         permissions: superPermsMap,
-        assignScope: resultUnwrap.assignScope.unwrapOr(undefined),
-        createScope: resultUnwrap.createScope.unwrapOr(undefined),
+        assignScope: assignScopeMap,
+        createScope: createScopeMap,
       }),
     );
   }
+  /**
+   * checks the presence of special permissions and the presence of thier scope permissions lists.
+   * @param superPermsMap
+   * @param anyPermKey
+   * @param scope
+   * @param scopeName
+   * @returns
+   */
   private static resolveScope(
-    superPermsMap: ReadonlyMap<string, Permission>,
+    superPermsMap: Map<string, Permission>,
     anyPermKey: string,
-    scope: Permission[] | undefined,
     scopeName: 'assignScope' | 'createScope',
-  ): Result<Permission[] | undefined, InvalidRoleValueError> {
+    scope?: Map<string, Permission>,
+  ): Result<Map<string, Permission> | undefined, InvalidRoleValueError> {
     const hasScopePerm = superPermsMap.has(anyPermKey);
 
-    const hasScopeValues = !!scope && scope.length > 0;
+    const hasScopeValues = !!scope && scope.size > 0;
 
     if (hasScopePerm !== hasScopeValues) {
       return Err(
@@ -105,51 +134,17 @@ export class Role {
 
   private static validateSupersetPerms(
     superPermsMap: Map<string, Permission>,
-    permScopes: {
-      assignScope?: Permission[];
-      createScope?: Permission[];
-    },
-  ): Result<
-    {
-      assignScope: Option<Map<string, Permission>>;
-      createScope: Option<Map<string, Permission>>;
-    },
-    InvalidPermissionSupersetError
-  > {
-    const result = {
-      assignScope: None as Option<Map<string, Permission>>,
-      createScope: None as Option<Map<string, Permission>>,
-    };
-
-    if (permScopes.assignScope) {
-      if (!this.isSuperSetOf(superPermsMap, permScopes.assignScope)) {
-        return Err(
-          new InvalidPermissionSupersetError(
-            'Main permissions map is not superset of assign scope permissions.',
-          ),
-        );
-      }
-
-      result.assignScope = Some(
-        new Map(permScopes.assignScope.map((p) => [p.key(), p])),
+    permScopes: Map<string, Permission>,
+    scopeName: 'assign scope' | 'create scope',
+  ): Result<boolean, InvalidPermissionSupersetError> {
+    if (!this.isSuperSetOf(superPermsMap, permScopes)) {
+      return Err(
+        new InvalidPermissionSupersetError(
+          `Main permissions map is not superset of ${scopeName} permissions.`,
+        ),
       );
     }
-
-    if (permScopes.createScope) {
-      if (!this.isSuperSetOf(superPermsMap, permScopes.createScope)) {
-        return Err(
-          new InvalidPermissionSupersetError(
-            'Main permissions map is not superset of create scope permissions.',
-          ),
-        );
-      }
-
-      result.createScope = Some(
-        new Map(permScopes.createScope.map((p) => [p.key(), p])),
-      );
-    }
-
-    return Ok(result);
+    return Ok(true);
   }
 
   get permissionsLength(): number {
@@ -161,39 +156,27 @@ export class Role {
   get createScopePermissionsLength(): number {
     return this.props.createScope?.size ?? 0;
   }
-  private static isSuperSetOf(
+  private static toMap(permissions: Permission[]): Map<string, Permission> {
+    return new Map(permissions.map((p) => [p.key(), p]));
+  }
+  static isSuperSetOf(
     superPermsMap: Map<string, Permission>,
-    subsetPerms: Permission[],
+    subsetPerms: Map<string, Permission>,
   ): boolean {
-    if (superPermsMap.size < subsetPerms.length) return false;
-    return subsetPerms.every((perm) => superPermsMap.has(perm.key()));
-  }
-  isProperSupersetOf(perms: Permission[]): boolean {
-    return this.isSupersetOf(perms) && this.permissionsLength > perms.length;
-  }
-  isSupersetOf(perms: Permission[]): boolean {
-    return Role.isSuperSetOf(this.props.permissions, perms);
-  }
-  isAssignScopeSupersetOf(perms: Permission[]): boolean {
-    const scope = this.props.assignScope;
-    return scope ? Role.isSuperSetOf(scope, perms) : false;
+    if (superPermsMap.size < subsetPerms.size) return false;
+    for (const perm of subsetPerms.values()) {
+      if (!superPermsMap.has(perm.key())) {
+        return false;
+      }
+    }
+    return true;
   }
 
-  isCreateScopeSupersetOf(perms: Permission[]): boolean {
-    const scope = this.props.createScope;
-    return scope ? Role.isSuperSetOf(scope, perms) : false;
-  }
   findPermission(perm: Permission): Option<Permission> {
     const p = this.props.permissions.get(perm.key());
     return p ? Some(p) : None;
   }
 
-  addPermission(perm: Permission) {
-    this.props.permissions.set(perm.key(), perm);
-  }
-  removePermission(perm: Permission) {
-    this.props.permissions.delete(perm.key());
-  }
   setName(name: string) {
     this.props.name = Name.create(name).unwrap();
   }
