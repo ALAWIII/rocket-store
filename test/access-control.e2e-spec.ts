@@ -7,6 +7,8 @@ import {
 } from './helpers/auth-user-flow.builder';
 import { createAuthenticatedTestContext } from './fixtures/create-authenticated-test-context.fixture';
 import { SYSTEM_ROLES } from 'src/modules/access-control/application/system-roles/system-roles.definition';
+import { AllPermissions } from 'src/modules/access-control/domain/permission';
+import { Role } from 'src/modules/access-control/domain/role';
 
 describe('access-control (e2e)', () => {
   let app: TestApp;
@@ -45,6 +47,39 @@ describe('access-control (e2e)', () => {
         .post('/api/v1/roles/policies/reload')
         .expect(200);
       expect(resp.body).toStrictEqual({ attempt: 2 });
+    });
+  });
+  describe('POST /api/v1/roles', () => {
+    it('should successfully create new role.', async () => {
+      const newRole = {
+        name: 'babyadmin',
+        permissions: [
+          AllPermissions.user.UserReadLessOrEqual,
+          AllPermissions.role.RoleReadLessOrEqual,
+          AllPermissions.role.RoleAssignLessOrEqual,
+        ],
+        assignScope: [AllPermissions.user.UserReadLessOrEqual],
+      };
+      const response = await adminUser.userAgent
+        .post('/api/v1/roles')
+        .send(newRole)
+        .expect(201);
+      const userAgent = app.createAgent();
+      const newUser = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent,
+      })
+        .asRole('babyadmin')
+        .random()
+        .verified()
+        .signin()
+        .build();
+      expect(response.body).toEqual(
+        Role.restore({ id: newUser.userDb.roleId!, ...newRole })
+          .unwrap()
+          .toJSON(),
+      );
     });
   });
   afterEach(async () => {
