@@ -33,6 +33,7 @@ export class AppExceptionFilter implements ExceptionFilter {
         name: exception.name,
         message: exception.message,
         stack: exception.stack,
+        cause: exception.cause,
       });
       return;
     }

@@ -6,8 +6,7 @@ import {
 
 type ErrorMapper<E extends Error = Error> = (error: E) => HttpException;
 type ErrorClass<E extends Error = Error> =
-  | (abstract new (...args: any[]) => E)
-  | (new (...args: any[]) => E);
+  (abstract new (...args: any[]) => E) | (new (...args: any[]) => E);
 
 const getCtor = (value: object): ErrorClass<Error> =>
   (value as { constructor: ErrorClass<Error> }).constructor;
