@@ -6,7 +6,10 @@ import {
   UserAuthFlowBuilder,
 } from './helpers/auth-user-flow.builder';
 import { createAuthenticatedTestContext } from './fixtures/create-authenticated-test-context.fixture';
-import { SYSTEM_ROLES } from 'src/modules/access-control/application/system-roles/system-roles.definition';
+import {
+  ADMIN_ROLE,
+  SYSTEM_ROLES,
+} from 'src/modules/access-control/application/system-roles/system-roles.definition';
 import { AllPermissions } from 'src/modules/access-control/domain/permission';
 import { Role } from 'src/modules/access-control/domain/role';
 
@@ -23,6 +26,13 @@ describe('access-control (e2e)', () => {
     it('should return all roles for admin user.', async () => {
       const response = await adminUser.userAgent
         .get('/api/v1/roles')
+        .expect(200);
+      expect(response.body).toEqual(SYSTEM_ROLES.map((r) => r.toJSON()));
+    });
+    it('should return all assignable roles only.', async () => {
+      const role = ADMIN_ROLE.toJSON();
+      const response = await adminUser.userAgent
+        .get('/api/v1/roles?scope=assignable')
         .expect(200);
       expect(response.body).toEqual(SYSTEM_ROLES.map((r) => r.toJSON()));
     });

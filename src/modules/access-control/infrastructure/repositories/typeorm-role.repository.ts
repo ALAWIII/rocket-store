@@ -120,9 +120,8 @@ export class RoleRepository implements IRoleRepository {
       const loadRoles = await this.roleRepo
         .createQueryBuilder('role')
         .addCommonTableExpression(loadPerms, 'role_perms')
-        .where(
-          `COALESCE((SELECT assignScope FROM role_perms), '[]'::jsonb) @> role.permissions`,
-        )
+        .where('(SELECT "assignScope" FROM role_perms) IS NOT NULL')
+        .andWhere(`(SELECT "assignScope" FROM role_perms) @> role.permissions`)
         .getMany();
 
       return this.mapRolesToDomain(loadRoles);
@@ -140,9 +139,8 @@ export class RoleRepository implements IRoleRepository {
       const loadRoles = await this.roleRepo
         .createQueryBuilder('role')
         .addCommonTableExpression(loadPerms, 'role_perms')
-        .where(
-          `COALESCE((SELECT createScope FROM role_perms), '[]'::jsonb) @> role.permissions`,
-        )
+        .where('(SELECT "createScope" FROM role_perms) IS NOT NULL')
+        .andWhere(`(SELECT "createScope" FROM role_perms) @> role.permissions`)
         .getMany();
       return this.mapRolesToDomain(loadRoles);
     } catch (e) {
