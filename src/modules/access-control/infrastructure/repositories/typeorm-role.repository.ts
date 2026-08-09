@@ -25,40 +25,49 @@ export class RoleRepository implements IRoleRepository {
   async create(role: Role, creatorRoleId: string): Promise<DBResult<Role>> {
     try {
       const newRole = role.toJSON();
+      const creatorRoleCte = this.roleRepo
+        .createQueryBuilder('creator_role')
+        .select('1', 'allowed')
+        .where('creator_role.id = :creatorRoleId')
+        .andWhere('creator_role.createScope @> :permissions::jsonb');
 
       const result = await this.roleRepo
         .createQueryBuilder()
+        .addCommonTableExpression(creatorRoleCte, 'authorized_creator')
         .insert()
         .into(RoleEntity, [
           'id',
           'name',
           'permissions',
-          'assignScope',
           'createScope',
+          'assignScope',
         ])
         .valuesFromSelect((qb) =>
           qb
             .select([
               ':id',
               ':name',
-              ':permissions',
-              ':assignScope',
-              ':createScope',
+              ':permissions::jsonb',
+              ':createScope::jsonb',
+              ':assignScope::jsonb',
             ])
-            .from(RoleEntity, 'creator')
-            .where('creator.id = :creatorRoleId')
-            .andWhere('creator.createScope @> :permissions'),
+            .from('authorized_creator', 'creator'),
         )
         .setParameters({
           id: newRole.id,
           name: newRole.name,
-          permissions: newRole.permissions,
-          assignScope: newRole.assignScope,
-          createScope: newRole.createScope,
+          permissions: JSON.stringify(newRole.permissions),
+          assignScope: newRole.assignScope
+            ? JSON.stringify(newRole.assignScope)
+            : null,
+          createScope: newRole.createScope
+            ? JSON.stringify(newRole.createScope)
+            : null,
           creatorRoleId,
         })
         .returning('*')
         .execute();
+
       const [row] = result.raw as RoleEntity[];
       if (!row) {
         return Err(
@@ -67,8 +76,7 @@ export class RoleRepository implements IRoleRepository {
           ),
         );
       }
-
-      return Ok(this.toDomain(row));
+      return this.toDomain(row);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -97,7 +105,7 @@ export class RoleRepository implements IRoleRepository {
         )
         .getMany();
 
-      return Ok(loadRoles.map((r) => this.toDomain(r)));
+      return this.mapRolesToDomain(loadRoles);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -117,7 +125,7 @@ export class RoleRepository implements IRoleRepository {
         )
         .getMany();
 
-      return Ok(loadRoles.map((r) => this.toDomain(r)));
+      return this.mapRolesToDomain(loadRoles);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -136,8 +144,7 @@ export class RoleRepository implements IRoleRepository {
           `COALESCE((SELECT createScope FROM role_perms), '[]'::jsonb) @> role.permissions`,
         )
         .getMany();
-
-      return Ok(loadRoles.map((r) => this.toDomain(r)));
+      return this.mapRolesToDomain(loadRoles);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -148,33 +155,34 @@ export class RoleRepository implements IRoleRepository {
       const roles = await this.roleRepo.findBy({
         name: In(names),
       });
-      return Ok(roles.map((r) => this.toDomain(r)));
+
+      return this.mapRolesToDomain(roles);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
   }
   async findById(id: string): Promise<DBResult<Option<Role>>> {
     try {
-      const r = await this.roleRepo.findOneBy({ id });
-      if (r === null) return Ok(None);
-      return Ok(Some(this.toDomain(r)));
+      const dbRole = await this.roleRepo.findOneBy({ id });
+      if (dbRole === null) return Ok(None);
+      return this.toDomain(dbRole).map((role) => Some(role));
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
   }
   async findByName(name: string): Promise<DBResult<Option<Role>>> {
     try {
-      const r = await this.roleRepo.findOneBy({ name });
-      if (r === null) return Ok(None);
-      return Ok(Some(this.toDomain(r)));
+      const dbRole = await this.roleRepo.findOneBy({ name });
+      if (dbRole === null) return Ok(None);
+      return this.toDomain(dbRole).map((role) => Some(role));
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
   }
   async loadAll(): Promise<DBResult<Role[]>> {
     try {
-      const rs = await this.roleRepo.find();
-      return Ok(rs.map((r) => this.toDomain(r)));
+      const roles = await this.roleRepo.find();
+      return this.mapRolesToDomain(roles);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -205,12 +213,14 @@ export class RoleRepository implements IRoleRepository {
 
       const [row] = result.raw as RoleEntity[];
       if (result.affected === 0 || !row) {
-        throw new RecordNotFoundError(
-          `role to be updated was not found: ${data.role.id}`,
+        return Err(
+          new RecordNotFoundError(
+            `role to be updated was not found: ${data.role.id}`,
+          ),
         );
       }
 
-      return Ok(this.toDomain(row));
+      return this.toDomain(row);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -232,7 +242,7 @@ export class RoleRepository implements IRoleRepository {
         return Err(new UnknownDatabaseError('Upsert did not return a row'));
       }
 
-      return Ok(this.toDomain(row));
+      return this.toDomain(row);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -281,39 +291,55 @@ export class RoleRepository implements IRoleRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  private toDomain(r: RoleEntity): Role {
+  private toDomain(r: RoleEntity): DBResult<Role> {
     const permError = (e: PermissionError) =>
       new CorruptedPersistenceDataError(
         'Failed to construct Permission at the database level',
         e,
       );
     const permissions = r.permissions.map((p) =>
-      Permission.fromPrimitives(p).mapErr(permError).unwrap(),
+      Permission.fromPrimitives(p).mapErr(permError),
     );
-    const assignScope = r.assignScope
-      ? r.assignScope.map((p) =>
-          Permission.fromPrimitives(p).mapErr(permError).unwrap(),
-        )
-      : undefined;
-    const createScope = r.createScope
-      ? r.createScope.map((p) =>
-          Permission.fromPrimitives(p).mapErr(permError).unwrap(),
-        )
-      : undefined;
+    const assignScope = r.assignScope?.map((p) =>
+      Permission.fromPrimitives(p).mapErr(permError),
+    );
+
+    const createScope = r.createScope?.map((p) =>
+      Permission.fromPrimitives(p).mapErr(permError),
+    );
+    for (const permList of [permissions, assignScope, createScope]) {
+      const p = permList?.find((p) => p.isErr());
+      if (p?.isErr()) {
+        return p;
+      }
+    }
     return Role.restore({
       id: r.id,
       name: r.name,
-      permissions,
-      assignScope,
-      createScope,
-    })
-      .mapErr(
-        (e) =>
-          new CorruptedPersistenceDataError(
-            `Failed to construct Role from RoleEntity.`,
-            e,
-          ),
-      )
-      .unwrap();
+      permissions: permissions.map((p) => p.unwrap()),
+      assignScope: assignScope?.map((p) => p.unwrap()),
+      createScope: createScope?.map((p) => p.unwrap()),
+    }).mapErr(
+      (e) =>
+        new CorruptedPersistenceDataError(
+          `Failed to construct Role from RoleEntity.`,
+          e,
+        ),
+    );
+  }
+  private mapRolesToDomain(roles: RoleEntity[]): DBResult<Role[]> {
+    const domainRoles: Role[] = [];
+
+    for (const role of roles) {
+      const result = this.toDomain(role);
+
+      if (result.isErr()) {
+        return result;
+      }
+
+      domainRoles.push(result.unwrap());
+    }
+
+    return Ok(domainRoles);
   }
 }
