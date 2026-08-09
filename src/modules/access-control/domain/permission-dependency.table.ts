@@ -38,7 +38,7 @@ class PermissionDependencyTableBuilder {
 class PermissionDependencyTable {
   constructor(private readonly table: ReadonlyMap<string, PermissionNode>) {}
 
-  getDependenciesFor(
+  getDependenciesTreeFor(
     permission: Permission,
     maxDepth = Number.POSITIVE_INFINITY,
   ): Permission[] {
