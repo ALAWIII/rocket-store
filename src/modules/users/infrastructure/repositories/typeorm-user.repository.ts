@@ -46,9 +46,9 @@ export class UserRepository implements IUserRepository {
     try {
       const result = await this.userRepo.findOneBy({ id });
       if (!result) {
-        throw new RecordNotFoundError(`user was not found: ${id}`);
+        return Err(new RecordNotFoundError(`user was not found: ${id}`));
       }
-      return Ok(this.toDomain(result));
+      return this.toDomain(result);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -62,13 +62,15 @@ export class UserRepository implements IUserRepository {
 
       qb.andWhere('user.id = :userId', { userId: data.userId });
 
-      const row = await qb.getOne();
+      const user = await qb.getOne();
 
-      if (!row) {
-        throw new RecordNotFoundError(`user was not found: ${data.userId}`);
+      if (!user) {
+        return Err(
+          new RecordNotFoundError(`user was not found: ${data.userId}`),
+        );
       }
 
-      return Ok(this.toDomain(row));
+      return this.toDomain(user);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -89,11 +91,11 @@ export class UserRepository implements IUserRepository {
 
       const [row] = result.raw as UserEntity[];
       if (!row) {
-        throw new UnknownDatabaseError(
-          'Failed to return the newly inserted user.',
+        return Err(
+          new UnknownDatabaseError('Failed to return the newly inserted user.'),
         );
       }
-      return Ok(this.toDomain(row));
+      return this.toDomain(row);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -110,9 +112,9 @@ export class UserRepository implements IUserRepository {
         .where('id= :id', { id })
         .returning('*')
         .execute();
-      const [row] = result.raw as UserEntity[];
+      const [user] = result.raw as UserEntity[];
 
-      return Ok(row ? Some(this.toDomain(row)) : None);
+      return user ? this.toDomain(user).map((r) => Some(r)) : Ok(None);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -185,15 +187,17 @@ export class UserRepository implements IUserRepository {
         .returning('*')
         .execute();
 
-      const [row] = result.raw as UserEntity[];
+      const [user] = result.raw as UserEntity[];
 
-      if (result.affected === 0 || !row) {
-        throw new RecordNotFoundError(
-          `user role could not be assigned: ${d.targetUserId}`,
+      if (result.affected === 0 || !user) {
+        return Err(
+          new RecordNotFoundError(
+            `user role could not be assigned: ${d.targetUserId}`,
+          ),
         );
       }
 
-      return Ok(this.toDomain(row));
+      return this.toDomain(user);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -266,9 +270,13 @@ export class UserRepository implements IUserRepository {
       this.applyPagination(qb, pagination);
 
       const [rows, total] = await qb.getManyAndCount();
-
+      const users = rows.map((row) => this.toDomain(row));
+      const findParseError = users.find((u) => u.isErr());
+      if (findParseError?.isErr()) {
+        return findParseError;
+      }
       return Ok({
-        users: rows.map((row) => this.toDomain(row)),
+        users: users.map((u) => u.unwrap()),
         total,
       });
     } catch (e) {
@@ -414,7 +422,7 @@ export class UserRepository implements IUserRepository {
   private escapeLikePattern(value: string): string {
     return value.replace(/[\\%_]/g, '\\$&');
   }
-  private toDomain(userEntity: UserEntity): User {
+  private toDomain(userEntity: UserEntity): DBResult<User> {
     const mappedUser = User.fromPrimitives({
       id: userEntity.id,
       email: userEntity.email,
@@ -434,6 +442,6 @@ export class UserRepository implements IUserRepository {
         ),
     );
 
-    return mappedUser.unwrap();
+    return mappedUser;
   }
 }
