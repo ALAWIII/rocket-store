@@ -117,6 +117,7 @@ export class UserAuthFlowBuilder {
         signup.body.user.email,
       );
       await this.verifySignup(verificationUrl);
+      await this.cleanInboxMail(signup.body.user.email);
     }
 
     if (this.roleName) {
@@ -176,7 +177,12 @@ export class UserAuthFlowBuilder {
       password: value,
     };
   }
-
+  private async cleanInboxMail(userMail: string) {
+    return await this.props.mailhogClient.deleteEmails({
+      to: userMail,
+      subject: 'Verify your email',
+    });
+  }
   private async sendSignupRequest(
     payload: UserPayload,
   ): Promise<SignupResponse> {

@@ -36,6 +36,5 @@ describe('AppController (e2e)', () => {
   afterEach(async () => {
     await db.cleanup();
     await app.cleanup();
-    await mailClient.deleteEmails({ to: adminUser.userDb.email });
   });
 });
