@@ -260,11 +260,11 @@ describe('access-control (e2e)', () => {
       const newRole = {
         name: 'manager',
         permissions: [
-          AllPermissions.role.RoleReadLessOrEqual.toJSON(),
+          AllPermissions.role.RoleReadLessOrEqual,
           AllPermissions.role.RoleCreateLessOrEqual,
           AllPermissions.role.RoleDeleteLess,
-        ],
-        createScope: [AllPermissions.role.RoleReadLessOrEqual],
+        ].map((p) => p.toJSON()),
+        createScope: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
       };
       const responseRole = (
         await adminUser.userAgent
@@ -295,7 +295,6 @@ describe('access-control (e2e)', () => {
       const dResponse = await manager.userAgent
         .delete(`/api/v1/roles/${responseDRole.id}`)
         .expect(200);
-      console.log(dResponse.statusCode);
       const roles = (await adminUser.userAgent.get('/api/v1/roles'))
         .body as RoleDto[];
       expect(roles.some((r) => r.id === responseDRole.id)).toBe(true);
@@ -303,12 +302,12 @@ describe('access-control (e2e)', () => {
     it('should fail to delete user requester role.', async () => {
       const newRole = {
         name: 'manager',
-        permission: [
+        permissions: [
+          AllPermissions.role.RoleReadLessOrEqual,
           AllPermissions.role.RoleCreateLessOrEqual,
           AllPermissions.role.RoleDeleteLess,
-          AllPermissions.user.UserReadLessOrEqual,
-        ],
-        createScope: [AllPermissions.user.UserReadLessOrEqual],
+        ].map((p) => p.toJSON()),
+        createScope: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
       };
       const role = (
         await adminUser.userAgent
@@ -326,7 +325,7 @@ describe('access-control (e2e)', () => {
         .verified()
         .signin()
         .build();
-      await manager.userAgent.delete(`/api/v1/roles/${role.id}`).expect(400);
+      await manager.userAgent.delete(`/api/v1/roles/${role.id}`).expect(403);
     });
   });
   afterEach(async () => {
