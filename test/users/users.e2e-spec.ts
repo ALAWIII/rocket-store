@@ -78,6 +78,19 @@ describe('users (e2e)', () => {
       expect(managerRequestUsersList.total).toStrictEqual(3);
       expect(returndUserIds).not.toContain(adminUser.userDb.id);
     });
+    it('should fail when unauthorized user attempts to fetch list of users.', async () => {
+      const customer = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('customer')
+        .random()
+        .verified()
+        .signin()
+        .build();
+      await customer.userAgent.get('/api/v1/users').expect(403);
+    });
   });
 
   afterEach(async () => {
