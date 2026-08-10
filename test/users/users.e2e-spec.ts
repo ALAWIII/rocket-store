@@ -91,6 +91,57 @@ describe('users (e2e)', () => {
         .build();
       await customer.userAgent.get('/api/v1/users').expect(403);
     });
+    it('should return number of users equal to page and limit', async () => {
+      const allUsers: AuthUserResult[] = [adminUser];
+      for (let i = 1; i <= 20; i++) {
+        allUsers.push(
+          await UserAuthFlowBuilder.create({
+            dbDataSource: db.dataSource,
+            mailhogClient: mailClient,
+            userAgent: app.createAgent(),
+          })
+            .asRole('customer')
+            .random()
+            .verified()
+            .signin()
+            .build(),
+        );
+      }
+      const first10Users = (
+        await adminUser.userAgent
+          .get('/api/v1/users')
+          .query({ page: 1, limit: 10 })
+          .expect(200)
+      ).body as FindUsersResponseDto;
+      const second10Users = (
+        await adminUser.userAgent
+          .get('/api/v1/users')
+          .query({ page: 2, limit: 10 })
+          .expect(200)
+      ).body as FindUsersResponseDto;
+      const lastUser = (
+        await adminUser.userAgent
+          .get('/api/v1/users')
+          .query({ page: 3, limit: 10 })
+          .expect(200)
+      ).body as FindUsersResponseDto;
+      const allReturnedUsersIds = [
+        ...first10Users.users,
+        ...second10Users.users,
+        ...lastUser.users,
+      ]
+        .map((us) => us.id)
+        .sort();
+      const usersIdsSet = new Set(allReturnedUsersIds);
+      expect(allUsers.every((u) => usersIdsSet.has(u.userDb.id))).toBe(true);
+      expect(usersIdsSet.size).toBe(21);
+      expect(first10Users.users).toHaveLength(10);
+      expect(second10Users.users).toHaveLength(10);
+      expect(lastUser.users).toHaveLength(1);
+      expect(first10Users.total).toBe(21);
+      expect(second10Users.total).toBe(21);
+      expect(lastUser.total).toBe(21);
+    });
   });
 
   afterEach(async () => {
