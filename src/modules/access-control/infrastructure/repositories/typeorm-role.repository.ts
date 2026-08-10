@@ -270,7 +270,7 @@ export class RoleRepository implements IRoleRepository {
         .createQueryBuilder()
         .update(UserEntity)
         .set({ roleId: ids.defaultRoleId })
-        .where('role_id IN (SELECT id FROM deletable_target)')
+        .where('"roleId" IN (SELECT id FROM deletable_target)')
         .returning('id');
 
       const result = await this.roleRepo
