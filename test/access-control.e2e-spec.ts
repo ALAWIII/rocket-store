@@ -226,6 +226,11 @@ describe('access-control (e2e)', () => {
         .expect(200);
       expect(deleted.body).toStrictEqual({ affected: 1 });
     });
+    it('should fail when delete system role.', async () => {
+      const deleted = await adminUser.userAgent
+        .delete(`/api/v1/roles/${adminUser.userDb.roleId}`)
+        .expect(403);
+    });
   });
   afterEach(async () => {
     await db.cleanup();
