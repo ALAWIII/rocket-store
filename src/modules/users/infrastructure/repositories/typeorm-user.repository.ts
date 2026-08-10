@@ -35,6 +35,9 @@ type Pagination = {
   limit: number;
   skip: number;
 };
+//============= aliases
+const usr = 'usr';
+//==================
 @Injectable()
 export class UserRepository implements IUserRepository {
   constructor(
@@ -285,7 +288,7 @@ export class UserRepository implements IUserRepository {
   private createFindUsersQuery(
     requesterRoleId: string,
   ): SelectQueryBuilder<UserEntity> {
-    const qb = this.userRepo.createQueryBuilder('user');
+    const qb = this.userRepo.createQueryBuilder(usr);
 
     this.applyAllowedRolesScope(qb, requesterRoleId);
 
@@ -314,7 +317,7 @@ export class UserRepository implements IUserRepository {
         )
         .getQuery();
       // here return a query for fetching all users that their roles fall in this list of role Id's
-      return `user."roleId" IN ${allowedRolesSubQuery}`;
+      return `${usr}."roleId" IN ${allowedRolesSubQuery}`;
     });
   }
 
@@ -335,7 +338,7 @@ export class UserRepository implements IUserRepository {
   ): void {
     if (!filters.email) return;
 
-    qb.andWhere(`user.email ILIKE :email ESCAPE '\\'`, {
+    qb.andWhere(`${usr}.email ILIKE :email ESCAPE '\\'`, {
       email: this.toContainsPattern(filters.email),
     });
   }
@@ -346,7 +349,7 @@ export class UserRepository implements IUserRepository {
   ): void {
     if (!filters.phone) return;
 
-    qb.andWhere(`user.phone ILIKE :phone ESCAPE '\\'`, {
+    qb.andWhere(`${usr}.phone ILIKE :phone ESCAPE '\\'`, {
       phone: this.toContainsPattern(filters.phone),
     });
   }
@@ -362,11 +365,11 @@ export class UserRepository implements IUserRepository {
     qb.andWhere(
       new Brackets((nameQb) => {
         nameQb
-          .where(`user.name ILIKE :name ESCAPE '\\'`, { name: namePattern })
-          .orWhere(`user."givenName" ILIKE :name ESCAPE '\\'`, {
+          .where(`${usr}.name ILIKE :name ESCAPE '\\'`, { name: namePattern })
+          .orWhere(`${usr}."givenName" ILIKE :name ESCAPE '\\'`, {
             name: namePattern,
           })
-          .orWhere(`user."familyName" ILIKE :name ESCAPE '\\'`, {
+          .orWhere(`${usr}."familyName" ILIKE :name ESCAPE '\\'`, {
             name: namePattern,
           });
       }),
@@ -374,7 +377,7 @@ export class UserRepository implements IUserRepository {
   }
 
   private applySorting(qb: SelectQueryBuilder<UserEntity>): void {
-    qb.orderBy('user."createdAt"', 'DESC');
+    qb.orderBy(`${usr}."createdAt"`, 'DESC');
   }
 
   private applyPagination(
