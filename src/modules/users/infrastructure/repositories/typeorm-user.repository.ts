@@ -299,26 +299,22 @@ export class UserRepository implements IUserRepository {
     // bring assignScope of user requester.
     const requesterScopeCte = this.userRepo.manager
       .createQueryBuilder(RoleEntity, 'requester_role')
-      .select('requester_role.assignScope', 'assignScope')
+      .select('requester_role.permissions', 'permissions')
       .where('requester_role.id = :requesterRoleId', { requesterRoleId });
     // register userRequester.role.assignScope as CTE
     qb.addCommonTableExpression(requesterScopeCte, 'requester_scope');
-    // fire a sub-query to find all roles that are subset or equal to userRequester.role.assignScope.
+    // fire a sub-query to find all roles that are subset or equal to userRequester.role.permissions.
     qb.andWhere((subQb) => {
       const allowedRolesSubQuery = subQb
         .subQuery()
         .select('candidate_role.id')
         .from(RoleEntity, 'candidate_role')
         .where(
-          `
-            candidate_role.permissions <@ COALESCE(
-              (SELECT "assignScope" FROM requester_scope),
-              '[]'::jsonb
-            )`,
+          `(SELECT permissions FROM requester_scope) @> candidate_role.permissions`,
         )
         .getQuery();
       // here return a query for fetching all users that their roles fall in this list of role Id's
-      return `user.roleId IN ${allowedRolesSubQuery}`;
+      return `user."roleId" IN ${allowedRolesSubQuery}`;
     });
   }
 
@@ -367,10 +363,10 @@ export class UserRepository implements IUserRepository {
       new Brackets((nameQb) => {
         nameQb
           .where(`user.name ILIKE :name ESCAPE '\\'`, { name: namePattern })
-          .orWhere(`user.givenName ILIKE :name ESCAPE '\\'`, {
+          .orWhere(`user."givenName" ILIKE :name ESCAPE '\\'`, {
             name: namePattern,
           })
-          .orWhere(`user.familyName ILIKE :name ESCAPE '\\'`, {
+          .orWhere(`user."familyName" ILIKE :name ESCAPE '\\'`, {
             name: namePattern,
           });
       }),
@@ -378,7 +374,7 @@ export class UserRepository implements IUserRepository {
   }
 
   private applySorting(qb: SelectQueryBuilder<UserEntity>): void {
-    qb.orderBy('user.createdAt', 'DESC');
+    qb.orderBy('user."createdAt"', 'DESC');
   }
 
   private applyPagination(
