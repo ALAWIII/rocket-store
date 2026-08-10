@@ -21,18 +21,24 @@ export class RoleService {
     private readonly acsyncService: AccessControlSyncService,
   ) {}
   async findAll(roleId: string): Promise<RoleResponseDto[]> {
-    const roles = (await this.roleRepo.loadManageableRoles(roleId)).unwrap();
+    const roles = (
+      await this.roleRepo.loadManageableRoles(roleId)
+    ).unwrapOrThrow();
     this.logger.log(`Loaded ${roles.length} roles.`);
     return roles.map((r) => r.toJSON());
   }
   async findCreatedRoles(roleId: string): Promise<RoleResponseDto[]> {
-    const roles = (await this.roleRepo.loadCreatableRoles(roleId)).unwrap();
+    const roles = (
+      await this.roleRepo.loadCreatableRoles(roleId)
+    ).unwrapOrThrow();
     this.logger.log(`Loaded ${roles.length} creatable roles.`);
     return roles.map((r) => r.toJSON());
   }
 
   async findAssignableRoles(roleId: string): Promise<RoleResponseDto[]> {
-    const roles = (await this.roleRepo.loadAssignableRoles(roleId)).unwrap();
+    const roles = (
+      await this.roleRepo.loadAssignableRoles(roleId)
+    ).unwrapOrThrow();
     this.logger.log(`Loaded ${roles.length} assignable roles.`);
     return roles.map((r) => r.toJSON());
   }
@@ -46,13 +52,13 @@ export class RoleService {
     if (this.systemRole.isSystemRoleName(roleData.name))
       throw new SystemRoleError('Try to create an existing system role.');
     const permissions = roleData.permissions
-      .map((p) => Permission.fromPrimitives(p).unwrap())
+      .map((p) => Permission.fromPrimitives(p).unwrapOrThrow())
       .flatMap((p) => permissionDepsTable.getDependenciesTreeFor(p));
     const assignScope = roleData.assignScope
-      ?.map((p) => Permission.fromPrimitives(p).unwrap())
+      ?.map((p) => Permission.fromPrimitives(p).unwrapOrThrow())
       .flatMap((p) => permissionDepsTable.getDependenciesTreeFor(p));
     const createScope = roleData.createScope
-      ?.map((p) => Permission.fromPrimitives(p).unwrap())
+      ?.map((p) => Permission.fromPrimitives(p).unwrapOrThrow())
       .flatMap((p) => permissionDepsTable.getDependenciesTreeFor(p));
     // deduplication, normalization and subset validations are holded internally by .create() method call.
     const newRole = Role.create({
@@ -60,12 +66,15 @@ export class RoleService {
       permissions,
       assignScope,
       createScope,
-    }).unwrap();
+    }).unwrapOrThrow();
+
     this.logger.log(`New role instantiated.`, {
       roleId: newRole.id,
     });
 
-    const role = (await this.roleRepo.create(newRole, userRoleId)).unwrap();
+    const role = (
+      await this.roleRepo.create(newRole, userRoleId)
+    ).unwrapOrThrow();
     await this.acsyncService.upsertRole(role);
 
     return role.toJSON();
@@ -82,10 +91,10 @@ export class RoleService {
       id: roleId,
       name: updateData.name,
       permissions: [],
-    }).unwrap();
+    }).unwrapOrThrow();
 
     return (await this.roleRepo.rename({ role: targetRole, userRoleId }))
-      .unwrap()
+      .unwrapOrThrow()
       .toJSON();
   }
   async removeRole(userRoleId: string, roleId: string): Promise<number> {
@@ -104,7 +113,7 @@ export class RoleService {
         targetRoleId: roleId,
         defaultRoleId: this.systemRole.getCustomerRoleId(),
       })
-    ).unwrap();
+    ).unwrapOrThrow();
     const isRemoved = await this.acsyncService.removeRole(roleId);
     if (!isRemoved)
       throw new Error(

@@ -23,7 +23,7 @@ export class AccessControlSyncService {
       throw roles.error;
     }
 
-    const allRoles = roles.unwrap();
+    const allRoles = roles.unwrapOrThrow();
     const policies = this.toPolicies(allRoles);
     const newEnforcer = await createCasbinEnforcer();
 
@@ -44,7 +44,7 @@ export class AccessControlSyncService {
         entity: p[1],
         action: p[2],
         visibility: p[3],
-      }).unwrap(),
+      }).unwrapOrThrow(),
     );
     return policies;
   }

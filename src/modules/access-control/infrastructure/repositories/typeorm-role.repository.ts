@@ -314,9 +314,9 @@ export class RoleRepository implements IRoleRepository {
     return Role.restore({
       id: r.id,
       name: r.name,
-      permissions: permissions.map((p) => p.unwrap()),
-      assignScope: assignScope?.map((p) => p.unwrap()),
-      createScope: createScope?.map((p) => p.unwrap()),
+      permissions: permissions.map((p) => p.unwrapOrThrow()),
+      assignScope: assignScope?.map((p) => p.unwrapOrThrow()),
+      createScope: createScope?.map((p) => p.unwrapOrThrow()),
     }).mapErr(
       (e) =>
         new CorruptedPersistenceDataError(
@@ -335,7 +335,7 @@ export class RoleRepository implements IRoleRepository {
         return result;
       }
 
-      domainRoles.push(result.unwrap());
+      domainRoles.push(result.unwrapOrThrow());
     }
 
     return Ok(domainRoles);
