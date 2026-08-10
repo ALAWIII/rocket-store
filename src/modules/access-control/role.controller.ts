@@ -67,7 +67,7 @@ export class RolesController {
   async remove(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Session() session: AppSession,
-  ) {
-    return await this.service.removeRole(session.user.roleId, id);
+  ): Promise<{ affected: number }> {
+    return { affected: await this.service.removeRole(session.user.roleId, id) };
   }
 }

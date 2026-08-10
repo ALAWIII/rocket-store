@@ -71,7 +71,7 @@ describe('RolesController', () => {
         'user',
         expectedRole.id,
       );
-      expect(removeResult).toBe(1);
+      expect(removeResult.affected).toBe(1);
     });
   });
 });
