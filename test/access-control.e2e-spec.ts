@@ -202,6 +202,12 @@ describe('access-control (e2e)', () => {
         .send({ name: 'shawarma' })
         .expect(403);
     });
+    it('should fail to rename admin system role.', async () => {
+      const renamedRole = await adminUser.userAgent
+        .put(`/api/v1/roles/${adminUser.userDb.roleId}`)
+        .send({ name: 'shawarma' })
+        .expect(400);
+    });
   });
   afterEach(async () => {
     await db.cleanup();
