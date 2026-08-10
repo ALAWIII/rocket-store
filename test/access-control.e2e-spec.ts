@@ -231,6 +231,31 @@ describe('access-control (e2e)', () => {
         .delete(`/api/v1/roles/${adminUser.userDb.roleId}`)
         .expect(403);
     });
+    it('should fail when delete role by unauthorized user.', async () => {
+      const newRole = {
+        name: 'manager',
+        permissions: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
+      };
+      const responseRole = (
+        await adminUser.userAgent
+          .post('/api/v1/roles')
+          .send(newRole)
+          .expect(201)
+      ).body as RoleDto;
+      const customer = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('customer')
+        .random()
+        .verified()
+        .signin()
+        .build();
+      const deleted = await customer.userAgent
+        .delete(`/api/v1/roles/${responseRole.id}`)
+        .expect(403);
+    });
   });
   afterEach(async () => {
     await db.cleanup();
