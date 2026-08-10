@@ -256,6 +256,50 @@ describe('access-control (e2e)', () => {
         .delete(`/api/v1/roles/${responseRole.id}`)
         .expect(403);
     });
+    it('should fail to delete a role its permissions list not subset of the authorized user createScope permission list.', async () => {
+      const newRole = {
+        name: 'manager',
+        permissions: [
+          AllPermissions.role.RoleReadLessOrEqual.toJSON(),
+          AllPermissions.role.RoleCreateLessOrEqual,
+          AllPermissions.role.RoleDeleteLess,
+        ],
+        createScope: [AllPermissions.role.RoleReadLessOrEqual],
+      };
+      const responseRole = (
+        await adminUser.userAgent
+          .post('/api/v1/roles')
+          .send(newRole)
+          .expect(201)
+      ).body as RoleDto;
+      const deleteableRole = {
+        name: 'delete',
+        permissions: [AllPermissions.user.UserReadLessOrEqual.toJSON()],
+      };
+      const responseDRole = (
+        await adminUser.userAgent
+          .post('/api/v1/roles')
+          .send(deleteableRole)
+          .expect(201)
+      ).body as RoleDto;
+      const manager = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole(newRole.name)
+        .random()
+        .verified()
+        .signin()
+        .build();
+      const dResponse = await manager.userAgent
+        .delete(`/api/v1/roles/${responseDRole.id}`)
+        .expect(200);
+      console.log(dResponse.statusCode);
+      const roles = (await adminUser.userAgent.get('/api/v1/roles'))
+        .body as RoleDto[];
+      expect(roles.some((r) => r.id === responseDRole.id)).toBe(true);
+    });
   });
   afterEach(async () => {
     await db.cleanup();
