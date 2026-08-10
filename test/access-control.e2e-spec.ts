@@ -300,6 +300,34 @@ describe('access-control (e2e)', () => {
         .body as RoleDto[];
       expect(roles.some((r) => r.id === responseDRole.id)).toBe(true);
     });
+    it('should fail to delete user requester role.', async () => {
+      const newRole = {
+        name: 'manager',
+        permission: [
+          AllPermissions.role.RoleCreateLessOrEqual,
+          AllPermissions.role.RoleDeleteLess,
+          AllPermissions.user.UserReadLessOrEqual,
+        ],
+        createScope: [AllPermissions.user.UserReadLessOrEqual],
+      };
+      const role = (
+        await adminUser.userAgent
+          .post('/api/v1/roles')
+          .send(newRole)
+          .expect(201)
+      ).body as RoleDto;
+      const manager = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole(newRole.name)
+        .random()
+        .verified()
+        .signin()
+        .build();
+      await manager.userAgent.delete(`/api/v1/roles/${role.id}`).expect(400);
+    });
   });
   afterEach(async () => {
     await db.cleanup();
