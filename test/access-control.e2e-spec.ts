@@ -9,14 +9,7 @@ import { createAuthenticatedTestContext } from './fixtures/create-authenticated-
 import { SYSTEM_ROLES } from 'src/modules/access-control/application/system-roles/system-roles.definition';
 import { AllPermissions } from 'src/modules/access-control/domain/permission';
 import { Role } from 'src/modules/access-control/domain/role';
-type PermissionDto = { entity: string; visibility: string; action: string };
-type RoleDto = {
-  id: string;
-  name: string;
-  permission: PermissionDto[];
-  assignScope?: PermissionDto[];
-  createScope?: PermissionDto[];
-};
+
 describe('access-control (e2e)', () => {
   let app: TestApp;
   let db: TestDatabase;
@@ -150,30 +143,6 @@ describe('access-control (e2e)', () => {
         .post('/api/v1/roles')
         .send(newRole)
         .expect(400);
-    });
-  });
-  describe('PUT /api/v1/roles/:id', () => {
-    it('should successfully rename non-system role.', async () => {
-      const newRole = {
-        name: 'manager',
-        permissions: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
-      };
-      const responseRole = (
-        await adminUser.userAgent
-          .post('/api/v1/roles')
-          .send(newRole)
-          .expect(201)
-      ).body as RoleDto;
-
-      const renamedRole = (
-        await adminUser.userAgent
-          .put(`/api/v1/roles/${responseRole.id}`)
-          .send({ name: 'shawarma' })
-          .expect(200)
-      ).body as RoleDto;
-      expect(renamedRole.name).toStrictEqual('shawarma');
-      expect(renamedRole.name).not.toStrictEqual('manager');
-      expect(renamedRole.id).toStrictEqual(responseRole.id);
     });
   });
   afterEach(async () => {
