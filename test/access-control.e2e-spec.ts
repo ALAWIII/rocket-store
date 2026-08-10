@@ -175,6 +175,33 @@ describe('access-control (e2e)', () => {
       expect(renamedRole.name).not.toStrictEqual('manager');
       expect(renamedRole.id).toStrictEqual(responseRole.id);
     });
+    it('should fail to rename non-system role because of unauthorized user.', async () => {
+      const newRole = {
+        name: 'manager',
+        permissions: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
+      };
+      const responseRole = (
+        await adminUser.userAgent
+          .post('/api/v1/roles')
+          .send(newRole)
+          .expect(201)
+      ).body as RoleDto;
+
+      const newUser = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('customer')
+        .random()
+        .verified()
+        .signin()
+        .build();
+      const renamedRole = await newUser.userAgent
+        .put(`/api/v1/roles/${responseRole.id}`)
+        .send({ name: 'shawarma' })
+        .expect(403);
+    });
   });
   afterEach(async () => {
     await db.cleanup();
