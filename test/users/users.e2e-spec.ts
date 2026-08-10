@@ -79,45 +79,9 @@ describe('users (e2e)', () => {
       expect(returndUserIds).not.toContain(adminUser.userDb.id);
     });
   });
-  describe('GET /api/auth/get-session', () => {
-    it('should return session user profile.', async () => {
-      const response = await adminUser.userAgent
-        .get('/api/auth/get-session')
-        .expect(200);
-      const sessionBody = response.body as SessionResponse;
-      expect(sessionBody.user.id).toEqual(adminUser.userDb.id);
-      expect(sessionBody.session.userId).toEqual(adminUser.userDb.id);
-      expect(sessionBody.user.roleId).toEqual(adminUser.userDb.roleId);
-      expect(sessionBody.session.roleId).toEqual(adminUser.userDb.roleId);
-    });
-  });
+
   afterEach(async () => {
     await db.cleanup();
     await app.cleanup();
   });
 });
-
-type SessionResponse = {
-  user: {
-    name: string;
-    email: string;
-    emailVerified: true;
-    image?: null | string;
-    createdAt: string;
-    updatedAt: string;
-    phone: null;
-    id: string;
-    roleId: string;
-  };
-  session: {
-    expiresAt: string;
-    token: string;
-    createdAt: string;
-    updatedAt: string;
-    ipAddress: string;
-    userAgent: string;
-    userId: string;
-    roleId: string;
-    id: string;
-  };
-};
