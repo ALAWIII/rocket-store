@@ -2,7 +2,7 @@ import { v7 } from 'uuid';
 import { UserAgent } from './app-test.helper';
 import { Response } from 'supertest';
 import { MailhogClient } from 'mailhog-awesome';
-import { extractUrlsFromHtml } from 'test/utils/extract-url-from-html.util';
+import { extractUrlsFromHtml } from '../utils/extract-url-from-html.util';
 import { DataSource } from 'typeorm';
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';

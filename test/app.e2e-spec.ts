@@ -1,9 +1,9 @@
-import { TestDatabase } from './helpers/database-test.helper';
-import { TestApp } from './helpers/app-test.helper';
+import { TestDatabase } from './support/helpers/database-test.helper';
+import { TestApp } from './support/helpers/app-test.helper';
 import { MailhogClient } from 'mailhog-awesome';
-import { AuthUserResult } from './helpers/auth-user-flow.builder';
-import { createAuthenticatedTestContext } from './fixtures/create-authenticated-test-context.fixture';
-import { extractRawCookieToken } from './helpers/extract-session-token.helper';
+import { AuthUserResult } from './support/helpers/auth-user-flow.builder';
+import { createAuthenticatedTestContext } from './support/fixtures/create-authenticated-test-context.fixture';
+import { extractRawCookieToken } from './support/helpers/extract-session-token.helper';
 
 describe('AppController (e2e)', () => {
   let app: TestApp;

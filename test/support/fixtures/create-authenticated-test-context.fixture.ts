@@ -1,9 +1,9 @@
-import { TestApp } from 'test/helpers/app-test.helper';
-import { createConfigServiceMock } from 'test/helpers/config-test.helper';
-import { TestDatabase } from 'test/helpers/database-test.helper';
-import { TEST_ENV } from 'test/helpers/env-test-values';
-import { createMailhogClient } from 'test/helpers/mailhog-client.helper';
-import { UserAuthFlowBuilder } from 'test/helpers/auth-user-flow.builder';
+import { TestApp } from '../helpers/app-test.helper';
+import { createConfigServiceMock } from '../helpers/config-test.helper';
+import { TestDatabase } from '../helpers/database-test.helper';
+import { TEST_ENV } from '../helpers/env-test-values';
+import { createMailhogClient } from '../helpers/mailhog-client.helper';
+import { UserAuthFlowBuilder } from '../helpers/auth-user-flow.builder';
 
 export async function createAuthenticatedTestContext() {
   const mailClient = createMailhogClient();

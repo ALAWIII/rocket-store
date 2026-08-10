@@ -1,6 +1,6 @@
 import { MailhogClient } from 'mailhog-awesome';
 import { HttpClient } from './app-test.helper';
-import { extractUrlsFromHtml } from 'test/utils/extract-url-from-html.util';
+import { extractUrlsFromHtml } from '../utils/extract-url-from-html.util';
 
 type Props = {
   httpClient: HttpClient;
