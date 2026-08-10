@@ -209,6 +209,24 @@ describe('access-control (e2e)', () => {
         .expect(400);
     });
   });
+  describe('DELETE /api/v1/roles/:id', () => {
+    it('should successfully delete non-system role.', async () => {
+      const newRole = {
+        name: 'manager',
+        permissions: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
+      };
+      const responseRole = (
+        await adminUser.userAgent
+          .post('/api/v1/roles')
+          .send(newRole)
+          .expect(201)
+      ).body as RoleDto;
+      const deleted = await adminUser.userAgent
+        .delete(`/api/v1/roles/${responseRole.id}`)
+        .expect(200);
+      expect(deleted.body).toStrictEqual({ affected: 1 });
+    });
+  });
   afterEach(async () => {
     await db.cleanup();
     await app.cleanup();
