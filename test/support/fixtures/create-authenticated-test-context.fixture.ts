@@ -1,7 +1,7 @@
 import { TestApp } from '../helpers/app-test.helper';
 import { createConfigServiceMock } from '../helpers/config-test.helper';
 import { TestDatabase } from '../helpers/database-test.helper';
-import { TEST_ENV } from '../constants/env-test-values';
+import { TEST_ENV } from '../constants/env-test-values.constant';
 import { createMailhogClient } from '../helpers/mailhog-client.helper';
 import { UserAuthFlowBuilder } from '../helpers/auth-user-flow.builder';
 
