@@ -11,6 +11,7 @@ import { RoleResponseDto } from 'src/modules/access-control/dto/role-response.dt
 import { FindUsersResponseDto } from 'src/modules/users/dto/find-users-response.dto';
 import { CUSTOMER_ROLE } from 'src/modules/access-control/application/system-roles/system-roles.definition';
 import { UserResponseDto } from 'src/modules/users/dto/user-response.dto';
+import { v7 } from 'uuid';
 
 describe('users (e2e)', () => {
   let app: TestApp;
@@ -215,6 +216,9 @@ describe('users (e2e)', () => {
             .expect(200)
         ).body as UserResponseDto;
         expect(userFetched.id).toEqual(userWorker.userDb.id);
+      });
+      it('should fail to return not found user.', async () => {
+        await adminUser.userAgent.get(`/api/v1/users/${v7()}`).expect(404);
       });
     });
   });
