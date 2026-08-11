@@ -1,4 +1,4 @@
-import { TEST_ENV } from './env-test-values';
+import { TEST_ENV } from '../constants/env-test-values';
 
 /// responsible for mocking and overriding ConfigService for every single test.
 export function createConfigServiceMock(
