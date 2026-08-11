@@ -9,6 +9,7 @@ import { createAuthenticatedTestContext } from '../support/fixtures/create-authe
 import { AllPermissions } from 'src/modules/access-control/domain/permission';
 import { RoleResponseDto } from 'src/modules/access-control/dto/role-response.dto';
 import { FindUsersResponseDto } from 'src/modules/users/dto/find-users-response.dto';
+import { CUSTOMER_ROLE } from 'src/modules/access-control/application/system-roles/system-roles.definition';
 
 describe('users (e2e)', () => {
   let app: TestApp;
@@ -141,6 +142,59 @@ describe('users (e2e)', () => {
       expect(first10Users.total).toBe(21);
       expect(second10Users.total).toBe(21);
       expect(lastUser.total).toBe(21);
+    });
+    it('should return users based on filter parameters.', async () => {
+      const allUsers: AuthUserResult[] = [adminUser];
+      for (let i = 1; i <= 20; i++) {
+        allUsers.push(
+          await UserAuthFlowBuilder.create({
+            dbDataSource: db.dataSource,
+            mailhogClient: mailClient,
+            userAgent: app.createAgent(),
+          })
+            .asRole('customer')
+            .random()
+            .verified()
+            .signin()
+            .build(),
+        );
+      }
+      const workerUser = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('worker')
+        .random()
+        .verified()
+        .signin()
+        .build();
+      const usersByRoleId = (
+        await adminUser.userAgent
+          .get('/api/v1/users')
+          .query({ roleId: CUSTOMER_ROLE.id })
+          .expect(200)
+      ).body as FindUsersResponseDto;
+      expect(usersByRoleId.users.length).toBe(20);
+      expect(
+        // admin and worker users should not be included.
+        usersByRoleId.users.some((u) =>
+          [adminUser.userDb.id, workerUser.userDb.id].includes(u.id),
+        ),
+      ).toBe(false);
+      expect(
+        // only users who have customer roleId are included.
+        usersByRoleId.users.every((u) => u.roleId === CUSTOMER_ROLE.id),
+      ).toBe(true);
+
+      const usersByEmail = (
+        await adminUser.userAgent
+          .get('/api/v1/users')
+          .query({ email: allUsers[1].userDb.email })
+          .expect(200)
+      ).body as FindUsersResponseDto;
+      expect(usersByEmail.users.length).toBe(1);
+      expect(usersByEmail.users[0].id).toEqual(allUsers[1].userDb.id);
     });
   });
 
