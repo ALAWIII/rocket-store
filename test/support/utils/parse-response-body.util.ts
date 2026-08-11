@@ -1,4 +1,5 @@
 import type { Response } from 'superagent';
+import { ExpectedTestStatusCode } from '../types/expected-test-status-code.type';
 /**
  * accepts superagent.Response type and tries to parse the body to a specific type based on a list of status codes.
  * @param response
@@ -14,6 +15,6 @@ export function parseResponseBody<T>(
     : undefined;
 }
 
-export const statusCodesListNormalize = (bodyParseStatusCode?: number) => [
-  ...(bodyParseStatusCode ? [bodyParseStatusCode] : []),
-];
+export const statusCodesListNormalize = (
+  expectedStatusCode: ExpectedTestStatusCode,
+) => [...(expectedStatusCode?.parseBody ? [expectedStatusCode.code] : [])];
