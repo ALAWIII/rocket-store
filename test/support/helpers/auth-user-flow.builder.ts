@@ -12,11 +12,11 @@ type UserPayload = {
   email: string;
   password: string;
 };
-export type SiginResponse = {
+type SiginResponse = {
   body: SigninResponseBody;
   response: Response;
 };
-export type SigninResponseBody = {
+type SigninResponseBody = {
   redirect: boolean;
   token: string;
   user: {
@@ -33,7 +33,7 @@ export type SigninResponseBody = {
     id: string;
   };
 };
-export type UserProps = {
+type UserProps = {
   id: string;
   name: string;
   email: string;
@@ -46,11 +46,11 @@ export type UserProps = {
   givenName?: null | string; //the givenName, familyName and roleId fields appears when firing a request second time to signup endpoint.
   familyName?: null | string;
 };
-export type SignupResponseBody = {
+type SignupResponseBody = {
   token: string | null;
   user: UserProps;
 };
-export type SignupResponse = {
+type SignupResponse = {
   response: Response;
   body: SignupResponseBody;
 };
