@@ -13,3 +13,7 @@ export function parseResponseBody<T>(
     ? (response.body as T)
     : undefined;
 }
+
+export const statusCodesListNormalize = (bodyParseStatusCode?: number) => [
+  ...(bodyParseStatusCode ? [bodyParseStatusCode] : []),
+];
