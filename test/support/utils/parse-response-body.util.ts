@@ -1,10 +1,15 @@
 import type { Response } from 'superagent';
-
+/**
+ * accepts superagent.Response type and tries to parse the body to a specific type based on a list of status codes.
+ * @param response
+ * @param statuses
+ * @returns T
+ */
 export function parseResponseBody<T>(
   response: Response,
-  expectedStatus: number,
+  statuses: number[],
 ): T | undefined {
-  return response.statusCode === expectedStatus
+  return statuses.includes(response.statusCode)
     ? (response.body as T)
     : undefined;
 }
