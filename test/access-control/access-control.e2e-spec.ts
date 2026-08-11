@@ -9,14 +9,8 @@ import { createAuthenticatedTestContext } from '../support/fixtures/create-authe
 import { SYSTEM_ROLES } from 'src/modules/access-control/application/system-roles/system-roles.definition';
 import { AllPermissions } from 'src/modules/access-control/domain/permission';
 import { Role } from 'src/modules/access-control/domain/role';
-type PermissionDto = { entity: string; visibility: string; action: string };
-type RoleDto = {
-  id: string;
-  name: string;
-  permission: PermissionDto[];
-  assignScope?: PermissionDto[];
-  createScope?: PermissionDto[];
-};
+import { RoleDto } from 'test/support/types/role-dto.type';
+
 describe('access-control (e2e)', () => {
   let app: TestApp;
   let db: TestDatabase;
