@@ -11,7 +11,7 @@ import request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { IAuthEmailService } from 'src/email/auth-email.service';
 import { MailHogAuthEmailService } from '../doubles/mailhog-auth-email.service';
-import { ConfigServiceMock } from './config-test.helper';
+import { ConfigServiceMock } from '../doubles/config-service-mock.double';
 
 export type HttpClient = ReturnType<typeof request>;
 export type UserAgent = ReturnType<typeof request.agent>;
