@@ -6,7 +6,7 @@ export type PermissionTestDto = {
 export type RoleTestDto = {
   id: string;
   name: string;
-  permission: PermissionTestDto[];
+  permissions: PermissionTestDto[];
   assignScope?: PermissionTestDto[];
   createScope?: PermissionTestDto[];
 };
