@@ -220,6 +220,29 @@ describe('users (e2e)', () => {
       it('should fail to return not found user.', async () => {
         await adminUser.userAgent.get(`/api/v1/users/${v7()}`).expect(404);
       });
+      it('should fail to return a user that is not of the requester permissions scope.', async () => {
+        const managerRole = {
+          name: 'manager',
+          permissions: [AllPermissions.user.UserReadLessOrEqual],
+        };
+        await adminUser.userAgent
+          .post('/api/v1/roles')
+          .send(managerRole)
+          .expect(201);
+        const manager = await UserAuthFlowBuilder.create({
+          dbDataSource: db.dataSource,
+          mailhogClient: mailClient,
+          userAgent: app.createAgent(),
+        })
+          .asRole('manager')
+          .random()
+          .verified()
+          .signin()
+          .build();
+        await manager.userAgent
+          .get(`/api/v1/users/${adminUser.userDb.id}`)
+          .expect(404);
+      });
     });
   });
 
