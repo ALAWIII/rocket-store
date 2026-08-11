@@ -63,7 +63,7 @@ export class UserRepository implements IUserRepository {
     try {
       const qb = this.createFindUsersQuery(data.requesterRoleId);
 
-      qb.andWhere('user.id = :userId', { userId: data.userId });
+      qb.andWhere(`${usr}.id = :userId`, { userId: data.userId });
 
       const user = await qb.getOne();
 
