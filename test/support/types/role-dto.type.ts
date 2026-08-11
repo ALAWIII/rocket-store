@@ -1,12 +1,12 @@
-export type PermissionDto = {
+export type PermissionTestDto = {
   entity: string;
   visibility: string;
   action: string;
 };
-export type RoleDto = {
+export type RoleTestDto = {
   id: string;
   name: string;
-  permission: PermissionDto[];
-  assignScope?: PermissionDto[];
-  createScope?: PermissionDto[];
+  permission: PermissionTestDto[];
+  assignScope?: PermissionTestDto[];
+  createScope?: PermissionTestDto[];
 };

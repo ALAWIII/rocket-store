@@ -9,7 +9,7 @@ import { createAuthenticatedTestContext } from '../support/fixtures/create-authe
 import { SYSTEM_ROLES } from 'src/modules/access-control/application/system-roles/system-roles.definition';
 import { AllPermissions } from 'src/modules/access-control/domain/permission';
 import { Role } from 'src/modules/access-control/domain/role';
-import { RoleDto } from 'test/support/types/role-dto.type';
+import { RoleTestDto } from 'test/support/types/role-dto.type';
 
 describe('access-control (e2e)', () => {
   let app: TestApp;
@@ -157,14 +157,14 @@ describe('access-control (e2e)', () => {
           .post('/api/v1/roles')
           .send(newRole)
           .expect(201)
-      ).body as RoleDto;
+      ).body as RoleTestDto;
 
       const renamedRole = (
         await adminUser.userAgent
           .put(`/api/v1/roles/${responseRole.id}`)
           .send({ name: 'shawarma' })
           .expect(200)
-      ).body as RoleDto;
+      ).body as RoleTestDto;
       expect(renamedRole.name).toStrictEqual('shawarma');
       expect(renamedRole.name).not.toStrictEqual('manager');
       expect(renamedRole.id).toStrictEqual(responseRole.id);
@@ -179,7 +179,7 @@ describe('access-control (e2e)', () => {
           .post('/api/v1/roles')
           .send(newRole)
           .expect(201)
-      ).body as RoleDto;
+      ).body as RoleTestDto;
 
       const newUser = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
@@ -214,7 +214,7 @@ describe('access-control (e2e)', () => {
           .post('/api/v1/roles')
           .send(newRole)
           .expect(201)
-      ).body as RoleDto;
+      ).body as RoleTestDto;
       const deleted = await adminUser.userAgent
         .delete(`/api/v1/roles/${responseRole.id}`)
         .expect(200);
@@ -235,7 +235,7 @@ describe('access-control (e2e)', () => {
           .post('/api/v1/roles')
           .send(newRole)
           .expect(201)
-      ).body as RoleDto;
+      ).body as RoleTestDto;
       const customer = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
         mailhogClient: mailClient,
@@ -265,7 +265,7 @@ describe('access-control (e2e)', () => {
           .post('/api/v1/roles')
           .send(newRole)
           .expect(201)
-      ).body as RoleDto;
+      ).body as RoleTestDto;
       const deleteableRole = {
         name: 'delete',
         permissions: [AllPermissions.user.UserReadLessOrEqual.toJSON()],
@@ -275,7 +275,7 @@ describe('access-control (e2e)', () => {
           .post('/api/v1/roles')
           .send(deleteableRole)
           .expect(201)
-      ).body as RoleDto;
+      ).body as RoleTestDto;
       const manager = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
         mailhogClient: mailClient,
@@ -290,7 +290,7 @@ describe('access-control (e2e)', () => {
         .delete(`/api/v1/roles/${responseDRole.id}`)
         .expect(200);
       const roles = (await adminUser.userAgent.get('/api/v1/roles'))
-        .body as RoleDto[];
+        .body as RoleTestDto[];
       expect(roles.some((r) => r.id === responseDRole.id)).toBe(true);
     });
     it('should fail to delete user requester role.', async () => {
@@ -308,7 +308,7 @@ describe('access-control (e2e)', () => {
           .post('/api/v1/roles')
           .send(newRole)
           .expect(201)
-      ).body as RoleDto;
+      ).body as RoleTestDto;
       const manager = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
         mailhogClient: mailClient,
