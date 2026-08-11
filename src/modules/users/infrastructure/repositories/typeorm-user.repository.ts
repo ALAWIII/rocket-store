@@ -327,7 +327,7 @@ export class UserRepository implements IUserRepository {
   ): void {
     if (!filters.roleId) return;
 
-    qb.andWhere('role.id = :filterRoleId', {
+    qb.andWhere(`${usr}."roleId" = :filterRoleId`, {
       filterRoleId: filters.roleId,
     });
   }
