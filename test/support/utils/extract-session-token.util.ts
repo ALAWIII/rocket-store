@@ -1,4 +1,4 @@
-import { UserAgent } from './app-test.helper';
+import { UserAgent } from '../helpers/app-test.helper';
 
 export function extractRawCookieToken(
   userAgent: UserAgent,

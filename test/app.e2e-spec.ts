@@ -3,7 +3,7 @@ import { TestApp } from './support/helpers/app-test.helper';
 import { MailhogClient } from 'mailhog-awesome';
 import { AuthUserResult } from './support/helpers/auth-user-flow.builder';
 import { createAuthenticatedTestContext } from './support/fixtures/create-authenticated-test-context.fixture';
-import { extractRawCookieToken } from './support/helpers/extract-session-token.helper';
+import { extractRawCookieToken } from './support/utils/extract-session-token.util';
 
 describe('AppController (e2e)', () => {
   let app: TestApp;
