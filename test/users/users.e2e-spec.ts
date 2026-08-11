@@ -10,6 +10,7 @@ import { AllPermissions } from 'src/modules/access-control/domain/permission';
 import { RoleResponseDto } from 'src/modules/access-control/dto/role-response.dto';
 import { FindUsersResponseDto } from 'src/modules/users/dto/find-users-response.dto';
 import { CUSTOMER_ROLE } from 'src/modules/access-control/application/system-roles/system-roles.definition';
+import { UserResponseDto } from 'src/modules/users/dto/user-response.dto';
 
 describe('users (e2e)', () => {
   let app: TestApp;
@@ -195,6 +196,26 @@ describe('users (e2e)', () => {
       ).body as FindUsersResponseDto;
       expect(usersByEmail.users.length).toBe(1);
       expect(usersByEmail.users[0].id).toEqual(allUsers[1].userDb.id);
+    });
+    describe('GET /api/v1/users/:id', () => {
+      it('should successfully return user profile', async () => {
+        const userWorker = await UserAuthFlowBuilder.create({
+          dbDataSource: db.dataSource,
+          mailhogClient: mailClient,
+          userAgent: app.createAgent(),
+        })
+          .asRole('worker')
+          .random()
+          .signin()
+          .verified()
+          .build();
+        const userFetched = (
+          await adminUser.userAgent
+            .get(`/api/v1/users/${userWorker.userDb.id}`)
+            .expect(200)
+        ).body as UserResponseDto;
+        expect(userFetched.id).toEqual(userWorker.userDb.id);
+      });
     });
   });
 
