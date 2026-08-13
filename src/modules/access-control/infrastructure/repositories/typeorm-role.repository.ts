@@ -320,7 +320,7 @@ export class RoleRepository implements IRoleRepository {
     }).mapErr(
       (e) =>
         new CorruptedPersistenceDataError(
-          `Failed to construct Role from RoleEntity.`,
+          `Failed to construct Role from RoleEntity: ${e.message}`,
           e,
         ),
     );
