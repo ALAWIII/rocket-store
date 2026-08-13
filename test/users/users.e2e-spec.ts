@@ -7,7 +7,10 @@ import {
 } from '../support/helpers/auth-user-flow.builder';
 import { createAuthenticatedTestContext } from '../support/fixtures/create-authenticated-test-context.fixture';
 import { AllPermissions } from 'src/modules/access-control/domain/permission';
-import { CUSTOMER_ROLE } from 'src/modules/access-control/application/system-roles/system-roles.definition';
+import {
+  CUSTOMER_ROLE,
+  WORKER_ROLE,
+} from 'src/modules/access-control/application/system-roles/system-roles.definition';
 import { v7 } from 'uuid';
 import { UsersControllerTest } from 'test/support/controllers/users/users.controller-test';
 import { RolesControllerTest } from 'test/support/controllers/roles.controller-test';
@@ -298,6 +301,33 @@ describe('users (e2e)', () => {
         expect(errorMessage.message).toEqual([
           'At least one field must be provided',
         ]);
+      });
+    });
+    describe('PATCH /api/v1/users/:id/role (assignRole)', () => {
+      it('should successfully assign new role to user.', async () => {
+        const customer = await UserAuthFlowBuilder.create({
+          dbDataSource: db.dataSource,
+          mailhogClient: mailClient,
+          userAgent: app.createAgent(),
+        })
+          .asRole('customer')
+          .random()
+          .signin()
+          .verified()
+          .build();
+        const assignedUser = await userController.assignRole(
+          customer.userDb.id,
+          WORKER_ROLE.id,
+          { code: 200, parseBody: true },
+        );
+
+        expect({
+          userId: assignedUser.body!.id,
+          roleId: assignedUser.body?.roleId,
+        }).toEqual({
+          userId: customer.userDb.id,
+          roleId: WORKER_ROLE.id,
+        });
       });
     });
   });
