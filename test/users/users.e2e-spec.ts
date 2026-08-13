@@ -329,6 +329,21 @@ describe('users (e2e)', () => {
           roleId: WORKER_ROLE.id,
         });
       });
+      it('should fail when unauthorized user request to assign role to user.', async () => {
+        const customer = await UserAuthFlowBuilder.create({
+          dbDataSource: db.dataSource,
+          mailhogClient: mailClient,
+          userAgent: app.createAgent(),
+        })
+          .asRole('customer')
+          .random()
+          .verified()
+          .signin()
+          .build();
+        await userController
+          .withAgent(customer.userAgent)
+          .assignRole(adminUser.userDb.id, WORKER_ROLE.id, { code: 403 });
+      });
     });
   });
 
