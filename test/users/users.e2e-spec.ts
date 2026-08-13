@@ -379,6 +379,30 @@ describe('users (e2e)', () => {
           .withAgent(manager.userAgent)
           .assignRole(customer.userDb.id, ADMIN_ROLE.id, { code: 404 });
       });
+      it('should fail when authorized user request to assign role to a user higher than the requester.', async () => {
+        const newRole = {
+          name: 'manager',
+          permissions: [AllPermissions.role.RoleAssignLessOrEqual],
+          assignScope: [AllPermissions.user.UserReadLessOrEqual],
+        };
+        const createdMRole = await roleController.create(newRole, {
+          code: 201,
+          parseBody: true,
+        });
+        const manager = await UserAuthFlowBuilder.create({
+          dbDataSource: db.dataSource,
+          mailhogClient: mailClient,
+          userAgent: app.createAgent(),
+        })
+          .asRole(createdMRole.body!.name)
+          .random()
+          .signin()
+          .verified()
+          .build();
+        await userController
+          .withAgent(manager.userAgent)
+          .assignRole(adminUser.userDb.id, CUSTOMER_ROLE.id, { code: 404 });
+      });
     });
   });
 
