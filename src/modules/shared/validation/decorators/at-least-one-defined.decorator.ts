@@ -5,11 +5,11 @@ export function AtLeastOneDefined(
   fields: string[],
   validationOptions?: ValidationOptions,
 ) {
-  return function (object: object, propertyName: string) {
+  return (object: object, propertyKey: string | symbol) => {
     registerDecorator({
       name: 'atLeastOneDefined',
       target: object.constructor,
-      propertyName,
+      propertyName: propertyKey.toString(),
       constraints: [fields],
       options: validationOptions,
       validator: AtLeastOneDefinedConstraint,

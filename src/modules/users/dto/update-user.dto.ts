@@ -23,9 +23,8 @@ export class UpdateMeDto {
   @Length(2, 20)
   phone?: string;
 
-  @AtLeastOneDefined(
-    ['name', 'givenName', 'familyName', 'image', 'roleId', 'phone'],
-    { message: 'At least one field must be provided' },
-  )
-  private readonly __atLeast?: never;
+  @AtLeastOneDefined(['name', 'givenName', 'familyName', 'image', 'phone'], {
+    message: 'At least one field must be provided',
+  })
+  private readonly __atLeastOneDefined?: never;
 }
