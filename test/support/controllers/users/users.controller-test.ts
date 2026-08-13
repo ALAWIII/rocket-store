@@ -74,6 +74,20 @@ export class UsersControllerTest {
     );
     return { response, body };
   }
-  assignRole(statusCode: ExpectedTestStatusCode) {}
+  async assignRole(
+    userId: string,
+    roleId: string,
+    statusCode: ExpectedTestStatusCode,
+  ) {
+    const response = await this.agent
+      .patch(`/api/v1/users/${userId}/role`)
+      .send({ roleId })
+      .expect(statusCode.code);
+    const body = parseResponseBody<UserTestDto>(
+      response,
+      statusCodesListNormalize(statusCode),
+    );
+    return { response, body };
+  }
   reassignUsersRole(statusCode: ExpectedTestStatusCode) {}
 }
