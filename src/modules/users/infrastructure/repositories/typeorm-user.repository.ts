@@ -434,7 +434,7 @@ export class UserRepository implements IUserRepository {
     }).mapErr(
       (e) =>
         new CorruptedPersistenceDataError(
-          `Failed to construct User from UserEntity`,
+          `Failed to construct User from UserEntity: ${e.message}`,
           e,
         ),
     );
