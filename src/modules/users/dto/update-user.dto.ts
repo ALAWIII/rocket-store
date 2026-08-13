@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsUrl, Length } from 'class-validator';
+import { IsOptional, IsString, IsUrl, Length, Matches } from 'class-validator';
 import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-least-one-defined.decorator';
 
 export class UpdateMeDto {
@@ -20,7 +20,9 @@ export class UpdateMeDto {
   image?: string;
   @IsOptional()
   @IsString()
-  @Length(2, 20)
+  @Matches(/^\+[1-9]\d{3,14}$/, {
+    message: 'phone must be a valid E.164 phone number',
+  })
   phone?: string;
 
   @AtLeastOneDefined(['name', 'givenName', 'familyName', 'image', 'phone'], {
