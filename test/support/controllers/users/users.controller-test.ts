@@ -1,5 +1,6 @@
 import { UserAgent } from 'test/support/helpers/app-test.helper';
 import { ExpectedTestStatusCode } from 'test/support/types/expected-test-status-code.type';
+import { UpdateUserTestDto } from 'test/support/types/user/update-user.dto.type';
 import { UserTestDto } from 'test/support/types/user/user.dto.type';
 import {
   parseResponseBody,
@@ -59,7 +60,20 @@ export class UsersControllerTest {
     );
     return { response, body };
   }
-  updateMe(statusCode: ExpectedTestStatusCode) {}
+  async updateMe(
+    updateData: UpdateUserTestDto,
+    statusCode: ExpectedTestStatusCode,
+  ) {
+    const response = await this.agent
+      .patch(`/api/v1/users/me`)
+      .send(updateData)
+      .expect(statusCode.code);
+    const body = parseResponseBody<UserTestDto>(
+      response,
+      statusCodesListNormalize(statusCode),
+    );
+    return { response, body };
+  }
   assignRole(statusCode: ExpectedTestStatusCode) {}
   reassignUsersRole(statusCode: ExpectedTestStatusCode) {}
 }
