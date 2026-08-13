@@ -285,6 +285,20 @@ describe('users (e2e)', () => {
           'phone must be a valid E.164 phone number',
         ]);
       });
+      it('should fail update user profile when sending empty object.', async () => {
+        const errorMessage = (
+          await userController.withAgent(adminUser.userAgent).updateMe(
+            {},
+            {
+              code: 400,
+              parseBody: false,
+            },
+          )
+        ).response.body as { message: string[] };
+        expect(errorMessage.message).toEqual([
+          'At least one field must be provided',
+        ]);
+      });
     });
   });
 
