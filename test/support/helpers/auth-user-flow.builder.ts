@@ -6,7 +6,7 @@ import { extractUrlsFromHtml } from '../utils/extract-url-from-html.util';
 import { DataSource } from 'typeorm';
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
-import { UserTestDto } from '../types/user.dto.type';
+import { UserTestDto } from '../types/user/user.dto.type';
 
 type UserPayload = {
   name: string;

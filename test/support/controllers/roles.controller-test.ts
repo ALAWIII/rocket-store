@@ -1,5 +1,5 @@
 import { UserAgent } from '../helpers/app-test.helper';
-import { RoleTestDto } from '../types/role-dto.type';
+import { RoleTestDto } from '../types/role/role-dto.type';
 import type { Response } from 'superagent';
 import {
   parseResponseBody,

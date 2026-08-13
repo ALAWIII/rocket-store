@@ -1,6 +1,6 @@
 import { UserAgent } from 'test/support/helpers/app-test.helper';
 import { ExpectedTestStatusCode } from 'test/support/types/expected-test-status-code.type';
-import { UserTestDto } from 'test/support/types/user.dto.type';
+import { UserTestDto } from 'test/support/types/user/user.dto.type';
 import {
   parseResponseBody,
   statusCodesListNormalize,
