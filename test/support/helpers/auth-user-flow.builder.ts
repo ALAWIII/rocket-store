@@ -6,6 +6,7 @@ import { extractUrlsFromHtml } from '../utils/extract-url-from-html.util';
 import { DataSource } from 'typeorm';
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
+import { UserTestDto } from '../types/user.dto.type';
 
 type UserPayload = {
   name: string;
@@ -33,22 +34,10 @@ type SigninResponseBody = {
     id: string;
   };
 };
-type UserProps = {
-  id: string;
-  name: string;
-  email: string;
-  roleId?: string;
-  emailVerified?: boolean;
-  image?: string | null;
-  phone?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  givenName?: null | string; //the givenName, familyName and roleId fields appears when firing a request second time to signup endpoint.
-  familyName?: null | string;
-};
+
 type SignupResponseBody = {
   token: string | null;
-  user: UserProps;
+  user: UserTestDto;
 };
 type SignupResponse = {
   response: Response;
@@ -57,7 +46,7 @@ type SignupResponse = {
 
 export type AuthUserResult = {
   userAgent: UserAgent;
-  userDb: UserProps;
+  userDb: UserTestDto;
   payload: UserPayload;
   signup: SignupResponse;
   sigin?: SiginResponse;
@@ -145,7 +134,7 @@ export class UserAuthFlowBuilder {
     };
   }
   //==================
-  private async fetchUserFromDatabase(userId: string): Promise<UserProps> {
+  private async fetchUserFromDatabase(userId: string): Promise<UserTestDto> {
     const user = await this.props.dbDataSource
       .getRepository(UserEntity)
       .findOneByOrFail({ id: userId });
