@@ -1,3 +1,5 @@
+import { Permission } from 'src/modules/access-control/domain/permission';
+
 export type PermissionTestDto = {
   entity: string;
   visibility: string;
@@ -6,7 +8,7 @@ export type PermissionTestDto = {
 export type RoleTestDto = {
   id: string;
   name: string;
-  permissions: PermissionTestDto[];
-  assignScope?: PermissionTestDto[];
-  createScope?: PermissionTestDto[];
+  permissions: PermissionTestDto[] | Permission[];
+  assignScope?: PermissionTestDto[] | Permission[];
+  createScope?: PermissionTestDto[] | Permission[];
 };
