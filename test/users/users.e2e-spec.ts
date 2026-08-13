@@ -11,6 +11,7 @@ import { CUSTOMER_ROLE } from 'src/modules/access-control/application/system-rol
 import { v7 } from 'uuid';
 import { UsersControllerTest } from 'test/support/controllers/users/users.controller-test';
 import { RolesControllerTest } from 'test/support/controllers/roles.controller-test';
+import { UpdateUserTestDto } from 'test/support/types/user/update-user.dto.type';
 
 describe('users (e2e)', () => {
   let app: TestApp;
@@ -243,6 +244,30 @@ describe('users (e2e)', () => {
         await userController
           .withAgent(manager.userAgent)
           .findById(adminUser.userDb.id, { code: 404 });
+      });
+    });
+    describe('PATCH /api/v1/users/me (updateMe)', () => {
+      it('should successfully update user profile', async () => {
+        const userProfile: UpdateUserTestDto = {
+          name: 'cat',
+          givenName: 'lion',
+          familyName: 'tigers',
+          image: 'http://puppy.com',
+          phone: '+19363463473',
+        };
+        const updateResp = await userController
+          .withAgent(adminUser.userAgent)
+          .updateMe(userProfile, {
+            code: 200,
+            parseBody: true,
+          });
+        const getUpdatedProfile = (
+          await userController.findMe({
+            code: 200,
+            parseBody: true,
+          })
+        ).body!;
+        expect(updateResp.body!).toEqual(getUpdatedProfile);
       });
     });
   });
