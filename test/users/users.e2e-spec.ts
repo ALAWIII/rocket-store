@@ -46,13 +46,12 @@ describe('users (e2e)', () => {
       const managerRole = {
         name: 'manager',
         permissions: [
-          AllPermissions.user.UserReadLessOrEqual.toJSON(),
-          AllPermissions.address.AddressReadLessOrEqual.toJSON(),
+          AllPermissions.address.AddressReadLessOrEqual,
+          AllPermissions.user.UserReadLessOrEqual,
         ],
       };
-      const managerRoleResp = (
-        await roleController.create(managerRole, { code: 201, parseBody: true })
-      ).body!;
+      await roleController.create(managerRole, { code: 201, parseBody: true });
+
       const rolesName = ['manager', 'worker', 'customer'];
       const expectedUsers: AuthUserResult[] = [];
       for (const nm of rolesName) {

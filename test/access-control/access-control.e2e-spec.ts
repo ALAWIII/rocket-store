@@ -8,8 +8,8 @@ import {
 import { createAuthenticatedTestContext } from '../support/fixtures/create-authenticated-test-context.fixture';
 import { SYSTEM_ROLES } from 'src/modules/access-control/application/system-roles/system-roles.definition';
 import { AllPermissions } from 'src/modules/access-control/domain/permission';
-import { Role } from 'src/modules/access-control/domain/role';
 import { RolesControllerTest } from 'test/support/controllers/roles.controller-test';
+import { Role } from 'src/modules/access-control/domain/role';
 
 describe('access-control (e2e)', () => {
   let app: TestApp;
@@ -41,7 +41,7 @@ describe('access-control (e2e)', () => {
       expect(response.body).toEqual(SYSTEM_ROLES.map((r) => r.toJSON()));
     });
     it('should return subset of creatable roles for a user who has the manager role.', async () => {
-      const newRole = Role.create({
+      const newRole = {
         name: 'manager',
         permissions: [
           AllPermissions.role.RoleCreateLessOrEqual,
@@ -53,20 +53,11 @@ describe('access-control (e2e)', () => {
           AllPermissions.role.RoleCreateLessOrEqual,
           AllPermissions.address.AddressReadLessOrEqual,
         ],
-      })
-        .unwrap()
-        .toJSON();
-      const responseRole = await roleController.create(
-        {
-          name: newRole.name,
-          permissions: newRole.permissions,
-          createScope: newRole.createScope,
-        },
-        {
-          code: 201,
-          parseBody: true,
-        },
-      );
+      };
+      const responseRole = await roleController.create(newRole, {
+        code: 201,
+        parseBody: true,
+      });
       const newManager = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
         mailhogClient: mailClient,
@@ -117,10 +108,8 @@ describe('access-control (e2e)', () => {
           AllPermissions.user.UserReadLessOrEqual,
           AllPermissions.role.RoleReadLessOrEqual,
           AllPermissions.role.RoleAssignLessOrEqual,
-        ]
-          .sort((p1, p2) => p1.key().localeCompare(p2.key()))
-          .map((p) => p.toJSON()),
-        assignScope: [AllPermissions.user.UserReadLessOrEqual.toJSON()],
+        ].sort((p1, p2) => p1.key().localeCompare(p2.key())),
+        assignScope: [AllPermissions.user.UserReadLessOrEqual],
       };
       const createdRole = (
         await roleController.create(newRole, {
@@ -139,7 +128,11 @@ describe('access-control (e2e)', () => {
         .verified()
         .signin()
         .build();
-      expect(createdRole).toEqual({ id: babyUser.userDb.roleId!, ...newRole });
+      expect(createdRole).toEqual(
+        Role.restore({ id: babyUser.userDb.roleId!, ...newRole })
+          .unwrap()
+          .toJSON(),
+      );
     });
     it('should fail creating new role when assign permission persist without its scope.', async () => {
       const newRole = {
@@ -148,7 +141,7 @@ describe('access-control (e2e)', () => {
           AllPermissions.user.UserReadLessOrEqual,
           AllPermissions.role.RoleReadLessOrEqual,
           AllPermissions.role.RoleAssignLessOrEqual,
-        ].map((p) => p.toJSON()),
+        ],
       };
       await roleController.create(newRole, {
         code: 400,
@@ -159,7 +152,7 @@ describe('access-control (e2e)', () => {
     it('should successfully rename non-system role.', async () => {
       const newRole = {
         name: 'manager',
-        permissions: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
+        permissions: [AllPermissions.role.RoleReadLessOrEqual],
       };
       const createdRoleBody = (
         await roleController.create(newRole, {
@@ -182,7 +175,7 @@ describe('access-control (e2e)', () => {
     it('should fail to rename non-system role because of unauthorized user.', async () => {
       const newRole = {
         name: 'manager',
-        permissions: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
+        permissions: [AllPermissions.role.RoleReadLessOrEqual],
       };
       const createdRoleBody = (
         await roleController.create(newRole, {
@@ -215,7 +208,7 @@ describe('access-control (e2e)', () => {
     it('should successfully delete non-system role.', async () => {
       const newRole = {
         name: 'manager',
-        permissions: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
+        permissions: [AllPermissions.role.RoleReadLessOrEqual],
       };
       const createdRoleBody = (
         await roleController.create(newRole, {
@@ -239,7 +232,7 @@ describe('access-control (e2e)', () => {
     it('should fail when delete role by unauthorized user.', async () => {
       const newRole = {
         name: 'manager',
-        permissions: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
+        permissions: [AllPermissions.role.RoleReadLessOrEqual],
       };
       const createdRoleBody = (
         await roleController.create(newRole, {
@@ -268,8 +261,8 @@ describe('access-control (e2e)', () => {
           AllPermissions.role.RoleReadLessOrEqual,
           AllPermissions.role.RoleCreateLessOrEqual,
           AllPermissions.role.RoleDeleteLess,
-        ].map((p) => p.toJSON()),
-        createScope: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
+        ],
+        createScope: [AllPermissions.role.RoleReadLessOrEqual],
       };
       const createdManagerRole = (
         await roleController.create(newRole, { code: 201, parseBody: true })
@@ -287,7 +280,7 @@ describe('access-control (e2e)', () => {
       //======== creating the deletable test role.
       const deleteableRole = {
         name: 'delete',
-        permissions: [AllPermissions.user.UserReadLessOrEqual.toJSON()],
+        permissions: [AllPermissions.user.UserReadLessOrEqual],
       };
       const createdDeletableRole = (
         await roleController.create(deleteableRole, {
@@ -314,8 +307,8 @@ describe('access-control (e2e)', () => {
           AllPermissions.role.RoleReadLessOrEqual,
           AllPermissions.role.RoleCreateLessOrEqual,
           AllPermissions.role.RoleDeleteLess,
-        ].map((p) => p.toJSON()),
-        createScope: [AllPermissions.role.RoleReadLessOrEqual.toJSON()],
+        ],
+        createScope: [AllPermissions.role.RoleReadLessOrEqual],
       };
       const role = (
         await roleController.create(newRole, { code: 201, parseBody: true })
