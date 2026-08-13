@@ -8,6 +8,7 @@ import {
 import { createAuthenticatedTestContext } from '../support/fixtures/create-authenticated-test-context.fixture';
 import { AllPermissions } from 'src/modules/access-control/domain/permission';
 import {
+  ADMIN_ROLE,
   CUSTOMER_ROLE,
   WORKER_ROLE,
 } from 'src/modules/access-control/application/system-roles/system-roles.definition';
@@ -343,6 +344,40 @@ describe('users (e2e)', () => {
         await userController
           .withAgent(customer.userAgent)
           .assignRole(adminUser.userDb.id, WORKER_ROLE.id, { code: 403 });
+      });
+      it('should fail when authorized user request to assign role and this role is not of user requester scope.', async () => {
+        const newRole = {
+          name: 'manager',
+          permissions: [AllPermissions.role.RoleAssignLessOrEqual],
+          assignScope: [AllPermissions.user.UserReadLessOrEqual],
+        };
+        const createdMRole = await roleController.create(newRole, {
+          code: 201,
+          parseBody: true,
+        });
+        const manager = await UserAuthFlowBuilder.create({
+          dbDataSource: db.dataSource,
+          mailhogClient: mailClient,
+          userAgent: app.createAgent(),
+        })
+          .asRole(createdMRole.body!.name)
+          .random()
+          .signin()
+          .verified()
+          .build();
+        const customer = await UserAuthFlowBuilder.create({
+          dbDataSource: db.dataSource,
+          mailhogClient: mailClient,
+          userAgent: app.createAgent(),
+        })
+          .asRole('customer')
+          .random()
+          .signin()
+          .verified()
+          .build();
+        await userController
+          .withAgent(manager.userAgent)
+          .assignRole(customer.userDb.id, ADMIN_ROLE.id, { code: 404 });
       });
     });
   });
