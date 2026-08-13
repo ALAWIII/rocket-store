@@ -269,6 +269,22 @@ describe('users (e2e)', () => {
         ).body!;
         expect(updateResp.body!).toEqual(getUpdatedProfile);
       });
+      it('should fail update user profile because of malformed phone number', async () => {
+        const userProfile: UpdateUserTestDto = {
+          phone: '9363463473',
+        };
+        const errorMessage = (
+          await userController
+            .withAgent(adminUser.userAgent)
+            .updateMe(userProfile, {
+              code: 400,
+              parseBody: false,
+            })
+        ).response.body as { message: string[] };
+        expect(errorMessage.message).toEqual([
+          'phone must be a valid E.164 phone number',
+        ]);
+      });
     });
   });
 
