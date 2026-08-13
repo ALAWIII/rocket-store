@@ -6,6 +6,20 @@ import {
   statusCodesListNormalize,
 } from 'test/support/utils/parse-response-body.util';
 
+type FindUsersFilterTest = {
+  name?: string;
+
+  email?: string;
+
+  roleId?: string;
+
+  phone?: string;
+
+  page?: number;
+
+  limit?: number;
+};
+
 export class UsersControllerTest {
   constructor(private readonly agent: UserAgent) {}
   withAgent(agent: UserAgent): UsersControllerTest {
@@ -21,9 +35,13 @@ export class UsersControllerTest {
     );
     return { response, body };
   }
-  async findAll(statusCode: ExpectedTestStatusCode) {
+  async findAll(
+    statusCode: ExpectedTestStatusCode,
+    query: FindUsersFilterTest = {},
+  ) {
     const response = await this.agent
       .get('/api/v1/users')
+      .query(query)
       .expect(statusCode.code);
     const body = parseResponseBody<{ users: UserTestDto[]; total: number }>(
       response,
