@@ -205,207 +205,206 @@ describe('users (e2e)', () => {
       expect(usersByEmail.users.length).toBe(1);
       expect(usersByEmail.users[0].id).toEqual(allUsers[1].userDb.id);
     });
-    describe('GET /api/v1/users/:id (findById)', () => {
-      it('should successfully return user profile', async () => {
-        const userWorker = await UserAuthFlowBuilder.create({
-          dbDataSource: db.dataSource,
-          mailhogClient: mailClient,
-          userAgent: app.createAgent(),
-        })
-          .asRole('worker')
-          .random()
-          .signin()
-          .verified()
-          .build();
-        const userFetched = (
-          await userController.findById(userWorker.userDb.id, {
-            code: 200,
-            parseBody: true,
-          })
-        ).body!;
-        expect(userFetched.id).toEqual(userWorker.userDb.id);
-      });
-      it('should fail to return not found user.', async () => {
-        await userController.findById(v7(), { code: 404 });
-      });
-      it('should fail to return a user that is not of the requester permissions scope.', async () => {
-        const managerRole = {
-          name: 'manager',
-          permissions: [AllPermissions.user.UserReadLessOrEqual.toJSON()],
-        };
-        await roleController.create(managerRole, { code: 201 });
-        const manager = await UserAuthFlowBuilder.create({
-          dbDataSource: db.dataSource,
-          mailhogClient: mailClient,
-          userAgent: app.createAgent(),
-        })
-          .asRole('manager')
-          .random()
-          .verified()
-          .signin()
-          .build();
-
-        await userController
-          .withAgent(manager.userAgent)
-          .findById(adminUser.userDb.id, { code: 404 });
-      });
-    });
-    describe('PATCH /api/v1/users/me (updateMe)', () => {
-      it('should successfully update user profile', async () => {
-        const userProfile: UpdateUserTestDto = {
-          name: 'cat',
-          givenName: 'lion',
-          familyName: 'tigers',
-          image: 'http://puppy.com',
-          phone: '+19363463473',
-        };
-        const updateResp = await userController
-          .withAgent(adminUser.userAgent)
-          .updateMe(userProfile, {
-            code: 200,
-            parseBody: true,
-          });
-        const getUpdatedProfile = (
-          await userController.findMe({
-            code: 200,
-            parseBody: true,
-          })
-        ).body!;
-        expect(updateResp.body!).toEqual(getUpdatedProfile);
-      });
-      it('should fail update user profile because of malformed phone number', async () => {
-        const userProfile: UpdateUserTestDto = {
-          phone: '9363463473',
-        };
-        const errorMessage = (
-          await userController
-            .withAgent(adminUser.userAgent)
-            .updateMe(userProfile, {
-              code: 400,
-              parseBody: false,
-            })
-        ).response.body as { message: string[] };
-        expect(errorMessage.message).toEqual([
-          'phone must be a valid E.164 phone number',
-        ]);
-      });
-      it('should fail update user profile when sending empty object.', async () => {
-        const errorMessage = (
-          await userController.withAgent(adminUser.userAgent).updateMe(
-            {},
-            {
-              code: 400,
-              parseBody: false,
-            },
-          )
-        ).response.body as { message: string[] };
-        expect(errorMessage.message).toEqual([
-          'At least one field must be provided',
-        ]);
-      });
-    });
-    describe('PATCH /api/v1/users/:id/role (assignRole)', () => {
-      it('should successfully assign new role to user.', async () => {
-        const customer = await UserAuthFlowBuilder.create({
-          dbDataSource: db.dataSource,
-          mailhogClient: mailClient,
-          userAgent: app.createAgent(),
-        })
-          .asRole('customer')
-          .random()
-          .signin()
-          .verified()
-          .build();
-        const assignedUser = await userController.assignRole(
-          customer.userDb.id,
-          WORKER_ROLE.id,
-          { code: 200, parseBody: true },
-        );
-
-        expect({
-          userId: assignedUser.body!.id,
-          roleId: assignedUser.body?.roleId,
-        }).toEqual({
-          userId: customer.userDb.id,
-          roleId: WORKER_ROLE.id,
-        });
-      });
-      it('should fail when unauthorized user request to assign role to user.', async () => {
-        const customer = await UserAuthFlowBuilder.create({
-          dbDataSource: db.dataSource,
-          mailhogClient: mailClient,
-          userAgent: app.createAgent(),
-        })
-          .asRole('customer')
-          .random()
-          .verified()
-          .signin()
-          .build();
-        await userController
-          .withAgent(customer.userAgent)
-          .assignRole(adminUser.userDb.id, WORKER_ROLE.id, { code: 403 });
-      });
-      it('should fail when authorized user request to assign role and this role is not of user requester scope.', async () => {
-        const newRole = {
-          name: 'manager',
-          permissions: [AllPermissions.role.RoleAssignLessOrEqual],
-          assignScope: [AllPermissions.user.UserReadLessOrEqual],
-        };
-        const createdMRole = await roleController.create(newRole, {
-          code: 201,
+  });
+  describe('GET /api/v1/users/:id (findById)', () => {
+    it('should successfully return user profile', async () => {
+      const userWorker = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('worker')
+        .random()
+        .signin()
+        .verified()
+        .build();
+      const userFetched = (
+        await userController.findById(userWorker.userDb.id, {
+          code: 200,
           parseBody: true,
-        });
-        const manager = await UserAuthFlowBuilder.create({
-          dbDataSource: db.dataSource,
-          mailhogClient: mailClient,
-          userAgent: app.createAgent(),
         })
-          .asRole(createdMRole.body!.name)
-          .random()
-          .signin()
-          .verified()
-          .build();
-        const customer = await UserAuthFlowBuilder.create({
-          dbDataSource: db.dataSource,
-          mailhogClient: mailClient,
-          userAgent: app.createAgent(),
-        })
-          .asRole('customer')
-          .random()
-          .signin()
-          .verified()
-          .build();
-        await userController
-          .withAgent(manager.userAgent)
-          .assignRole(customer.userDb.id, ADMIN_ROLE.id, { code: 404 });
-      });
-      it('should fail when authorized user request to assign role to a user higher than the requester.', async () => {
-        const newRole = {
-          name: 'manager',
-          permissions: [AllPermissions.role.RoleAssignLessOrEqual],
-          assignScope: [AllPermissions.user.UserReadLessOrEqual],
-        };
-        const createdMRole = await roleController.create(newRole, {
-          code: 201,
-          parseBody: true,
-        });
-        const manager = await UserAuthFlowBuilder.create({
-          dbDataSource: db.dataSource,
-          mailhogClient: mailClient,
-          userAgent: app.createAgent(),
-        })
-          .asRole(createdMRole.body!.name)
-          .random()
-          .signin()
-          .verified()
-          .build();
-        await userController
-          .withAgent(manager.userAgent)
-          .assignRole(adminUser.userDb.id, CUSTOMER_ROLE.id, { code: 404 });
-      });
+      ).body!;
+      expect(userFetched.id).toEqual(userWorker.userDb.id);
+    });
+    it('should fail to return not found user.', async () => {
+      await userController.findById(v7(), { code: 404 });
+    });
+    it('should fail to return a user that is not of the requester permissions scope.', async () => {
+      const managerRole = {
+        name: 'manager',
+        permissions: [AllPermissions.user.UserReadLessOrEqual.toJSON()],
+      };
+      await roleController.create(managerRole, { code: 201 });
+      const manager = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('manager')
+        .random()
+        .verified()
+        .signin()
+        .build();
+
+      await userController
+        .withAgent(manager.userAgent)
+        .findById(adminUser.userDb.id, { code: 404 });
     });
   });
+  describe('PATCH /api/v1/users/me (updateMe)', () => {
+    it('should successfully update user profile', async () => {
+      const userProfile: UpdateUserTestDto = {
+        name: 'cat',
+        givenName: 'lion',
+        familyName: 'tigers',
+        image: 'http://puppy.com',
+        phone: '+19363463473',
+      };
+      const updateResp = await userController
+        .withAgent(adminUser.userAgent)
+        .updateMe(userProfile, {
+          code: 200,
+          parseBody: true,
+        });
+      const getUpdatedProfile = (
+        await userController.findMe({
+          code: 200,
+          parseBody: true,
+        })
+      ).body!;
+      expect(updateResp.body!).toEqual(getUpdatedProfile);
+    });
+    it('should fail update user profile because of malformed phone number', async () => {
+      const userProfile: UpdateUserTestDto = {
+        phone: '9363463473',
+      };
+      const errorMessage = (
+        await userController
+          .withAgent(adminUser.userAgent)
+          .updateMe(userProfile, {
+            code: 400,
+            parseBody: false,
+          })
+      ).response.body as { message: string[] };
+      expect(errorMessage.message).toEqual([
+        'phone must be a valid E.164 phone number',
+      ]);
+    });
+    it('should fail update user profile when sending empty object.', async () => {
+      const errorMessage = (
+        await userController.withAgent(adminUser.userAgent).updateMe(
+          {},
+          {
+            code: 400,
+            parseBody: false,
+          },
+        )
+      ).response.body as { message: string[] };
+      expect(errorMessage.message).toEqual([
+        'At least one field must be provided',
+      ]);
+    });
+  });
+  describe('PATCH /api/v1/users/:id/role (assignRole)', () => {
+    it('should successfully assign new role to user.', async () => {
+      const customer = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('customer')
+        .random()
+        .signin()
+        .verified()
+        .build();
+      const assignedUser = await userController.assignRole(
+        customer.userDb.id,
+        WORKER_ROLE.id,
+        { code: 200, parseBody: true },
+      );
 
+      expect({
+        userId: assignedUser.body!.id,
+        roleId: assignedUser.body?.roleId,
+      }).toEqual({
+        userId: customer.userDb.id,
+        roleId: WORKER_ROLE.id,
+      });
+    });
+    it('should fail when unauthorized user request to assign role to user.', async () => {
+      const customer = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('customer')
+        .random()
+        .verified()
+        .signin()
+        .build();
+      await userController
+        .withAgent(customer.userAgent)
+        .assignRole(adminUser.userDb.id, WORKER_ROLE.id, { code: 403 });
+    });
+    it('should fail when authorized user request to assign role and this role is not of user requester scope.', async () => {
+      const newRole = {
+        name: 'manager',
+        permissions: [AllPermissions.role.RoleAssignLessOrEqual],
+        assignScope: [AllPermissions.user.UserReadLessOrEqual],
+      };
+      const createdMRole = await roleController.create(newRole, {
+        code: 201,
+        parseBody: true,
+      });
+      const manager = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole(createdMRole.body!.name)
+        .random()
+        .signin()
+        .verified()
+        .build();
+      const customer = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('customer')
+        .random()
+        .signin()
+        .verified()
+        .build();
+      await userController
+        .withAgent(manager.userAgent)
+        .assignRole(customer.userDb.id, ADMIN_ROLE.id, { code: 404 });
+    });
+    it('should fail when authorized user request to assign role to a user higher than the requester.', async () => {
+      const newRole = {
+        name: 'manager',
+        permissions: [AllPermissions.role.RoleAssignLessOrEqual],
+        assignScope: [AllPermissions.user.UserReadLessOrEqual],
+      };
+      const createdMRole = await roleController.create(newRole, {
+        code: 201,
+        parseBody: true,
+      });
+      const manager = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole(createdMRole.body!.name)
+        .random()
+        .signin()
+        .verified()
+        .build();
+      await userController
+        .withAgent(manager.userAgent)
+        .assignRole(adminUser.userDb.id, CUSTOMER_ROLE.id, { code: 404 });
+    });
+  });
   afterEach(async () => {
     await db.cleanup();
     await app.cleanup();
