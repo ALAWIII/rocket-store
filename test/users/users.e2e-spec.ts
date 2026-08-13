@@ -7,26 +7,30 @@ import {
 } from '../support/helpers/auth-user-flow.builder';
 import { createAuthenticatedTestContext } from '../support/fixtures/create-authenticated-test-context.fixture';
 import { AllPermissions } from 'src/modules/access-control/domain/permission';
-import { RoleResponseDto } from 'src/modules/access-control/dto/role-response.dto';
-import { FindUsersResponseDto } from 'src/modules/users/dto/find-users-response.dto';
 import { CUSTOMER_ROLE } from 'src/modules/access-control/application/system-roles/system-roles.definition';
-import { UserResponseDto } from 'src/modules/users/dto/user-response.dto';
 import { v7 } from 'uuid';
+import { UsersControllerTest } from 'test/support/controllers/users/users.controller-test';
+import { RolesControllerTest } from 'test/support/controllers/roles.controller-test';
 
 describe('users (e2e)', () => {
   let app: TestApp;
   let db: TestDatabase;
   let mailClient: MailhogClient;
   let adminUser: AuthUserResult;
+  let userController: UsersControllerTest;
+  let roleController: RolesControllerTest;
   beforeEach(async () => {
     ({ app, db, mailClient, adminUser } =
       await createAuthenticatedTestContext());
+    userController = new UsersControllerTest(adminUser.userAgent);
+    roleController = new RolesControllerTest(adminUser.userAgent);
   });
   describe('GET /api/v1/users/me (findMe)', () => {
     it('should return user profile.', async () => {
-      const userResp = await adminUser.userAgent
-        .get('/api/v1/users/me')
-        .expect(200);
+      const userResp = await userController.findMe({
+        code: 200,
+        parseBody: true,
+      });
       expect(userResp.body).toEqual({
         id: adminUser.userDb.id,
         name: adminUser.userDb.name,
@@ -37,21 +41,18 @@ describe('users (e2e)', () => {
       });
     });
   });
-  describe('GET /api/v1/users', () => {
+  describe('GET /api/v1/users (findAll)', () => {
     it('should return all users whose permissions are a subset of the requester permissions.', async () => {
       const managerRole = {
         name: 'manager',
         permissions: [
-          AllPermissions.user.UserReadLessOrEqual,
-          AllPermissions.address.AddressReadLessOrEqual,
+          AllPermissions.user.UserReadLessOrEqual.toJSON(),
+          AllPermissions.address.AddressReadLessOrEqual.toJSON(),
         ],
       };
       const managerRoleResp = (
-        await adminUser.userAgent
-          .post('/api/v1/roles')
-          .send(managerRole)
-          .expect(201)
-      ).body as RoleResponseDto;
+        await roleController.create(managerRole, { code: 201, parseBody: true })
+      ).body!;
       const rolesName = ['manager', 'worker', 'customer'];
       const expectedUsers: AuthUserResult[] = [];
       for (const nm of rolesName) {
@@ -69,8 +70,10 @@ describe('users (e2e)', () => {
         );
       }
       const managerRequestUsersList = (
-        await expectedUsers[0].userAgent.get('/api/v1/users').expect(200)
-      ).body as FindUsersResponseDto;
+        await userController
+          .withAgent(expectedUsers[0].userAgent)
+          .findAll({ code: 200, parseBody: true })
+      ).body!;
       const returndUserIds = managerRequestUsersList.users
         .map((user) => user.id)
         .sort();
@@ -92,7 +95,7 @@ describe('users (e2e)', () => {
         .verified()
         .signin()
         .build();
-      await customer.userAgent.get('/api/v1/users').expect(403);
+      await userController.withAgent(customer.userAgent).findAll({ code: 403 });
     });
     it('should return number of users equal to page and limit', async () => {
       const allUsers: AuthUserResult[] = [adminUser];
@@ -111,23 +114,23 @@ describe('users (e2e)', () => {
         );
       }
       const first10Users = (
-        await adminUser.userAgent
-          .get('/api/v1/users')
-          .query({ page: 1, limit: 10 })
-          .expect(200)
-      ).body as FindUsersResponseDto;
+        await userController.findAll(
+          { code: 200, parseBody: true },
+          { page: 1, limit: 10 },
+        )
+      ).body!;
       const second10Users = (
-        await adminUser.userAgent
-          .get('/api/v1/users')
-          .query({ page: 2, limit: 10 })
-          .expect(200)
-      ).body as FindUsersResponseDto;
+        await userController.findAll(
+          { code: 200, parseBody: true },
+          { page: 2, limit: 10 },
+        )
+      ).body!;
       const lastUser = (
-        await adminUser.userAgent
-          .get('/api/v1/users')
-          .query({ page: 3, limit: 10 })
-          .expect(200)
-      ).body as FindUsersResponseDto;
+        await userController.findAll(
+          { code: 200, parseBody: true },
+          { page: 3, limit: 10 },
+        )
+      ).body!;
       const allReturnedUsersIds = [
         ...first10Users.users,
         ...second10Users.users,
@@ -172,11 +175,11 @@ describe('users (e2e)', () => {
         .signin()
         .build();
       const usersByRoleId = (
-        await adminUser.userAgent
-          .get('/api/v1/users')
-          .query({ roleId: CUSTOMER_ROLE.id })
-          .expect(200)
-      ).body as FindUsersResponseDto;
+        await userController.findAll(
+          { code: 200, parseBody: true },
+          { roleId: CUSTOMER_ROLE.id },
+        )
+      ).body!;
       expect(usersByRoleId.users.length).toBe(20);
       expect(
         // admin and worker users should not be included.
@@ -190,15 +193,15 @@ describe('users (e2e)', () => {
       ).toBe(true);
 
       const usersByEmail = (
-        await adminUser.userAgent
-          .get('/api/v1/users')
-          .query({ email: allUsers[1].userDb.email })
-          .expect(200)
-      ).body as FindUsersResponseDto;
+        await userController.findAll(
+          { code: 200, parseBody: true },
+          { email: allUsers[1].userDb.email },
+        )
+      ).body!;
       expect(usersByEmail.users.length).toBe(1);
       expect(usersByEmail.users[0].id).toEqual(allUsers[1].userDb.id);
     });
-    describe('GET /api/v1/users/:id', () => {
+    describe('GET /api/v1/users/:id (findById)', () => {
       it('should successfully return user profile', async () => {
         const userWorker = await UserAuthFlowBuilder.create({
           dbDataSource: db.dataSource,
@@ -211,24 +214,22 @@ describe('users (e2e)', () => {
           .verified()
           .build();
         const userFetched = (
-          await adminUser.userAgent
-            .get(`/api/v1/users/${userWorker.userDb.id}`)
-            .expect(200)
-        ).body as UserResponseDto;
+          await userController.findById(userWorker.userDb.id, {
+            code: 200,
+            parseBody: true,
+          })
+        ).body!;
         expect(userFetched.id).toEqual(userWorker.userDb.id);
       });
       it('should fail to return not found user.', async () => {
-        await adminUser.userAgent.get(`/api/v1/users/${v7()}`).expect(404);
+        await userController.findById(v7(), { code: 404 });
       });
       it('should fail to return a user that is not of the requester permissions scope.', async () => {
         const managerRole = {
           name: 'manager',
-          permissions: [AllPermissions.user.UserReadLessOrEqual],
+          permissions: [AllPermissions.user.UserReadLessOrEqual.toJSON()],
         };
-        await adminUser.userAgent
-          .post('/api/v1/roles')
-          .send(managerRole)
-          .expect(201);
+        await roleController.create(managerRole, { code: 201 });
         const manager = await UserAuthFlowBuilder.create({
           dbDataSource: db.dataSource,
           mailhogClient: mailClient,
@@ -239,9 +240,10 @@ describe('users (e2e)', () => {
           .verified()
           .signin()
           .build();
-        await manager.userAgent
-          .get(`/api/v1/users/${adminUser.userDb.id}`)
-          .expect(404);
+
+        await userController
+          .withAgent(manager.userAgent)
+          .findById(adminUser.userDb.id, { code: 404 });
       });
     });
   });
