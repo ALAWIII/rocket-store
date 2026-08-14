@@ -585,5 +585,71 @@ describe.concurrent('users (e2e)', () => {
       );
       expect(userAfterAssign.body?.roleId).toEqual(CUSTOMER_ROLE.id);
     });
+    it('should fail to assign against users that thier role is not subset of the requester role while the new role is subset of the user requester role .', async ({
+      roleController,
+      userController,
+      app,
+      mailClient,
+      db,
+    }) => {
+      //=========================== creating manager role.
+      const managerRole = await roleController.create(
+        {
+          name: 'manager',
+          permissions: [
+            AllPermissions.role.RoleAssignLessOrEqual,
+            AllPermissions.user.UserReadLessOrEqual,
+          ],
+          assignScope: [AllPermissions.user.UserReadLessOrEqual],
+        },
+        {
+          code: 201,
+          parseBody: true,
+        },
+      );
+      const manager = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole(managerRole.body!.name)
+        .random()
+        .signin()
+        .verified()
+        .build();
+      //=========================== creating test user with newrole role.
+
+      const userBeforeAssign = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('worker')
+        .random()
+        .signin()
+        .verified()
+        .build();
+      const assignResp = await userController
+        .withAgent(manager.userAgent)
+        .reassignUsersRole(
+          { oldRoleId: WORKER_ROLE.id, newRoleId: CUSTOMER_ROLE.id },
+          { code: 200, parseBody: true },
+        );
+      expect(assignResp.body).toEqual({ affected: 0 });
+      //====
+      const userAfterAssign = await userController.findById(
+        userBeforeAssign.userDb.id,
+        {
+          code: 200,
+          parseBody: true,
+        },
+      );
+      /// its role id must be unchanged.
+      expect(userAfterAssign.body?.id).toEqual(userBeforeAssign.userDb.id);
+      expect(userAfterAssign.body?.roleId).toEqual(
+        userBeforeAssign.userDb.roleId,
+      );
+      expect(userAfterAssign.body?.roleId).toEqual(WORKER_ROLE.id);
+    });
   });
 });
