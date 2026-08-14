@@ -9,6 +9,10 @@ import { AddressEntity } from './infrastructure/entities/address.entity';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { AddressService } from './address.service';
+import {
+  MyAddressesController,
+  UserAddressesController,
+} from './addresses.controller';
 @Module({
   imports: [TypeOrmModule.forFeature([UserEntity, AddressEntity])],
   providers: [
@@ -18,6 +22,10 @@ import { AddressService } from './address.service';
     AddressService,
   ],
   exports: [IUserRepository, IAddressRepository],
-  controllers: [UsersController],
+  controllers: [
+    UsersController,
+    MyAddressesController,
+    UserAddressesController,
+  ],
 })
 export class UsersModule {}
