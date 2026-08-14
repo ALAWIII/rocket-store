@@ -1,11 +1,8 @@
-import { MailhogClient } from 'mailhog-awesome';
-import { TestApp } from '../support/helpers/app-test.helper';
-import { TestDatabase } from '../support/helpers/database-test.helper';
 import {
   AuthUserResult,
   UserAuthFlowBuilder,
 } from '../support/helpers/auth-user-flow.builder';
-import { createAuthenticatedTestContext } from '../support/fixtures/create-authenticated-test-context.fixture';
+import { it } from '../support/fixtures/authenticated-e2e.fixture';
 import { AllPermissions } from 'src/modules/access-control/domain/permission';
 import {
   ADMIN_ROLE,
@@ -13,25 +10,12 @@ import {
   WORKER_ROLE,
 } from 'src/modules/access-control/application/system-roles/system-roles.definition';
 import { v7 } from 'uuid';
-import { UsersControllerTest } from 'test/support/controllers/users/users.controller-test';
-import { RolesControllerTest } from 'test/support/controllers/roles.controller-test';
+
 import { UpdateUserTestDto } from 'test/support/types/user/update-user.dto.type';
 
-describe('users (e2e)', () => {
-  let app: TestApp;
-  let db: TestDatabase;
-  let mailClient: MailhogClient;
-  let adminUser: AuthUserResult;
-  let userController: UsersControllerTest;
-  let roleController: RolesControllerTest;
-  beforeEach(async () => {
-    ({ app, db, mailClient, adminUser } =
-      await createAuthenticatedTestContext());
-    userController = new UsersControllerTest(adminUser.userAgent);
-    roleController = new RolesControllerTest(adminUser.userAgent);
-  });
+describe.concurrent('users (e2e)', () => {
   describe('GET /api/v1/users/me (findMe)', () => {
-    it('should return user profile.', async () => {
+    it('should return user profile.', async ({ userController, adminUser }) => {
       const userResp = await userController.findMe({
         code: 200,
         parseBody: true,
@@ -46,8 +30,16 @@ describe('users (e2e)', () => {
       });
     });
   });
+
   describe('GET /api/v1/users (findAll)', () => {
-    it('should return all users whose permissions are a subset of the requester permissions.', async () => {
+    it('should return all users whose permissions are a subset of the requester permissions.', async ({
+      userController,
+      roleController,
+      db,
+      mailClient,
+      app,
+      adminUser,
+    }) => {
       const managerRole = {
         name: 'manager',
         permissions: [
@@ -88,7 +80,13 @@ describe('users (e2e)', () => {
       expect(managerRequestUsersList.total).toStrictEqual(3);
       expect(returndUserIds).not.toContain(adminUser.userDb.id);
     });
-    it('should fail when unauthorized user attempts to fetch list of users.', async () => {
+
+    it('should fail when unauthorized user attempts to fetch list of users.', async ({
+      userController,
+      db,
+      mailClient,
+      app,
+    }) => {
       const customer = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
         mailhogClient: mailClient,
@@ -101,7 +99,14 @@ describe('users (e2e)', () => {
         .build();
       await userController.withAgent(customer.userAgent).findAll({ code: 403 });
     });
-    it('should return number of users equal to page and limit', async () => {
+
+    it('should return number of users equal to page and limit', async ({
+      userController,
+      db,
+      mailClient,
+      app,
+      adminUser,
+    }) => {
       const allUsers: AuthUserResult[] = [adminUser];
       for (let i = 1; i <= 20; i++) {
         allUsers.push(
@@ -152,7 +157,14 @@ describe('users (e2e)', () => {
       expect(second10Users.total).toBe(21);
       expect(lastUser.total).toBe(21);
     });
-    it('should return users based on filter parameters.', async () => {
+
+    it('should return users based on filter parameters.', async ({
+      userController,
+      db,
+      mailClient,
+      app,
+      adminUser,
+    }) => {
       const allUsers: AuthUserResult[] = [adminUser];
       for (let i = 1; i <= 20; i++) {
         allUsers.push(
@@ -186,13 +198,11 @@ describe('users (e2e)', () => {
       ).body!;
       expect(usersByRoleId.users.length).toBe(20);
       expect(
-        // admin and worker users should not be included.
         usersByRoleId.users.some((u) =>
           [adminUser.userDb.id, workerUser.userDb.id].includes(u.id),
         ),
       ).toBe(false);
       expect(
-        // only users who have customer roleId are included.
         usersByRoleId.users.every((u) => u.roleId === CUSTOMER_ROLE.id),
       ).toBe(true);
 
@@ -206,8 +216,14 @@ describe('users (e2e)', () => {
       expect(usersByEmail.users[0].id).toEqual(allUsers[1].userDb.id);
     });
   });
+
   describe('GET /api/v1/users/:id (findById)', () => {
-    it('should successfully return user profile', async () => {
+    it('should successfully return user profile', async ({
+      userController,
+      db,
+      mailClient,
+      app,
+    }) => {
       const userWorker = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
         mailhogClient: mailClient,
@@ -226,10 +242,19 @@ describe('users (e2e)', () => {
       ).body!;
       expect(userFetched.id).toEqual(userWorker.userDb.id);
     });
-    it('should fail to return not found user.', async () => {
+
+    it('should fail to return not found user.', async ({ userController }) => {
       await userController.findById(v7(), { code: 404 });
     });
-    it('should fail to return a user that is not of the requester permissions scope.', async () => {
+
+    it('should fail to return a user that is not of the requester permissions scope.', async ({
+      userController,
+      roleController,
+      db,
+      mailClient,
+      app,
+      adminUser,
+    }) => {
       const managerRole = {
         name: 'manager',
         permissions: [AllPermissions.user.UserReadLessOrEqual.toJSON()],
@@ -251,8 +276,12 @@ describe('users (e2e)', () => {
         .findById(adminUser.userDb.id, { code: 404 });
     });
   });
+
   describe('PATCH /api/v1/users/me (updateMe)', () => {
-    it('should successfully update user profile', async () => {
+    it('should successfully update user profile', async ({
+      userController,
+      adminUser,
+    }) => {
       const userProfile: UpdateUserTestDto = {
         name: 'cat',
         givenName: 'lion',
@@ -274,7 +303,11 @@ describe('users (e2e)', () => {
       ).body!;
       expect(updateResp.body!).toEqual(getUpdatedProfile);
     });
-    it('should fail update user profile because of malformed phone number', async () => {
+
+    it('should fail update user profile because of malformed phone number', async ({
+      userController,
+      adminUser,
+    }) => {
       const userProfile: UpdateUserTestDto = {
         phone: '9363463473',
       };
@@ -290,7 +323,11 @@ describe('users (e2e)', () => {
         'phone must be a valid E.164 phone number',
       ]);
     });
-    it('should fail update user profile when sending empty object.', async () => {
+
+    it('should fail update user profile when sending empty object.', async ({
+      userController,
+      adminUser,
+    }) => {
       const errorMessage = (
         await userController.withAgent(adminUser.userAgent).updateMe(
           {},
@@ -305,8 +342,14 @@ describe('users (e2e)', () => {
       ]);
     });
   });
+
   describe('PATCH /api/v1/users/:id/role (assignRole)', () => {
-    it('should successfully assign new role to user.', async () => {
+    it('should successfully assign new role to user.', async ({
+      userController,
+      db,
+      mailClient,
+      app,
+    }) => {
       const customer = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
         mailhogClient: mailClient,
@@ -331,7 +374,14 @@ describe('users (e2e)', () => {
         roleId: WORKER_ROLE.id,
       });
     });
-    it('should fail when unauthorized user request to assign role to user.', async () => {
+
+    it('should fail when unauthorized user request to assign role to user.', async ({
+      userController,
+      db,
+      mailClient,
+      app,
+      adminUser,
+    }) => {
       const customer = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
         mailhogClient: mailClient,
@@ -346,7 +396,14 @@ describe('users (e2e)', () => {
         .withAgent(customer.userAgent)
         .assignRole(adminUser.userDb.id, WORKER_ROLE.id, { code: 403 });
     });
-    it('should fail when authorized user request to assign role and this role is not of user requester scope.', async () => {
+
+    it('should fail when authorized user request to assign role and this role is not of user requester scope.', async ({
+      userController,
+      roleController,
+      db,
+      mailClient,
+      app,
+    }) => {
       const newRole = {
         name: 'manager',
         permissions: [AllPermissions.role.RoleAssignLessOrEqual],
@@ -380,7 +437,15 @@ describe('users (e2e)', () => {
         .withAgent(manager.userAgent)
         .assignRole(customer.userDb.id, ADMIN_ROLE.id, { code: 404 });
     });
-    it('should fail when authorized user request to assign role to a user higher than the requester.', async () => {
+
+    it('should fail when authorized user request to assign role to a user higher than the requester.', async ({
+      userController,
+      roleController,
+      db,
+      mailClient,
+      app,
+      adminUser,
+    }) => {
       const newRole = {
         name: 'manager',
         permissions: [AllPermissions.role.RoleAssignLessOrEqual],
@@ -404,9 +469,5 @@ describe('users (e2e)', () => {
         .withAgent(manager.userAgent)
         .assignRole(adminUser.userDb.id, CUSTOMER_ROLE.id, { code: 404 });
     });
-  });
-  afterEach(async () => {
-    await db.cleanup();
-    await app.cleanup();
   });
 });

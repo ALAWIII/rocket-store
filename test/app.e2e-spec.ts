@@ -1,26 +1,16 @@
-import { TestDatabase } from './support/helpers/database-test.helper';
-import { TestApp } from './support/helpers/app-test.helper';
-import { MailhogClient } from 'mailhog-awesome';
-import { AuthUserResult } from './support/helpers/auth-user-flow.builder';
-import { createAuthenticatedTestContext } from './support/fixtures/create-authenticated-test-context.fixture';
+import { it } from './support/fixtures/authenticated-e2e.fixture';
 import { extractRawCookieToken } from './support/utils/extract-session-token.util';
 
-describe('AppController (e2e)', () => {
-  let app: TestApp;
-  let db: TestDatabase;
-  let mailClient: MailhogClient;
-  let adminUser: AuthUserResult;
-  beforeEach(async () => {
-    ({ app, db, mailClient, adminUser } =
-      await createAuthenticatedTestContext());
-  });
-
-  it('GET /api/auth/ok it should return 200 success', () => {
+describe.concurrent('AppController (e2e)', () => {
+  it('GET /api/auth/ok it should return 200 success', ({ app }) => {
     const response = app.httpClient.get('/api/auth/ok');
     return response.expect(200);
   });
 
-  it('admin user cookie session token must be stored in database sessions table.', async () => {
+  it('admin user cookie session token must be stored in database sessions table.', async ({
+    db,
+    adminUser,
+  }) => {
     const token = extractRawCookieToken(
       adminUser.userAgent,
       'better-auth.session_token',
@@ -34,7 +24,7 @@ describe('AppController (e2e)', () => {
     );
   });
   describe('GET /api/auth/get-session', () => {
-    it('should return session user profile.', async () => {
+    it('should return session user profile.', async ({ adminUser }) => {
       const response = await adminUser.userAgent
         .get('/api/auth/get-session')
         .expect(200);
@@ -44,10 +34,6 @@ describe('AppController (e2e)', () => {
       expect(sessionBody.user.roleId).toEqual(adminUser.userDb.roleId);
       expect(sessionBody.session.roleId).toEqual(adminUser.userDb.roleId);
     });
-  });
-  afterEach(async () => {
-    await db.cleanup();
-    await app.cleanup();
   });
 });
 type SessionResponse = {
