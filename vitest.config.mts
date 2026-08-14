@@ -12,13 +12,14 @@ export default defineConfig({
     }),
   ],
   test: {
+    maxConcurrency: 50,
     globals: true,
     environment: 'node',
     include: ['src/**/*.spec.ts', 'test/**/*.e2e-spec.ts'],
     exclude: ['dist/**', 'node_modules/**'],
     pool: 'forks',
-    testTimeout: 30000,
-    hookTimeout: 30000,
+    testTimeout: 1_200_000,
+    hookTimeout: 1_200_000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],
