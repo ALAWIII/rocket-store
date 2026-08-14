@@ -509,5 +509,81 @@ describe.concurrent('users (e2e)', () => {
         findAllUsers.body?.users.every((u) => u.roleId === WORKER_ROLE.id),
       ).toBe(true);
     });
+    it('should fail when try to assign different new role that is not a subset of the user requester role.', async ({
+      roleController,
+      userController,
+      app,
+      mailClient,
+      db,
+    }) => {
+      // --------------------------- user with manager role, can not assign role worker to users, because worker is not subset of manager.
+      //=========================== creating manager role.
+      const managerRole = await roleController.create(
+        {
+          name: 'manager',
+          permissions: [
+            AllPermissions.role.RoleAssignLessOrEqual,
+            AllPermissions.user.UserReadLessOrEqual,
+          ],
+          assignScope: [AllPermissions.user.UserReadLessOrEqual],
+        },
+        {
+          code: 201,
+          parseBody: true,
+        },
+      );
+      const manager = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole(managerRole.body!.name)
+        .random()
+        .signin()
+        .verified()
+        .build();
+      //=========================== creating test user with customer role
+      const userBeforeAssign = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('customer')
+        .random()
+        .signin()
+        .verified()
+        .build();
+      const newRole = await roleController.create(
+        {
+          name: 'newrole',
+          permissions: [AllPermissions.address.AddressReadLessOrEqual],
+        },
+        {
+          code: 201,
+          parseBody: true,
+        },
+      );
+      const assignResp = await userController
+        .withAgent(manager.userAgent)
+        .reassignUsersRole(
+          { oldRoleId: CUSTOMER_ROLE.id, newRoleId: newRole.body!.id },
+          { code: 200, parseBody: true },
+        );
+      expect(assignResp.body).toEqual({ affected: 0 });
+      //====
+      const userAfterAssign = await userController.findById(
+        userBeforeAssign.userDb.id,
+        {
+          code: 200,
+          parseBody: true,
+        },
+      );
+      /// its role id must be unchanged.
+      expect(userAfterAssign.body?.id).toEqual(userBeforeAssign.userDb.id);
+      expect(userAfterAssign.body?.roleId).toEqual(
+        userBeforeAssign.userDb.roleId,
+      );
+      expect(userAfterAssign.body?.roleId).toEqual(CUSTOMER_ROLE.id);
+    });
   });
 });
