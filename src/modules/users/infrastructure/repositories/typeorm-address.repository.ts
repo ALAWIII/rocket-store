@@ -102,7 +102,7 @@ export class AddressRepository implements IAddressRepository {
     return Address.fromPrimitives({ ...adrs }).mapErr(
       (e) =>
         new CorruptedPersistenceDataError(
-          `Failed to construct address from AddressEntity.`,
+          `Failed to construct address from AddressEntity: ${e.message}`,
           e,
         ),
     );
