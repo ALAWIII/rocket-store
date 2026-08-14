@@ -2,7 +2,7 @@ import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuid
 import { Entity, Column, Index } from 'typeorm';
 import { PermissionDatabaseDto } from '../dto/permission-database.dto';
 
-@Entity('roles')
+@Entity('roles', { synchronize: false })
 export class RoleEntity {
   @UuidV7PrimaryColumn()
   id!: string;
