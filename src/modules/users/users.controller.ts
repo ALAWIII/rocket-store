@@ -76,7 +76,9 @@ export class UsersController {
   async reassignUsersRole(
     @Session() session: AppSession,
     @Body() dto: ReassignUsersRoleDto,
-  ): Promise<number> {
-    return this.service.assignRoleToUsers(session.user.roleId, dto);
+  ): Promise<{ affected: number }> {
+    return {
+      affected: await this.service.assignRoleToUsers(session.user.roleId, dto),
+    };
   }
 }
