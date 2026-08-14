@@ -20,7 +20,7 @@ export class UpdateMeDto {
   image?: string;
   @IsOptional()
   @IsString()
-  @Matches(/^\+[1-9]\d{3,14}$/, {
+  @Matches(/^\+[1-9]\d{3,15}$/, {
     message: 'phone must be a valid E.164 phone number',
   })
   phone?: string;
