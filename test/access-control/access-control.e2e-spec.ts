@@ -153,6 +153,12 @@ describe.concurrent('access-control (e2e)', () => {
         code: 400,
       });
     });
+    it('should fail to create new role that its permissions shape is identical to existing role.', async ({
+      roleController,
+    }) => {
+      const newCustomer = { name: 'newcustomer', permissions: [] };
+      await roleController.create(newCustomer, { code: 409 });
+    });
   });
   describe('PUT /api/v1/roles/:id', () => {
     it('should successfully rename non-system role.', async ({
