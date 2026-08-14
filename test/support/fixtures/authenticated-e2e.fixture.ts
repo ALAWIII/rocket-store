@@ -7,6 +7,10 @@ import { createMailhogClient } from '../helpers/mailhog-client.helper';
 import { UserAuthFlowBuilder } from '../helpers/auth-user-flow.builder';
 import { RolesControllerTest } from '../controllers/roles.controller-test';
 import { UsersControllerTest } from '../controllers/users/users.controller-test';
+import {
+  MyAddressesControllerTest,
+  UserAddressesControllerTest,
+} from '../controllers/users/addresses.controller-test';
 
 export const test = baseTest
   .extend('mailClient', async () => {
@@ -52,5 +56,11 @@ export const test = baseTest
   })
   .extend('roleController', async ({ adminUser }) => {
     return new RolesControllerTest(adminUser.userAgent);
+  })
+  .extend('myAddressController', async ({ adminUser }) => {
+    return new MyAddressesControllerTest(adminUser.userAgent);
+  })
+  .extend('userAddressController', async ({ adminUser }) => {
+    return new UserAddressesControllerTest(adminUser.userAgent);
   });
 export const it = test;
