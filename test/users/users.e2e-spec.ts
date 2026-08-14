@@ -470,4 +470,44 @@ describe.concurrent('users (e2e)', () => {
         .assignRole(adminUser.userDb.id, CUSTOMER_ROLE.id, { code: 404 });
     });
   });
+  describe('PATCH /api/v1/users/roles/reassign (reassignUsersRole)', () => {
+    it('should successfully reassign all users to new role.', async ({
+      mailClient,
+      app,
+      db,
+      userController,
+    }) => {
+      const customers: AuthUserResult[] = [];
+      for (let i = 1; i <= 5; i++) {
+        customers.push(
+          await UserAuthFlowBuilder.create({
+            dbDataSource: db.dataSource,
+            userAgent: app.createAgent(),
+            mailhogClient: mailClient,
+          })
+            .asRole('customer')
+            .random()
+            .verified()
+            .signin()
+            .build(),
+        );
+      }
+      const assignResponse = await userController.reassignUsersRole(
+        { oldRoleId: CUSTOMER_ROLE.id, newRoleId: WORKER_ROLE.id },
+        { code: 200, parseBody: true },
+      );
+      const findAllUsers = await userController.findAll(
+        {
+          code: 200,
+          parseBody: true,
+        },
+        { roleId: WORKER_ROLE.id },
+      );
+      expect(assignResponse.body).toEqual({ affected: 5 });
+      expect(findAllUsers.body?.total).toBe(5);
+      expect(
+        findAllUsers.body?.users.every((u) => u.roleId === WORKER_ROLE.id),
+      ).toBe(true);
+    });
+  });
 });
