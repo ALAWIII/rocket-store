@@ -3,7 +3,6 @@ import { IAddressRepository } from './infrastructure/repositories/address.reposi
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { Address } from './domain/address';
 import { CreateAddressDto } from './dto/create-address.dto';
-import { AddressId } from '../shared/domain/ids';
 import { AddressResponseDto } from './dto/address-response.dto';
 
 @Injectable()
@@ -32,7 +31,6 @@ export class AddressService {
     userId: string,
     data: CreateAddressDto,
   ): Promise<AddressResponseDto> {
-    const newDate = new Date();
     const newAdrs = Address.create({
       userId,
       ...data,
