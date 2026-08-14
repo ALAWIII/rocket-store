@@ -89,5 +89,18 @@ export class UsersControllerTest {
     );
     return { response, body };
   }
-  reassignUsersRole(statusCode: ExpectedTestStatusCode) {}
+  async reassignUsersRole(
+    roles: { oldRoleId: string; newRoleId: string },
+    statusCode: ExpectedTestStatusCode,
+  ) {
+    const response = await this.agent
+      .patch(`/api/v1/users/roles/reassign`)
+      .send(roles)
+      .expect(statusCode.code);
+    const body = parseResponseBody<{ affected: number }>(
+      response,
+      statusCodesListNormalize(statusCode),
+    );
+    return { response, body };
+  }
 }
