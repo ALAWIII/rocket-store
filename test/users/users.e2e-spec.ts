@@ -553,20 +553,11 @@ describe.concurrent('users (e2e)', () => {
         .signin()
         .verified()
         .build();
-      const newRole = await roleController.create(
-        {
-          name: 'newrole',
-          permissions: [AllPermissions.address.AddressReadLessOrEqual],
-        },
-        {
-          code: 201,
-          parseBody: true,
-        },
-      );
+
       const assignResp = await userController
         .withAgent(manager.userAgent)
         .reassignUsersRole(
-          { oldRoleId: CUSTOMER_ROLE.id, newRoleId: newRole.body!.id },
+          { oldRoleId: CUSTOMER_ROLE.id, newRoleId: WORKER_ROLE.id },
           { code: 200, parseBody: true },
         );
       expect(assignResp.body).toEqual({ affected: 0 });
