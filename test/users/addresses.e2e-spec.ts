@@ -202,4 +202,36 @@ describe.concurrent('adminstrative addresses (e2e)', () => {
         .findById(customer.userDb.id, customerAdrs.body!.id, { code: 403 });
     });
   });
+  describe(`GET ${apiPrefix}/:userId/addresses/ (findAllForUser)`, () => {
+    it('should success return address by authorized requester user.', async ({
+      app,
+      db,
+      mailClient,
+      userAddressController,
+      myAddressController,
+    }) => {
+      const customer = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('customer')
+        .random()
+        .verified()
+        .signin()
+        .build();
+      const customerAdrs = await myAddressController
+        .withAgent(customer.userAgent)
+        .create(createRandomAddress(), {
+          code: 201,
+          parseBody: true,
+        });
+      //============================
+      const fetchedAdrss = await userAddressController.findAllForUser(
+        customer.userDb.id,
+        { code: 200, parseBody: true },
+      );
+      expect(fetchedAdrss.body).toEqual([customerAdrs.body]);
+    });
+  });
 });
