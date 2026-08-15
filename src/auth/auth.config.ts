@@ -31,7 +31,10 @@ export function createAuth(
   emailService: IAuthEmailService,
 ) {
   return betterAuth({
-    database: typeormAdapter(dataSource, { usePlural: true }),
+    database: typeormAdapter(dataSource, {
+      usePlural: true,
+      columnTypeOverrides: { user: { image: 'uuid' }, image: { id: 'uuid' } },
+    }),
     //--------------------------
     logger: {
       level: toAppLogLevel(config.get('LOG_LEVEL')),
