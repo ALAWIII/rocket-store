@@ -12,22 +12,22 @@ export class AddressEntity {
   @UuidV7PrimaryColumn()
   id!: string;
 
-  @Column('varchar', { length: 50 })
+  @Column('varchar', { length: 100 })
   fullName!: string;
 
   @Column('varchar', { length: 20 })
   phone!: string;
 
-  @Column('varchar', { length: 30 })
+  @Column('varchar', { length: 50 })
   country!: string;
 
-  @Column('varchar', { length: 30 })
+  @Column('varchar', { length: 50 })
   city!: string;
 
-  @Column('varchar', { length: 30 })
+  @Column('varchar', { length: 50 })
   state!: string;
 
-  @Column('varchar', { length: 40 })
+  @Column('varchar', { length: 50 })
   postalCode!: string;
 
   @Column('varchar', { length: 50 })
