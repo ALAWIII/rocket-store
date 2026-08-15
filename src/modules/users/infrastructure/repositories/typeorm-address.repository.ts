@@ -79,8 +79,8 @@ export class AddressRepository implements IAddressRepository {
         .update(AddressEntity)
         .set(values)
         .where('id = :id', { id })
-        .andWhere('user_id = :userId', { userId })
-        .andWhere('deleted_at IS NULL')
+        .andWhere('userId = :userId', { userId })
+        .andWhere('deletedAt IS NULL')
         .returning('*')
         .execute();
 
