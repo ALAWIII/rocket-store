@@ -163,5 +163,43 @@ describe.concurrent('adminstrative addresses (e2e)', () => {
       );
       expect(fetchedAdrs.body).toEqual(customerAdrs.body);
     });
+    it('should fail find address by unauthorized requester user.', async ({
+      app,
+      db,
+      mailClient,
+      userAddressController,
+      myAddressController,
+    }) => {
+      const customer = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('customer')
+        .random()
+        .verified()
+        .signin()
+        .build();
+      const customerAdrs = await myAddressController
+        .withAgent(customer.userAgent)
+        .create(createRandomAddress(), {
+          code: 201,
+          parseBody: true,
+        });
+      //===================== create another user who doesnt has AddressReadLessOrEqual permission
+      const customer2 = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('customer')
+        .random()
+        .verified()
+        .signin()
+        .build();
+      await userAddressController
+        .withAgent(customer2.userAgent)
+        .findById(customer.userDb.id, customerAdrs.body!.id, { code: 403 });
+    });
   });
 });
