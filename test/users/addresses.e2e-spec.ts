@@ -53,4 +53,19 @@ describe.concurrent('addresses (e2e)', () => {
       );
     });
   });
+  describe(`GET ${apiPrefix}/:id (findById)`, () => {
+    it('should successfully return address by its id for requester user.', async ({
+      myAddressController,
+    }) => {
+      const adrs = await myAddressController.create(createRandomAddress(), {
+        code: 201,
+        parseBody: true,
+      });
+      const findAdrs = await myAddressController.findById(adrs.body!.id, {
+        code: 200,
+        parseBody: true,
+      });
+      expect(adrs.body).toEqual(findAdrs.body);
+    });
+  });
 });
