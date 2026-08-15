@@ -130,3 +130,38 @@ describe.concurrent('addresses (e2e)', () => {
     });
   });
 });
+describe.concurrent('adminstrative addresses (e2e)', () => {
+  const apiPrefix = '/api/v1/users';
+  describe(`GET ${apiPrefix}/:userId/addresses/:id (findById)`, () => {
+    it('should success return address by authorized requester user.', async ({
+      app,
+      db,
+      mailClient,
+      userAddressController,
+      myAddressController,
+    }) => {
+      const customer = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('customer')
+        .random()
+        .verified()
+        .signin()
+        .build();
+      const customerAdrs = await myAddressController
+        .withAgent(customer.userAgent)
+        .create(createRandomAddress(), {
+          code: 201,
+          parseBody: true,
+        });
+      const fetchedAdrs = await userAddressController.findById(
+        customer.userDb.id,
+        customerAdrs.body!.id,
+        { code: 200, parseBody: true },
+      );
+      expect(fetchedAdrs.body).toEqual(customerAdrs.body);
+    });
+  });
+});
