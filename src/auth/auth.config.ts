@@ -33,7 +33,6 @@ export function createAuth(
   return betterAuth({
     database: typeormAdapter(dataSource, {
       usePlural: true,
-      columnTypeOverrides: { user: { image: 'uuid' }, image: { id: 'uuid' } },
     }),
     //--------------------------
     logger: {
