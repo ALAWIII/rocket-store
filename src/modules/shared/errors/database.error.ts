@@ -22,3 +22,6 @@ export class UnknownDatabaseError extends DatabaseError {
 export class CorruptedPersistenceDataError extends DatabaseError {
   readonly code = 'CORRUPTED_DATA_ERROR' as const;
 }
+export class ValueTooLongError extends DatabaseError {
+  readonly code = 'VALUE_TOO_LONG';
+}
