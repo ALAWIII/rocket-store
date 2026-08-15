@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsUrl, Length, Matches } from 'class-validator';
+import { IsOptional, IsString, IsUUID, Length, Matches } from 'class-validator';
 import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-least-one-defined.decorator';
 
 export class UpdateMeDto {
@@ -16,7 +16,7 @@ export class UpdateMeDto {
   familyName?: string;
   @IsOptional()
   @IsString()
-  @IsUrl()
+  @IsUUID('7')
   image?: string;
   @IsOptional()
   @IsString()
