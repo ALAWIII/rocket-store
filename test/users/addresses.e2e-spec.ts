@@ -203,7 +203,7 @@ describe.concurrent('adminstrative addresses (e2e)', () => {
     });
   });
   describe(`GET ${apiPrefix}/:userId/addresses/ (findAllForUser)`, () => {
-    it('should success return address by authorized requester user.', async ({
+    it('should success findAll addresses by authorized requester user for specific user.', async ({
       app,
       db,
       mailClient,
