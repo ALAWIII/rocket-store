@@ -3,6 +3,7 @@ import { v7 } from 'uuid';
 import { DataSource } from 'typeorm';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
+import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 export interface CreateTestDatabaseOptions {
   host: string;
   port: number;
@@ -32,7 +33,7 @@ export class TestDatabase {
     const dataSource = new DataSource({
       type: 'postgres',
       url: databaseUrl,
-      entities: [UserEntity, RoleEntity],
+      entities: [UserEntity, RoleEntity, ImageEntity],
       migrations: [],
     });
 
