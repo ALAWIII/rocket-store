@@ -1,7 +1,8 @@
 import { customAlphabet } from 'nanoid';
 
-const nanoidDigits = customAlphabet('0123456789', 10);
+const digits = customAlphabet('0123456789', 14);
+const nonZeroDigit = customAlphabet('123456789', 1);
 
 export function createRandomPhoneNumber(): string {
-  return `+${nanoidDigits()}`; // e.g. "+7392048156"
+  return `+${nonZeroDigit()}${digits()}`;
 }
