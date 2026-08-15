@@ -1,4 +1,5 @@
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
+import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 import {
   CreateDateColumnTz,
   UpdateDateColumnTz,
@@ -25,7 +26,9 @@ export class UserEntity {
 
   @Column('varchar', { nullable: true, length: 20 })
   phone!: string | null;
-  @Column('text', { name: 'image', nullable: true })
+
+  @Column('uuid', { name: 'image', nullable: true })
+  @ForeignKey(() => ImageEntity, (i) => i.id)
   image!: string | null;
 
   @Column({ type: 'uuid' })
