@@ -4,15 +4,15 @@ import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-l
 export class UpdateMeDto {
   @IsOptional()
   @IsString()
-  @Length(2, 25)
+  @Length(2, 50)
   name?: string;
   @IsOptional()
   @IsString()
-  @Length(2, 25)
+  @Length(2, 50)
   givenName?: string;
   @IsOptional()
   @IsString()
-  @Length(2, 25)
+  @Length(2, 50)
   familyName?: string;
   @IsOptional()
   @IsString()
