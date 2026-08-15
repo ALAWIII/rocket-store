@@ -15,7 +15,7 @@ export class AddressEntity {
   @Column('varchar', { length: 50 })
   fullName!: string;
 
-  @Column('varchar', { length: 15 })
+  @Column('varchar', { length: 20 })
   phone!: string;
 
   @Column('varchar', { length: 30 })
