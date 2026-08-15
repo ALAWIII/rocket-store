@@ -90,4 +90,25 @@ describe.concurrent('addresses (e2e)', () => {
       await myAddressController.findById(customerAdrs.body!.id, { code: 404 });
     });
   });
+  describe(`PUT ${apiPrefix}/:id (update)`, () => {
+    it('should successfully update user address.', async ({
+      myAddressController,
+    }) => {
+      const adrs = await myAddressController.create(createRandomAddress(), {
+        code: 201,
+        parseBody: true,
+      });
+      const adrsPayload = createRandomAddress();
+      const updatedAdrs = await myAddressController.update(
+        adrs.body!.id,
+        adrsPayload,
+        {
+          code: 200,
+          parseBody: true,
+        },
+      );
+      expect(pickFrom(adrsPayload, updatedAdrs.body!)).toEqual(adrsPayload);
+      expect(updatedAdrs.body).not.toEqual(adrs.body);
+    });
+  });
 });
