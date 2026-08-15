@@ -10,12 +10,12 @@ import { Entity, Column, ForeignKey } from 'typeorm';
 export class UserEntity {
   @UuidV7PrimaryColumn()
   id!: string;
-  @Column('varchar', { name: 'name', length: 30 })
+  @Column('varchar', { name: 'name', length: 50 })
   name!: string;
 
-  @Column({ type: 'varchar', length: 30, nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   givenName!: string;
-  @Column({ type: 'varchar', length: 30, nullable: true })
+  @Column({ type: 'varchar', length: 50, nullable: true })
   familyName!: string;
   @Column('text', { name: 'email', unique: true })
   email!: string;
