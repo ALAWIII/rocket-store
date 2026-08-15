@@ -60,7 +60,7 @@ export class Address {
     data: AddressPrimitives,
   ): Result<Address, ValueObjectError> {
     const dataValidate = unwrapResultObject({
-      fullName: Name.create(data.fullName),
+      fullName: Name.create(data.fullName, 100),
       phone: Phone.create(data.phone),
       country: Name.create(data.country),
       city: Name.create(data.city),
