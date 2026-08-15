@@ -25,7 +25,9 @@ export class MyAddressesControllerTest {
     return new MyAddressesControllerTest(agent);
   }
   async findAll(statusCode: ExpectedTestStatusCode) {
-    const response = await this.agent.get(this.urlPrefix);
+    const response = await this.agent
+      .get(this.urlPrefix)
+      .expect(statusCode.code);
     const body = parseResponseBody<AddressTestDto[]>(
       response,
       statusCodesListNormalize(statusCode),
@@ -33,7 +35,9 @@ export class MyAddressesControllerTest {
     return { response, body };
   }
   async findById(addressId: string, statusCode: ExpectedTestStatusCode) {
-    const response = await this.agent.get(`${this.urlPrefix}/${addressId}`);
+    const response = await this.agent
+      .get(`${this.urlPrefix}/${addressId}`)
+      .expect(statusCode.code);
     const body = parseResponseBody<AddressTestDto>(
       response,
       statusCodesListNormalize(statusCode),
@@ -41,7 +45,10 @@ export class MyAddressesControllerTest {
     return { response, body };
   }
   async create(payload: AddressPayloadDto, statusCode: ExpectedTestStatusCode) {
-    const response = await this.agent.post(this.urlPrefix).send(payload);
+    const response = await this.agent
+      .post(this.urlPrefix)
+      .send(payload)
+      .expect(statusCode.code);
     const body = parseResponseBody<AddressTestDto>(
       response,
       statusCodesListNormalize(statusCode),
@@ -55,7 +62,8 @@ export class MyAddressesControllerTest {
   ) {
     const response = await this.agent
       .put(`${this.urlPrefix}/${addressId}`)
-      .send(payload);
+      .send(payload)
+      .expect(statusCode.code);
     const body = parseResponseBody<AddressTestDto>(
       response,
       statusCodesListNormalize(statusCode),
@@ -63,7 +71,9 @@ export class MyAddressesControllerTest {
     return { response, body };
   }
   async delete(addressId: string, statusCode: ExpectedTestStatusCode) {
-    const response = await this.agent.delete(`${this.urlPrefix}/${addressId}`);
+    const response = await this.agent
+      .delete(`${this.urlPrefix}/${addressId}`)
+      .expect(statusCode.code);
     const body = parseResponseBody<{ affected: number }>(
       response,
       statusCodesListNormalize(statusCode),
@@ -83,9 +93,9 @@ export class UserAddressesControllerTest {
     addressId: string,
     statusCode: ExpectedTestStatusCode,
   ) {
-    const response = await this.agent.get(
-      `${this.urlPrefix}/${userId}/addresses/${addressId}`,
-    );
+    const response = await this.agent
+      .get(`${this.urlPrefix}/${userId}/addresses/${addressId}`)
+      .expect(statusCode.code);
     const body = parseResponseBody<AddressResponseDto>(
       response,
       statusCodesListNormalize(statusCode),
@@ -93,9 +103,9 @@ export class UserAddressesControllerTest {
     return { response, body };
   }
   async findAllForUser(userId: string, statusCode: ExpectedTestStatusCode) {
-    const response = await this.agent.get(
-      `${this.urlPrefix}/${userId}/addresses`,
-    );
+    const response = await this.agent
+      .get(`${this.urlPrefix}/${userId}/addresses`)
+      .expect(statusCode.code);
     const body = parseResponseBody<AddressResponseDto[]>(
       response,
       statusCodesListNormalize(statusCode),
