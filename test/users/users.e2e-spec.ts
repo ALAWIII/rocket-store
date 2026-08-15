@@ -286,7 +286,6 @@ describe.concurrent('users (e2e)', () => {
         name: 'cat',
         givenName: 'lion',
         familyName: 'tigers',
-        image: 'http://puppy.com',
         phone: '+19363463473',
       };
       const updateResp = await userController
