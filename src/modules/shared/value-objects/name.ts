@@ -4,13 +4,15 @@ import { ValueObjectError } from './value-object.error';
 export class Name {
   private constructor(private readonly _value: string) {}
 
-  static create(value: string): Result<Name, ValueObjectError> {
+  static create(value: string, maxLength = 50): Result<Name, ValueObjectError> {
     const v = value.trim();
 
     if (!v) return Err(new ValueObjectError('Name is required'));
-    if (v.length < 2 || v.length > 50)
+    if (v.length < 2 || v.length > maxLength)
       return Err(
-        new ValueObjectError('Name must be between 2 and 50 characters'),
+        new ValueObjectError(
+          `Name must be between 2 and ${maxLength} characters`,
+        ),
       );
 
     const regex = /^[a-zA-ZÀ-ÿ]+([ '-][a-zA-ZÀ-ÿ]+)*$/;
