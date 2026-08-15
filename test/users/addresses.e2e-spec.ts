@@ -111,4 +111,22 @@ describe.concurrent('addresses (e2e)', () => {
       expect(updatedAdrs.body).not.toEqual(adrs.body);
     });
   });
+  describe(`DELETE ${apiPrefix} (delete)`, () => {
+    it('should success delete user requester address.', async ({
+      myAddressController,
+    }) => {
+      const adrs = await myAddressController.create(createRandomAddress(), {
+        code: 201,
+        parseBody: true,
+      });
+      const deletedAdrs = await myAddressController.delete(adrs.body!.id, {
+        code: 200,
+        parseBody: true,
+      });
+      expect(deletedAdrs.body).toEqual({ affected: 1 });
+      await myAddressController.findById(adrs.body!.id, {
+        code: 404,
+      });
+    });
+  });
 });
