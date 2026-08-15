@@ -10,7 +10,7 @@ import { Type } from 'class-transformer';
 
 export class CreateRoleDto {
   @IsString()
-  @Length(2, 40)
+  @Length(2, 50)
   name!: string;
 
   @IsArray()
