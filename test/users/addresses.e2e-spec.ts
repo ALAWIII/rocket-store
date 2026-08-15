@@ -1,4 +1,5 @@
 import { it } from 'test/support/fixtures/authenticated-e2e.fixture';
+import { UserAuthFlowBuilder } from 'test/support/helpers/auth-user-flow.builder';
 import { AddressTestDto } from 'test/support/types/user/address.dto.type';
 import { createRandomAddress } from 'test/support/utils/create-random-address.util';
 import { pickFrom } from 'test/support/utils/pick-from.util';
@@ -66,6 +67,27 @@ describe.concurrent('addresses (e2e)', () => {
         parseBody: true,
       });
       expect(adrs.body).toEqual(findAdrs.body);
+    });
+    it('should fail return address id not owned by the requester user.', async ({
+      app,
+      db,
+      mailClient,
+      myAddressController,
+    }) => {
+      const customer = await UserAuthFlowBuilder.create({
+        dbDataSource: db.dataSource,
+        mailhogClient: mailClient,
+        userAgent: app.createAgent(),
+      })
+        .asRole('customer')
+        .random()
+        .signin()
+        .verified()
+        .build();
+      const customerAdrs = await myAddressController
+        .withAgent(customer.userAgent)
+        .create(createRandomAddress(), { code: 201, parseBody: true });
+      await myAddressController.findById(customerAdrs.body!.id, { code: 404 });
     });
   });
 });
