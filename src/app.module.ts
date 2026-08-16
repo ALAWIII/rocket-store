@@ -17,6 +17,7 @@ import { AccessControlModule } from './modules/access-control/access-control.mod
 import { AppErrorModule } from './error/app-error.module';
 import { AppLoggerModule } from './app-logger/app-logger.module';
 import { EmailModule } from './email/email.module';
+import { BrandsModule } from './modules/brands/brands.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -37,6 +38,7 @@ import { EmailModule } from './email/email.module';
     CartsModule,
     AccessControlModule,
     EmailModule,
+    BrandsModule,
   ],
 })
 export class AppModule {}
