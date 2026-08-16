@@ -19,11 +19,11 @@ export class BrandImagesEntity {
   id!: string;
 
   @Column()
-  @ForeignKey(() => BrandEntity, (b) => b.id)
+  @ForeignKey(() => BrandEntity, (b) => b.id, { onDelete: 'CASCADE' })
   brandId!: string;
 
   @Column()
-  @ForeignKey(() => ImageEntity, (i) => i.id)
+  @ForeignKey(() => ImageEntity, (i) => i.id, { onDelete: 'CASCADE' })
   imageId!: string;
 
   @Column({ type: 'varchar', length: 10 })
