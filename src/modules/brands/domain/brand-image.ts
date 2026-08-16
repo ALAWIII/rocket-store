@@ -38,6 +38,9 @@ export class BrandImage {
       imageId: ImageId.create(data.imageId),
     });
   }
+  get sortOrder(): number {
+    return this.props.sortOrder;
+  }
   toJSON(): BrandImagePrimitives {
     return {
       ...this.props,
