@@ -1,41 +1,62 @@
 import { BrandId } from 'src/modules/shared/domain/ids';
 import { Name } from 'src/modules/shared/value-objects/name';
+import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
+import { Ok, Result } from 'ts-results-es';
 
 type BrandProps = {
   readonly id: BrandId;
   name: Name;
   createdAt: Date;
 };
-
+type BrandPrimitives = {
+  readonly id: string;
+  name: string;
+  createdAt: Date;
+};
 export class Brand {
   private constructor(private props: BrandProps) {}
 
-  static create(data: { id: BrandId; name: Name }): Brand {
-    return new Brand({
-      ...data,
-      createdAt: new Date(),
-    });
+  static create(name: string): Result<Brand, ValueObjectError> {
+    const bName = Name.create(name);
+    if (bName.isErr()) {
+      return bName;
+    }
+    return Ok(
+      new Brand({
+        id: BrandId.create(),
+        name: bName.unwrap(),
+        createdAt: new Date(),
+      }),
+    );
   }
-  static restore(data: BrandProps): Brand {
-    return new Brand(data);
+  static restore(data: BrandPrimitives): Result<Brand, ValueObjectError> {
+    const name = Name.create(data.name);
+    if (name.isErr()) {
+      return name;
+    }
+    const brand = {
+      id: BrandId.create(data.id),
+      name: name.unwrap(),
+      createdAt: data.createdAt,
+    };
+    return Ok(new Brand(brand));
   }
 
-  get id(): BrandId {
-    return this.props.id;
+  get id(): string {
+    return this.props.id.toString();
   }
 
-  get name(): Name {
-    return this.props.name;
+  get name(): string {
+    return this.props.name.value;
   }
   get createdAt(): Date {
-    return this.props.createdAt;
+    return new Date(this.props.createdAt);
   }
-  rename(name: Name): void {
-    if (this.name.value === name.value) return;
-
-    this.props.name = name;
-  }
-  toJSON() {
-    return { ...this.props };
+  toJSON(): BrandPrimitives {
+    return {
+      id: this.id,
+      name: this.name,
+      createdAt: this.createdAt,
+    };
   }
 }
