@@ -6,6 +6,7 @@ import {
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { Column, Entity, ForeignKey, Index } from 'typeorm';
 import { BrandEntity } from './brand.entity';
+import { type BrandImageRole } from '../../domain/brand-image';
 
 // allow one optional logo, and multiple banners.
 
@@ -27,7 +28,7 @@ export class BrandImagesEntity {
   imageId!: string;
 
   @Column({ type: 'varchar', length: 10 })
-  imageRole!: 'banner' | 'logo';
+  imageRole!: BrandImageRole;
 
   @Column({ type: 'int', default: 0 })
   sortOrder!: number;
