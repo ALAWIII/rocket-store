@@ -9,6 +9,7 @@ import { Err } from 'ts-results-es';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import {
   CorruptedPersistenceDataError,
+  RecordNotFoundError,
   UnknownDatabaseError,
 } from 'src/modules/shared/errors/database.error';
 import { BrandImage } from '../../domain/brand-image';
@@ -95,7 +96,29 @@ export class BrandRepository implements IBrandRepository {
   findAll(options?: FindOptions): Promise<DBResult<Brand[]>> {}
   findById(id: string, options?: FindOptions): Promise<DBResult<Brand>> {}
   findByName(name: string, options?: FindOptions): Promise<DBResult<Brand>> {}
-  update(brand: Brand): Promise<DBResult<Brand>> {}
+
+  async rename(brandId: string, name: string): Promise<DBResult<Brand>> {
+    try {
+      const result = await this.brandRepo
+        .createQueryBuilder()
+        .update()
+        .set({ name })
+        .where('id = :brandId', { brandId })
+        .returning('*')
+        .execute();
+
+      const [brand] = result.raw as BrandEntity[];
+      if (!brand) {
+        return Err(
+          new RecordNotFoundError(`Brand with id ${brandId} not found`),
+        );
+      }
+
+      return this.toDomain({ brand });
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   delete(id: string): Promise<DBResult<number>> {}
 
   private toDomain(b: BrandWithImagesDb): DBResult<Brand> {

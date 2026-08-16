@@ -18,6 +18,6 @@ export abstract class IBrandRepository {
   ): Promise<DBResult<Brand>>;
 
   abstract create(brand: Brand): Promise<DBResult<Brand>>;
-  abstract update(brand: Brand): Promise<DBResult<Brand>>;
+  abstract rename(brandId: string, name: string): Promise<DBResult<Brand>>;
   abstract delete(id: string): Promise<DBResult<number>>;
 }
