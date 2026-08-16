@@ -334,3 +334,14 @@ export class RoleId extends UuidV7Id {
     return new RoleId(id);
   }
 }
+export class BrandImageId extends UuidV7Id {
+  private constructor(value: string) {
+    super(value);
+  }
+
+  static create(value?: string): BrandImageId {
+    const id = value ?? v7();
+    super.validate(id);
+    return new BrandImageId(id);
+  }
+}
