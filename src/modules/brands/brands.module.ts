@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BrandEntity } from './infrastructure/entities/brand.entity';
 
-@Module({})
+@Module({ imports: [TypeOrmModule.forFeature([BrandEntity])] })
 export class BrandsModule {}
