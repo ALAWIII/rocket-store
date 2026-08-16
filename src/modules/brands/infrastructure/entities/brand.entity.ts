@@ -6,7 +6,7 @@ import { Column, Entity } from 'typeorm';
 export class BrandEntity {
   @UuidV7PrimaryColumn()
   id!: string;
-  @Column('varchar', { length: 30, unique: true })
+  @Column('varchar', { length: 50, unique: true })
   name!: string;
   @CreateDateColumnTz()
   createdAt!: Date;
