@@ -1,6 +1,6 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Brand } from '../../domain/brand';
-type FindOptions = {
+export type FindOptions = {
   includeLogo?: boolean;
   includeBanners?: boolean;
   page?: number;
