@@ -16,7 +16,10 @@ export abstract class IBrandRepository {
     name: string,
     options?: FindOptions,
   ): Promise<DBResult<Brand>>;
-
+  abstract updateImageSortOrderBatch(
+    brandId: string,
+    updates: { brandImageId: string; sortOrder: number }[],
+  ): Promise<DBResult<string[]>>;
   abstract create(brand: Brand): Promise<DBResult<Brand>>;
   abstract rename(brandId: string, name: string): Promise<DBResult<Brand>>;
   abstract delete(id: string): Promise<DBResult<number>>;

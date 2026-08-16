@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Brand } from '../../domain/brand';
 import { BrandImagesEntity } from '../entities/brand-images.entity';
-import { Err } from 'ts-results-es';
+import { Err, Ok } from 'ts-results-es';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import {
   CorruptedPersistenceDataError,
@@ -115,6 +115,42 @@ export class BrandRepository implements IBrandRepository {
       }
 
       return this.toDomain({ brand });
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
+  async updateImageSortOrderBatch(
+    brandId: string,
+    updates: { brandImageId: string; sortOrder: number }[],
+  ): Promise<DBResult<string[]>> {
+    try {
+      // generating numbers placeholders: (e.g ($1, $2),($3, $4), ...)
+      const valuesSql = updates
+        .map((_, i) => `($${i * 2 + 1}::uuid, $${i * 2 + 2}::int)`)
+        .join(', ');
+      const updateParams: unknown[] = updates.flatMap((u) => [
+        u.brandImageId,
+        u.sortOrder,
+      ]);
+      const brandIdParamIdx = updateParams.length + 1;
+
+      const sql = `
+        UPDATE brand_images
+        SET "sortOrder" = data."sortOrder"
+        FROM (VALUES ${valuesSql}) AS data(id, "sortOrder")
+        WHERE brand_images."id" = data.id
+          AND brand_images."brandId" = $${brandIdParamIdx}
+        RETURNING brand_images."id"
+      `;
+
+      const params = [...updateParams, brandId];
+
+      const rows = await this.brandImageRepo.manager.query<{ id: string }[]>(
+        sql,
+        params,
+      );
+
+      return Ok(rows.map((r) => r.id));
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
