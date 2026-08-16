@@ -1,6 +1,6 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
-import { CategoryEntity } from './category.entity';
+import { CategoryEntity } from '../../../categories/infrastructure/entities/category.entity';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 

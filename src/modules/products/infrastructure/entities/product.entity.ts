@@ -1,6 +1,6 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { Column, Entity, ForeignKey } from 'typeorm';
-import { BrandEntity } from './brand.entity';
+import { BrandEntity } from '../../../brands/infrastructure/entities/brand.entity';
 import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('products')
