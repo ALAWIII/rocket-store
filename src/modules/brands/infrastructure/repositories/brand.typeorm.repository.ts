@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { BrandEntity } from '../entities/brand.entity';
 import { FindOptions, IBrandRepository } from './brand.repository';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Brand } from '../../domain/brand';
 import { BrandImagesEntity } from '../entities/brand-images.entity';
@@ -157,6 +157,21 @@ export class BrandRepository implements IBrandRepository {
   }
   delete(id: string): Promise<DBResult<number>> {}
 
+  async deleteImages(
+    brandId: string,
+    imageIds: string[],
+  ): Promise<DBResult<number>> {
+    try {
+      const result = await this.brandImageRepo.delete({
+        brandId,
+        id: In(imageIds),
+      });
+
+      return Ok(result.affected ?? 0);
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   private toDomain(b: BrandWithImagesDb): DBResult<Brand> {
     const images = b.images?.map((bi) =>
       BrandImage.restore({

@@ -23,4 +23,8 @@ export abstract class IBrandRepository {
   abstract create(brand: Brand): Promise<DBResult<Brand>>;
   abstract rename(brandId: string, name: string): Promise<DBResult<Brand>>;
   abstract delete(id: string): Promise<DBResult<number>>;
+  abstract deleteImages(
+    brandId: string,
+    imageIds: string[],
+  ): Promise<DBResult<number>>;
 }
