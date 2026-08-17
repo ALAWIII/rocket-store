@@ -136,7 +136,7 @@ export class BrandRepository implements IBrandRepository {
 
       const sql = `
         UPDATE brand_images
-        SET "sortOrder" = data."sortOrder"
+        SET "sortOrder" = data."sortOrder", "updatedAt" = NOW()
         FROM (VALUES ${valuesSql}) AS data(id, "sortOrder")
         WHERE brand_images."id" = data.id
           AND brand_images."brandId" = $${brandIdParamIdx}
