@@ -143,7 +143,29 @@ export class BrandRepository implements IBrandRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  findById(id: string): Promise<DBResult<Brand>> {}
+  async findById(id: string): Promise<DBResult<Brand>> {
+    try {
+      const brand: BrandEntity & { logo?: BrandImagesEntity } =
+        await this.brandRepo
+          .createQueryBuilder('brand')
+          .leftJoinAndMapOne(
+            'brand.logo',
+            'brand_images',
+            'logo',
+            'logo."brandId" = brand.id AND logo."imageRole" = :role',
+            { role: 'logo' },
+          )
+          .where('brand.id = :id', { id })
+          .getOneOrFail();
+
+      return this.toDomain({
+        brand,
+        images: brand.logo ? [brand.logo] : undefined,
+      });
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   findByName(
     names: string,
     options: PaginationOptions,
