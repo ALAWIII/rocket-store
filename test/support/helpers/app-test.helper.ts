@@ -10,7 +10,7 @@ import { Logger } from 'nestjs-pino';
 import request from 'supertest';
 import { AppModule } from 'src/app.module';
 import { IAuthEmailService } from 'src/email/auth-email.service';
-import { MailHogAuthEmailService } from '../doubles/mailhog-auth-email.service';
+import { MailHogAuthEmailService } from '../doubles/auth-email.mailhog.service';
 import { ConfigServiceMock } from '../doubles/config-service-mock.double';
 
 export type HttpClient = ReturnType<typeof request>;

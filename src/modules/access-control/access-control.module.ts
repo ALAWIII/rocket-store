@@ -1,6 +1,6 @@
 import { ForbiddenException, Module } from '@nestjs/common';
 import { IRoleRepository } from './infrastructure/repositories/role.repository';
-import { RoleRepository } from './infrastructure/repositories/typeorm-role.repository';
+import { RoleRepository } from './infrastructure/repositories/role.typeorm.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RoleEntity } from './infrastructure/entities/role.entity';
 import { AccessControlBootstrapService } from './application/bootstrap/access-control.bootstrap.service';
