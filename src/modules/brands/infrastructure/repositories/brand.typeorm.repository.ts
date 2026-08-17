@@ -167,7 +167,17 @@ export class BrandRepository implements IBrandRepository {
     }
   }
 
-  findBanners(brandId: string): Promise<DBResult<BrandImage[]>> {}
+  async findBanners(brandId: string): Promise<DBResult<BrandImage[]>> {
+    try {
+      const images = await this.brandImageRepo.findBy({
+        brandId,
+        imageRole: 'logo',
+      });
+      return Ok(this.toBImageDomain(images));
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   async rename(brandId: string, name: string): Promise<DBResult<Brand>> {
     try {
       const result = await this.brandRepo
@@ -262,8 +272,8 @@ export class BrandRepository implements IBrandRepository {
       skip: (safePage - 1) * safeLimit,
     };
   }
-  private toDomain(b: BrandWithImagesDb): DBResult<Brand> {
-    const images = b.images?.map((bi) =>
+  private toBImageDomain(images: BrandImagesEntity[]): BrandImage[] {
+    const bimages = images?.map((bi) =>
       BrandImage.restore({
         id: bi.id,
         imageId: bi.imageId,
@@ -273,7 +283,10 @@ export class BrandRepository implements IBrandRepository {
         updatedAt: bi.updatedAt,
       }),
     );
-
+    return bimages;
+  }
+  private toDomain(b: BrandWithImagesDb): DBResult<Brand> {
+    const images = b.images ? this.toBImageDomain(b.images) : undefined;
     return Brand.restore({
       id: b.brand.id,
       name: b.brand.name,
