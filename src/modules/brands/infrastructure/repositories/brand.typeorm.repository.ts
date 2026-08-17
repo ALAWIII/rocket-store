@@ -166,10 +166,7 @@ export class BrandRepository implements IBrandRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  findByName(
-    names: string,
-    options: PaginationOptions,
-  ): Promise<DBResult<Brand>> {}
+
   findBanners(brandId: string): Promise<DBResult<BrandImage[]>> {}
   async rename(brandId: string, name: string): Promise<DBResult<Brand>> {
     try {

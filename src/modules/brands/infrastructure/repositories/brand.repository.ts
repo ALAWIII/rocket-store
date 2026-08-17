@@ -7,10 +7,6 @@ export type PaginationOptions = { page?: number; limit?: number };
 export abstract class IBrandRepository {
   abstract findAll(options: PaginationOptions): Promise<DBResult<Brand[]>>;
   abstract findById(id: string): Promise<DBResult<Brand>>;
-  abstract findByName(
-    names: string,
-    options: PaginationOptions,
-  ): Promise<DBResult<Brand>>;
   abstract findBanners(brandId: string): Promise<DBResult<BrandImage[]>>;
   abstract updateImageSortOrderBatch(
     brandId: string,
