@@ -144,10 +144,10 @@ export class BrandRepository implements IBrandRepository {
     }
   }
   findById(id: string): Promise<DBResult<Brand>> {}
-  findByNames(
-    names: string[],
-    options: PaginationOptions = {},
-  ): Promise<DBResult<Brand[]>> {}
+  findByName(
+    names: string,
+    options: PaginationOptions,
+  ): Promise<DBResult<Brand>> {}
   findBanners(brandId: string): Promise<DBResult<BrandImage[]>> {}
   async rename(brandId: string, name: string): Promise<DBResult<Brand>> {
     try {
