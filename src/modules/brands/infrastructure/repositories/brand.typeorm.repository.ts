@@ -99,34 +99,37 @@ export class BrandRepository implements IBrandRepository {
   }
   async findAll(options: PaginationOptions = {}): Promise<DBResult<Brand[]>> {
     try {
-      const { page, limit, skip } = this.normalizePagination(
+      const { limit, skip, page } = this.normalizePagination(
         options.page,
         options.limit,
       );
 
-      // CTE: one logo per brand (enforced by unique constraint on brandId + imageRole)
       const logoCte = this.brandImageRepo
         .createQueryBuilder()
         .select('*')
         .from('brand_images', 'bi')
         .where('"imageRole" = :role', { role: 'logo' });
 
-      const brands = await this.brandRepo
-        .createQueryBuilder('brand')
-        .addCommonTableExpression(logoCte, 'brand_logos')
-        .leftJoin('brand_logos', 'logo', 'logo."brandId" = brand.id')
-        .select('row_to_json(brand.*)', 'brand')
-        .addSelect('row_to_json(logo.*)', 'logo')
-        .orderBy('brand."createdAt"', 'DESC')
-        .addOrderBy('brand.id', 'ASC') // tiebreaker for deterministic pagination
-        .skip(skip)
-        .take(limit)
-        .getRawMany<{ brand: BrandEntity; logo: BrandImagesEntity | null }>();
+      const brandEntities: (BrandEntity & { logo?: BrandImagesEntity })[] =
+        await this.brandRepo
+          .createQueryBuilder('brand')
+          .addCommonTableExpression(logoCte, 'brand_logos')
+          .leftJoinAndMapOne(
+            'brand.logo', // property to attach on the entity
+            'brand_logos',
+            'logo',
+            'logo."brandId" = brand.id',
+          )
+          .orderBy('brand."createdAt"', 'DESC')
+          .addOrderBy('brand.id', 'ASC')
+          .skip(skip)
+          .take(limit)
+          .getMany();
 
       const domainBrands: Brand[] = [];
-      for (const b of brands) {
+      for (const b of brandEntities) {
         const dbrand = this.toDomain({
-          brand: b.brand,
+          brand: b,
           images: b.logo ? [b.logo] : undefined,
         });
         if (dbrand.isErr()) {
