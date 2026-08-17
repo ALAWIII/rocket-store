@@ -1,8 +1,8 @@
+import { pickSharedFields } from 'src/modules/shared/utils/pick-shared-fields.util';
 import { it } from 'test/support/fixtures/authenticated-e2e.fixture';
 import { UserAuthFlowBuilder } from 'test/support/helpers/auth-user-flow.builder';
 import { AddressTestDto } from 'test/support/types/user/address.dto.type';
 import { createRandomAddress } from 'test/support/utils/create-random-address.util';
-import { pickFrom } from 'test/support/utils/pick-from.util';
 
 describe.concurrent('addresses (e2e)', () => {
   const apiPrefix = '/api/v1/users/me/addresses';
@@ -15,7 +15,7 @@ describe.concurrent('addresses (e2e)', () => {
         code: 201,
         parseBody: true,
       });
-      expect(pickFrom(adrs, response.body!)).toEqual(adrs);
+      expect(pickSharedFields(adrs, response.body!)).toEqual(adrs);
     });
   });
   describe(`GET ${apiPrefix} (findAll)`, () => {
@@ -107,7 +107,9 @@ describe.concurrent('addresses (e2e)', () => {
           parseBody: true,
         },
       );
-      expect(pickFrom(adrsPayload, updatedAdrs.body!)).toEqual(adrsPayload);
+      expect(pickSharedFields(adrsPayload, updatedAdrs.body!)).toEqual(
+        adrsPayload,
+      );
       expect(updatedAdrs.body).not.toEqual(adrs.body);
     });
   });

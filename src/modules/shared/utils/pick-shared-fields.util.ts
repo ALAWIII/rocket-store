@@ -5,7 +5,7 @@ type PickFrom<T extends object, U extends object> = {
   [K in CommonKey<T, U>]: U[K];
 };
 
-export function pickFrom<T extends object, U extends object>(
+export function pickSharedFields<T extends object, U extends object>(
   shape: T,
   object: U,
 ): PickFrom<T, U> {
