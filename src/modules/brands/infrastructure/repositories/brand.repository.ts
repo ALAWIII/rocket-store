@@ -1,21 +1,17 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Brand } from '../../domain/brand';
-export type FindOptions = {
-  includeLogo?: boolean;
-  includeBanners?: boolean;
-  page?: number;
-  limit?: number;
-};
+import { BrandImage } from '../../domain/brand-image';
+
+export type PaginationOptions = { page?: number; limit?: number };
+
 export abstract class IBrandRepository {
-  abstract findAll(options?: FindOptions): Promise<DBResult<Brand[]>>;
-  abstract findById(
-    id: string,
-    options?: FindOptions,
-  ): Promise<DBResult<Brand>>;
-  abstract findByName(
-    name: string,
-    options?: FindOptions,
-  ): Promise<DBResult<Brand>>;
+  abstract findAll(options: PaginationOptions): Promise<DBResult<Brand[]>>;
+  abstract findById(id: string): Promise<DBResult<Brand>>;
+  abstract findByNames(
+    names: string[],
+    options: PaginationOptions,
+  ): Promise<DBResult<Brand[]>>;
+  abstract findBanners(brandId: string): Promise<DBResult<BrandImage[]>>;
   abstract updateImageSortOrderBatch(
     brandId: string,
     updates: { brandImageId: string; sortOrder: number }[],

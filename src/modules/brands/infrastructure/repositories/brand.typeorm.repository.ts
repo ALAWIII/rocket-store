@@ -1,7 +1,12 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { BrandEntity } from '../entities/brand.entity';
-import { FindOptions, IBrandRepository } from './brand.repository';
-import { In, Repository } from 'typeorm';
+import {
+  FindManyOptions,
+  FindOptions,
+  IBrandRepository,
+  PaginationOptions,
+} from './brand.repository';
+import { In, Repository, SelectQueryBuilder } from 'typeorm';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Brand } from '../../domain/brand';
 import { BrandImagesEntity } from '../entities/brand-images.entity';
@@ -18,7 +23,11 @@ type BrandWithImagesDb = {
   brand: BrandEntity;
   images?: BrandImagesEntity[];
 };
-
+type Pagination = {
+  page: number;
+  limit: number;
+  skip: number;
+};
 export class BrandRepository implements IBrandRepository {
   constructor(
     @InjectRepository(BrandEntity)
@@ -93,10 +102,13 @@ export class BrandRepository implements IBrandRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  findAll(options?: FindOptions): Promise<DBResult<Brand[]>> {}
-  findById(id: string, options?: FindOptions): Promise<DBResult<Brand>> {}
-  findByName(name: string, options?: FindOptions): Promise<DBResult<Brand>> {}
-
+  findAll(options: PaginationOptions = {}): Promise<DBResult<Brand[]>> {}
+  findById(id: string): Promise<DBResult<Brand>> {}
+  findByNames(
+    names: string[],
+    options: PaginationOptions = {},
+  ): Promise<DBResult<Brand[]>> {}
+  findBanners(brandId: string): Promise<DBResult<BrandImage[]>> {}
   async rename(brandId: string, name: string): Promise<DBResult<Brand>> {
     try {
       const result = await this.brandRepo
