@@ -155,7 +155,15 @@ export class BrandRepository implements IBrandRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  delete(id: string): Promise<DBResult<number>> {}
+  async delete(id: string): Promise<DBResult<number>> {
+    try {
+      const result = await this.brandRepo.delete({ id });
+
+      return Ok(result.affected ?? 0);
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
 
   async deleteImages(
     brandId: string,
