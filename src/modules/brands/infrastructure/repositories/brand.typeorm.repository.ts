@@ -278,7 +278,9 @@ export class BrandRepository implements IBrandRepository {
     );
 
     return Brand.restore({
-      ...b.brand,
+      id: b.brand.id,
+      name: b.brand.name,
+      createdAt: b.brand.createdAt,
       images,
     }).mapErr(
       (e) =>
