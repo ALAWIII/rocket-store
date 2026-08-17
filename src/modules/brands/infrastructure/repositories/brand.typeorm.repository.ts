@@ -1,12 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { BrandEntity } from '../entities/brand.entity';
-import {
-  FindManyOptions,
-  FindOptions,
-  IBrandRepository,
-  PaginationOptions,
-} from './brand.repository';
-import { In, Repository, SelectQueryBuilder } from 'typeorm';
+import { IBrandRepository, PaginationOptions } from './brand.repository';
+import { In, Repository } from 'typeorm';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Brand } from '../../domain/brand';
 import { BrandImagesEntity } from '../entities/brand-images.entity';
@@ -102,7 +97,49 @@ export class BrandRepository implements IBrandRepository {
       return Err(mapTypeOrmError(e));
     }
   }
-  findAll(options: PaginationOptions = {}): Promise<DBResult<Brand[]>> {}
+  async findAll(options: PaginationOptions = {}): Promise<DBResult<Brand[]>> {
+    try {
+      const { page, limit, skip } = this.normalizePagination(
+        options.page,
+        options.limit,
+      );
+
+      // CTE: one logo per brand (enforced by unique constraint on brandId + imageRole)
+      const logoCte = this.brandImageRepo
+        .createQueryBuilder()
+        .select('*')
+        .from('brand_images', 'bi')
+        .where('"imageRole" = :role', { role: 'logo' });
+
+      const brands = await this.brandRepo
+        .createQueryBuilder('brand')
+        .addCommonTableExpression(logoCte, 'brand_logos')
+        .leftJoin('brand_logos', 'logo', 'logo."brandId" = brand.id')
+        .select('row_to_json(brand.*)', 'brand')
+        .addSelect('row_to_json(logo.*)', 'logo')
+        .orderBy('brand."createdAt"', 'DESC')
+        .addOrderBy('brand.id', 'ASC') // tiebreaker for deterministic pagination
+        .skip(skip)
+        .take(limit)
+        .getRawMany<{ brand: BrandEntity; logo: BrandImagesEntity | null }>();
+
+      const domainBrands: Brand[] = [];
+      for (const b of brands) {
+        const dbrand = this.toDomain({
+          brand: b.brand,
+          images: b.logo ? [b.logo] : undefined,
+        });
+        if (dbrand.isErr()) {
+          return dbrand;
+        }
+        domainBrands.push(dbrand.unwrap());
+      }
+
+      return Ok(domainBrands);
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   findById(id: string): Promise<DBResult<Brand>> {}
   findByNames(
     names: string[],
@@ -191,6 +228,17 @@ export class BrandRepository implements IBrandRepository {
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
+  }
+
+  private normalizePagination(page?: number, limit?: number): Pagination {
+    const safePage = Math.max(1, page ?? 1);
+    const safeLimit = Math.max(1, Math.min(100, limit ?? 20));
+
+    return {
+      page: safePage,
+      limit: safeLimit,
+      skip: (safePage - 1) * safeLimit,
+    };
   }
   private toDomain(b: BrandWithImagesDb): DBResult<Brand> {
     const images = b.images?.map((bi) =>
