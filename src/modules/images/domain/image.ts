@@ -6,7 +6,7 @@ import { FileSize } from 'src/modules/shared/value-objects/file-size';
 import { Dimension } from 'src/modules/shared/value-objects/image-dimension';
 import { ImageMimeType } from 'src/modules/shared/value-objects/image-mime-type';
 import { Sha256Checksum } from 'src/modules/shared/value-objects/sha256-checksum';
-import { Err, Ok, Result } from 'ts-results-es';
+import { Ok, Result } from 'ts-results-es';
 import { ImageError } from './image.error';
 import { serializeProps } from 'src/modules/shared/utils/serialize-props.util';
 
@@ -61,14 +61,11 @@ export class Image {
       width: Dimension.create(data.width),
       height: Dimension.create(data.height),
       altText: data.altText ? DomainText.create(data.altText) : Ok(undefined),
-    });
+    }).mapErr(
+      (e) => new ImageError(`Failed to construct image: ${e.message}`, e),
+    );
     if (imageData.isErr()) {
-      return Err(
-        new ImageError(
-          `Failed to construct image: ${imageData.error.message}`,
-          imageData.error,
-        ),
-      );
+      return imageData;
     }
     return Ok(
       new Image({
