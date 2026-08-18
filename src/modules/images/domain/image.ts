@@ -1,4 +1,4 @@
-import { ImageId } from 'src/modules/shared/domain/ids';
+import { ImageId, UserId } from 'src/modules/shared/domain/ids';
 import { FileName } from 'src/modules/shared/value-objects/file-name';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { Ok, Result } from 'ts-results-es';
@@ -12,7 +12,7 @@ type ImageProps = {
   width?: number;
   height?: number;
   altText?: string;
-  metadata?: Record<string, unknown>;
+  uploadedBy: UserId;
   createdAt: Date;
 };
 type ImagePrimitives = {
@@ -24,7 +24,7 @@ type ImagePrimitives = {
   width?: number;
   height?: number;
   altText?: string;
-  metadata?: Record<string, unknown>;
+  uploadedBy: string;
   createdAt: Date;
 };
 type CreateImageProps = Omit<ImagePrimitives, 'createdAt' | 'id'>;
@@ -41,6 +41,7 @@ export class Image {
         ...data,
         id: ImageId.create(),
         name: fname.unwrap(),
+        uploadedBy: UserId.create(data.uploadedBy),
         createdAt: new Date(),
       }),
     );
