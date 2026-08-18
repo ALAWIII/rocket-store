@@ -77,6 +77,12 @@ export class Image {
       }),
     );
   }
+  get key(): string {
+    return this.props.id.toString();
+  }
+  get uploadedBy(): string {
+    return this.props.uploadedBy.toString();
+  }
   toJSON() {
     return serializeProps(this.props);
   }
