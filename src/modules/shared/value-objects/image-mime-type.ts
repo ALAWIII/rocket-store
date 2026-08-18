@@ -28,4 +28,7 @@ export class ImageMimeType {
   get value(): AllowedImageMimeType {
     return this._value;
   }
+  toJSON(): AllowedImageMimeType {
+    return this.value;
+  }
 }
