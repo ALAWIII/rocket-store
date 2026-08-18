@@ -8,6 +8,7 @@ import { ImageMimeType } from 'src/modules/shared/value-objects/image-mime-type'
 import { Sha256Checksum } from 'src/modules/shared/value-objects/sha256-checksum';
 import { Err, Ok, Result } from 'ts-results-es';
 import { ImageError } from './image.error';
+import { serializeProps } from 'src/modules/shared/utils/serialize-props.util';
 
 type ImageProps = {
   id: ImageId;
@@ -76,7 +77,7 @@ export class Image {
       }),
     );
   }
-  toJSON(): ImageProps {
-    return { ...this.props };
+  toJSON() {
+    return serializeProps(this.props);
   }
 }
