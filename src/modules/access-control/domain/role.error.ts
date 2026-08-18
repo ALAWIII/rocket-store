@@ -1,4 +1,4 @@
-export abstract class RoleError extends Error {
+export class RoleError extends Error {
   constructor(message: string, cause?: unknown) {
     super(message, { cause });
 
@@ -6,6 +6,3 @@ export abstract class RoleError extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
-export class InvalidRoleValueError extends RoleError {}
-
-export class InvalidPermissionSupersetError extends RoleError {}

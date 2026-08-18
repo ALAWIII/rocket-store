@@ -1,9 +1,6 @@
 import { AllPermissions } from './permission';
 import { Role } from './role';
-import {
-  InvalidPermissionSupersetError,
-  InvalidRoleValueError,
-} from './role.error';
+import { RoleError } from './role.error';
 
 describe('Role', () => {
   describe('create', () => {
@@ -14,7 +11,7 @@ describe('Role', () => {
       });
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
-        expect(result.error).toBeInstanceOf(InvalidRoleValueError);
+        expect(result.error).toBeInstanceOf(RoleError);
         expect(result.error.message).toBe('Invalid name');
       }
     });
@@ -112,7 +109,7 @@ describe('Role', () => {
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
         expect(result.error).toEqual(
-          new InvalidRoleValueError(
+          new RoleError(
             `assignScope must be provided if and only if its related scoped permission exists.`,
           ),
         );
@@ -128,7 +125,7 @@ describe('Role', () => {
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
         expect(result.error).toEqual(
-          new InvalidRoleValueError(
+          new RoleError(
             `assignScope must be provided if and only if its related scoped permission exists.`,
           ),
         );
@@ -150,7 +147,7 @@ describe('Role', () => {
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
         expect(result.error).toEqual(
-          new InvalidPermissionSupersetError(
+          new RoleError(
             'Main permissions map is not superset of assign scope permissions.',
           ),
         );

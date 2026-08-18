@@ -2,11 +2,8 @@ import { Name } from 'src/modules/shared/value-objects/name';
 import { AllPermissions, Permission } from './permission';
 import { RoleId } from 'src/modules/shared/value-objects/ids';
 import { Err, None, Ok, Option, Result, Some } from 'ts-results-es';
-import {
-  InvalidPermissionSupersetError,
-  InvalidRoleValueError,
-  RoleError,
-} from './role.error';
+import { RoleError } from './role.error';
+import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 
 type RoleProps = {
   id: RoleId;
@@ -42,15 +39,13 @@ export class Role {
       createScope?: Permission[];
     },
   ): Result<Role, RoleError> {
-    const idd = RoleId.create(id).mapErr(
-      (e) => new InvalidRoleValueError(e.message, e),
-    );
+    const id_name = unwrapResultObject({
+      id: RoleId.create(id),
+      name: Name.create(data.name),
+    }).mapErr((e) => new RoleError(e.message, e));
 
-    const name = Name.create(data.name).mapErr(
-      (e) => new InvalidRoleValueError(e.message),
-    );
-    if (name.isErr()) return Err(name.error);
-
+    if (id_name.isErr()) return Err(id_name.error);
+    //================================
     const superPermsMap = this.toMap(data.permissions);
 
     //======================= validate if assign role permission persists and its scope permission list.
@@ -99,8 +94,7 @@ export class Role {
     //=======================
     return Ok(
       new Role({
-        id: idd.unwrap(),
-        name: name.unwrap(),
+        ...id_name.unwrap(),
         permissions: superPermsMap,
         assignScope: assignScopeMap,
         createScope: createScopeMap,
@@ -120,14 +114,14 @@ export class Role {
     anyPermKey: string,
     scopeName: 'assignScope' | 'createScope',
     scope?: Map<string, Permission>,
-  ): Result<Map<string, Permission> | undefined, InvalidRoleValueError> {
+  ): Result<Map<string, Permission> | undefined, RoleError> {
     const hasScopePerm = superPermsMap.has(anyPermKey);
 
     const hasScopeValues = !!scope && scope.size > 0;
 
     if (hasScopePerm !== hasScopeValues) {
       return Err(
-        new InvalidRoleValueError(
+        new RoleError(
           `${scopeName} must be provided if and only if its related scoped permission exists.`,
         ),
       );
@@ -140,10 +134,10 @@ export class Role {
     superPermsMap: Map<string, Permission>,
     permScopes: Map<string, Permission>,
     scopeName: 'assign scope' | 'create scope',
-  ): Result<boolean, InvalidPermissionSupersetError> {
+  ): Result<boolean, RoleError> {
     if (!this.isSuperSetOf(superPermsMap, permScopes)) {
       return Err(
-        new InvalidPermissionSupersetError(
+        new RoleError(
           `Main permissions map is not superset of ${scopeName} permissions.`,
         ),
       );
