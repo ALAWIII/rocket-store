@@ -3,7 +3,7 @@ import {
   ProductId,
   ReviewId,
   UserId,
-} from 'src/modules/shared/domain/ids';
+} from 'src/modules/shared/value-objects/ids';
 
 export type ReviewStatus = 'published' | 'hidden';
 

@@ -1,4 +1,4 @@
-import { UserId } from 'src/modules/shared/domain/ids';
+import { UserId } from 'src/modules/shared/value-objects/ids';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 import { Email } from 'src/modules/shared/value-objects/email';
 import { Name } from 'src/modules/shared/value-objects/name';
@@ -42,6 +42,7 @@ export class User {
       create: (value: T) => R,
     ) => (value == null ? Ok(undefined) : create(value));
     const dataValidated = unwrapResultObject({
+      id: UserId.create(data.id),
       email: Email.create(data.email),
       name: Name.create(data.name),
       givenName: optional(data.givenName, (value) => Name.create(value)),
@@ -52,7 +53,6 @@ export class User {
 
     return Ok(
       new User({
-        id: UserId.create(data.id),
         ...dataValidated.value,
         image: data.image,
         roleId: data.roleId,

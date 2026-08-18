@@ -1,4 +1,4 @@
-import { AddressId, OrderId, UserId } from 'src/modules/shared/domain/ids';
+import { AddressId, UserId } from 'src/modules/shared/value-objects/ids';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Phone } from 'src/modules/shared/value-objects/phone';
@@ -60,6 +60,8 @@ export class Address {
     data: AddressPrimitives,
   ): Result<Address, ValueObjectError> {
     const dataValidate = unwrapResultObject({
+      id: AddressId.create(data.id),
+      userId: UserId.create(data.userId),
       fullName: Name.create(data.fullName, 100),
       phone: Phone.create(data.phone),
       country: Name.create(data.country),
@@ -69,8 +71,6 @@ export class Address {
     if (dataValidate.isErr()) return Err(dataValidate.error);
     return Ok(
       new Address({
-        id: AddressId.create(data.id),
-        userId: UserId.create(data.userId),
         postalCode: data.postalCode,
         addressLine1: data.addressLine1,
         addressLine2: data.addressLine2,

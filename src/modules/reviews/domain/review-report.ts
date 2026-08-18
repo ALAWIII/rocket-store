@@ -1,4 +1,4 @@
-import { ReviewId, UserId } from 'src/modules/shared/domain/ids';
+import { ReviewId, UserId } from 'src/modules/shared/value-objects/ids';
 import { ValueOf } from 'src/modules/shared/types/value-of';
 
 export const ReviewReportReason = {

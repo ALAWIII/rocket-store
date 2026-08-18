@@ -1,4 +1,7 @@
-import { ProductId, ProductVariantId } from 'src/modules/shared/domain/ids';
+import {
+  ProductId,
+  ProductVariantId,
+} from 'src/modules/shared/value-objects/ids';
 
 type ProductVariantProps = {
   readonly id: ProductVariantId;

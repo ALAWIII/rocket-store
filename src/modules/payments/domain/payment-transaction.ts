@@ -2,7 +2,7 @@ import {
   PaymentId,
   PaymentProviderId,
   PaymentTransactionId,
-} from 'src/modules/shared/domain/ids';
+} from 'src/modules/shared/value-objects/ids';
 import { PaymentStatus } from './payment-status';
 
 type PaymentTransactionProps = {
@@ -35,7 +35,7 @@ export class PaymentTransaction {
     this.validateCardLast4(data.cardLast4);
 
     return new PaymentTransaction({
-      id: PaymentTransactionId.create(),
+      id: PaymentTransactionId.create().unwrap(),
       paymentId: data.paymentId,
       providerId: data.providerId,
       gatewayTransactionId: data.gatewayTransactionId.trim(),

@@ -1,6 +1,6 @@
 import { Name } from 'src/modules/shared/value-objects/name';
 import { AllPermissions, Permission } from './permission';
-import { RoleId } from 'src/modules/shared/domain/ids';
+import { RoleId } from 'src/modules/shared/value-objects/ids';
 import { Err, None, Ok, Option, Result, Some } from 'ts-results-es';
 import {
   InvalidPermissionSupersetError,
@@ -27,14 +27,14 @@ type CreateRoleProps = Omit<RolePropsPrimitives, 'id'>;
 export class Role {
   private constructor(private readonly props: RoleProps) {}
   static create(data: CreateRoleProps): Result<Role, RoleError> {
-    return this.build(RoleId.create(), data);
+    return this.build(RoleId.create().unwrap().toJSON(), data);
   }
 
   static restore(data: RolePropsPrimitives): Result<Role, RoleError> {
-    return this.build(RoleId.create(data.id), data);
+    return this.build(data.id, data);
   }
   private static build(
-    id: RoleId,
+    id: string,
     data: {
       name: string;
       permissions: Permission[];
@@ -42,6 +42,10 @@ export class Role {
       createScope?: Permission[];
     },
   ): Result<Role, RoleError> {
+    const idd = RoleId.create(id).mapErr(
+      (e) => new InvalidRoleValueError(e.message, e),
+    );
+
     const name = Name.create(data.name).mapErr(
       (e) => new InvalidRoleValueError(e.message),
     );
@@ -95,7 +99,7 @@ export class Role {
     //=======================
     return Ok(
       new Role({
-        id,
+        id: idd.unwrap(),
         name: name.unwrap(),
         permissions: superPermsMap,
         assignScope: assignScopeMap,

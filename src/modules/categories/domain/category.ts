@@ -1,4 +1,4 @@
-import { CategoryId } from 'src/modules/shared/domain/ids';
+import { CategoryId } from 'src/modules/shared/value-objects/ids';
 import { Name } from 'src/modules/shared/value-objects/name';
 
 type CategoryProps = {

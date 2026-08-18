@@ -3,7 +3,7 @@ import {
   ProductVariantId,
   WishlistId,
   WishlistItemId,
-} from 'src/modules/shared/domain/ids';
+} from 'src/modules/shared/value-objects/ids';
 
 type WishlistItemProps = {
   id: WishlistItemId;

@@ -1,14 +1,9 @@
 import { v7, validate, version } from 'uuid';
-import { IdError } from './id.error';
+import { Err, Ok, Result } from 'ts-results-es';
+import { ValueObjectError } from './value-object.error';
 
 export abstract class UuidV7Id {
   protected constructor(private readonly value: string) {}
-
-  protected static validate(value: string) {
-    if (!validate(value) || version(value) !== 7) {
-      throw new IdError(`${this.name} must be UUID v7`);
-    }
-  }
 
   toString(): string {
     return this.value;
@@ -26,10 +21,15 @@ export class Id extends UuidV7Id {
     super(value);
   }
 
-  static create<T extends typeof Id>(this: T, value?: string): InstanceType<T> {
-    const id = value ?? v7();
-    this.validate(id); // 'this' is the subclass (OrderId, UserId, ...)
-    return new this(id) as InstanceType<T>;
+  static create<T extends typeof Id>(
+    this: T,
+    value?: string,
+  ): Result<InstanceType<T>, ValueObjectError> {
+    if (value && (!validate(value) || version(value) !== 7)) {
+      return Err(new ValueObjectError(`${this.name} must be UUID v7`));
+    }
+    // 'this' is the subclass (OrderId, UserId, ...)
+    return Ok(new this(value ?? v7()) as InstanceType<T>);
   }
 }
 export class UserId extends Id {}

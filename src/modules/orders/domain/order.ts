@@ -7,7 +7,7 @@ import {
   OrderItemId,
   ProductVariantId,
   UserId,
-} from 'src/modules/shared/domain/ids';
+} from 'src/modules/shared/value-objects/ids';
 import { ValueOf } from 'src/modules/shared/types/value-of';
 
 export const OrderStatus = {
@@ -38,8 +38,8 @@ export class Order {
   private constructor(private props: OrderProps) {}
   static create(userId: string): Order {
     return new Order({
-      id: OrderId.create(), // will create a default new one if not provided.
-      userId: UserId.create(userId),
+      id: OrderId.create().unwrap(), // will create a default new one if not provided.
+      userId: UserId.create(userId).unwrap(),
       status: OrderStatus.Pending,
       createdAt: new Date(),
       items: [],

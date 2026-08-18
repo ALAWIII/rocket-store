@@ -5,7 +5,7 @@ import {
   OrderId,
   ShipmentId,
   ShippingProviderId,
-} from 'src/modules/shared/domain/ids';
+} from 'src/modules/shared/value-objects/ids';
 import { ShipmentMethod } from './shipping-method';
 import { ShipmentStatus } from './shipping-status';
 
@@ -42,7 +42,7 @@ export class Shipment {
     const now = new Date();
 
     return new Shipment({
-      id: ShipmentId.create(),
+      id: ShipmentId.create().unwrap(),
       orderId: data.orderId,
       orderAddressId: data.orderAddressId,
       shipmentMethod: data.shipmentMethod,

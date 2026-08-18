@@ -1,4 +1,4 @@
-import { ReviewId, UserId } from 'src/modules/shared/domain/ids';
+import { ReviewId, UserId } from 'src/modules/shared/value-objects/ids';
 
 type ReviewVoteProps = {
   reviewId: ReviewId;

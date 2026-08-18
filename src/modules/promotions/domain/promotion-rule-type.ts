@@ -3,7 +3,7 @@ import {
   CategoryId,
   PaymentProviderId,
   ProductId,
-} from 'src/modules/shared/domain/ids';
+} from 'src/modules/shared/value-objects/ids';
 // extend this type with more field types if you encountered new props that requires new types.
 type TypeMap = {
   string: string;

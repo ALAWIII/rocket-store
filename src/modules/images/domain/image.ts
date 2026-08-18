@@ -1,4 +1,4 @@
-import { ImageId, UserId } from 'src/modules/shared/domain/ids';
+import { ImageId, UserId } from 'src/modules/shared/value-objects/ids';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 import { DomainText } from 'src/modules/shared/value-objects/domain-text';
 import { FileName } from 'src/modules/shared/value-objects/file-name';
@@ -52,6 +52,8 @@ export class Image {
   }
   private static build(data: ImagePrimitives): Result<Image, ImageError> {
     const imageData = unwrapResultObject({
+      id: ImageId.create(data.id),
+      uploadedBy: UserId.create(data.uploadedBy),
       name: FileName.create(data.name),
       mimeType: ImageMimeType.create(data.mimeType),
       sizeBytes: FileSize.create(data.sizeBytes),
@@ -70,8 +72,6 @@ export class Image {
     }
     return Ok(
       new Image({
-        id: ImageId.create(data.id),
-        uploadedBy: UserId.create(data.uploadedBy),
         createdAt: data.createdAt,
         ...imageData.unwrap(),
       }),

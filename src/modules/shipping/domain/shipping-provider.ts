@@ -1,4 +1,4 @@
-import { ShippingProviderId } from 'src/modules/shared/domain/ids';
+import { ShippingProviderId } from 'src/modules/shared/value-objects/ids';
 
 type ShippingProviderProps = {
   id: ShippingProviderId;
@@ -30,7 +30,7 @@ export class ShippingProvider {
     this.validateConfig(config);
 
     return new ShippingProvider({
-      id: ShippingProviderId.create(),
+      id: ShippingProviderId.create().unwrap(),
       slug,
       displayName,
       isActive: data.isActive,

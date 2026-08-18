@@ -1,4 +1,4 @@
-import { UserId, WishlistId } from 'src/modules/shared/domain/ids';
+import { UserId, WishlistId } from 'src/modules/shared/value-objects/ids';
 import { Name } from 'src/modules/shared/value-objects/name';
 
 type WishlistProps = {

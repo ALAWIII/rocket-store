@@ -1,4 +1,7 @@
-import { PromotionId, PromotionRuleId } from 'src/modules/shared/domain/ids';
+import {
+  PromotionId,
+  PromotionRuleId,
+} from 'src/modules/shared/value-objects/ids';
 import { PromotionRuleType } from './promotion-rule-type';
 
 export type PromotionRuleProps<T extends Record<string, unknown>> = {

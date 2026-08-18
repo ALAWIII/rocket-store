@@ -1,4 +1,4 @@
-import { PaymentProviderId } from 'src/modules/shared/domain/ids';
+import { PaymentProviderId } from 'src/modules/shared/value-objects/ids';
 import { Name } from 'src/modules/shared/value-objects/name';
 
 type PaymentProviderProps = {
@@ -28,7 +28,7 @@ export class PaymentProvider {
     this.validateConfig(config);
 
     return new PaymentProvider({
-      id: PaymentProviderId.create(),
+      id: PaymentProviderId.create().unwrap(),
       slug,
       displayName: data.displayName,
       isActive: data.isActive ?? true,

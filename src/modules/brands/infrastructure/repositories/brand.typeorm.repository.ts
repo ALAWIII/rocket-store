@@ -5,7 +5,7 @@ import { In, Repository } from 'typeorm';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Brand } from '../../domain/brand';
 import { BrandImagesEntity } from '../entities/brand-images.entity';
-import { Err, Ok } from 'ts-results-es';
+import { Err, Ok, Result } from 'ts-results-es';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import {
   CorruptedPersistenceDataError,
@@ -173,7 +173,7 @@ export class BrandRepository implements IBrandRepository {
         brandId,
         imageRole: 'logo',
       });
-      return Ok(this.toBImageDomain(images));
+      return this.toBImageDomain(images);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -272,26 +272,43 @@ export class BrandRepository implements IBrandRepository {
       skip: (safePage - 1) * safeLimit,
     };
   }
-  private toBImageDomain(images: BrandImagesEntity[]): BrandImage[] {
-    const bimages = images?.map((bi) =>
-      BrandImage.restore({
+  private toBImageDomain(
+    images: BrandImagesEntity[],
+  ): Result<BrandImage[], CorruptedPersistenceDataError> {
+    const bimages: BrandImage[] = [];
+    for (const bi of images) {
+      const bimage = BrandImage.restore({
         id: bi.id,
         imageId: bi.imageId,
         imageRole: bi.imageRole,
         sortOrder: bi.sortOrder,
         createdAt: bi.createdAt,
         updatedAt: bi.updatedAt,
-      }),
-    );
-    return bimages;
+      }).mapErr(
+        (e) =>
+          new CorruptedPersistenceDataError(
+            `Failed to construct brand from BrandEntity: ${e.message}`,
+            e,
+          ),
+      );
+      if (bimage.isErr()) {
+        return bimage;
+      }
+      bimages.push(bimage.unwrap());
+    }
+
+    return Ok(bimages);
   }
   private toDomain(b: BrandWithImagesDb): DBResult<Brand> {
     const images = b.images ? this.toBImageDomain(b.images) : undefined;
+    if (images?.isErr()) {
+      return images;
+    }
     return Brand.restore({
       id: b.brand.id,
       name: b.brand.name,
       createdAt: b.brand.createdAt,
-      images,
+      images: images?.unwrap(),
     }).mapErr(
       (e) =>
         new CorruptedPersistenceDataError(

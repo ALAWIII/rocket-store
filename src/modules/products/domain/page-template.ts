@@ -2,7 +2,7 @@ import {
   CategoryId,
   PageTemplateId,
   UserId,
-} from 'src/modules/shared/domain/ids';
+} from 'src/modules/shared/value-objects/ids';
 import { Name } from 'src/modules/shared/value-objects/name';
 
 // draft templates only allowed to be hard deleted!
@@ -38,7 +38,9 @@ abstract class PageTemplate {
     }
     if (info.categoryId !== undefined) {
       this.data.categoryId =
-        info.categoryId === null ? null : CategoryId.create(info.categoryId); // create new id for categoryId if not exist, will cause a bug later!
+        info.categoryId === null
+          ? null
+          : CategoryId.create(info.categoryId).unwrap(); // create new id for categoryId if not exist, will cause a bug later!
     }
   }
   get id(): PageTemplateId {

@@ -1,4 +1,8 @@
-import { CouponId, PromotionId, UserId } from 'src/modules/shared/domain/ids';
+import {
+  CouponId,
+  PromotionId,
+  UserId,
+} from 'src/modules/shared/value-objects/ids';
 
 type CouponProps = {
   id: CouponId;

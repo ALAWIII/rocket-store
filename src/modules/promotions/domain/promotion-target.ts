@@ -2,7 +2,7 @@ import {
   PromotionId,
   PromotionTargetId,
   UuidV7Id,
-} from 'src/modules/shared/domain/ids';
+} from 'src/modules/shared/value-objects/ids';
 import { ValueOf } from 'src/modules/shared/types/value-of';
 
 export const PromotionTargetType = {

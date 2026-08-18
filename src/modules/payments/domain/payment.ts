@@ -1,4 +1,4 @@
-import { OrderId, PaymentId } from 'src/modules/shared/domain/ids';
+import { OrderId, PaymentId } from 'src/modules/shared/value-objects/ids';
 import { PaymentStatus } from './payment-status';
 import { PaymentMethod } from './payment-method';
 
@@ -22,7 +22,7 @@ export class Payment {
   static create(data: CreatePaymentProps): Payment {
     const now = new Date();
     return new Payment({
-      id: PaymentId.create(),
+      id: PaymentId.create().unwrap(),
       ...data,
       createdAt: now,
       updatedAt: now,

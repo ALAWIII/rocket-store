@@ -1,4 +1,4 @@
-import { PromotionId, UserId } from 'src/modules/shared/domain/ids';
+import { PromotionId, UserId } from 'src/modules/shared/value-objects/ids';
 import { ValueOf } from 'src/modules/shared/types/value-of';
 import { Name } from 'src/modules/shared/value-objects/name';
 

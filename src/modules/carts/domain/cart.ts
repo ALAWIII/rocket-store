@@ -3,7 +3,7 @@ import {
   CartItemId,
   ProductVariantId,
   UserId,
-} from 'src/modules/shared/domain/ids';
+} from 'src/modules/shared/value-objects/ids';
 
 type CartItemProps = {
   readonly id: CartItemId;
