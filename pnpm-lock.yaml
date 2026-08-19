@@ -29,6 +29,9 @@ importers:
       '@nestjs/typeorm':
         specifier: ^11.0.3
         version: 11.0.3(@nestjs/common@11.2.1(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.2.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)(typeorm@1.1.0(pg-query-stream@4.17.0(pg@8.23.0))(pg@8.23.0)(ts-node@10.9.2(@swc/core@1.16.0)(@types/node@24.13.3)(typescript@5.9.3)))
+      '@smithy/node-http-handler':
+        specifier: ^4.11.2
+        version: 4.11.2
       '@thallesp/nestjs-better-auth':
         specifier: ^2.7.0
         version: 2.7.0(@nestjs/common@11.2.1(class-transformer@0.5.1)(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.2.1)(better-auth@1.6.29(pg@8.23.0)(vitest@4.1.10))(express@5.2.1)(qs@6.15.3)(typescript@5.9.3)
