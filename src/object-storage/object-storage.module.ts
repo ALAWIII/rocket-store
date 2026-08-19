@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ObjectStorageS3Client } from './object-storage.s3-client';
 
-@Module({})
+@Module({ providers: [ObjectStorageS3Client] })
 export class ObjectStorageModule {}
