@@ -5,6 +5,7 @@ import { Name } from 'src/modules/shared/value-objects/name';
 import { Phone } from 'src/modules/shared/value-objects/phone';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { Err, Ok, Result } from 'ts-results-es';
+import { optional } from 'src/modules/shared/utils/optional.util';
 
 type UserProps = {
   readonly id: UserId;
@@ -37,10 +38,6 @@ export class User {
     return new User(props);
   }
   static fromPrimitives(data: UserPrimitives): Result<User, ValueObjectError> {
-    const optional = <T, R>(
-      value: T | null | undefined,
-      create: (value: T) => R,
-    ) => (value == null ? Ok(undefined) : create(value));
     const dataValidated = unwrapResultObject({
       id: UserId.create(data.id),
       email: Email.create(data.email),
