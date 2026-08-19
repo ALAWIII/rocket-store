@@ -8,27 +8,25 @@ const ALLOWED_IMAGE_MIME_TYPES = [
   'image/avif',
 ] as const;
 
-export type AllowedImageMimeType = (typeof ALLOWED_IMAGE_MIME_TYPES)[number];
+export type ImageMimeTypes = (typeof ALLOWED_IMAGE_MIME_TYPES)[number];
 
 export class ImageMimeType {
-  private constructor(private readonly _value: AllowedImageMimeType) {}
+  private constructor(private readonly _value: ImageMimeTypes) {}
 
   static create(value: string): Result<ImageMimeType, ValueObjectError> {
     const normalized = value.trim().toLowerCase();
 
-    if (
-      !ALLOWED_IMAGE_MIME_TYPES.includes(normalized as AllowedImageMimeType)
-    ) {
+    if (!ALLOWED_IMAGE_MIME_TYPES.includes(normalized as ImageMimeTypes)) {
       return Err(new ValueObjectError(`Unsupported image MIME type: ${value}`));
     }
 
-    return Ok(new ImageMimeType(normalized as AllowedImageMimeType));
+    return Ok(new ImageMimeType(normalized as ImageMimeTypes));
   }
 
-  get value(): AllowedImageMimeType {
+  get value(): ImageMimeTypes {
     return this._value;
   }
-  toJSON(): AllowedImageMimeType {
+  toJSON(): ImageMimeTypes {
     return this.value;
   }
 }
