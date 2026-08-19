@@ -19,11 +19,11 @@ export class BrandImagesEntity {
   @UuidV7PrimaryColumn()
   id!: string;
 
-  @Column()
+  @Column({ type: 'uuid' })
   @ForeignKey(() => BrandEntity, (b) => b.id, { onDelete: 'CASCADE' })
   brandId!: string;
 
-  @Column()
+  @Column({ type: 'uuid' })
   @ForeignKey(() => ImageEntity, (i) => i.id, { onDelete: 'CASCADE' })
   imageId!: string;
 
