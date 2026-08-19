@@ -1,5 +1,6 @@
 import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
+import { type ImageMimeTypes } from 'src/modules/shared/value-objects/image-mime-type';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 import { Column, Entity, ForeignKey } from 'typeorm';
 
@@ -11,8 +12,8 @@ export class ImageEntity {
   name!: string;
   @Column('varchar', { length: 64 })
   checksum!: string;
-  @Column('varchar', { length: 100 })
-  mimeType!: string;
+  @Column('varchar', { length: 20 })
+  mimeType!: ImageMimeTypes;
   @Column('bigint')
   sizeBytes!: number;
   @Column('integer')
