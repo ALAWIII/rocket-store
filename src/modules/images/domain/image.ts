@@ -9,6 +9,7 @@ import { Sha256Checksum } from 'src/modules/shared/value-objects/sha256-checksum
 import { Ok, Result } from 'ts-results-es';
 import { ImageError } from './image.error';
 import { serializeProps } from 'src/modules/shared/utils/serialize-props.util';
+import { optional } from 'src/modules/shared/utils/optional.util';
 
 type ImageProps = {
   id: ImageId;
@@ -19,7 +20,7 @@ type ImageProps = {
   width: Dimension;
   height: Dimension;
   altText?: DomainText;
-  uploadedBy: UserId;
+  uploadedBy?: UserId | null;
   createdAt: Date;
 };
 type ImagePrimitives = {
@@ -30,8 +31,8 @@ type ImagePrimitives = {
   checksum: string;
   width: number;
   height: number;
-  altText?: string;
-  uploadedBy: string;
+  altText?: string | null;
+  uploadedBy?: string | null;
   createdAt: Date;
 };
 type CreateImageProps = Omit<ImagePrimitives, 'createdAt' | 'id'>;
@@ -53,16 +54,14 @@ export class Image {
   private static build(data: ImagePrimitives): Result<Image, ImageError> {
     const imageData = unwrapResultObject({
       id: ImageId.create(data.id),
-      uploadedBy: UserId.create(data.uploadedBy),
       name: FileName.create(data.name),
       mimeType: ImageMimeType.create(data.mimeType),
       sizeBytes: FileSize.create(data.sizeBytes),
       checksum: Sha256Checksum.create(data.checksum),
       width: Dimension.create(data.width),
       height: Dimension.create(data.height),
-      altText: data.altText
-        ? DomainText.create(data.altText, 125)
-        : Ok(undefined),
+      uploadedBy: optional(data.uploadedBy, (value) => UserId.create(value)),
+      altText: optional(data.altText, (value) => DomainText.create(value, 125)),
     }).mapErr(
       (e) => new ImageError(`Failed to construct image: ${e.message}`, e),
     );
@@ -79,8 +78,8 @@ export class Image {
   get key(): string {
     return this.props.id.toString();
   }
-  get uploadedBy(): string {
-    return this.props.uploadedBy.toString();
+  get uploadedBy(): string | undefined | null {
+    return this.props.uploadedBy?.toString();
   }
   toJSON() {
     return serializeProps(this.props);
