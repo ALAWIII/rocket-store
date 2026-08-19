@@ -60,7 +60,9 @@ export class Image {
       checksum: Sha256Checksum.create(data.checksum),
       width: Dimension.create(data.width),
       height: Dimension.create(data.height),
-      altText: data.altText ? DomainText.create(data.altText) : Ok(undefined),
+      altText: data.altText
+        ? DomainText.create(data.altText, 125)
+        : Ok(undefined),
     }).mapErr(
       (e) => new ImageError(`Failed to construct image: ${e.message}`, e),
     );
