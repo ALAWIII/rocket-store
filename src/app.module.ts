@@ -19,6 +19,7 @@ import { AppLoggerModule } from './app-logger/app-logger.module';
 import { EmailModule } from './email/email.module';
 import { BrandsModule } from './modules/brands/brands.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { ObjectStorageModule } from './object-storage/object-storage.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -41,6 +42,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
     EmailModule,
     BrandsModule,
     CategoriesModule,
+    ObjectStorageModule,
   ],
 })
 export class AppModule {}
