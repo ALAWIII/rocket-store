@@ -28,7 +28,7 @@ export class UserEntity {
   phone!: string | null;
 
   @Column('uuid', { name: 'image', nullable: true })
-  @ForeignKey(() => ImageEntity, (i) => i.id)
+  @ForeignKey(() => ImageEntity, (i) => i.id, { onDelete: 'SET NULL' })
   image!: string | null;
 
   @Column({ type: 'uuid' })
