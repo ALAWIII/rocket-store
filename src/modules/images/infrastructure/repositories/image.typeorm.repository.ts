@@ -3,7 +3,7 @@ import { IImageRepository } from './image.repository';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Image } from '../../domain/image';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
-import { Err } from 'ts-results-es';
+import { Err, Ok } from 'ts-results-es';
 import { Repository } from 'typeorm';
 import { ImageEntity } from '../entities/image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -30,6 +30,14 @@ export class ImageRepository implements IImageRepository {
     try {
       const result = await this.imageRepo.findOneByOrFail({ id: imageId });
       return this.toDomain(result);
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
+  async delete(imageId: string): Promise<DBResult<number>> {
+    try {
+      const result = await this.imageRepo.delete({ id: imageId });
+      return Ok(result.affected ?? 0);
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
