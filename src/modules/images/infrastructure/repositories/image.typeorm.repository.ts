@@ -26,6 +26,14 @@ export class ImageRepository implements IImageRepository {
       return Err(mapTypeOrmError(e));
     }
   }
+  async findById(imageId: string): Promise<DBResult<Image>> {
+    try {
+      const result = await this.imageRepo.findOneByOrFail({ id: imageId });
+      return this.toDomain(result);
+    } catch (e) {
+      return Err(mapTypeOrmError(e));
+    }
+  }
   private toDomain(img: ImageEntity) {
     return Image.restore({ ...img }).mapErr(
       (e) =>
