@@ -4,7 +4,7 @@ import { AccessControlSyncService } from './access-control-sync.service';
 import { IRoleRepository } from '../infrastructure/repositories/role.repository';
 import { AllPermissions } from '../domain/permission';
 import { Role } from '../domain/role';
-import { Err, Ok } from 'ts-results-es';
+import { Err, Ok } from '@allawiii/results-ts';
 import { IEnforcerHolder } from '../enforcer-holder/infrastructure/casbin/enforcer-holder';
 import * as casbinFactory from '../enforcer-holder/infrastructure/casbin/casbin.factory';
 import { Enforcer } from 'casbin';

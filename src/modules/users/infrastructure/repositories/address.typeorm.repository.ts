@@ -9,7 +9,7 @@ import {
   UnknownDatabaseError,
 } from 'src/modules/shared/errors/database.error';
 import { DBResult } from 'src/modules/shared/errors/error.types';
-import { Err, None, Ok, Option, Some } from 'ts-results-es';
+import { Err, None, Ok, Option, Some } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class AddressRepository implements IAddressRepository {
       const domain: Address[] = [];
       for (const adrs of addresses) {
         const result = this.toDomain(adrs);
-        if (result.isErr()) return result;
+        if (result.isErr()) return result.map();
         domain.push(result.unwrap());
       }
       return Ok(domain);
@@ -42,7 +42,7 @@ export class AddressRepository implements IAddressRepository {
         userId,
         deletedAt: IsNull(),
       });
-      return result ? this.toDomain(result).map((a) => Some(a)) : Ok(None);
+      return result ? this.toDomain(result).map((a) => Some(a)) : Ok(None());
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }

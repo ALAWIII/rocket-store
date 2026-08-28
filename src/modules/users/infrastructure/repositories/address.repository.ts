@@ -1,6 +1,6 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Address } from '../../domain/address';
-import { Option } from 'ts-results-es';
+import { Option } from '@allawiii/results-ts';
 
 export abstract class IAddressRepository {
   abstract findAll(userId: string): Promise<DBResult<Address[]>>;

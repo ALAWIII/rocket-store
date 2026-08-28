@@ -1,7 +1,7 @@
 import { BrandId } from 'src/modules/shared/value-objects/ids';
 import { Name } from 'src/modules/shared/value-objects/name';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
-import { Ok, Result } from 'ts-results-es';
+import { Ok, Result } from '@allawiii/results-ts';
 import { BrandImage } from './brand-image';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 
@@ -29,7 +29,7 @@ export class Brand {
       id: BrandId.create(),
     });
     if (resultData.isErr()) {
-      return resultData;
+      return resultData.map();
     }
     return Ok(
       new Brand({
@@ -45,7 +45,7 @@ export class Brand {
       id: BrandId.create(data.id),
     });
     if (resultData.isErr()) {
-      return resultData;
+      return resultData.map();
     }
     const brand = {
       ...resultData.unwrap(),

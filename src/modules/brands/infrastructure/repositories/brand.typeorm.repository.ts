@@ -5,7 +5,7 @@ import { In, Repository } from 'typeorm';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Brand } from '../../domain/brand';
 import { BrandImagesEntity } from '../entities/brand-images.entity';
-import { Err, Ok, Result } from 'ts-results-es';
+import { Err, Ok, Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import {
   CorruptedPersistenceDataError,
@@ -133,7 +133,7 @@ export class BrandRepository implements IBrandRepository {
           images: b.logo ? [b.logo] : undefined,
         });
         if (dbrand.isErr()) {
-          return dbrand;
+          return dbrand.map();
         }
         domainBrands.push(dbrand.unwrap());
       }
@@ -292,7 +292,7 @@ export class BrandRepository implements IBrandRepository {
           ),
       );
       if (bimage.isErr()) {
-        return bimage;
+        return bimage.map();
       }
       bimages.push(bimage.unwrap());
     }
@@ -302,7 +302,7 @@ export class BrandRepository implements IBrandRepository {
   private toDomain(b: BrandWithImagesDb): DBResult<Brand> {
     const images = b.images ? this.toBImageDomain(b.images) : undefined;
     if (images?.isErr()) {
-      return images;
+      return images.map();
     }
     return Brand.restore({
       id: b.brand.id,

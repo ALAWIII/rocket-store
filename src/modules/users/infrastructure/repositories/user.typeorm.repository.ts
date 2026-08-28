@@ -15,7 +15,7 @@ import {
   UnknownDatabaseError,
 } from 'src/modules/shared/errors/database.error';
 import { DBResult } from 'src/modules/shared/errors/error.types';
-import { Err, None, Ok, Option, Some } from 'ts-results-es';
+import { Err, None, Ok, Option, Some } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
 
@@ -117,7 +117,7 @@ export class UserRepository implements IUserRepository {
         .execute();
       const [user] = result.raw as UserEntity[];
 
-      return user ? this.toDomain(user).map((r) => Some(r)) : Ok(None);
+      return user ? this.toDomain(user).map((r) => Some(r)) : Ok(None());
     } catch (e) {
       return Err(mapTypeOrmError(e));
     }
@@ -276,7 +276,7 @@ export class UserRepository implements IUserRepository {
       const users: User[] = [];
       for (const row of rows) {
         const result = this.toDomain(row);
-        if (result.isErr()) return result;
+        if (result.isErr()) return result.map();
         users.push(result.unwrap());
       }
       return Ok({ users, total });

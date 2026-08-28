@@ -1,5 +1,5 @@
 import { v7, validate, version } from 'uuid';
-import { Err, Ok, Result } from 'ts-results-es';
+import { Err, Ok, Result } from '@allawiii/results-ts';
 import { ValueObjectError } from './value-object.error';
 
 export abstract class UuidV7Id {

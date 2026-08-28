@@ -6,10 +6,11 @@ import { FileSize } from 'src/modules/shared/value-objects/file-size';
 import { Dimension } from 'src/modules/shared/value-objects/image-dimension';
 import { ImageMimeType } from 'src/modules/shared/value-objects/image-mime-type';
 import { Sha256Checksum } from 'src/modules/shared/value-objects/sha256-checksum';
-import { Ok, Result } from 'ts-results-es';
+import { Ok, Result } from '@allawiii/results-ts';
 import { ImageError } from './image.error';
 import { serializeProps } from 'src/modules/shared/utils/serialize-props.util';
 import { optional } from 'src/modules/shared/utils/optional.util';
+import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 
 type ImageProps = {
   id: ImageId;
@@ -63,10 +64,11 @@ export class Image {
       uploadedBy: optional(data.uploadedBy, (value) => UserId.create(value)),
       altText: optional(data.altText, (value) => DomainText.create(value, 125)),
     }).mapErr(
-      (e) => new ImageError(`Failed to construct image: ${e.message}`, e),
+      (e: ValueObjectError) =>
+        new ImageError(`Failed to construct image: ${e.message}`, e),
     );
     if (imageData.isErr()) {
-      return imageData;
+      return imageData.map();
     }
     return Ok(
       new Image({

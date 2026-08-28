@@ -1,4 +1,4 @@
-import { Option } from 'ts-results-es';
+import { Option } from '@allawiii/results-ts';
 import { Role } from '../../domain/role';
 import type { DBResult } from 'src/modules/shared/errors/error.types';
 

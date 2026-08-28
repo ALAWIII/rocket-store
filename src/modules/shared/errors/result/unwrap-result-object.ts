@@ -1,4 +1,4 @@
-import { Ok, Err, Result } from 'ts-results-es';
+import { Ok, Err, Result } from '@allawiii/results-ts';
 
 type ExtractOk<T> = T extends Ok<infer U> ? U : never;
 type ExtractErr<T> = T extends Err<infer E> ? E : never;

@@ -4,7 +4,7 @@ import { Email } from 'src/modules/shared/value-objects/email';
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Phone } from 'src/modules/shared/value-objects/phone';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
-import { Err, Ok, Result } from 'ts-results-es';
+import { Err, Ok, Result } from '@allawiii/results-ts';
 import { optional } from 'src/modules/shared/utils/optional.util';
 
 type UserProps = {

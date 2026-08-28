@@ -1,6 +1,6 @@
 import { BrandImageId, ImageId } from 'src/modules/shared/value-objects/ids';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
-import { Ok, Result } from 'ts-results-es';
+import { Ok, Result } from '@allawiii/results-ts';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 export type BrandImageRole = 'banner' | 'logo';
 type BrandImageProps = {
@@ -32,7 +32,7 @@ export class BrandImage {
       imageId: ImageId.create(data.imageId),
     });
     if (resultData.isErr()) {
-      return resultData;
+      return resultData.map();
     }
     return Ok(
       new BrandImage({
@@ -52,7 +52,7 @@ export class BrandImage {
       imageId: ImageId.create(data.imageId),
     });
     if (resultData.isErr()) {
-      return resultData;
+      return resultData.map();
     }
     return Ok(
       new BrandImage({

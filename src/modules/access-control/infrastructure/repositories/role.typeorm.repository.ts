@@ -6,10 +6,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEntity } from '../entities/role.entity';
 import { Brackets, In, Repository } from 'typeorm';
 import type { DBResult } from 'src/modules/shared/errors/error.types';
-import { Err, None, Ok, Option, Some } from 'ts-results-es';
+import { Err, None, Ok, Option, Some } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import {
   CorruptedPersistenceDataError,
+  DatabaseError,
   RecordNotFoundError,
   UnknownDatabaseError,
 } from 'src/modules/shared/errors/database.error';
@@ -162,7 +163,7 @@ export class RoleRepository implements IRoleRepository {
   async findById(id: string): Promise<DBResult<Option<Role>>> {
     try {
       const dbRole = await this.roleRepo.findOneBy({ id });
-      if (dbRole === null) return Ok(None);
+      if (dbRole === null) return Ok(None());
       return this.toDomain(dbRole).map((role) => Some(role));
     } catch (e) {
       return Err(mapTypeOrmError(e));
@@ -171,7 +172,7 @@ export class RoleRepository implements IRoleRepository {
   async findByName(name: string): Promise<DBResult<Option<Role>>> {
     try {
       const dbRole = await this.roleRepo.findOneBy({ name });
-      if (dbRole === null) return Ok(None);
+      if (dbRole === null) return Ok(None());
       return this.toDomain(dbRole).map((role) => Some(role));
     } catch (e) {
       return Err(mapTypeOrmError(e));
@@ -306,17 +307,17 @@ export class RoleRepository implements IRoleRepository {
       Permission.fromPrimitives(p).mapErr(permError),
     );
     for (const permList of [permissions, assignScope, createScope]) {
-      const p = permList?.find((p) => p.isErr());
-      if (p?.isErr()) {
+      const p = permList?.find((p) => p.isErr())?.map<Role>();
+      if (p) {
         return p;
       }
     }
     return Role.restore({
       id: r.id,
       name: r.name,
-      permissions: permissions.map((p) => p.unwrapOrThrow()),
-      assignScope: assignScope?.map((p) => p.unwrapOrThrow()),
-      createScope: createScope?.map((p) => p.unwrapOrThrow()),
+      permissions: permissions.map((p) => p.unwrap()),
+      assignScope: assignScope?.map((p) => p.unwrap()),
+      createScope: createScope?.map((p) => p.unwrap()),
     }).mapErr(
       (e) =>
         new CorruptedPersistenceDataError(
@@ -330,12 +331,11 @@ export class RoleRepository implements IRoleRepository {
 
     for (const role of roles) {
       const result = this.toDomain(role);
-
       if (result.isErr()) {
-        return result;
+        return result.map();
       }
 
-      domainRoles.push(result.unwrapOrThrow());
+      domainRoles.push(result.unwrap());
     }
 
     return Ok(domainRoles);

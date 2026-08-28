@@ -1,7 +1,6 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { User } from '../../domain/user';
-import { Option } from 'ts-results-es';
-
+import { Option } from '@allawiii/results-ts';
 export type UpdateUserRepoData = {
   name?: string;
   givenName?: string;

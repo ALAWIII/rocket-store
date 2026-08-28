@@ -3,7 +3,7 @@ import { IImageRepository } from './image.repository';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Image } from '../../domain/image';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
-import { Err, Ok } from 'ts-results-es';
+import { Err, Ok } from '@allawiii/results-ts';
 import { Repository } from 'typeorm';
 import { ImageEntity } from '../entities/image.entity';
 import { InjectRepository } from '@nestjs/typeorm';

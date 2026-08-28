@@ -1,4 +1,4 @@
-import { Ok } from 'ts-results-es';
+import { Ok } from '@allawiii/results-ts';
 
 export function optional<T, R>(
   value: T | null | undefined,

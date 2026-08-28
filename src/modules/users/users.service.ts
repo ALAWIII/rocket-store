@@ -16,7 +16,7 @@ export class UsersService {
   constructor(private readonly userRepo: IUserRepository) {}
 
   async findMe(id: string): Promise<UserResponseDto> {
-    const user = (await this.userRepo.findMe(id)).unwrapOrThrow();
+    const user = (await this.userRepo.findMe(id)).unwrap();
     return user.toJSON();
   }
   async findBy(
@@ -28,7 +28,7 @@ export class UsersService {
         ...filters,
         requesterRoleId,
       })
-    ).unwrapOrThrow();
+    ).unwrap();
     return { users: users.users.map((u) => u.toJSON()), total: users.total };
   }
   async findById(
@@ -37,7 +37,7 @@ export class UsersService {
   ): Promise<UserResponseDto> {
     const user = (
       await this.userRepo.findById({ requesterRoleId, userId })
-    ).unwrapOrThrow();
+    ).unwrap();
     return user.toJSON();
   }
   async assignRoleToUser(
@@ -52,7 +52,7 @@ export class UsersService {
         targetUserId,
       })
     ).map((u) => u.toJSON());
-    return user.unwrapOrThrow();
+    return user.unwrap();
   }
   async assignRoleToUsers(
     requesterRoleId: string,
@@ -62,13 +62,14 @@ export class UsersService {
       ...d,
       requesterRoleId,
     });
-    return result.unwrapOrThrow();
+    return result.unwrap();
   }
   async updateUser(id: string, d: UpdateMeDto): Promise<UserResponseDto> {
     const user = (await this.userRepo.updateById(id, d))
-      .map((u) => u.toResult(new NotFoundException(`User ${id} not found`)))
-      .unwrapOrThrow()
-      .unwrapOrThrow();
+      .map((u) => u.okOr(new NotFoundException(`User ${id} not found`)))
+      .unwrap()
+      .unwrap();
+
     return user.toJSON();
   }
 }

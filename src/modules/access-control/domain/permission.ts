@@ -1,4 +1,4 @@
-import { Err, Ok } from 'ts-results-es';
+import { Err, Ok } from '@allawiii/results-ts';
 import {
   InvalidPermissionActionError,
   InvalidPermissionEntityError,

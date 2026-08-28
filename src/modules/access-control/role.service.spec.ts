@@ -4,7 +4,7 @@ import { IRoleRepository } from './infrastructure/repositories/role.repository';
 import { SystemRolesRegistry } from './application/system-roles/system-roles.registry';
 import { AccessControlSyncService } from './application/access-control-sync.service';
 import { Role } from './domain/role';
-import { Ok } from 'ts-results-es';
+import { Ok } from '@allawiii/results-ts';
 
 describe('AccessControlService', () => {
   let service: RoleService;

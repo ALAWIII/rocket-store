@@ -1,9 +1,10 @@
 import { Name } from 'src/modules/shared/value-objects/name';
 import { AllPermissions, Permission } from './permission';
 import { RoleId } from 'src/modules/shared/value-objects/ids';
-import { Err, None, Ok, Option, Result, Some } from 'ts-results-es';
+import { Err, None, Ok, Option, Result, Some } from '@allawiii/results-ts';
 import { RoleError } from './role.error';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
+import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 
 type RoleProps = {
   id: RoleId;
@@ -42,7 +43,7 @@ export class Role {
     const id_name = unwrapResultObject({
       id: RoleId.create(id),
       name: Name.create(data.name),
-    }).mapErr((e) => new RoleError(e.message, e));
+    }).mapErr((e: ValueObjectError) => new RoleError(e.message, e));
 
     if (id_name.isErr()) return Err(id_name.error);
     //================================
@@ -172,7 +173,7 @@ export class Role {
 
   findPermission(perm: Permission): Option<Permission> {
     const p = this.props.permissions.get(perm.key());
-    return p ? Some(p) : None;
+    return p ? Some(p) : None();
   }
 
   setName(name: string) {
@@ -191,7 +192,7 @@ export class Role {
   }
   get assignScopePermissions(): Option<Readonly<Permission[]>> {
     if (!this.props.assignScope) {
-      return None;
+      return None();
     }
     const perms = [...this.props.assignScope.values()];
     perms.sort((p1, p2) => p1.key().localeCompare(p2.key()));
@@ -199,7 +200,7 @@ export class Role {
   }
   get createScopePermissions(): Option<Readonly<Permission[]>> {
     if (!this.props.createScope) {
-      return None;
+      return None();
     }
     const perms = [...this.props.createScope.values()];
     perms.sort((p1, p2) => p1.key().localeCompare(p2.key()));
@@ -223,12 +224,12 @@ export class Role {
       id: this.id,
       name: this.name,
       permissions: this.permissions.map((p) => p.toJSON()),
-      assignScope: this.assignScopePermissions
-        .map((ps) => ps.map((p) => p.toJSON()))
-        .unwrapOr(undefined),
-      createScope: this.createScopePermissions
-        .map((ps) => ps.map((p) => p.toJSON()))
-        .unwrapOr(undefined),
+      assignScope: this.assignScopePermissions.mapOr(undefined, (ps) =>
+        ps.map((p) => p.toJSON()),
+      ),
+      createScope: this.createScopePermissions.mapOr(undefined, (ps) =>
+        ps.map((p) => p.toJSON()),
+      ),
     };
   }
 }

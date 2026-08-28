@@ -1,4 +1,4 @@
-import { Result } from 'ts-results-es';
+import { Result } from '@allawiii/results-ts';
 export type PermissionResult<T> = Result<T, PermissionError>;
 export abstract class PermissionError extends Error {
   constructor(message: string, cause?: unknown) {

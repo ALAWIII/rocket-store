@@ -3,7 +3,7 @@ import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-resu
 import { Name } from 'src/modules/shared/value-objects/name';
 import { Phone } from 'src/modules/shared/value-objects/phone';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
-import { Err, Ok, Result } from 'ts-results-es';
+import { Err, Ok, Result } from '@allawiii/results-ts';
 
 export const AddressType = {
   Billing: 'billing',
