@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@allawiii/results-ts':
+        specifier: ^8.0.2
+        version: 8.0.2
       '@aws-sdk/client-s3':
         specifier: ^3.1113.0
         version: 3.1113.0
@@ -86,9 +89,6 @@ importers:
       rxjs:
         specifier: ^7.8.2
         version: 7.8.2
-      ts-results-es:
-        specifier: link:../open-source/ts-results-es
-        version: link:../open-source/ts-results-es
       typeorm:
         specifier: ^1.1.0
         version: 1.1.0(pg-query-stream@4.17.0(pg@8.23.0))(pg@8.23.0)(ts-node@10.9.2(@swc/core@1.16.0)(@types/node@24.13.3)(typescript@5.9.3))
@@ -191,6 +191,9 @@ importers:
         version: 4.1.10(@types/node@24.13.3)(@vitest/coverage-v8@4.1.10)(vite@8.2.0(@types/node@24.13.3)(terser@5.50.0))
 
 packages:
+
+  '@allawiii/results-ts@8.0.2':
+    resolution: {integrity: sha512-y50FCSJwIYXC3bov5z+aK8J/JYyIbTUH6ZzIzbOf8ogtDuaKz1wPC1KYqwaH+/LqbTUqXeLPnP7H3EBRyM/6vg==}
 
   '@angular-devkit/core@19.2.24':
     resolution: {integrity: sha512-Kd49warf6U/EyWe5BszF/eebN3zQ3bk7tgfEljAw8q/rX95UUtriJubWvp6pgzHfzBA4jwq8f+QiNZB8eBEXPA==}
@@ -3371,6 +3374,8 @@ packages:
     resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
 
 snapshots:
+
+  '@allawiii/results-ts@8.0.2': {}
 
   '@angular-devkit/core@19.2.24(chokidar@4.0.3)':
     dependencies:
