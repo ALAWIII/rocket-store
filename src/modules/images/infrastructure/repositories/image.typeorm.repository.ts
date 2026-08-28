@@ -29,12 +29,10 @@ export class ImageRepository implements IImageRepository {
       .andThen((entity) => this.toDomain(entity));
   }
   async findById(imageId: string): Promise<DBResult<Image>> {
-    try {
-      const result = await this.imageRepo.findOneByOrFail({ id: imageId });
-      return this.toDomain(result);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+    const res = await Result.wrapAsync(async () =>
+      this.imageRepo.findOneByOrFail({ id: imageId }),
+    );
+    return res.mapErr(mapTypeOrmError).andThen((img) => this.toDomain(img));
   }
   async delete(imageId: string): Promise<DBResult<number>> {
     try {
