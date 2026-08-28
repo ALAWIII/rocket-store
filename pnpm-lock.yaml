@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@allawiii/results-ts':
-        specifier: ^8.0.2
-        version: 8.0.2
+        specifier: 8.1.1
+        version: 8.1.1
       '@aws-sdk/client-s3':
         specifier: ^3.1113.0
         version: 3.1113.0
@@ -192,8 +192,8 @@ importers:
 
 packages:
 
-  '@allawiii/results-ts@8.0.2':
-    resolution: {integrity: sha512-y50FCSJwIYXC3bov5z+aK8J/JYyIbTUH6ZzIzbOf8ogtDuaKz1wPC1KYqwaH+/LqbTUqXeLPnP7H3EBRyM/6vg==}
+  '@allawiii/results-ts@8.1.1':
+    resolution: {integrity: sha512-ZoCU8n+zGT7J8gLy6++12knhb8hxdpIdnjrwViNm74EimwF0jFlqrl1v1l0QZuemtCHMAPP3MIdITbjq0LfqPA==}
 
   '@angular-devkit/core@19.2.24':
     resolution: {integrity: sha512-Kd49warf6U/EyWe5BszF/eebN3zQ3bk7tgfEljAw8q/rX95UUtriJubWvp6pgzHfzBA4jwq8f+QiNZB8eBEXPA==}
@@ -3375,7 +3375,7 @@ packages:
 
 snapshots:
 
-  '@allawiii/results-ts@8.0.2': {}
+  '@allawiii/results-ts@8.1.1': {}
 
   '@angular-devkit/core@19.2.24(chokidar@4.0.3)':
     dependencies:
