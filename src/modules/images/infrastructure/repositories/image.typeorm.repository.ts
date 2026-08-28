@@ -3,7 +3,7 @@ import { IImageRepository } from './image.repository';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Image } from '../../domain/image';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
-import { Err, Ok } from '@allawiii/results-ts';
+import { Err, Ok, Result } from '@allawiii/results-ts';
 import { Repository } from 'typeorm';
 import { ImageEntity } from '../entities/image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -16,15 +16,17 @@ export class ImageRepository implements IImageRepository {
     private readonly imageRepo: Repository<ImageEntity>,
   ) {}
   async save(image: Image): Promise<DBResult<Image>> {
-    try {
+    const res = await Result.wrapAsync(async () => {
       const imageJson = image.toJSON();
-      const result = await this.imageRepo.save(
+      const entity = await this.imageRepo.save(
         this.imageRepo.create(imageJson),
       );
-      return this.toDomain(result);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+      return entity;
+    });
+
+    return res
+      .mapErr(mapTypeOrmError)
+      .andThen((entity) => this.toDomain(entity));
   }
   async findById(imageId: string): Promise<DBResult<Image>> {
     try {
