@@ -8,7 +8,7 @@ import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Image } from '../../domain/image';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { Ok, Result } from '@allawiii/results-ts';
-import { Repository } from 'typeorm';
+import { DeleteQueryBuilder, Repository, SelectQueryBuilder } from 'typeorm';
 import { ImageEntity } from '../entities/image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CorruptedPersistenceDataError } from 'src/modules/shared/errors/database.error';
@@ -57,13 +57,8 @@ export class ImageRepository implements IImageRepository {
         .skip((page - 1) * limit)
         .take(limit);
 
-      const imageCol = IMAGE_FK_COLUMN;
-      IMAGE_USAGE_TABLES.forEach((table, idx) => {
-        const alias = `usage_${idx}`;
-        qb.andWhere(
-          `NOT EXISTS (SELECT 1 FROM "${table}" AS "${alias}" WHERE "${alias}"."${imageCol}" = "image"."id")`,
-        );
-      });
+      this.applyUnusedImageFilter(qb);
+
       const [images, total] = await qb.getManyAndCount();
 
       return { images, total };
@@ -84,24 +79,29 @@ export class ImageRepository implements IImageRepository {
   }
   async deleteUnUsed(): Promise<DBResult<number>> {
     return await Result.wrapAsync(async () => {
-      const imageCol = IMAGE_FK_COLUMN;
-
       const qb = this.imageRepo
         .createQueryBuilder()
         .delete()
         .from(Image, 'image');
 
-      IMAGE_USAGE_TABLES.forEach((table, idx) => {
-        const alias = `usage_${idx}`;
-        qb.andWhere(
-          `NOT EXISTS (SELECT 1 FROM "${table}" AS "${alias}" WHERE "${alias}"."${imageCol}" = "image"."id")`,
-        );
-      });
+      this.applyUnusedImageFilter(qb);
 
       const result = await qb.execute();
 
       return result.affected ?? 0;
     }).mapErr(mapTypeOrmError);
+  }
+  private applyUnusedImageFilter(
+    qb: SelectQueryBuilder<any> | DeleteQueryBuilder<any>,
+    mainAlias = 'image',
+  ): typeof qb {
+    IMAGE_USAGE_TABLES.forEach((table, idx) => {
+      const alias = `usage_${idx}`;
+      qb.andWhere(
+        `NOT EXISTS (SELECT 1 FROM "${table}" AS "${alias}" WHERE "${alias}"."${IMAGE_FK_COLUMN}" = "${mainAlias}"."id")`,
+      );
+    });
+    return qb;
   }
   private imagesToDomain(imgs: ImageEntity[]): DBResult<Image[]> {
     const images: Image[] = [];
