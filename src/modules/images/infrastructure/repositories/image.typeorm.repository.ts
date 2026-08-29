@@ -82,6 +82,27 @@ export class ImageRepository implements IImageRepository {
         });
       });
   }
+  async deleteUnUsed(): Promise<DBResult<number>> {
+    return await Result.wrapAsync(async () => {
+      const imageCol = IMAGE_FK_COLUMN;
+
+      const qb = this.imageRepo
+        .createQueryBuilder()
+        .delete()
+        .from(Image, 'image');
+
+      IMAGE_USAGE_TABLES.forEach((table, idx) => {
+        const alias = `usage_${idx}`;
+        qb.andWhere(
+          `NOT EXISTS (SELECT 1 FROM "${table}" AS "${alias}" WHERE "${alias}"."${imageCol}" = "image"."id")`,
+        );
+      });
+
+      const result = await qb.execute();
+
+      return result.affected ?? 0;
+    }).mapErr(mapTypeOrmError);
+  }
   private imagesToDomain(imgs: ImageEntity[]): DBResult<Image[]> {
     const images: Image[] = [];
     for (const img of imgs) {
