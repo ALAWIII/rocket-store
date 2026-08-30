@@ -1,4 +1,4 @@
-export class ImageObjectStorageError extends Error {
+export class ImageStorageError extends Error {
   constructor(message: string, cause?: unknown) {
     super(message, { cause });
     this.name = new.target.name;
