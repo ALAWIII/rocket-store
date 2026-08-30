@@ -8,10 +8,10 @@ export abstract class IJobsService {
    * @param jobKind
    * @param data
    */
-  abstract sendJob<T extends JobData>(
+  abstract sendJobs<T extends JobData>(
     jobKind: string,
-    data: T,
-  ): Promise<JobId | null>;
+    jobs: T[],
+  ): Promise<JobId[] | null>;
   /**
    * Create new worker on a specified existed `jobKind` (queue name).
    * @param jobKind

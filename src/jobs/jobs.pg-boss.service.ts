@@ -16,11 +16,11 @@ export class JobsPgBossService implements IJobsService {
     return this.core.getBoss();
   }
 
-  async sendJob<T extends JobData>(
+  async sendJobs<T extends JobData>(
     jobKind: string,
-    data: T,
-  ): Promise<JobId | null> {
-    return this.boss.send(jobKind, data);
+    jobs: T[],
+  ): Promise<JobId[] | null> {
+    return this.boss.insert(jobKind, jobs);
   }
 
   async createWorker<T extends JobData>(
