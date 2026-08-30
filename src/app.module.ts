@@ -20,6 +20,7 @@ import { EmailModule } from './email/email.module';
 import { BrandsModule } from './modules/brands/brands.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ObjectStorageModule } from './object-storage/object-storage.module';
+import { JobsModule } from './jobs/jobs.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -43,6 +44,7 @@ import { ObjectStorageModule } from './object-storage/object-storage.module';
     BrandsModule,
     CategoriesModule,
     ObjectStorageModule,
+    JobsModule,
   ],
 })
 export class AppModule {}
