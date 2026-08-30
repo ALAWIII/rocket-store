@@ -1,4 +1,5 @@
 import { PassThrough, Readable } from 'stream';
+import { IJobsService } from 'src/jobs/jobs.service';
 import { ObjectStorageS3Client } from 'src/object-storage/object-storage.s3-client';
 import { Upload } from '@aws-sdk/lib-storage';
 import { Result } from '@allawiii/results-ts';
@@ -20,7 +21,11 @@ export interface UploadImageResult {
 }
 
 export class ImagesObjectStorageService {
-  constructor(private readonly s3Client: ObjectStorageS3Client) {}
+  private readonly jobKind = 'image.delete';
+  constructor(
+    private readonly s3Client: ObjectStorageS3Client,
+    private readonly jobService: IJobsService,
+  ) {}
   async upload(
     params: UploadImageParams,
   ): Promise<Result<UploadImageResult, ImageObjectStorageError>> {
@@ -69,6 +74,19 @@ export class ImagesObjectStorageService {
     }).mapErr(
       (e: unknown) =>
         new ImageObjectStorageError('Image upload to RustFS failed', e),
+    );
+  }
+  async delete(imageKeys: string[]) {
+    return Result.wrapAsync(async () =>
+      this.jobService.sendJobs(
+        this.jobKind,
+        imageKeys.map((k) => {
+          return { imageKey: k };
+        }),
+      ),
+    ).mapErr(
+      (e: unknown) =>
+        new ImageObjectStorageError('Failed to send delete image jobs', e),
     );
   }
 }
