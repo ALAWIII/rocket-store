@@ -41,6 +41,7 @@
     "nest-authz": "^2.17.0",
     "nestjs-pino": "^4.6.1",
     "pg": "^8.23.0",
+    "pg-boss": "^12.28.1",
     "pg-query-stream": "^4.17.0",
     "pino-http": "^11.0.0",
     "pino-roll": "^4.0.0",
