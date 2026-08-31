@@ -21,6 +21,6 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
-    "types": ["node", "vitest/globals"],
+    "types": ["node", "vitest/globals", "multer"],
   },
 }
