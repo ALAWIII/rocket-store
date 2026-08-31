@@ -4,6 +4,7 @@ import { ObjectStorageS3Client } from 'src/object-storage/object-storage.s3-clie
 import { Upload } from '@aws-sdk/lib-storage';
 import { Result } from '@allawiii/results-ts';
 import { ImageStorageError } from './images.storage.error';
+import { ImageDeletionPayload } from './images-worker.service';
 
 export interface UploadImageParams {
   stream: Readable;
@@ -79,8 +80,8 @@ export class ImagesStorageService {
     return Result.wrapAsync(async () =>
       this.jobService.sendJobs(
         this.jobKind,
-        imageKeys.map((k) => {
-          return { imageKey: k };
+        imageKeys.map((k): ImageDeletionPayload => {
+          return { Key: k };
         }),
       ),
     ).mapErr(
