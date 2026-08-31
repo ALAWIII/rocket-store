@@ -5,7 +5,8 @@ import { Upload } from '@aws-sdk/lib-storage';
 import { Result } from '@allawiii/results-ts';
 import { ImageStorageError } from './images.storage.error';
 import { ImageDeletionPayload } from './images-worker.service';
-
+import { GetObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 export interface UploadImageParams {
   stream: Readable;
   imageKey: string;
@@ -88,5 +89,14 @@ export class ImagesStorageService {
       (e: unknown) =>
         new ImageStorageError('Failed to send delete image jobs', e),
     );
+  }
+  async getPresignedUrl(key: string, expiresInSec = 60 * 5) {
+    const cmd = new GetObjectCommand({
+      Bucket: 'images',
+      Key: key,
+    });
+    return getSignedUrl(this.s3Client.getClient(), cmd, {
+      expiresIn: expiresInSec,
+    });
   }
 }
