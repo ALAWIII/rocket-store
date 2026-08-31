@@ -1,12 +1,21 @@
-import { PassThrough, Readable } from 'stream';
+import { Readable, Transform, TransformCallback } from 'node:stream';
 import { IJobsService } from 'src/jobs/jobs.service';
 import { ObjectStorageS3Client } from 'src/object-storage/object-storage.s3-client';
 import { Upload } from '@aws-sdk/lib-storage';
 import { AsyncResult, Result } from '@allawiii/results-ts';
-import { ImageStorageError } from './images.storage.error';
+import {
+  ImageStorageError,
+  MaxSizeExceededError,
+} from './images.storage.error';
 import { ImageDeletionPayload } from './images-worker.service';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { createHash } from 'node:crypto';
+import { Logger } from '@nestjs/common';
+
+const DEFAULT_MAX_SIZE_BYTES = 10 * 1024 * 1024;
+const BUCKET = 'images';
+
 type ImgResult<T> = AsyncResult<T, ImageStorageError>;
 export interface UploadImageParams {
   stream: Readable;
@@ -23,64 +32,105 @@ export interface UploadImageResult {
   contentType: string;
 }
 
+class MeteringHashStream extends Transform {
+  private hash = createHash('sha256');
+  private bytes = 0;
+
+  constructor(private readonly maxSizeBytes: number) {
+    super();
+  }
+
+  _transform(chunk: Buffer, _enc: BufferEncoding, cb: TransformCallback) {
+    this.bytes += chunk.length;
+    if (this.bytes > this.maxSizeBytes) {
+      cb(new MaxSizeExceededError(this.maxSizeBytes));
+      return;
+    }
+    this.hash.update(chunk);
+    cb(null, chunk);
+  }
+
+  get size(): number {
+    return this.bytes;
+  }
+
+  get checksum(): string {
+    return this.hash.digest('hex');
+  }
+}
 export class ImagesStorageService {
+  private logger = new Logger(MeteringHashStream.name);
   private readonly jobKind = 'image.delete';
   constructor(
     private readonly s3Client: ObjectStorageS3Client,
     private readonly jobService: IJobsService,
   ) {}
+
   upload(params: UploadImageParams): ImgResult<UploadImageResult> {
     const {
       stream,
       imageKey,
       contentType,
-      maxSizeBytes = 10 * 1024 * 1024,
+      maxSizeBytes = DEFAULT_MAX_SIZE_BYTES,
     } = params;
+
     return Result.wrapAsync(async () => {
-      const countingStream = new PassThrough();
+      const meter = new MeteringHashStream(maxSizeBytes);
+
+      // Forward source errors onto the meter so a broken/aborted upstream
+      // stream (e.g. client disconnect) surfaces as a single error instead
+      // of an unhandled 'error' event.
+      stream.on('error', (err) => meter.destroy(err));
 
       const up = new Upload({
         client: this.s3Client.getClient(),
         queueSize: 2,
         params: {
-          Bucket: 'images',
+          Bucket: BUCKET,
           Key: imageKey,
-          Body: countingStream,
+          Body: meter,
           ContentType: contentType,
-          ChecksumAlgorithm: 'SHA256',
         },
       });
 
-      let uploadedBytes = 0;
+      // Kick off the pipe; meter.destroy(err) (from either size overflow
+      // or a forwarded source error) will cause up.done() to reject.
+      stream.pipe(meter);
 
-      countingStream.on('data', (chunk: Buffer) => {
-        uploadedBytes += chunk.length;
-        if (uploadedBytes > maxSizeBytes) {
-          countingStream.destroy(new Error('File exceeds maximum size'));
-          up.abort().catch(() => {});
-        }
-      });
-
-      stream.pipe(countingStream);
-
-      const result = await up.done();
-
-      return {
-        key: imageKey,
-        url: result.Location!,
-        checksum: result.ChecksumSHA256!,
-        size: uploadedBytes,
-        contentType,
-      };
-    }).mapErr(
-      (e: unknown) =>
-        new ImageStorageError(
-          'Uploading image to storage was failed or aborted',
-          e,
-        ),
-    );
+      try {
+        const result = await up.done();
+        return {
+          key: imageKey,
+          url: result.Location!,
+          checksum: meter.checksum,
+          size: meter.size,
+          contentType,
+        };
+      } catch (err) {
+        await up.abort().catch((abortErr) => {
+          this.logger.error(
+            `Failed to abort S3 upload for key=${imageKey}`,
+            abortErr,
+          );
+        });
+        throw err;
+      }
+    }).mapErr((e: unknown) => {
+      if (e instanceof MaxSizeExceededError) return e;
+      return new ImageStorageError(
+        'Uploading image to storage was failed or aborted',
+        e,
+      );
+    });
   }
-  delete(imageKeys: string[]): ImgResult<string[] | null> {
+  /**
+   * NOTE: this does not delete the object synchronously — it enqueues an
+   * async delete job. A resolved Ok here means "job accepted", not
+   * "object removed". Callers relying on immediate deletion (e.g. rollback
+   * after a failed DB save) should be aware there's a window where the
+   * object still exists in storage.
+   */
+  sendDeleteImgs(imageKeys: string[]): ImgResult<string[] | null> {
     return Result.wrapAsync(async () =>
       this.jobService.sendJobs(
         this.jobKind,
