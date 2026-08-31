@@ -106,6 +106,7 @@ export class ImagesStorageService {
       (e) =>
         new ImageStorageError(
           `Failed to generate signed url for image key: ${key}`,
+          e,
         ),
     );
   }
