@@ -19,6 +19,7 @@ import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.
 import { SystemRoleError } from 'src/modules/access-control/application/system-roles/system-roles.error';
 import { RoleServiceError } from 'src/modules/access-control/role.error.service';
 import { RoleError } from 'src/modules/access-control/domain/role.error';
+import { ImageStorageError } from 'src/modules/images/images.storage.error';
 
 @Injectable()
 export class ErrorMappingBootstrap implements OnModuleInit {
@@ -37,6 +38,10 @@ export class ErrorMappingBootstrap implements OnModuleInit {
       )
       .register(
         ValueObjectError,
+        (e) => new UnprocessableEntityException(e.message),
+      )
+      .register(
+        ImageStorageError,
         (e) => new UnprocessableEntityException(e.message),
       );
   }
