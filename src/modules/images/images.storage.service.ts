@@ -2,11 +2,12 @@ import { PassThrough, Readable } from 'stream';
 import { IJobsService } from 'src/jobs/jobs.service';
 import { ObjectStorageS3Client } from 'src/object-storage/object-storage.s3-client';
 import { Upload } from '@aws-sdk/lib-storage';
-import { Result } from '@allawiii/results-ts';
+import { AsyncResult, Result } from '@allawiii/results-ts';
 import { ImageStorageError } from './images.storage.error';
 import { ImageDeletionPayload } from './images-worker.service';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+type ImgResult<T> = AsyncResult<T, ImageStorageError>;
 export interface UploadImageParams {
   stream: Readable;
   imageKey: string;
@@ -28,9 +29,7 @@ export class ImagesStorageService {
     private readonly s3Client: ObjectStorageS3Client,
     private readonly jobService: IJobsService,
   ) {}
-  async upload(
-    params: UploadImageParams,
-  ): Promise<Result<UploadImageResult, ImageStorageError>> {
+  upload(params: UploadImageParams): ImgResult<UploadImageResult> {
     const {
       stream,
       imageKey,
@@ -74,10 +73,14 @@ export class ImagesStorageService {
         contentType,
       };
     }).mapErr(
-      (e: unknown) => new ImageStorageError('Image upload to RustFS failed', e),
+      (e: unknown) =>
+        new ImageStorageError(
+          'Uploading image to storage was failed or aborted',
+          e,
+        ),
     );
   }
-  async delete(imageKeys: string[]) {
+  delete(imageKeys: string[]): ImgResult<string[] | null> {
     return Result.wrapAsync(async () =>
       this.jobService.sendJobs(
         this.jobKind,
@@ -90,13 +93,20 @@ export class ImagesStorageService {
         new ImageStorageError('Failed to send delete image jobs', e),
     );
   }
-  async getPresignedUrl(key: string, expiresInSec = 60 * 5) {
+  getPresignedUrl(key: string, expiresInSec = 60 * 5): ImgResult<string> {
     const cmd = new GetObjectCommand({
       Bucket: 'images',
       Key: key,
     });
-    return getSignedUrl(this.s3Client.getClient(), cmd, {
-      expiresIn: expiresInSec,
-    });
+    return Result.wrapAsync(async () =>
+      getSignedUrl(this.s3Client.getClient(), cmd, {
+        expiresIn: expiresInSec,
+      }),
+    ).mapErr(
+      (e) =>
+        new ImageStorageError(
+          `Failed to generate signed url for image key: ${key}`,
+        ),
+    );
   }
 }
