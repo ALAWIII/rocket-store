@@ -5,3 +5,8 @@ export class ImageStorageError extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
+export class MaxSizeExceededError extends ImageStorageError {
+  constructor(public readonly maxSizeBytes: number) {
+    super(`File exceeds maximum size of ${maxSizeBytes} bytes`);
+  }
+}
