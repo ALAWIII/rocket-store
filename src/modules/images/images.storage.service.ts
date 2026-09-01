@@ -11,7 +11,7 @@ import { ImageDeletionPayload } from './images-worker.service';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { createHash } from 'node:crypto';
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 const DEFAULT_MAX_SIZE_BYTES = 10 * 1024 * 1024;
 const BUCKET = 'images';
@@ -43,6 +43,7 @@ class MeteringHashStream extends Transform {
   _transform(chunk: Buffer, _enc: BufferEncoding, cb: TransformCallback) {
     this.bytes += chunk.length;
     if (this.bytes > this.maxSizeBytes) {
+      // on error stop and send back the final message which is error
       cb(new MaxSizeExceededError(this.maxSizeBytes));
       return;
     }
@@ -58,6 +59,7 @@ class MeteringHashStream extends Transform {
     return this.hash.digest('hex');
   }
 }
+@Injectable()
 export class ImagesStorageService {
   private logger = new Logger(MeteringHashStream.name);
   private readonly jobKind = 'image.delete';
@@ -66,7 +68,7 @@ export class ImagesStorageService {
     private readonly jobService: IJobsService,
   ) {}
 
-  upload(params: UploadImageParams): ImgResult<UploadImageResult> {
+  uploadToStorage(params: UploadImageParams): ImgResult<UploadImageResult> {
     const {
       stream,
       imageKey,
