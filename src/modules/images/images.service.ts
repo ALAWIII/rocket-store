@@ -10,6 +10,7 @@ import { Name } from '../shared/value-objects/name';
 import { DomainText } from '../shared/value-objects/domain-text';
 import { Readable } from 'node:stream';
 import { Err, Ok, Result } from '@allawiii/results-ts';
+import { ImagesServiceError } from './images.service.error';
 
 @Injectable()
 export class ImagesService {
@@ -72,7 +73,18 @@ export class ImagesService {
     }
     return imgDb.unwrap().toJSON();
   }
+  async removeImgs(imgIds: string[]) {
+    const storageRes = await this.storageService
+      .sendDeleteImgs(imgIds)
+      .map((v) => v.unwrapOr([]).length)
+      .mapErr((e) => new ImagesServiceError(e.message, e));
+    if (storageRes.isErr() || storageRes.isOkAnd((v) => v === 0))
+      return storageRes;
 
+    return (await this.imgRepo.deleteMany(imgIds)).mapErr(
+      (e) => new ImagesServiceError(e.message, e),
+    );
+  }
   private extractMetadataFromBytes(stream: Readable) {
     return Result.wrapAsync(
       async (): Promise<Result<ProbeResult, UnprocessableEntityException>> => {
