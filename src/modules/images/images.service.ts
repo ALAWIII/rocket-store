@@ -74,7 +74,7 @@ export class ImagesService {
     }
     return imgDb.unwrap().toJSON();
   }
-  async removeImgs(imgIds: string[]) {
+  async removeImages(imgIds: string[]) {
     const storageRes = await this.storageService
       .sendDeleteImgs(imgIds)
       .map((v) => v.unwrapOr([]).length)
@@ -87,7 +87,7 @@ export class ImagesService {
     );
   }
 
-  async deleteUnUsed(): Promise<Result<number, ImagesServiceError>> {
+  async removeUnUsedImages(): Promise<Result<number, ImagesServiceError>> {
     let count = 0;
 
     while (true) {
