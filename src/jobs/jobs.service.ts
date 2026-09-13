@@ -1,3 +1,6 @@
+import { AsyncResult, Option } from '@allawiii/results-ts';
+import { JobsError } from './jobs.error';
+
 export type JobData = Record<string, unknown>;
 export type WorkerId = string;
 export type JobId = string;
@@ -11,7 +14,7 @@ export abstract class IJobsService {
   abstract sendJobs<T extends JobData>(
     jobKind: string,
     jobs: T[],
-  ): Promise<JobId[] | null>;
+  ): AsyncResult<Option<JobId[]>, JobsError>;
   /**
    * Create new worker on a specified existed `jobKind` (queue name).
    * @param jobKind
@@ -21,11 +24,11 @@ export abstract class IJobsService {
     jobKind: string,
     handler: (data: T[]) => Promise<void>,
     options?: CreateWorkerOptions,
-  ): Promise<WorkerId>;
+  ): AsyncResult<WorkerId, JobsError>;
 
   /**
    * Responsible for creating new queue (new kind of jobs) with a unique given name.
    * @param name
    */
-  abstract createJobQueue(name: string): Promise<void>;
+  abstract createJobQueue(name: string): AsyncResult<void, JobsError>;
 }

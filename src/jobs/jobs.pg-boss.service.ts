@@ -7,6 +7,8 @@ import {
   WorkerId,
 } from './jobs.service';
 import { PgBossCoreService } from './pg-boss.core.service';
+import { AsyncResult, Option, Result } from '@allawiii/results-ts';
+import { JobsError } from './jobs.error';
 
 @Injectable()
 export class JobsPgBossService implements IJobsService {
@@ -16,34 +18,40 @@ export class JobsPgBossService implements IJobsService {
     return this.core.getBoss();
   }
 
-  async sendJobs<T extends JobData>(
+  sendJobs<T extends JobData>(
     jobKind: string,
     jobs: T[],
-  ): Promise<JobId[] | null> {
-    return this.boss.insert(jobKind, jobs);
+  ): AsyncResult<Option<JobId[]>, JobsError> {
+    return Result.wrapAsync(() => this.boss.insert(jobKind, jobs))
+      .map(Option.fromNullable)
+      .mapErr((e) => new JobsError(`Failed to send jobs`, e));
   }
 
-  async createWorker<T extends JobData>(
+  createWorker<T extends JobData>(
     jobKind: string,
     handler: (data: T[]) => Promise<void>,
     options?: CreateWorkerOptions,
-  ): Promise<WorkerId> {
-    return this.boss.work<T>(
-      jobKind,
-      {
-        batchSize: options?.batchSize ?? 10,
-        pollingIntervalSeconds: 5,
-        notifyPollingIntervalSeconds: 10,
-        localConcurrency: options?.concurrency ?? 10,
-      },
-      (jobs) => handler(jobs.map((j) => j.data)),
-    );
+  ): AsyncResult<WorkerId, JobsError> {
+    return Result.wrapAsync(() =>
+      this.boss.work<T>(
+        jobKind,
+        {
+          batchSize: options?.batchSize ?? 10,
+          pollingIntervalSeconds: 5,
+          notifyPollingIntervalSeconds: 10,
+          localConcurrency: options?.concurrency ?? 10,
+        },
+        (jobs) => handler(jobs.map((j) => j.data)),
+      ),
+    ).mapErr((e) => new JobsError(`Failed to create Worker`, e));
   }
-  async createJobQueue(name: string): Promise<void> {
-    await this.boss.createQueue(name, {
-      notify: true,
-      retryLimit: Infinity,
-      retryBackoff: true,
-    });
+  createJobQueue(name: string): AsyncResult<void, JobsError> {
+    return Result.wrapAsync(() =>
+      this.boss.createQueue(name, {
+        notify: true,
+        retryLimit: Infinity,
+        retryBackoff: true,
+      }),
+    ).mapErr((e) => new JobsError(`Failed to create job queue: ${name}`, e));
   }
 }
