@@ -11,7 +11,8 @@ import { DomainText } from '../shared/value-objects/domain-text';
 import { Readable } from 'node:stream';
 import { Err, Ok, Result } from '@allawiii/results-ts';
 import { ImagesServiceError } from './images.service.error';
-
+const mapToImagesServiceError = (e: Error) =>
+  new ImagesServiceError(e.message, e);
 @Injectable()
 export class ImagesService {
   constructor(
@@ -84,6 +85,37 @@ export class ImagesService {
     return (await this.imgRepo.deleteMany(imgIds)).mapErr(
       (e) => new ImagesServiceError(e.message, e),
     );
+  }
+
+  async deleteUnUsed(): Promise<Result<number, ImagesServiceError>> {
+    let count = 0;
+
+    while (true) {
+      // fetch and delete by patches rather than infinite fetching.
+      const imgsRes = (await this.imgRepo.findUnUsed({ limit: 100 })).mapErr(
+        mapToImagesServiceError,
+      );
+      if (imgsRes.isErr()) return imgsRes.map();
+
+      const imgIds = imgsRes.value.images.map((img) => img.key);
+      if (!imgIds.length) return Ok(count);
+
+      const s3Res = await this.storageService
+        .sendDeleteImgs(imgIds)
+        .map((v) => v.unwrapOr([]).length)
+        .mapErr(mapToImagesServiceError);
+
+      if (s3Res.isErr() || s3Res.value === 0) {
+        return s3Res;
+      }
+
+      const deleted = (await this.imgRepo.deleteMany(imgIds)).mapErr(
+        mapToImagesServiceError,
+      );
+
+      if (deleted.isErr()) return deleted;
+      count += deleted.value;
+    }
   }
   private extractMetadataFromBytes(stream: Readable) {
     return Result.wrapAsync(
