@@ -1,10 +1,10 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Image } from '../../domain/image';
-
+export type ImageSortByOptions = 'name' | 'sizeBytes' | 'createdAt';
 export type Pagination = {
   page?: number;
   limit?: number;
-  sortBy?: 'name' | 'sizeBytes' | 'createdAt';
+  sortBy?: ImageSortByOptions;
 };
 export type FindUnUsedDbResponse = {
   images: Image[];
