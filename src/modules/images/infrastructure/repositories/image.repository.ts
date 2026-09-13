@@ -20,6 +20,6 @@ export abstract class IImageRepository {
   abstract findUnUsed(
     options: Pagination,
   ): Promise<DBResult<FindUnUsedDbResponse>>;
-  abstract delete(imageId: string): Promise<DBResult<number>>;
+  abstract deleteMany(imageIds: string[]): Promise<DBResult<number>>;
   abstract deleteUnUsed(): Promise<DBResult<number>>;
 }

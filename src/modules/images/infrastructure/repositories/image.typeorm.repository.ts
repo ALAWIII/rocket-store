@@ -8,7 +8,12 @@ import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Image } from '../../domain/image';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { Ok, Result } from '@allawiii/results-ts';
-import { DeleteQueryBuilder, Repository, SelectQueryBuilder } from 'typeorm';
+import {
+  DeleteQueryBuilder,
+  In,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 import { ImageEntity } from '../entities/image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CorruptedPersistenceDataError } from 'src/modules/shared/errors/database.error';
@@ -41,8 +46,10 @@ export class ImageRepository implements IImageRepository {
       .mapErr(mapTypeOrmError)
       .andThen((img) => this.toDomain(img));
   }
-  async delete(imageId: string): Promise<DBResult<number>> {
-    return await Result.wrapAsync(() => this.imageRepo.delete({ id: imageId }))
+  async deleteMany(imageIds: string[]): Promise<DBResult<number>> {
+    return await Result.wrapAsync(() =>
+      this.imageRepo.delete({ id: In(imageIds) }),
+    )
       .map((v) => v.affected ?? 0)
       .mapErr(mapTypeOrmError);
   }
