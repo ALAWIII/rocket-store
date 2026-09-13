@@ -84,20 +84,7 @@ export class ImageRepository implements IImageRepository {
         });
       });
   }
-  async deleteUnUsed(): Promise<DBResult<number>> {
-    return await Result.wrapAsync(async () => {
-      const qb = this.imageRepo
-        .createQueryBuilder()
-        .delete()
-        .from(Image, 'image');
 
-      this.applyUnusedImageFilter(qb);
-
-      const result = await qb.execute();
-
-      return result.affected ?? 0;
-    }).mapErr(mapTypeOrmError);
-  }
   private applyUnusedImageFilter(
     qb: SelectQueryBuilder<any> | DeleteQueryBuilder<any>,
     mainAlias = 'image',

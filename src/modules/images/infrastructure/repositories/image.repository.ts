@@ -21,5 +21,4 @@ export abstract class IImageRepository {
     options: Pagination,
   ): Promise<DBResult<FindUnUsedDbResponse>>;
   abstract deleteMany(imageIds: string[]): Promise<DBResult<number>>;
-  abstract deleteUnUsed(): Promise<DBResult<number>>;
 }
