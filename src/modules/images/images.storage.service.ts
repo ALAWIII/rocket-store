@@ -2,7 +2,7 @@ import { Readable, Transform, TransformCallback } from 'node:stream';
 import { IJobsService } from 'src/jobs/jobs.service';
 import { ObjectStorageS3Client } from 'src/object-storage/object-storage.s3-client';
 import { Upload } from '@aws-sdk/lib-storage';
-import { AsyncResult, Result } from '@allawiii/results-ts';
+import { AsyncResult, Option, Result } from '@allawiii/results-ts';
 import {
   ImageStorageError,
   MaxSizeExceededError,
@@ -132,18 +132,21 @@ export class ImagesStorageService {
    * after a failed DB save) should be aware there's a window where the
    * object still exists in storage.
    */
-  sendDeleteImgs(imageKeys: string[]): ImgResult<string[] | null> {
-    return Result.wrapAsync(async () =>
-      this.jobService.sendJobs(
+  sendDeleteImgs(imageKeys: string[]): ImgResult<Option<string[]>> {
+    return this.jobService
+      .sendJobs(
         this.jobKind,
         imageKeys.map((k): ImageDeletionPayload => {
           return { Key: k };
         }),
-      ),
-    ).mapErr(
-      (e: unknown) =>
-        new ImageStorageError('Failed to send delete image jobs', e),
-    );
+      )
+      .mapErr(
+        (e) =>
+          new ImageStorageError(
+            `Failed to send delete image jobs: ${e.message}`,
+            e,
+          ),
+      );
   }
   getPresignedUrl(key: string, expiresInSec = 60 * 5): ImgResult<string> {
     const cmd = new GetObjectCommand({
