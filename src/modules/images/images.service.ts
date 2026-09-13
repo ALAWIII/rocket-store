@@ -1,5 +1,8 @@
 import { Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { IImageRepository } from './infrastructure/repositories/image.repository';
+import {
+  IImageRepository,
+  ImageSortByOptions,
+} from './infrastructure/repositories/image.repository';
 import { ImagesStorageService } from './images.storage.service';
 import probe, { ProbeResult } from 'probe-image-size';
 import { ImageId } from '../shared/value-objects/ids';
@@ -11,8 +14,20 @@ import { DomainText } from '../shared/value-objects/domain-text';
 import { Readable } from 'node:stream';
 import { Err, Ok, Result } from '@allawiii/results-ts';
 import { ImagesServiceError } from './images.service.error';
+
 const mapToImagesServiceError = (e: Error) =>
   new ImagesServiceError(e.message, e);
+
+type FindUnUsedOptions = {
+  limit?: number;
+  page?: number;
+  sortBy?: 'date' | 'size' | 'name';
+};
+const sortByMap = new Map<string, ImageSortByOptions>([
+  ['date', 'createdAt'],
+  ['size', 'sizeBytes'],
+  ['name', 'name'],
+]);
 @Injectable()
 export class ImagesService {
   constructor(
@@ -73,6 +88,21 @@ export class ImagesService {
       (await this.storageService.sendDeleteImgs([imgId])).unwrap();
     }
     return imgDb.unwrap().toJSON();
+  }
+  async findUnUsedImages(options: FindUnUsedOptions) {
+    const sortBy = sortByMap.get(options.sortBy ?? 'date')!;
+    const imagesRes = await this.imgRepo.findUnUsed({ ...options, sortBy });
+    if (imagesRes.isErr()) return imagesRes;
+
+    const { pagination, images } = imagesRes.value;
+    const resolvedImages = await Promise.all(
+      images.map(async (img) => ({
+        ...img.toJSON(),
+        url: (await this.storageService.getPresignedUrl(img.key)).unwrapOr(''),
+      })),
+    );
+
+    return Ok({ images: resolvedImages, pagination });
   }
   async removeImages(imgIds: string[]) {
     const storageRes = await this.storageService
