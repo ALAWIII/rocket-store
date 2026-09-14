@@ -26,8 +26,8 @@ export class ImagesController {
   ): Promise<ImageResponseDto> {
     return (await this.imagesService.findImageById(id)).unwrap().toJSON();
   }
-  @Get()
-  @RequirePermission(AllPermissions.images.ImagesReadAny)
+  @Get('unused')
+  @RequirePermission(AllPermissions.images.ImagesReadAll)
   async findUnused(
     @Query() filters: FindUnusedImagesDto,
   ): Promise<FindUnusedImagesResponseDto> {
