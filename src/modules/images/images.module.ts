@@ -6,6 +6,7 @@ import { IImageRepository } from './infrastructure/repositories/image.repository
 import { ImageRepository } from './infrastructure/repositories/image.typeorm.repository';
 import { ImagesStorageService } from './images.storage.service';
 import { ImagesWorkerService } from './images-worker.service';
+import { ImagesController } from './images.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ImageEntity])],
@@ -15,5 +16,6 @@ import { ImagesWorkerService } from './images-worker.service';
     ImagesStorageService,
     { provide: IImageRepository, useClass: ImageRepository },
   ],
+  controllers: [ImagesController],
 })
 export class ImagesModule {}
