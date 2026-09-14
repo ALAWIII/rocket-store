@@ -90,33 +90,14 @@ export class ImagesService {
     return imgDb.unwrap().toJSON();
   }
   async findImageById(imgId: string): Promise<Result<any, ImagesServiceError>> {
-    const imageRes = await this.imgRepo.findById(imgId);
-    if (imageRes.isErr()) return imageRes.mapErr(mapToImagesServiceError);
-    const image = imageRes.value;
-    const imgUrl = await this.storageService
-      .getPresignedUrl(image.key)
+    return (await this.imgRepo.findById(imgId))
+      .map((img) => img.toJSON())
       .mapErr(mapToImagesServiceError);
-    if (imgUrl.isErr()) return imgUrl;
-
-    return Ok({
-      ...image.toJSON(),
-      url: imgUrl.value,
-    });
   }
   async findUnUsedImages(options: FindUnUsedOptions) {
     const sortBy = sortByMap.get(options.sortBy ?? 'date')!;
     const imagesRes = await this.imgRepo.findUnUsed({ ...options, sortBy });
-    if (imagesRes.isErr()) return imagesRes;
-
-    const { pagination, images } = imagesRes.value;
-    const resolvedImages = await Promise.all(
-      images.map(async (img) => ({
-        ...img.toJSON(),
-        url: (await this.storageService.getPresignedUrl(img.key)).unwrapOr(''),
-      })),
-    );
-
-    return Ok({ images: resolvedImages, pagination });
+    return imagesRes.mapErr(mapToImagesServiceError);
   }
   async removeImages(imgIds: string[]) {
     const storageRes = await this.storageService
