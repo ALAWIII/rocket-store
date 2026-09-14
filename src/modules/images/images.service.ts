@@ -89,10 +89,10 @@ export class ImagesService {
     }
     return imgDb.unwrap().toJSON();
   }
-  async findImageById(imgId: string): Promise<Result<any, ImagesServiceError>> {
-    return (await this.imgRepo.findById(imgId))
-      .map((img) => img.toJSON())
-      .mapErr(mapToImagesServiceError);
+  async findImageById(
+    imgId: string,
+  ): Promise<Result<Image, ImagesServiceError>> {
+    return (await this.imgRepo.findById(imgId)).mapErr(mapToImagesServiceError);
   }
   async findUnUsedImages(options: FindUnUsedOptions) {
     const sortBy = sortByMap.get(options.sortBy ?? 'date')!;
