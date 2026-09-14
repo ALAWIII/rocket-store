@@ -1,10 +1,19 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Query,
+} from '@nestjs/common';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
 import { ImagesService } from './images.service';
 import { AllPermissions } from '../access-control/domain/permission';
 import { ImageResponseDto } from './dto/image-response.dto';
 import { FindUnusedImagesDto } from './dto/find-unused-images-pagination.dto';
 import { FindUnusedImagesResponseDto } from './dto/find-unused-images-response.dto';
+import { RemoveImagesDto } from './dto/remove-unused-images.dto';
+import { RemoveImagesResponseDto } from './dto/remove-unused-images-response.dto';
 
 @Controller('images')
 export class ImagesController {
@@ -27,6 +36,14 @@ export class ImagesController {
     return {
       pagination: findImgs.pagination,
       images: findImgs.images.map((img) => img.toJSON()),
+    };
+  }
+
+  async removeImages(
+    @Body() ids: RemoveImagesDto,
+  ): Promise<RemoveImagesResponseDto> {
+    return {
+      affected: (await this.imagesService.removeImages(ids.imageIds)).unwrap(),
     };
   }
 }
