@@ -12,8 +12,8 @@ import { AllPermissions } from '../access-control/domain/permission';
 import { ImageResponseDto } from './dto/image-response.dto';
 import { FindUnusedImagesDto } from './dto/find-unused-images-pagination.dto';
 import { FindUnusedImagesResponseDto } from './dto/find-unused-images-response.dto';
-import { RemoveImagesDto } from './dto/remove-unused-images.dto';
-import { RemoveImagesResponseDto } from './dto/remove-unused-images-response.dto';
+import { RemoveImagesDto } from './dto/remove-images.dto';
+import { RemoveImagesResponseDto } from './dto/remove-images-response.dto';
 
 @Controller('images')
 export class ImagesController {
