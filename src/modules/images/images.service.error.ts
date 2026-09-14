@@ -1,4 +1,4 @@
-export class ImagesServiceError extends Error {
+export class ImageServiceError extends Error {
   constructor(message: string, cause?: unknown) {
     super(message, { cause });
     this.name = new.target.name;

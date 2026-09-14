@@ -13,10 +13,10 @@ import { Name } from '../shared/value-objects/name';
 import { DomainText } from '../shared/value-objects/domain-text';
 import { Readable } from 'node:stream';
 import { Err, Ok, Result } from '@allawiii/results-ts';
-import { ImagesServiceError } from './images.service.error';
+import { ImageServiceError } from './images.service.error';
 
 const mapToImagesServiceError = (e: Error) =>
-  new ImagesServiceError(e.message, e);
+  new ImageServiceError(e.message, e);
 
 type FindUnUsedOptions = {
   limit?: number;
@@ -91,7 +91,7 @@ export class ImagesService {
   }
   async findImageById(
     imgId: string,
-  ): Promise<Result<Image, ImagesServiceError>> {
+  ): Promise<Result<Image, ImageServiceError>> {
     return (await this.imgRepo.findById(imgId)).mapErr(mapToImagesServiceError);
   }
   async findUnusedImages(options: FindUnUsedOptions) {
@@ -103,16 +103,16 @@ export class ImagesService {
     const storageRes = await this.storageService
       .sendDeleteImgs(imgIds)
       .map((v) => v.unwrapOr([]).length)
-      .mapErr((e) => new ImagesServiceError(e.message, e));
+      .mapErr((e) => new ImageServiceError(e.message, e));
     if (storageRes.isErr() || storageRes.isOkAnd((v) => v === 0))
       return storageRes;
 
     return (await this.imgRepo.deleteMany(imgIds)).mapErr(
-      (e) => new ImagesServiceError(e.message, e),
+      (e) => new ImageServiceError(e.message, e),
     );
   }
 
-  async removeUnusedImages(): Promise<Result<number, ImagesServiceError>> {
+  async removeUnusedImages(): Promise<Result<number, ImageServiceError>> {
     let count = 0;
 
     while (true) {
