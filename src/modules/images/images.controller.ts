@@ -48,4 +48,11 @@ export class ImagesController {
       affected: (await this.imagesService.removeImages(ids.imageIds)).unwrap(),
     };
   }
+  @Delete('unused')
+  @RequirePermission(AllPermissions.images.ImagesDeleteAll)
+  async removeUnused(): Promise<RemoveImagesResponseDto> {
+    return {
+      affected: (await this.imagesService.removeUnUsedImages()).unwrap(),
+    };
+  }
 }
