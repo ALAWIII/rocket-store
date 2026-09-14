@@ -94,7 +94,7 @@ export class ImagesService {
   ): Promise<Result<Image, ImagesServiceError>> {
     return (await this.imgRepo.findById(imgId)).mapErr(mapToImagesServiceError);
   }
-  async findUnUsedImages(options: FindUnUsedOptions) {
+  async findUnusedImages(options: FindUnUsedOptions) {
     const sortBy = sortByMap.get(options.sortBy ?? 'date')!;
     const imagesRes = await this.imgRepo.findUnUsed({ ...options, sortBy });
     return imagesRes.mapErr(mapToImagesServiceError);
@@ -112,7 +112,7 @@ export class ImagesService {
     );
   }
 
-  async removeUnUsedImages(): Promise<Result<number, ImagesServiceError>> {
+  async removeUnusedImages(): Promise<Result<number, ImagesServiceError>> {
     let count = 0;
 
     while (true) {

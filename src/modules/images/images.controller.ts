@@ -32,7 +32,7 @@ export class ImagesController {
     @Query() filters: FindUnusedImagesDto,
   ): Promise<FindUnusedImagesResponseDto> {
     const findImgs = (
-      await this.imagesService.findUnUsedImages(filters)
+      await this.imagesService.findUnusedImages(filters)
     ).unwrap();
     return {
       pagination: findImgs.pagination,
@@ -52,7 +52,7 @@ export class ImagesController {
   @RequirePermission(AllPermissions.images.ImagesDeleteAll)
   async removeUnused(): Promise<RemoveImagesResponseDto> {
     return {
-      affected: (await this.imagesService.removeUnUsedImages()).unwrap(),
+      affected: (await this.imagesService.removeUnusedImages()).unwrap(),
     };
   }
 }
