@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -38,7 +39,8 @@ export class ImagesController {
       images: findImgs.images.map((img) => img.toJSON()),
     };
   }
-
+  @Delete()
+  @RequirePermission(AllPermissions.images.ImagesDeleteAny)
   async removeImages(
     @Body() ids: RemoveImagesDto,
   ): Promise<RemoveImagesResponseDto> {
