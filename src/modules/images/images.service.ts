@@ -89,6 +89,20 @@ export class ImagesService {
     }
     return imgDb.unwrap().toJSON();
   }
+  async findImageById(imgId: string): Promise<Result<any, ImagesServiceError>> {
+    const imageRes = await this.imgRepo.findById(imgId);
+    if (imageRes.isErr()) return imageRes.mapErr(mapToImagesServiceError);
+    const image = imageRes.value;
+    const imgUrl = await this.storageService
+      .getPresignedUrl(image.key)
+      .mapErr(mapToImagesServiceError);
+    if (imgUrl.isErr()) return imgUrl;
+
+    return Ok({
+      ...image.toJSON(),
+      url: imgUrl.value,
+    });
+  }
   async findUnUsedImages(options: FindUnUsedOptions) {
     const sortBy = sortByMap.get(options.sortBy ?? 'date')!;
     const imagesRes = await this.imgRepo.findUnUsed({ ...options, sortBy });
