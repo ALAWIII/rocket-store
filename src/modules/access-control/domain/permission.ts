@@ -41,6 +41,7 @@ const Matrix = {
     read: ['lessOrEqual'],
   },
   address: { read: ['lessOrEqual'] },
+  images: { read: ['any', 'own'] },
 } as const;
 //==================================
 
