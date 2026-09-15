@@ -12,8 +12,11 @@ import { Image } from './domain/image';
 import { Name } from '../shared/value-objects/name';
 import { DomainText } from '../shared/value-objects/domain-text';
 import { Readable } from 'node:stream';
-import { Err, Ok, Result } from '@allawiii/results-ts';
-import { ImageServiceError } from './images.service.error';
+import { AsyncResult, Ok, Result } from '@allawiii/results-ts';
+import {
+  CorruptedUploadedImageError,
+  ImageServiceError,
+} from './images.service.error';
 
 const mapToImagesServiceError = (e: Error) =>
   new ImageServiceError(e.message, e);
@@ -51,7 +54,6 @@ export class ImagesService {
       uploadStream.destroy();
     };
     const meta = (await this.extractMetadataFromBytes(probeStream))
-      .flatten()
       .inspectErr(destroyStreams)
       .unwrap();
     //===
@@ -142,21 +144,19 @@ export class ImagesService {
       count += deleted.value;
     }
   }
-  private extractMetadataFromBytes(stream: Readable) {
-    return Result.wrapAsync(
-      async (): Promise<Result<ProbeResult, UnprocessableEntityException>> => {
-        try {
-          const metaRes = await probe(stream, true); // dont allow implicit destroying because it may emit error which will crash the entire sibling stream
-          if (!metaRes)
-            return Err(new UnprocessableEntityException('Invalid image'));
-          return Ok(metaRes);
-        } finally {
-          stream.destroy();
-        }
-      },
-    ).mapErr(
+  /**
+   * it will destroy the stream automatically on success or failure.
+   *
+   * but as safety net, remember to handle destroing the stream on the caller.
+   * @param stream
+   * @returns `AsyncResult<ProbeResult, CorruptedUploadedImageError>`
+   */
+  private extractMetadataFromBytes(
+    stream: Readable,
+  ): AsyncResult<ProbeResult, CorruptedUploadedImageError> {
+    return Result.wrapAsync((): Promise<ProbeResult> => probe(stream)).mapErr(
       (e) =>
-        new UnprocessableEntityException('Corrupted image magic bytes.', {
+        new CorruptedUploadedImageError('Corrupted image magic bytes.', {
           cause: e,
         }),
     );
