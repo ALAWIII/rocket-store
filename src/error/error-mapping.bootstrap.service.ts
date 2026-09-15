@@ -21,8 +21,8 @@ import { SystemRoleError } from 'src/modules/access-control/application/system-r
 import { RoleServiceError } from 'src/modules/access-control/role.error.service';
 import { RoleError } from 'src/modules/access-control/domain/role.error';
 import {
-  CorruptedUploadedImageError,
   ImageMaxSizeExceededError,
+  ImageNotFoundError,
   ImageServiceError,
 } from 'src/modules/images/images.service.error';
 
@@ -49,10 +49,7 @@ export class ErrorMappingBootstrap implements OnModuleInit {
         ImageServiceError,
         (e) => new InternalServerErrorException(e.message),
       )
-      .register(
-        CorruptedUploadedImageError,
-        (e) => new NotFoundException(e.message),
-      )
+      .register(ImageNotFoundError, (e) => new NotFoundException(e.message))
       .register(
         ImageMaxSizeExceededError,
         (e) => new PayloadTooLargeException(e.message),
