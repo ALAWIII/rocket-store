@@ -1,6 +1,6 @@
 import { Err, Ok, Result } from '@allawiii/results-ts';
 import { ValueObjectError } from './value-object.error';
-
+export const fileNameRegex = /^[\p{L}\p{N}]+$/u;
 export class FileName {
   private constructor(private readonly _value: string) {}
 
@@ -17,9 +17,6 @@ export class FileName {
           `file name must be between 2 and ${maxLength} characters`,
         ),
       );
-
-    const fileNameRegex =
-      /^(?!\.{1,2}$)[\p{L}\p{N}][\p{L}\p{N} ._'()-]*[\p{L}\p{N}]$/u;
     if (!fileNameRegex.test(v))
       return Err(new ValueObjectError('Invalid file name'));
 
