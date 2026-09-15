@@ -15,7 +15,7 @@ export class ErrorMapperRegistry {
   private readonly mappers = new Map<ErrorClass, ErrorMapper>();
 
   register<E extends Error>(errorClass: ErrorClass<E>, mapper: ErrorMapper<E>) {
-    this.mappers.set(errorClass, mapper);
+    this.mappers.set(errorClass, mapper as ErrorMapper<Error>);
     return this;
   }
 
