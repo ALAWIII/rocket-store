@@ -1,4 +1,4 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   IImageRepository,
   ImageSortByOptions,
@@ -15,6 +15,7 @@ import { Readable } from 'node:stream';
 import { AsyncResult, Ok, Result } from '@allawiii/results-ts';
 import {
   CorruptedUploadedImageError,
+  ImagePersistenceDatabaseError,
   ImageServiceError,
 } from './images.service.error';
 
@@ -33,6 +34,7 @@ const sortByMap = new Map<string, ImageSortByOptions>([
 ]);
 @Injectable()
 export class ImagesService {
+  private readonly logger = new Logger(ImagesService.name);
   constructor(
     private readonly imgRepo: IImageRepository,
     private readonly storageService: ImagesStorageService,
@@ -41,55 +43,62 @@ export class ImagesService {
     file: Express.Multer.File,
     uploadedBy: string,
     metadata: { name: string; altText?: string },
-  ) {
+  ): Promise<Result<Image, ImageServiceError>> {
     const sourceStream = file.stream;
     const [probeWeb, uploadWeb] = Readable.toWeb(sourceStream).tee();
     const probeStream = Readable.fromWeb(probeWeb);
     const uploadStream = Readable.fromWeb(uploadWeb);
-
+    const imgId = ImageId.create().unwrap().toJSON();
     //===
-    const destroyStreams = (v?: any) => {
+    const upRes = await Result.wrapAsync<Image, ImageServiceError>(async () => {
+      const imgInfo = (
+        await this.extractMetadataFromBytes(probeStream)
+      ).unwrap();
+      //===
+      const width = Dimension.create(imgInfo.width).unwrap().toJSON();
+      const height = Dimension.create(imgInfo.height).unwrap().toJSON();
+      const imgMime = ImageMimeType.create(imgInfo.mime).unwrap().toJSON();
+      const name = Name.create(metadata.name).unwrap().toJSON();
+      const altText = DomainText.create(metadata.altText, 125)
+        .unwrap()
+        ?.toJSON();
+      //===
+
+      const upResult = (
+        await this.storageService.uploadToStorage({
+          stream: uploadStream,
+          imageKey: imgId,
+          contentType: imgMime,
+        })
+      ).unwrap();
+      //===
+      const image = Image.restore({
+        id: imgId,
+        name,
+        height,
+        width,
+        altText,
+        mimeType: imgMime,
+        checksum: upResult.checksum,
+        sizeBytes: upResult.size,
+        uploadedBy,
+        createdAt: new Date(),
+      })
+        .mapErr((e) => new CorruptedUploadedImageError(e.message, e))
+        .unwrap();
+      const imgDb = (await this.imgRepo.save(image)).mapErr(
+        (e) => new ImagePersistenceDatabaseError(e.message, e),
+      );
+      return imgDb.unwrap();
+    }).inspectErr(async () => {
+      await this.storageService
+        .sendDeleteImgs([imgId])
+        .inspectErr((e) => this.logger.error(e.message, e));
       sourceStream.destroy();
       probeStream.destroy();
       uploadStream.destroy();
-    };
-    const meta = (await this.extractMetadataFromBytes(probeStream))
-      .inspectErr(destroyStreams)
-      .unwrap();
-    //===
-    const imgId = ImageId.create().unwrap().toJSON();
-    const width = Dimension.create(meta.width).unwrap().toJSON();
-    const height = Dimension.create(meta.height).unwrap().toJSON();
-    const imgMime = ImageMimeType.create(meta.mime).unwrap().toJSON();
-    const name = Name.create(metadata.name).unwrap().toJSON();
-    const altText = DomainText.create(metadata.altText, 125).unwrap()?.toJSON();
-    //===
-
-    const upResult = (
-      await this.storageService.uploadToStorage({
-        stream: uploadStream,
-        imageKey: imgId,
-        contentType: imgMime,
-      })
-    ).unwrap();
-    //===
-    const image = Image.restore({
-      id: imgId,
-      name,
-      height,
-      width,
-      altText,
-      mimeType: imgMime,
-      checksum: upResult.checksum,
-      sizeBytes: upResult.size,
-      uploadedBy,
-      createdAt: new Date(),
-    }).unwrap();
-    const imgDb = await this.imgRepo.save(image);
-    if (imgDb.isErr()) {
-      (await this.storageService.sendDeleteImgs([imgId])).unwrap();
-    }
-    return imgDb.unwrap().toJSON();
+    });
+    return upRes;
   }
   async findImageById(
     imgId: string,
