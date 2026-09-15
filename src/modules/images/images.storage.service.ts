@@ -3,20 +3,20 @@ import { IJobsService } from 'src/jobs/jobs.service';
 import { ObjectStorageS3Client } from 'src/object-storage/object-storage.s3-client';
 import { Upload } from '@aws-sdk/lib-storage';
 import { AsyncResult, Option, Result } from '@allawiii/results-ts';
-import {
-  ImageStorageError,
-  MaxSizeExceededError,
-} from './images.storage.error';
 import { ImageDeletionPayload } from './images-worker.service';
 import { GetObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { createHash } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
+import {
+  ImageMaxSizeExceededError,
+  ImageServiceError,
+} from './images.service.error';
 
 const DEFAULT_MAX_SIZE_BYTES = 10 * 1024 * 1024;
 const BUCKET = 'images';
 
-type ImgResult<T> = AsyncResult<T, ImageStorageError>;
+type ImgResult<T> = AsyncResult<T, ImageServiceError>;
 export interface UploadImageParams {
   stream: Readable;
   imageKey: string;
@@ -44,7 +44,7 @@ class MeteringHashStream extends Transform {
     this.bytes += chunk.length;
     if (this.bytes > this.maxSizeBytes) {
       // on error stop and send back the final message which is error
-      cb(new MaxSizeExceededError(this.maxSizeBytes));
+      cb(new ImageMaxSizeExceededError(this.maxSizeBytes));
       return;
     }
     this.hash.update(chunk);
@@ -118,8 +118,8 @@ export class ImagesStorageService {
         throw err;
       }
     }).mapErr((e: unknown) => {
-      if (e instanceof MaxSizeExceededError) return e;
-      return new ImageStorageError(
+      if (e instanceof ImageMaxSizeExceededError) return e;
+      return new ImageServiceError(
         'Uploading image to storage was failed or aborted',
         e,
       );
@@ -142,7 +142,7 @@ export class ImagesStorageService {
       )
       .mapErr(
         (e) =>
-          new ImageStorageError(
+          new ImageServiceError(
             `Failed to send delete image jobs: ${e.message}`,
             e,
           ),
@@ -159,7 +159,7 @@ export class ImagesStorageService {
       }),
     ).mapErr(
       (e) =>
-        new ImageStorageError(
+        new ImageServiceError(
           `Failed to generate signed url for image key: ${key}`,
           e,
         ),
