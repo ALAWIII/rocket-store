@@ -133,7 +133,9 @@ export class ImagesStorageService {
    * after a failed DB save) should be aware there's a window where the
    * object still exists in storage.
    */
-  sendDeleteImgs(imageKeys: string[]): ImgResult<Option<string[]>> {
+  sendDeleteImgs(
+    imageKeys: string[],
+  ): AsyncResult<Option<string[]>, ImageDeletionError> {
     return this.jobService
       .sendJobs(
         this.jobKind,
@@ -148,22 +150,5 @@ export class ImagesStorageService {
             e,
           ),
       );
-  }
-  getPresignedUrl(key: string, expiresInSec = 60 * 5): ImgResult<string> {
-    const cmd = new GetObjectCommand({
-      Bucket: 'images',
-      Key: key,
-    });
-    return Result.wrapAsync(async () =>
-      getSignedUrl(this.s3Client.getClient(), cmd, {
-        expiresIn: expiresInSec,
-      }),
-    ).mapErr(
-      (e) =>
-        new ImageServiceError(
-          `Failed to generate signed url for image key: ${key}`,
-          e,
-        ),
-    );
   }
 }
