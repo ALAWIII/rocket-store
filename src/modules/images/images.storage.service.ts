@@ -61,7 +61,7 @@ class MeteringHashStream extends Transform {
 }
 @Injectable()
 export class ImagesStorageService {
-  private logger = new Logger(MeteringHashStream.name);
+  private logger = new Logger(ImagesStorageService.name);
   private readonly jobKind = 'image.delete';
   constructor(
     private readonly s3Client: ObjectStorageS3Client,
