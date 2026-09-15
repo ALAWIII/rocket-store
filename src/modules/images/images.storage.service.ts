@@ -4,8 +4,6 @@ import { ObjectStorageS3Client } from 'src/object-storage/object-storage.s3-clie
 import { Upload } from '@aws-sdk/lib-storage';
 import { AsyncResult, Option, Result } from '@allawiii/results-ts';
 import { ImageDeletionPayload } from './images-worker.service';
-import { GetObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { createHash } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
 import {
