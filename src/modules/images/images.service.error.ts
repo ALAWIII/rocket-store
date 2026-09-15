@@ -5,3 +5,7 @@ export class ImageServiceError extends Error {
     Object.setPrototypeOf(this, new.target.prototype);
   }
 }
+export class CorruptedUploadedImageError extends ImageServiceError {}
+export class ImageMaxSizeExceededError extends ImageServiceError {}
+export class ImageNotFoundError extends ImageServiceError {}
+export class ImagePersistenceDatabaseError extends ImageServiceError {}
