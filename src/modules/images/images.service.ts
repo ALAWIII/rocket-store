@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  FindUnUsedDbResponse,
   IImageRepository,
   ImageSortByOptions,
 } from './infrastructure/repositories/image.repository';
@@ -15,9 +16,11 @@ import { Readable } from 'node:stream';
 import { AsyncResult, Ok, Result } from '@allawiii/results-ts';
 import {
   CorruptedUploadedImageError,
+  ImageNotFoundError,
   ImagePersistenceDatabaseError,
   ImageServiceError,
 } from './images.service.error';
+import { RecordNotFoundError } from '../shared/errors/database.error';
 
 const mapToImagesServiceError = (e: Error) =>
   new ImageServiceError(e.message, e);
@@ -103,14 +106,24 @@ export class ImagesService {
   async findImageById(
     imgId: string,
   ): Promise<Result<Image, ImageServiceError>> {
-    return (await this.imgRepo.findById(imgId)).mapErr(mapToImagesServiceError);
+    return (await this.imgRepo.findById(imgId)).mapErr((e) =>
+      e instanceof RecordNotFoundError
+        ? new ImageNotFoundError(e.message, e)
+        : new ImageServiceError(e.message, e),
+    );
   }
-  async findUnusedImages(options: FindUnUsedOptions) {
-    const sortBy = sortByMap.get(options.sortBy ?? 'date')!;
-    const imagesRes = await this.imgRepo.findUnUsed({ ...options, sortBy });
+  async findUnusedImages(
+    options: FindUnUsedOptions,
+  ): Promise<Result<FindUnUsedDbResponse, ImageServiceError>> {
+    const imagesRes = await this.imgRepo.findUnUsed({
+      ...options,
+      sortBy: sortByMap.get(options.sortBy ?? 'date')!,
+    });
     return imagesRes.mapErr(mapToImagesServiceError);
   }
-  async removeImages(imgIds: string[]) {
+  async removeImages(
+    imgIds: string[],
+  ): Promise<Result<number, ImageServiceError>> {
     const storageRes = await this.storageService
       .sendDeleteImgs(imgIds)
       .map((v) => v.unwrapOr([]).length)
@@ -119,7 +132,7 @@ export class ImagesService {
       return storageRes;
 
     return (await this.imgRepo.deleteMany(imgIds)).mapErr(
-      (e) => new ImageServiceError(e.message, e),
+      mapToImagesServiceError,
     );
   }
 
