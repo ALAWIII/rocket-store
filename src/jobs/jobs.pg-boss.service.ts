@@ -49,7 +49,8 @@ export class JobsPgBossService implements IJobsService {
     return Result.wrapAsync(() =>
       this.boss.createQueue(name, {
         notify: true,
-        retryLimit: Infinity,
+        // it will error if we provide Infinity
+        retryLimit: 9999999,
         retryBackoff: true,
       }),
     ).mapErr((e) => new JobsError(`Failed to create job queue: ${name}`, e));
