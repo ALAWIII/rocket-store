@@ -7,9 +7,16 @@ import { ImageRepository } from './infrastructure/repositories/image.typeorm.rep
 import { ImagesStorageService } from './images.storage.service';
 import { ImagesWorkerService } from './images-worker.service';
 import { ImagesController } from './images.controller';
+import { IJobsService } from 'src/jobs/jobs.service';
+import { JobsModule } from 'src/jobs/jobs.module';
+import { ObjectStorageModule } from 'src/object-storage/object-storage.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([ImageEntity])],
+  imports: [
+    TypeOrmModule.forFeature([ImageEntity]),
+    JobsModule,
+    ObjectStorageModule,
+  ],
   providers: [
     ImagesWorkerService,
     ImagesService,
