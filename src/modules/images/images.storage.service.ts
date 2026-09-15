@@ -9,6 +9,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { createHash } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  ImageDeletionError,
   ImageMaxSizeExceededError,
   ImageServiceError,
 } from './images.service.error';
@@ -142,7 +143,7 @@ export class ImagesStorageService {
       )
       .mapErr(
         (e) =>
-          new ImageServiceError(
+          new ImageDeletionError(
             `Failed to send delete image jobs: ${e.message}`,
             e,
           ),

@@ -13,3 +13,4 @@ export class ImageMaxSizeExceededError extends ImageServiceError {
 }
 export class ImageNotFoundError extends ImageServiceError {}
 export class ImagePersistenceDatabaseError extends ImageServiceError {}
+export class ImageDeletionError extends ImageServiceError {}
