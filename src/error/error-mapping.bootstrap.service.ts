@@ -21,9 +21,10 @@ import { SystemRoleError } from 'src/modules/access-control/application/system-r
 import { RoleServiceError } from 'src/modules/access-control/role.error.service';
 import { RoleError } from 'src/modules/access-control/domain/role.error';
 import {
-  ImageStorageError,
-  MaxSizeExceededError,
-} from 'src/modules/images/images.storage.error';
+  CorruptedUploadedImageError,
+  ImageMaxSizeExceededError,
+  ImageServiceError,
+} from 'src/modules/images/images.service.error';
 
 @Injectable()
 export class ErrorMappingBootstrap implements OnModuleInit {
@@ -45,11 +46,15 @@ export class ErrorMappingBootstrap implements OnModuleInit {
         (e) => new UnprocessableEntityException(e.message),
       )
       .register(
-        ImageStorageError,
-        (e) => new UnprocessableEntityException(e.message),
+        ImageServiceError,
+        (e) => new InternalServerErrorException(e.message),
       )
       .register(
-        MaxSizeExceededError,
+        CorruptedUploadedImageError,
+        (e) => new NotFoundException(e.message),
+      )
+      .register(
+        ImageMaxSizeExceededError,
         (e) => new PayloadTooLargeException(e.message),
       );
   }
