@@ -47,7 +47,7 @@ export class Address {
     const now = new Date();
     const adrsData = {
       ...data,
-      id: AddressId.create().toString(),
+      id: AddressId.create().unwrap().toString(),
       createdAt: now,
       updatedAt: now,
     };
