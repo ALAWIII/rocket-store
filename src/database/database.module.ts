@@ -20,7 +20,7 @@ import path from 'path';
         autoLoadEntities: true,
         migrationsRun: true,
         synchronize: config.get<string>('DB_SYNC') === 'true', // for development only
-        poolSize: 50,
+        poolSize: config.get<number>('DATABASE_POOL_SIZE', 50),
       }),
     }),
   ],
