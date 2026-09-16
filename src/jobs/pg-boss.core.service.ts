@@ -14,18 +14,14 @@ export class PgBossCoreService implements OnModuleInit, OnModuleDestroy {
 
   constructor(config: ConfigService) {
     this.boss = new PgBoss({
-      host: config.getOrThrow<string>('DB_HOST'),
-      port: config.getOrThrow<number>('DB_PORT'),
-      user: config.getOrThrow<string>('DB_USERNAME'),
-      password: config.getOrThrow<string>('DB_PASSWORD'),
-      database: config.getOrThrow<string>('DB_NAME'),
+      connectionString: config.getOrThrow<string>('DATABASE_URL'),
       application_name: config.get<string>('STORE_NAME') ?? 'pg-boss-store',
       useListenNotify: true,
       // pool sizing (separate from TypeORM)
-      max: 50,
+      max: config.get<number>('PG_BOSS_POOL_SIZE', 50),
       // we will use CLI in production DOCKERFILE, and in testing we will write code to migrate and setup the schema before run the app and tests.
-      migrate: false,
-      createSchema: false,
+      migrate: config.get<string>('NODE_ENV') ? true : false,
+      createSchema: config.get<string>('NODE_ENV') ? true : false,
       //
       supervise: true,
       schedule: true,
