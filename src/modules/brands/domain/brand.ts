@@ -2,19 +2,19 @@ import { BrandId } from 'src/modules/shared/value-objects/ids';
 import { Name } from 'src/modules/shared/value-objects/name';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { Ok, Result } from '@allawiii/results-ts';
-import { BrandImage } from './brand-image';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
+import { Image } from 'src/modules/images/domain/image';
 
 type BrandProps = {
   readonly id: BrandId;
   name: Name;
-  images?: BrandImage[];
+  logo?: Image;
   createdAt: Date;
 };
 type BrandPrimitives = {
   readonly id: string;
   name: string;
-  images?: BrandImage[];
+  logo?: Image;
   createdAt: Date;
 };
 export class Brand {
@@ -22,7 +22,7 @@ export class Brand {
 
   static create(data: {
     name: string;
-    images?: BrandImage[];
+    logo?: Image;
   }): Result<Brand, ValueObjectError> {
     const resultData = unwrapResultObject({
       name: Name.create(data.name),
@@ -34,7 +34,7 @@ export class Brand {
     return Ok(
       new Brand({
         ...resultData.unwrap(),
-        images: data.images?.sort((a, b) => a.sortOrder - b.sortOrder),
+        logo: data.logo,
         createdAt: new Date(),
       }),
     );
@@ -49,7 +49,7 @@ export class Brand {
     }
     const brand = {
       ...resultData.unwrap(),
-      images: data.images?.sort((a, b) => a.sortOrder - b.sortOrder),
+      logo: data.logo,
       createdAt: data.createdAt,
     };
     return Ok(new Brand(brand));
@@ -65,14 +65,12 @@ export class Brand {
   get createdAt(): Date {
     return new Date(this.props.createdAt);
   }
-  get images() {
-    return this.props.images?.map((i) => i.toJSON());
-  }
+
   toJSON() {
     return {
       id: this.id,
       name: this.name,
-      images: this.images,
+      logo: this.props.logo?.toJSON(),
       createdAt: this.createdAt,
     };
   }
