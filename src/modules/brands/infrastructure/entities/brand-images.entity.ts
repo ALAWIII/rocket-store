@@ -1,8 +1,5 @@
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
-import {
-  CreateDateColumnTz,
-  UpdateDateColumnTz,
-} from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
+import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { Column, Entity, ForeignKey, Index } from 'typeorm';
 import { BrandEntity } from './brand.entity';
@@ -30,12 +27,6 @@ export class BrandImagesEntity {
   @Column({ type: 'varchar', length: 10 })
   imageRole!: BrandImageRole;
 
-  @Column({ type: 'int', default: 0 })
-  sortOrder!: number;
-
   @CreateDateColumnTz()
   createdAt!: Date;
-
-  @UpdateDateColumnTz()
-  updatedAt!: Date;
 }
