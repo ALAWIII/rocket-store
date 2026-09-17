@@ -7,7 +7,7 @@ import {
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Image } from '../../domain/image';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
-import { Ok, Result } from '@allawiii/results-ts';
+import { Result } from '@allawiii/results-ts';
 import {
   DeleteQueryBuilder,
   In,
@@ -16,11 +16,11 @@ import {
 } from 'typeorm';
 import { ImageEntity } from '../entities/image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CorruptedPersistenceDataError } from 'src/modules/shared/errors/database.error';
 import {
   IMAGE_FK_COLUMN,
   IMAGE_USAGE_TABLES,
 } from 'src/modules/shared/domain/image-usage-table';
+import { ImageMapper } from '../mappers/images.mapper';
 
 @Injectable()
 export class ImageRepository implements IImageRepository {
@@ -37,14 +37,14 @@ export class ImageRepository implements IImageRepository {
       return entity;
     })
       .mapErr(mapTypeOrmError)
-      .andThen((entity) => this.toDomain(entity));
+      .andThen((entity) => ImageMapper.toDomain(entity));
   }
   async findById(imageId: string): Promise<DBResult<Image>> {
     return await Result.wrapAsync(async () =>
       this.imageRepo.findOneByOrFail({ id: imageId }),
     )
       .mapErr(mapTypeOrmError)
-      .andThen((img) => this.toDomain(img));
+      .andThen((img) => ImageMapper.toDomain(img));
   }
   async deleteMany(imageIds: string[]): Promise<DBResult<number>> {
     return await Result.wrapAsync(() =>
@@ -72,7 +72,7 @@ export class ImageRepository implements IImageRepository {
     })
       .mapErr(mapTypeOrmError)
       .andThen(({ images: imgs, total }) => {
-        return this.imagesToDomain(imgs).map((images) => {
+        return ImageMapper.toDomainList(imgs).map((images) => {
           return {
             images,
             pagination: {
@@ -96,25 +96,5 @@ export class ImageRepository implements IImageRepository {
       );
     });
     return qb;
-  }
-  private imagesToDomain(imgs: ImageEntity[]): DBResult<Image[]> {
-    const images: Image[] = [];
-    for (const img of imgs) {
-      const dImg = this.toDomain(img);
-      if (dImg.isErr()) {
-        return dImg.map();
-      }
-      images.push(dImg.unwrap());
-    }
-    return Ok(images);
-  }
-  private toDomain(img: ImageEntity) {
-    return Image.restore({ ...img }).mapErr(
-      (e) =>
-        new CorruptedPersistenceDataError(
-          `Failed to construct image from ImageEntity: ${e.message}`,
-          e,
-        ),
-    );
   }
 }
