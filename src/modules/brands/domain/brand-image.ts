@@ -1,24 +1,31 @@
-import { BrandImageId, ImageId } from 'src/modules/shared/value-objects/ids';
+import {
+  BrandId,
+  BrandImageId,
+  ImageId,
+} from 'src/modules/shared/value-objects/ids';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 import { Ok, Result } from '@allawiii/results-ts';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 export type BrandImageRole = 'banner' | 'logo';
 type BrandImageProps = {
   id: BrandImageId;
+  brandId: BrandId;
   imageId: ImageId;
   imageRole: BrandImageRole;
-  sortOrder: number;
   createdAt: Date;
-  updatedAt: Date;
 };
 type CreateBrandImageProps = {
   imageId: string;
+  brandId: string;
   imageRole: BrandImageRole;
-  sortOrder: number;
 };
-type BrandImagePrimitives = Omit<BrandImageProps, 'id' | 'imageId'> & {
+type BrandImagePrimitives = Omit<
+  BrandImageProps,
+  'id' | 'imageId' | 'brandId'
+> & {
   id: string;
   imageId: string;
+  brandId: string;
 };
 export class BrandImage {
   private constructor(private props: BrandImageProps) {}
@@ -30,6 +37,7 @@ export class BrandImage {
     const resultData = unwrapResultObject({
       id: BrandImageId.create(),
       imageId: ImageId.create(data.imageId),
+      brandId: BrandId.create(data.brandId),
     });
     if (resultData.isErr()) {
       return resultData.map();
@@ -38,9 +46,7 @@ export class BrandImage {
       new BrandImage({
         ...resultData.unwrap(),
         imageRole: data.imageRole,
-        sortOrder: data.sortOrder,
         createdAt: newDate,
-        updatedAt: newDate,
       }),
     );
   }
@@ -50,6 +56,7 @@ export class BrandImage {
     const resultData = unwrapResultObject({
       id: BrandImageId.create(data.id),
       imageId: ImageId.create(data.imageId),
+      brandId: BrandId.create(data.brandId),
     });
     if (resultData.isErr()) {
       return resultData.map();
@@ -61,14 +68,13 @@ export class BrandImage {
       }),
     );
   }
-  get sortOrder(): number {
-    return this.props.sortOrder;
-  }
+
   toJSON(): BrandImagePrimitives {
     return {
       ...this.props,
       id: this.props.id.toString(),
       imageId: this.props.imageId.toString(),
+      brandId: this.props.brandId.toString(),
     };
   }
 }
