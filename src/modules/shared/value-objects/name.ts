@@ -2,7 +2,7 @@ import { Err, Ok, Result } from '@allawiii/results-ts';
 import { ValueObjectError } from './value-object.error';
 
 export class Name {
-  private constructor(private readonly _value: string) {}
+  protected constructor(private readonly _value: string) {}
 
   static create(
     value: string,
