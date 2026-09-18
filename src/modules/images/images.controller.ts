@@ -44,13 +44,6 @@ export class ImagesController {
       .unwrap()
       .toJSON();
   }
-  @Get(':id')
-  @RequirePermission(AllPermissions.images.ImagesReadAny)
-  async findById(
-    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
-  ): Promise<ImageResponseDto> {
-    return (await this.imagesService.findImageById(id)).unwrap().toJSON();
-  }
   @Get('unused')
   @RequirePermission(AllPermissions.images.ImagesReadAll)
   async findUnused(
@@ -64,7 +57,7 @@ export class ImagesController {
       images: findImgs.images.map((img) => img.toJSON()),
     };
   }
-  @Delete()
+  @Post('batch-delete')
   @RequirePermission(AllPermissions.images.ImagesDeleteAny)
   async removeImages(
     @Body() ids: RemoveImagesDto,
@@ -79,5 +72,12 @@ export class ImagesController {
     return {
       affected: (await this.imagesService.removeUnusedImages()).unwrap(),
     };
+  }
+  @Get(':id')
+  @RequirePermission(AllPermissions.images.ImagesReadAny)
+  async findById(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+  ): Promise<ImageResponseDto> {
+    return (await this.imagesService.findImageById(id)).unwrap().toJSON();
   }
 }
