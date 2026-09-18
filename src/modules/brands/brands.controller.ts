@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -28,5 +29,10 @@ export class BrandsController {
     @Body() name: RenameBrandDto,
   ): Promise<BrandResponseDto> {
     return this.brandService.renameBrand(id, name);
+  }
+  @Get(':id')
+  @RequirePermission(AllPermissions.brands.BrandsReadAny)
+  findById(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string) {
+    return this.brandService.findById(id);
   }
 }
