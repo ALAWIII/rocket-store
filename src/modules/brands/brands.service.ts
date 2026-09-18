@@ -55,7 +55,7 @@ export class BrandsService {
       .unwrap()
       .map((bimg) => bimg.toJSON());
   }
-  async linkImages(
+  async attachImages(
     brandId: string,
     attachments: AttachImagesToBrandDto,
   ): Promise<ImageResponseDto[]> {
@@ -66,7 +66,7 @@ export class BrandsService {
       .unwrap()
       .map((bimg) => bimg.toJSON());
   }
-  async unlinkImages(
+  async detachImages(
     brandId: string,
     imageIds: DetachBrandImagesDto,
   ): Promise<DetachImagesResponseDto> {
