@@ -28,6 +28,9 @@ export class BrandsService {
       affected: (await this.brandRepo.deleteMany(brandIds.brandIds)).unwrap(),
     };
   }
+  async findById(brandId: string): Promise<BrandResponseDto> {
+    return (await this.brandRepo.findById(brandId)).unwrap().toJSON();
+  }
   async findByName(name: FindByNameDto): Promise<BrandResponseDto[]> {
     return (await this.brandRepo.findByName(name.name))
       .unwrap()
