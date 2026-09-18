@@ -9,6 +9,8 @@ import { RemoveBrandsResponseDto } from './dto/remove-brands-response.dto';
 import { FindByNameDto } from './dto/find-by-name.dto';
 import { FindAllBrandsPaginationDto } from './dto/find-all-brands-pagination.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
+import { AttachImagesToBrandDto } from './dto/attach-images-to-brand.dto';
+import { BrandImage } from './domain/brand-image';
 
 @Injectable()
 export class BrandsService {
@@ -50,5 +52,11 @@ export class BrandsService {
     return (await this.brandRepo.findBanners(brandId))
       .unwrap()
       .map((bimg) => bimg.toJSON());
+  }
+  async attachImages(brandId: string, attachments: AttachImagesToBrandDto) {
+    const brandImages = attachments.images.map((img) =>
+      BrandImage.create({ brandId, ...img }).unwrap(),
+    );
+    return this.brandRepo.attachImages(brandImages);
   }
 }
