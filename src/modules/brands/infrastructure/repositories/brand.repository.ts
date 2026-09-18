@@ -14,6 +14,7 @@ export abstract class IBrandRepository {
   abstract attachImages(brandImages: BrandImage[]): Promise<DBResult<Image[]>>;
   abstract rename(brandId: string, name: string): Promise<DBResult<Brand>>;
   abstract deleteMany(ids: string[]): Promise<DBResult<number>>;
+  abstract findByName(name: string): Promise<DBResult<Brand[]>>;
   abstract detachImages(
     brandId: string,
     imageIds: string[],

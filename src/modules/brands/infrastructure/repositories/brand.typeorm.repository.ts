@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { BrandEntity } from '../entities/brand.entity';
 import { IBrandRepository, PaginationOptions } from './brand.repository';
-import { In, Repository, SelectQueryBuilder } from 'typeorm';
+import { ILike, In, Repository, SelectQueryBuilder } from 'typeorm';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Brand } from '../../domain/brand';
 import { BrandImagesEntity } from '../entities/brand-images.entity';
@@ -119,7 +119,13 @@ export class BrandRepository implements IBrandRepository {
       .map((res) => res.affected ?? 0)
       .mapErr(mapTypeOrmError);
   }
-
+  async findByName(name: string): Promise<DBResult<Brand[]>> {
+    return Result.wrapAsync(() =>
+      this.brandRepo.findBy({ name: ILike(`%${name}%`) }),
+    )
+      .andThen((b) => BrandMapper.toDomainList(b))
+      .mapErr(mapTypeOrmError);
+  }
   async findAll(options: PaginationOptions = {}): Promise<DBResult<Brand[]>> {
     const { limit, skip } = this.normalizePagination(
       options.page,
