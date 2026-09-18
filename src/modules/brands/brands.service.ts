@@ -11,6 +11,8 @@ import { FindAllBrandsPaginationDto } from './dto/find-all-brands-pagination.dto
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { AttachImagesToBrandDto } from './dto/attach-images-to-brand.dto';
 import { BrandImage } from './domain/brand-image';
+import { DetachBrandImagesDto } from './dto/detach-images-of-brand.dto';
+import { DetachImagesResponseDto } from './dto/detach-images.response.dto';
 
 @Injectable()
 export class BrandsService {
@@ -63,5 +65,15 @@ export class BrandsService {
     return (await this.brandRepo.attachImages(brandImages))
       .unwrap()
       .map((bimg) => bimg.toJSON());
+  }
+  async unlinkImages(
+    brandId: string,
+    imageIds: DetachBrandImagesDto,
+  ): Promise<DetachImagesResponseDto> {
+    return {
+      affected: (
+        await this.brandRepo.detachImages(brandId, imageIds.imageIds)
+      ).unwrap(),
+    };
   }
 }
