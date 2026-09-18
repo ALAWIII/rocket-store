@@ -6,6 +6,7 @@ import { BrandResponseDto } from './dto/brand-response.dto';
 import { RenameBrandDto } from './dto/rename-brand.dto';
 import { RemoveBrandsDto } from './dto/remove-brands.dto';
 import { RemoveBrandsResponseDto } from './dto/remove-brands-response.dto';
+import { FindByNameDto } from './dto/find-by-name.dto';
 
 @Injectable()
 export class BrandsService {
@@ -26,5 +27,10 @@ export class BrandsService {
     return {
       affected: (await this.brandRepo.deleteMany(brandIds.brandIds)).unwrap(),
     };
+  }
+  async findByName(name: FindByNameDto): Promise<BrandResponseDto[]> {
+    return (await this.brandRepo.findByName(name.name))
+      .unwrap()
+      .map((b) => b.toJSON());
   }
 }
