@@ -53,10 +53,15 @@ export class BrandsService {
       .unwrap()
       .map((bimg) => bimg.toJSON());
   }
-  async attachImages(brandId: string, attachments: AttachImagesToBrandDto) {
+  async attachImages(
+    brandId: string,
+    attachments: AttachImagesToBrandDto,
+  ): Promise<ImageResponseDto[]> {
     const brandImages = attachments.images.map((img) =>
       BrandImage.create({ brandId, ...img }).unwrap(),
     );
-    return this.brandRepo.attachImages(brandImages);
+    return (await this.brandRepo.attachImages(brandImages))
+      .unwrap()
+      .map((bimg) => bimg.toJSON());
   }
 }
