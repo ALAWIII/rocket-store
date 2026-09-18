@@ -13,6 +13,8 @@ import { BrandsService } from './brands.service';
 import { BrandResponseDto } from './dto/brand-response.dto';
 import { AllPermissions } from '../access-control/domain/permission';
 import { RenameBrandDto } from './dto/rename-brand.dto';
+import { RemoveBrandsDto } from './dto/remove-brands.dto';
+import { RemoveBrandsResponseDto } from './dto/remove-brands-response.dto';
 
 @Controller('brands')
 export class BrandsController {
@@ -32,7 +34,14 @@ export class BrandsController {
   }
   @Get(':id')
   @RequirePermission(AllPermissions.brands.BrandsReadAny)
-  findById(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string) {
+  findById(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+  ): Promise<BrandResponseDto> {
     return this.brandService.findById(id);
+  }
+  @Post('batch-delete')
+  @RequirePermission(AllPermissions.brands.BrandsDeleteAny)
+  removeMany(@Body() dto: RemoveBrandsDto): Promise<RemoveBrandsResponseDto> {
+    return this.brandService.removeMany(dto);
   }
 }
