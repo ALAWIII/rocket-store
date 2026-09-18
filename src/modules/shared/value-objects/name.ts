@@ -4,7 +4,11 @@ import { ValueObjectError } from './value-object.error';
 export class Name {
   private constructor(private readonly _value: string) {}
 
-  static create(value: string, maxLength = 50): Result<Name, ValueObjectError> {
+  static create(
+    value: string,
+    maxLength = 50,
+    customRegex = /^[a-zA-ZÀ-ÿ]+([ '-][a-zA-ZÀ-ÿ]+)*$/,
+  ): Result<Name, ValueObjectError> {
     const v = value.trim();
 
     if (!v) return Err(new ValueObjectError('Name is required'));
@@ -15,8 +19,7 @@ export class Name {
         ),
       );
 
-    const regex = /^[a-zA-ZÀ-ÿ]+([ '-][a-zA-ZÀ-ÿ]+)*$/;
-    if (!regex.test(v)) return Err(new ValueObjectError('Invalid name'));
+    if (!customRegex.test(v)) return Err(new ValueObjectError('Invalid name'));
 
     return Ok(new Name(v));
   }
