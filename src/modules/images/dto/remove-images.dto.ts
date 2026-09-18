@@ -1,8 +1,8 @@
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsUUID } from 'class-validator';
 
 export class RemoveImagesDto {
   @IsArray()
-  @IsString({ each: true })
-  @IsNotEmpty({ each: true })
+  @ArrayNotEmpty()
+  @IsUUID('7', { each: true })
   imageIds!: string[];
 }
