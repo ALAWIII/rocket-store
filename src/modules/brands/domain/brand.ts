@@ -1,13 +1,13 @@
 import { BrandId } from 'src/modules/shared/value-objects/ids';
-import { Name } from 'src/modules/shared/value-objects/name';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { Ok, Result } from '@allawiii/results-ts';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 import { Image } from 'src/modules/images/domain/image';
+import { BrandName } from 'src/modules/shared/value-objects/brand-name';
 
 type BrandProps = {
   readonly id: BrandId;
-  name: Name;
+  name: BrandName;
   logo?: Image;
   createdAt: Date;
 };
@@ -25,7 +25,7 @@ export class Brand {
     logo?: Image;
   }): Result<Brand, ValueObjectError> {
     const resultData = unwrapResultObject({
-      name: Name.create(data.name),
+      name: BrandName.create(data.name),
       id: BrandId.create(),
     });
     if (resultData.isErr()) {
@@ -41,7 +41,7 @@ export class Brand {
   }
   static restore(data: BrandPrimitives): Result<Brand, ValueObjectError> {
     const resultData = unwrapResultObject({
-      name: Name.create(data.name),
+      name: BrandName.create(data.name),
       id: BrandId.create(data.id),
     });
     if (resultData.isErr()) {
