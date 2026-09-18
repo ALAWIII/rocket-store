@@ -4,6 +4,8 @@ import { CreateBrandDto } from './dto/create-brand.dto';
 import { Brand } from './domain/brand';
 import { BrandResponseDto } from './dto/brand-response.dto';
 import { RenameBrandDto } from './dto/rename-brand.dto';
+import { RemoveBrandsDto } from './dto/remove-brands.dto';
+import { RemoveBrandsResponseDto } from './dto/remove-brands-response.dto';
 
 @Injectable()
 export class BrandsService {
@@ -17,5 +19,12 @@ export class BrandsService {
     name: RenameBrandDto,
   ): Promise<BrandResponseDto> {
     return (await this.brandRepo.rename(brandId, name.name)).unwrap().toJSON();
+  }
+  async removeMany(
+    brandIds: RemoveBrandsDto,
+  ): Promise<RemoveBrandsResponseDto> {
+    return {
+      affected: (await this.brandRepo.deleteMany(brandIds.brandIds)).unwrap(),
+    };
   }
 }
