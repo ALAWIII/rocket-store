@@ -1,4 +1,4 @@
-import { ImageResponseDto } from './image-response.dto';
+import { ImageResponseDto } from '../../shared/dto/image-response.dto';
 import { PaginationResponseDto } from './pagination-response.dto';
 
 export class FindUnusedImagesResponseDto {
