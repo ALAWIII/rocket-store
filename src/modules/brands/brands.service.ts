@@ -6,8 +6,7 @@ import { BrandResponseDto } from './dto/brand-response.dto';
 import { RenameBrandDto } from './dto/rename-brand.dto';
 import { RemoveBrandsDto } from './dto/remove-brands.dto';
 import { RemoveBrandsResponseDto } from './dto/remove-brands-response.dto';
-import { FindByNameDto } from './dto/find-by-name.dto';
-import { FindAllBrandsPaginationDto } from './dto/find-all-brands-pagination.dto';
+import { FindAllBrandsFilterDto } from './dto/find-all-brands-filter.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { AttachImagesToBrandDto } from './dto/attach-images-to-brand.dto';
 import { BrandImage } from './domain/brand-image';
@@ -37,14 +36,8 @@ export class BrandsService {
   async findById(brandId: string): Promise<BrandResponseDto> {
     return (await this.brandRepo.findById(brandId)).unwrap().toJSON();
   }
-  async findByName(name: FindByNameDto): Promise<BrandResponseDto[]> {
-    return (await this.brandRepo.findByName(name.name))
-      .unwrap()
-      .map((b) => b.toJSON());
-  }
-  async findAll(
-    options: FindAllBrandsPaginationDto,
-  ): Promise<BrandResponseDto[]> {
+
+  async findAll(options: FindAllBrandsFilterDto): Promise<BrandResponseDto[]> {
     return (await this.brandRepo.findAll(options))
       .unwrap()
       .map((b) => b.toJSON());
