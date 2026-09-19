@@ -125,9 +125,15 @@ const imagesTable = new PermissionDependencyTableBuilder()
     AllPermissions.images.ImagesReadOwn,
   ])
   .getTable();
+const brandTable = new PermissionDependencyTableBuilder()
+  .register(AllPermissions.brands.BrandsCreateAny, [])
+  .register(AllPermissions.brands.BrandsDeleteAny, [])
+  .register(AllPermissions.brands.BrandsUpdateAny, [])
+  .getTable();
 export const permissionDepsTable = new PermissionDependencyTableBuilder()
   .mergeFrom(roleTable)
   .mergeFrom(userTable)
   .mergeFrom(imagesTable)
+  .mergeFrom(brandTable)
   .compile();
 // permissionDepsTable
