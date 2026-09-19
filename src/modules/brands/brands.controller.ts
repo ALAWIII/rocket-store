@@ -19,6 +19,8 @@ import { RemoveBrandsResponseDto } from './dto/remove-brands-response.dto';
 import { FindAllBrandsFilterDto } from './dto/find-all-brands-filter.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { AttachImagesToBrandDto } from './dto/attach-images-to-brand.dto';
+import { DetachBrandImagesDto } from './dto/detach-images-of-brand.dto';
+import { DetachImagesResponseDto } from './dto/detach-images.response.dto';
 
 @Controller('brands')
 export class BrandsController {
@@ -68,5 +70,13 @@ export class BrandsController {
     dto: AttachImagesToBrandDto,
   ): Promise<ImageResponseDto[]> {
     return this.brandService.attachImages(id, dto);
+  }
+  @Post(':id/images/batch-detach')
+  @RequirePermission(AllPermissions.images.ImagesAttachAny)
+  detachImages(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    dto: DetachBrandImagesDto,
+  ): Promise<DetachImagesResponseDto> {
+    return this.brandService.detachImages(id, dto);
   }
 }
