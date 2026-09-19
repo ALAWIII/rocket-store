@@ -17,6 +17,7 @@ import { RenameBrandDto } from './dto/rename-brand.dto';
 import { RemoveBrandsDto } from './dto/remove-brands.dto';
 import { RemoveBrandsResponseDto } from './dto/remove-brands-response.dto';
 import { FindAllBrandsFilterDto } from './dto/find-all-brands-filter.dto';
+import { ImageResponseDto } from '../shared/dto/image-response.dto';
 
 @Controller('brands')
 export class BrandsController {
@@ -51,5 +52,12 @@ export class BrandsController {
   @RequirePermission(AllPermissions.brands.BrandsDeleteAny)
   removeMany(@Body() dto: RemoveBrandsDto): Promise<RemoveBrandsResponseDto> {
     return this.brandService.removeMany(dto);
+  }
+  @Get(':id/images')
+  @RequirePermission(AllPermissions.images.ImagesReadAny)
+  async findBanners(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+  ): Promise<ImageResponseDto[]> {
+    return this.brandService.findBanners(id);
   }
 }
