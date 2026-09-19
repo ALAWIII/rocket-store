@@ -71,7 +71,7 @@ export class BrandsController {
   ): Promise<ImageResponseDto[]> {
     return this.brandService.attachImages(id, dto);
   }
-  @Post(':id/images/batch-detach')
+  @Post(':id/images/detach')
   @RequirePermission(AllPermissions.images.ImagesAttachAny)
   detachImages(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
