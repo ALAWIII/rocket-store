@@ -206,7 +206,7 @@ export class BrandRepository implements IBrandRepository {
   // ============= helper methods ====
   private normalizePagination(page?: number, limit?: number): Pagination {
     const safePage = Math.max(1, page ?? 1);
-    const safeLimit = Math.max(1, Math.min(100, limit ?? 20));
+    const safeLimit = Math.max(1, limit ?? 100);
 
     return {
       page: safePage,
