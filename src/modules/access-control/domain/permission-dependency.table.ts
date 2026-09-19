@@ -104,9 +104,30 @@ const roleTable = new PermissionDependencyTableBuilder()
 const userTable = new PermissionDependencyTableBuilder()
   .register(AllPermissions.user.UserReadLessOrEqual, [])
   .getTable();
-
+const imagesTable = new PermissionDependencyTableBuilder()
+  .register(AllPermissions.images.ImagesUploadAny, [
+    AllPermissions.images.ImagesReadAny,
+    AllPermissions.images.ImagesDeleteAny,
+  ])
+  .register(AllPermissions.images.ImagesAttachAny, [
+    AllPermissions.images.ImagesUploadAny,
+  ])
+  .register(AllPermissions.images.ImagesReadAny, [])
+  .register(AllPermissions.images.ImagesDeleteAny, [
+    AllPermissions.images.ImagesReadAny,
+  ])
+  .register(AllPermissions.images.ImagesUploadOwn, [
+    AllPermissions.images.ImagesReadOwn,
+    AllPermissions.images.ImagesDeleteOwn,
+  ])
+  .register(AllPermissions.images.ImagesReadOwn, [])
+  .register(AllPermissions.images.ImagesDeleteOwn, [
+    AllPermissions.images.ImagesReadOwn,
+  ])
+  .getTable();
 export const permissionDepsTable = new PermissionDependencyTableBuilder()
   .mergeFrom(roleTable)
   .mergeFrom(userTable)
+  .mergeFrom(imagesTable)
   .compile();
 // permissionDepsTable
