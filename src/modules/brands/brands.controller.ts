@@ -18,6 +18,7 @@ import { RemoveBrandsDto } from './dto/remove-brands.dto';
 import { RemoveBrandsResponseDto } from './dto/remove-brands-response.dto';
 import { FindAllBrandsFilterDto } from './dto/find-all-brands-filter.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
+import { AttachImagesToBrandDto } from './dto/attach-images-to-brand.dto';
 
 @Controller('brands')
 export class BrandsController {
@@ -59,5 +60,13 @@ export class BrandsController {
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
   ): Promise<ImageResponseDto[]> {
     return this.brandService.findBanners(id);
+  }
+  @Post(':id/images')
+  @RequirePermission(AllPermissions.images.ImagesAttachAny)
+  attachImages(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    dto: AttachImagesToBrandDto,
+  ): Promise<ImageResponseDto[]> {
+    return this.brandService.attachImages(id, dto);
   }
 }
