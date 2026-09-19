@@ -42,8 +42,8 @@ const Matrix = {
   },
   address: { read: ['lessOrEqual'] },
   images: {
-    read: ['any', 'own', 'all'],
-    delete: ['any', 'own', 'all'],
+    read: ['any', 'own'],
+    delete: ['any', 'own'],
     upload: ['any', 'own'],
     attach: ['any'],
   },

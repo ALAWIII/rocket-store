@@ -45,7 +45,7 @@ export class ImagesController {
       .toJSON();
   }
   @Get('unused')
-  @RequirePermission(AllPermissions.images.ImagesReadAll)
+  @RequirePermission(AllPermissions.images.ImagesReadAny)
   async findUnused(
     @Query() filters: FindUnusedImagesDto,
   ): Promise<FindUnusedImagesResponseDto> {
@@ -67,7 +67,7 @@ export class ImagesController {
     };
   }
   @Delete('unused')
-  @RequirePermission(AllPermissions.images.ImagesDeleteAll)
+  @RequirePermission(AllPermissions.images.ImagesDeleteAny)
   async removeUnused(): Promise<RemoveImagesResponseDto> {
     return {
       affected: (await this.imagesService.removeUnusedImages()).unwrap(),
