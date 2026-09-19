@@ -1,7 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { BrandEntity } from '../entities/brand.entity';
-import { IBrandRepository, PaginationOptions } from './brand.repository';
-import { ILike, In, Repository, SelectQueryBuilder } from 'typeorm';
+import { IBrandRepository, FindAllFilterOptions } from './brand.repository';
+import { In, Repository, SelectQueryBuilder } from 'typeorm';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Brand } from '../../domain/brand';
 import { BrandImagesEntity } from '../entities/brand-images.entity';
@@ -119,14 +119,10 @@ export class BrandRepository implements IBrandRepository {
       .map((res) => res.affected ?? 0)
       .mapErr(mapTypeOrmError);
   }
-  async findByName(name: string): Promise<DBResult<Brand[]>> {
-    return Result.wrapAsync(() =>
-      this.brandRepo.findBy({ name: ILike(`%${name}%`) }),
-    )
-      .andThen((b) => BrandMapper.toDomainList(b))
-      .mapErr(mapTypeOrmError);
-  }
-  async findAll(options: PaginationOptions = {}): Promise<DBResult<Brand[]>> {
+
+  async findAll(
+    options: FindAllFilterOptions = {},
+  ): Promise<DBResult<Brand[]>> {
     const { limit, skip } = this.normalizePagination(
       options.page,
       options.limit,
@@ -145,7 +141,7 @@ export class BrandRepository implements IBrandRepository {
         .addSelect('bi.brandId', 'brandId'); // Expose brandId for the main query join
 
       // 2. Main Query: Join CTE to Brands
-      const brandEntities = await this.brandRepo
+      const brandEntities = this.brandRepo
         .createQueryBuilder('brand')
         .addCommonTableExpression(logoCte, 'brand_logos')
         .leftJoinAndMapOne(
@@ -155,13 +151,18 @@ export class BrandRepository implements IBrandRepository {
           'logo',
           'logo.brandId = brand.id', // Join on the exposed brandId
         )
-        .orderBy('brand."createdAt"', 'DESC')
-        .addOrderBy('brand.id', 'ASC')
         .skip(skip)
-        .take(limit)
-        .getMany();
-
-      return brandEntities;
+        .take(limit);
+      if (options.name) {
+        brandEntities
+          .andWhere('brand.name ILIKE :name', { name: `%${options.name}%` })
+          .orderBy('brand.name', 'ASC'); // Alphabetical for search
+      } else {
+        brandEntities
+          .orderBy('brand."createdAt"', 'DESC') // Newest first for list
+          .addOrderBy('brand.id', 'ASC');
+      }
+      return brandEntities.getMany();
     })
       .andThen((brands) => BrandMapper.toDomainList(brands))
       .mapErr(mapTypeOrmError);

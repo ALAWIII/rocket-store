@@ -3,10 +3,14 @@ import { Brand } from '../../domain/brand';
 import { Image } from 'src/modules/images/domain/image';
 import { BrandImage } from '../../domain/brand-image';
 
-export type PaginationOptions = { page?: number; limit?: number };
+export type FindAllFilterOptions = {
+  name?: string;
+  page?: number;
+  limit?: number;
+};
 
 export abstract class IBrandRepository {
-  abstract findAll(options: PaginationOptions): Promise<DBResult<Brand[]>>;
+  abstract findAll(options: FindAllFilterOptions): Promise<DBResult<Brand[]>>;
   abstract findById(id: string): Promise<DBResult<Brand>>;
   abstract findBanners(brandId: string): Promise<DBResult<Image[]>>;
 
@@ -14,7 +18,6 @@ export abstract class IBrandRepository {
   abstract attachImages(brandImages: BrandImage[]): Promise<DBResult<Image[]>>;
   abstract rename(brandId: string, name: string): Promise<DBResult<Brand>>;
   abstract deleteMany(ids: string[]): Promise<DBResult<number>>;
-  abstract findByName(name: string): Promise<DBResult<Brand[]>>;
   abstract detachImages(
     brandId: string,
     imageIds: string[],
