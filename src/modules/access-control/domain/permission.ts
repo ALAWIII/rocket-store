@@ -47,7 +47,7 @@ const Matrix = {
     upload: ['any', 'own'],
     attach: ['any'],
   },
-  brands: { create: ['any'], update: ['any'], delete: ['any'], read: ['any'] },
+  brands: { create: ['any'], update: ['any'], delete: ['any'] },
 } as const;
 //==================================
 

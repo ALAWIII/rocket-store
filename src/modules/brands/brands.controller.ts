@@ -39,14 +39,12 @@ export class BrandsController {
     return this.brandService.renameBrand(id, name);
   }
   @Get(':id')
-  @RequirePermission(AllPermissions.brands.BrandsReadAny)
   findById(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
   ): Promise<BrandResponseDto> {
     return this.brandService.findById(id);
   }
   @Get()
-  @RequirePermission(AllPermissions.brands.BrandsReadAny)
   findAll(@Query() dto: FindAllBrandsFilterDto): Promise<BrandResponseDto[]> {
     return this.brandService.findAll(dto);
   }
