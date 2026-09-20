@@ -27,7 +27,7 @@ export class ImagesWorkerService implements OnModuleInit {
     const chunks = this.chunk(imgs, 1000);
     await Promise.all(
       chunks.map((chunk) =>
-        this.s3Client.getClient().send(
+        this.s3Client.client.send(
           new DeleteObjectsCommand({
             Bucket: 'images',
             Delete: { Objects: chunk },

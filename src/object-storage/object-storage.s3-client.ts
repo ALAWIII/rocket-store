@@ -6,7 +6,7 @@ import https from 'https';
 
 @Injectable()
 export class ObjectStorageS3Client {
-  private readonly client: S3Client;
+  private readonly _client: S3Client;
 
   constructor(config: ConfigService) {
     const agent = new https.Agent({
@@ -15,7 +15,7 @@ export class ObjectStorageS3Client {
       keepAliveMsecs: 1000,
     });
 
-    this.client = new S3Client({
+    this._client = new S3Client({
       region: config.getOrThrow('RUSTFS_REGION'),
       endpoint: config.getOrThrow('RUSTFS_ENDPOINT'),
       credentials: {
@@ -31,7 +31,7 @@ export class ObjectStorageS3Client {
     });
   }
 
-  getClient(): S3Client {
-    return this.client;
+  get client(): S3Client {
+    return this._client;
   }
 }

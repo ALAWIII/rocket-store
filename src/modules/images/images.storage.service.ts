@@ -84,7 +84,7 @@ export class ImagesStorageService {
       stream.on('error', (err) => meter.destroy(err));
 
       const up = new Upload({
-        client: this.s3Client.getClient(),
+        client: this.s3Client.client,
         queueSize: 2,
         params: {
           Bucket: BUCKET,
