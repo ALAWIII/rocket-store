@@ -29,7 +29,7 @@ export class ImagesWorkerService implements OnModuleInit {
       chunks.map((chunk) =>
         this.s3Client.client.send(
           new DeleteObjectsCommand({
-            Bucket: 'images',
+            Bucket: this.s3Client.bucket,
             Delete: { Objects: chunk },
           }),
         ),

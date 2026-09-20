@@ -13,7 +13,6 @@ import {
 } from './images.service.error';
 
 const DEFAULT_MAX_SIZE_BYTES = 10 * 1024 * 1024;
-const BUCKET = 'images';
 
 type ImgResult<T> = AsyncResult<T, ImageServiceError>;
 export interface UploadImageParams {
@@ -87,7 +86,7 @@ export class ImagesStorageService {
         client: this.s3Client.client,
         queueSize: 2,
         params: {
-          Bucket: BUCKET,
+          Bucket: this.s3Client.bucket,
           Key: imageKey,
           Body: meter,
           ContentType: contentType,

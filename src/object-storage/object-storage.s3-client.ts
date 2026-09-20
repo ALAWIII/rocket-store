@@ -7,8 +7,10 @@ import https from 'https';
 @Injectable()
 export class ObjectStorageS3Client {
   private readonly _client: S3Client;
+  private readonly _bucket: string;
 
   constructor(config: ConfigService) {
+    this._bucket = config.get('STORAGE_BUCKET', 'images');
     const agent = new https.Agent({
       keepAlive: true,
       maxSockets: config.get<number>('RUSTFS_MAX_SOCKETS', 256),
@@ -30,7 +32,9 @@ export class ObjectStorageS3Client {
       }),
     });
   }
-
+  get bucket(): string {
+    return this._bucket;
+  }
   get client(): S3Client {
     return this._client;
   }
