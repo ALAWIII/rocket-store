@@ -21,6 +21,7 @@ import { SystemRoleError } from 'src/modules/access-control/application/system-r
 import { RoleServiceError } from 'src/modules/access-control/role.error.service';
 import { RoleError } from 'src/modules/access-control/domain/role.error';
 import {
+  CorruptedUploadedImageError,
   ImageMaxSizeExceededError,
   ImageNotFoundError,
   ImageServiceError,
@@ -43,6 +44,10 @@ export class ErrorMappingBootstrap implements OnModuleInit {
       )
       .register(
         ValueObjectError,
+        (e) => new UnprocessableEntityException(e.message),
+      )
+      .register(
+        CorruptedUploadedImageError,
         (e) => new UnprocessableEntityException(e.message),
       )
       .register(
