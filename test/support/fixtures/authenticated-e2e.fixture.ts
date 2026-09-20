@@ -12,6 +12,7 @@ import {
   UserAddressesControllerTest,
 } from '../controllers/users/addresses.controller-test';
 import { ImagesControllerTest } from '../controllers/images.controller-test';
+import { ObjectStorageClientTest } from '../helpers/object-storage-client.helper';
 
 export const test = baseTest
   .extend('mailClient', async () => {
@@ -29,10 +30,16 @@ export const test = baseTest
     onCleanup(async () => db.cleanup());
     return db;
   })
-  .extend('app', async ({ db }, { onCleanup }) => {
+  .extend('storageClient', async ({}, { onCleanup }) => {
+    const storage = await ObjectStorageClientTest.create();
+    onCleanup(async () => storage.cleanup());
+    return storage;
+  })
+  .extend('app', async ({ db, storageClient }, { onCleanup }) => {
     const configServiceMock = createConfigServiceMock({
       DATABASE_URL: db.databaseUrl,
       DB_NAME: db.databaseName,
+      STORAGE_BUCKET: storageClient.bucket,
     });
     const app = await TestApp.create(configServiceMock);
     onCleanup(async () => app.cleanup());
