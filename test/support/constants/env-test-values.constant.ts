@@ -25,4 +25,5 @@ export const TEST_ENV = {
   RUSTFS_ENDPOINT: 'http://localhost:9000',
   RUSTFS_ACCESS_KEY: 'gQBKOvN739NAkSIWJgsO',
   RUSTFS_SECRET_KEY: 'RznWOJ5EioSbNNnBvKZwQflSuYR3WWRGuuiCJADk',
+  RUSTFS_MAX_SOCKETS: 1,
 } as const;
