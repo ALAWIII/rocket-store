@@ -11,6 +11,7 @@ import {
   MyAddressesControllerTest,
   UserAddressesControllerTest,
 } from '../controllers/users/addresses.controller-test';
+import { ImagesControllerTest } from '../controllers/images.controller-test';
 
 export const test = baseTest
   .extend('mailClient', async () => {
@@ -62,5 +63,8 @@ export const test = baseTest
   })
   .extend('userAddressController', async ({ adminUser }) => {
     return new UserAddressesControllerTest(adminUser.userAgent);
+  })
+  .extend('imageController', async ({ adminUser }) => {
+    return new ImagesControllerTest(adminUser.userAgent);
   });
 export const it = test;
