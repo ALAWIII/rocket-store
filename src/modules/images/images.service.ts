@@ -47,7 +47,7 @@ export class ImagesService {
     uploadedBy: string,
     metadata: { name: string; altText?: string },
   ): Promise<Result<Image, ImageServiceError>> {
-    const sourceStream = file.stream;
+    const sourceStream = Readable.from(file.buffer);
     const [probeWeb, uploadWeb] = Readable.toWeb(sourceStream).tee();
     const probeStream = Readable.fromWeb(probeWeb);
     const uploadStream = Readable.fromWeb(uploadWeb);
