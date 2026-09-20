@@ -14,4 +14,27 @@ export class ImagesControllerTest {
   withAgent(agent: UserAgent): ImagesControllerTest {
     return new ImagesControllerTest(agent);
   }
+  async upload(
+    file: Buffer,
+    finfo: UploadFileInfoDto,
+    statusCodes: ExpectedTestStatusCode,
+  ) {
+    const fileInfo = { name: finfo.name.split('.')[0], altText: finfo.altText };
+    const response = await fields(
+      this.agent.post(this.urlPrefix).attach('file', file, finfo.name),
+      fileInfo,
+    ).expect(statusCodes.code);
+
+    const body = parseResponseBody<ImageResponseDto>(
+      response,
+      statusCodesListNormalize(statusCodes),
+    );
+    return { response, body };
+  }
+}
+function fields<T extends object>(request: Test, data: T) {
+  for (const [key, value] of Object.entries(data)) {
+    request.field(key, String(value));
+  }
+  return request;
 }
