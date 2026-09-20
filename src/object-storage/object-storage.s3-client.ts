@@ -11,7 +11,7 @@ export class ObjectStorageS3Client {
   constructor(config: ConfigService) {
     const agent = new https.Agent({
       keepAlive: true,
-      maxSockets: 256,
+      maxSockets: config.get<number>('RUSTFS_MAX_SOCKETS', 256),
       keepAliveMsecs: 1000,
     });
 
