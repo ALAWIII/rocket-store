@@ -23,7 +23,8 @@ export const TEST_ENV = {
   GOOGLE_CLIENT_SECRET: 'google-client-secret',
   RUSTFS_REGION: 'us-east-1',
   RUSTFS_ENDPOINT: 'http://localhost:9000',
-  RUSTFS_ACCESS_KEY: 'gQBKOvN739NAkSIWJgsO',
-  RUSTFS_SECRET_KEY: 'RznWOJ5EioSbNNnBvKZwQflSuYR3WWRGuuiCJADk',
+  RUSTFS_ACCESS_KEY: 'admin',
+  RUSTFS_SECRET_KEY: '12345678',
   RUSTFS_MAX_SOCKETS: 1,
+  STORAGE_BUCKET: 'images', // as default but the testing will take care generating and creating random bucket using uuid v7.
 } as const;
