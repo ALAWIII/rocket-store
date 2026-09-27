@@ -40,6 +40,16 @@ describe.concurrent('images (e2e)', () => {
         expectedStatus: { code: 413 },
       });
     });
+    it('should fail uploading image because of invalid mime type.', async ({
+      imageController,
+    }) => {
+      const customBuffer = Buffer.from('should violate filter mime check.');
+      await uploadRandomImage(imageController, {
+        customBuffer,
+        imgExt: 'txt' as unknown as 'png',
+        expectedStatus: { code: 400 },
+      });
+    });
   });
   describe('GET /api/v1/images/:id', () => {
     it('should success returning image metadata by its id.', async ({
