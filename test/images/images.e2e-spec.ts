@@ -50,6 +50,14 @@ describe.concurrent('images (e2e)', () => {
         expectedStatus: { code: 400 },
       });
     });
+    it('should fail uploading image because of name regex violation contains `-` .', async ({
+      imageController,
+    }) => {
+      await uploadRandomImage(imageController, {
+        name: 'shawarma-zenjer',
+        expectedStatus: { code: 400 },
+      });
+    });
   });
   describe('GET /api/v1/images/:id', () => {
     it('should success returning image metadata by its id.', async ({
