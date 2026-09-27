@@ -34,8 +34,9 @@ describe.concurrent('images (e2e)', () => {
     it('should fail because of exceeding file size', async ({
       imageController,
     }) => {
+      const maxSize = 10 * 1024 * 1024;
       await uploadRandomImage(imageController, {
-        exactSizeBytes: 11 * 1024 * 1024,
+        exactSizeBytes: maxSize + 1,
         expectedStatus: { code: 413 },
       });
     });
