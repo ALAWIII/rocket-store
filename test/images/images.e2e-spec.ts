@@ -31,6 +31,14 @@ describe.concurrent('images (e2e)', () => {
         expect(body!.sizeBytes).toBe(img.length);
       }
     });
+    it('should fail because of exceeding file size', async ({
+      imageController,
+    }) => {
+      await uploadRandomImage(imageController, {
+        exactSizeBytes: 11 * 1024 * 1024,
+        expectedStatus: { code: 413 },
+      });
+    });
   });
   describe('GET /api/v1/images/:id', () => {
     it('should success returning image metadata by its id.', async ({
