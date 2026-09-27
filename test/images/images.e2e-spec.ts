@@ -1,6 +1,7 @@
 import { it } from 'test/support/fixtures/authenticated-e2e.fixture';
 import sharp from 'sharp';
 import { uploadRandomImage } from 'test/support/utils/upload-random-image.util';
+import { calculateChecksum } from 'test/support/utils/calculate-checksum.util';
 describe.concurrent('images (e2e)', () => {
   describe('POST /api/v1/images', () => {
     it('should success upload a valid image', async ({ imageController }) => {
@@ -82,6 +83,31 @@ describe.concurrent('images (e2e)', () => {
         width: 4097,
         expectedStatus: { code: 422 },
       });
+    });
+    it('should preserve image integrity after upload (checksum matches original)', async ({
+      imageController,
+    }) => {
+      // Arrange: create a known image and compute its checksum
+      const originalImage = await sharp({
+        create: {
+          width: 800,
+          height: 600,
+          channels: 3,
+          background: { r: 255, g: 0, b: 0 },
+        },
+      })
+        .png()
+        .toBuffer();
+
+      const expectedChecksum = calculateChecksum(originalImage);
+
+      // Act
+      const { body } = await uploadRandomImage(imageController, {
+        customBuffer: originalImage,
+      });
+
+      // Assert
+      expect(body!.checksum).toBe(expectedChecksum);
     });
   });
   describe('GET /api/v1/images/:id', () => {
