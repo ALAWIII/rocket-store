@@ -31,6 +31,16 @@ export class ImagesControllerTest {
     );
     return { response, body };
   }
+  async findById(imgId: string, statusCodes: ExpectedTestStatusCode) {
+    const response = await this.agent
+      .get(`${this.urlPrefix}/${imgId}`)
+      .expect(statusCodes.code);
+    const body = parseResponseBody<ImageResponseDto>(
+      response,
+      statusCodesListNormalize(statusCodes),
+    );
+    return { response, body };
+  }
 }
 function fields<T extends object>(request: Test, data: T) {
   for (const [key, value] of Object.entries(data)) {
