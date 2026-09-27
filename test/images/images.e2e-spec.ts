@@ -2,6 +2,7 @@ import { it } from 'test/support/fixtures/authenticated-e2e.fixture';
 import sharp from 'sharp';
 import { uploadRandomImage } from 'test/support/utils/upload-random-image.util';
 import { calculateChecksum } from 'test/support/utils/calculate-checksum.util';
+import { v7 } from 'uuid';
 describe.concurrent('images (e2e)', () => {
   describe('POST /api/v1/images', () => {
     it('should success upload a valid image', async ({ imageController }) => {
@@ -130,6 +131,13 @@ describe.concurrent('images (e2e)', () => {
         parseBody: true,
       });
       expect(getImg.body!.id).toBe(img.id);
+    });
+    it('should fail to fetch not found image metadata by id.', async ({
+      imageController,
+    }) => {
+      await imageController.findById(v7(), {
+        code: 404,
+      });
     });
   });
 });
