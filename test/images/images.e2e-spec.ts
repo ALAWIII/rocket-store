@@ -32,6 +32,14 @@ describe.concurrent('images (e2e)', () => {
         expect(body!.sizeBytes).toBe(img.length);
       }
     });
+    it('should show the image in object storage when success upload.', async ({
+      imageController,
+      storageClient,
+    }) => {
+      const img = (await uploadRandomImage(imageController)).body!;
+      const imgInfo = await storageClient.fetchInfo(img.id);
+      expect(imgInfo.contentLength).toBe(img.sizeBytes);
+    });
     it('should fail because of exceeding file size', async ({
       imageController,
     }) => {
