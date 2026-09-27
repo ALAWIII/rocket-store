@@ -28,6 +28,7 @@ describe.concurrent('images (e2e)', () => {
         expect(body!.mimeType).toBe(`image/${mime}`);
         expect(body!.width).toBe(4000);
         expect(body!.height).toBe(4000);
+        expect(body!.sizeBytes).toBe(img.length);
       }
     });
   });
