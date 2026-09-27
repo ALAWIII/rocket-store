@@ -29,7 +29,7 @@ export async function uploadRandomImage(
     width = 800,
     height = 600,
     imgExt = 'png',
-    name = `image${Date.now()}`,
+    name = `testImg`,
     altText = 'Random test image',
     customBuffer,
     expectedStatus = { code: 201, parseBody: true },
