@@ -58,6 +58,14 @@ describe.concurrent('images (e2e)', () => {
         expectedStatus: { code: 400 },
       });
     });
+    it('should fail uploading image because of name length exceeds its limits.', async ({
+      imageController,
+    }) => {
+      await uploadRandomImage(imageController, {
+        name: 'h'.repeat(60),
+        expectedStatus: { code: 400 },
+      });
+    });
   });
   describe('GET /api/v1/images/:id', () => {
     it('should success returning image metadata by its id.', async ({
