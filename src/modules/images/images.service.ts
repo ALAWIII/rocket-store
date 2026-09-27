@@ -52,6 +52,7 @@ export class ImagesService {
     const probeStream = Readable.fromWeb(probeWeb);
     const uploadStream = Readable.fromWeb(uploadWeb);
     const imgId = ImageId.create().unwrap().toJSON();
+    let uploaded = false;
     //===
     const upRes = await Result.wrapAsync<Image, ImageServiceError>(async () => {
       const imgInfo = (
@@ -74,6 +75,7 @@ export class ImagesService {
           contentType: imgMime,
         })
       ).unwrap();
+      uploaded = true;
       //===
       const image = Image.restore({
         id: imgId,
@@ -94,9 +96,11 @@ export class ImagesService {
       );
       return imgDb.unwrap();
     }).inspectErr(async () => {
-      await this.storageService
-        .sendDeleteImgs([imgId])
-        .inspectErr((e) => this.logger.error(e.message, e));
+      if (uploaded)
+        await this.storageService
+          .sendDeleteImgs([imgId])
+          .inspectErr((e) => this.logger.error(e.message, e));
+
       sourceStream.destroy();
       probeStream.destroy();
       uploadStream.destroy();
