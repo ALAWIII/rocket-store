@@ -63,10 +63,7 @@ export class Image {
       height: Dimension.create(data.height),
       uploadedBy: optional(data.uploadedBy, (value) => UserId.create(value)),
       altText: optional(data.altText, (value) => DomainText.create(value, 125)),
-    }).mapErr(
-      (e: ValueObjectError) =>
-        new ImageError(`Failed to construct image: ${e.message}`, e),
-    );
+    }).mapErr((e: ValueObjectError) => new ImageError(e.message, e));
     if (imageData.isErr()) {
       return imageData.map();
     }
