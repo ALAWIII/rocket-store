@@ -15,7 +15,7 @@ export interface RandomImageUploadOptions {
 
   /** Ultimate escape hatch for highly specific edge cases */
   customBuffer?: Buffer;
-
+  exactSizeBytes?: number;
   // --- 3. Test Expectations ---
   /** Defaults to 201 Created. Override for failure assertions. */
   expectedStatus?: ExpectedTestStatusCode;
@@ -31,6 +31,7 @@ export async function uploadRandomImage(
     imgExt = 'png',
     name = `testImg`,
     altText = 'Random test image',
+    exactSizeBytes = 0,
     customBuffer,
     expectedStatus = { code: 201, parseBody: true },
   } = options;
@@ -55,10 +56,13 @@ export async function uploadRandomImage(
       [imgExt]()
       .toBuffer();
   }
-
+  const expandedBuf = Buffer.concat([
+    imgBuffer,
+    Buffer.alloc(Math.max(exactSizeBytes - imgBuffer.length, 0)),
+  ]);
   // --- Execute Upload ---
   return imageController.upload(
-    imgBuffer,
+    expandedBuf,
     { name: nameWithExt, altText },
     expectedStatus,
   );
