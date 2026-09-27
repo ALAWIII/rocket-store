@@ -74,6 +74,15 @@ describe.concurrent('images (e2e)', () => {
         expectedStatus: { code: 400 },
       });
     });
+    it('fails uploading image because of Dimensions exceeds 4096x4096 dimension limits.', async ({
+      imageController,
+    }) => {
+      await uploadRandomImage(imageController, {
+        height: 4097,
+        width: 4097,
+        expectedStatus: { code: 422 },
+      });
+    });
   });
   describe('GET /api/v1/images/:id', () => {
     it('should success returning image metadata by its id.', async ({
