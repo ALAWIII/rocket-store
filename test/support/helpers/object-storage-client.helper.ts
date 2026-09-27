@@ -112,7 +112,7 @@ export class ObjectStorageClientTest {
    * Downloads the object and converts the stream to a Buffer.
    */
   async download(key: string): Promise<Buffer> {
-    const cmd = new GetObjectCommand({ Bucket: 'images', Key: key });
+    const cmd = new GetObjectCommand({ Bucket: this.bucket, Key: key });
     const response = await this.client.send(cmd);
 
     if (!response.Body) throw new Error(`Object ${key} has no body`);
@@ -125,7 +125,7 @@ export class ObjectStorageClientTest {
    * Fetches metadata without downloading the whole file (efficient).
    */
   async fetchInfo(key: string) {
-    const cmd = new HeadObjectCommand({ Bucket: 'images', Key: key });
+    const cmd = new HeadObjectCommand({ Bucket: this.bucket, Key: key });
     const response = await this.client.send(cmd);
 
     return {
@@ -140,7 +140,7 @@ export class ObjectStorageClientTest {
    * Deletes the object. Returns true if successful.
    */
   async deleteObject(key: string): Promise<boolean> {
-    const cmd = new DeleteObjectCommand({ Bucket: 'images', Key: key });
+    const cmd = new DeleteObjectCommand({ Bucket: this.bucket, Key: key });
     await this.client.send(cmd);
     return true;
   }
