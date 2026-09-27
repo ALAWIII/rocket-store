@@ -14,7 +14,7 @@ export class ImageEntity {
   checksum!: string;
   @Column('varchar', { length: 20 })
   mimeType!: ImageMimeTypes;
-  @Column('bigint')
+  @Column('integer')
   sizeBytes!: number;
   @Column('integer')
   width!: number;
