@@ -19,9 +19,11 @@ export class ImagesControllerTest {
     finfo: UploadFileInfoDto,
     statusCodes: ExpectedTestStatusCode,
   ) {
-    const fileInfo = { name: finfo.name.split('.')[0], altText: finfo.altText };
+    const nameWithExt = finfo.name;
+    const name = finfo.name.split('.')[0];
+    const fileInfo = { name, altText: finfo.altText };
     const response = await fields(
-      this.agent.post(this.urlPrefix).attach('file', file, finfo.name),
+      this.agent.post(this.urlPrefix).attach('file', file, nameWithExt),
       fileInfo,
     ).expect(statusCodes.code);
 
@@ -44,7 +46,8 @@ export class ImagesControllerTest {
 }
 function fields<T extends object>(request: Test, data: T) {
   for (const [key, value] of Object.entries(data)) {
-    request.field(key, String(value));
+    if (value === undefined || value === null) continue; // skip
+    request.field(key, value);
   }
   return request;
 }
