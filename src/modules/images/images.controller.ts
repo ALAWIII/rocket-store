@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Post,
@@ -58,6 +60,7 @@ export class ImagesController {
     };
   }
   @Post('batch-delete')
+  @HttpCode(HttpStatus.OK)
   @RequirePermission(AllPermissions.images.ImagesDeleteAny)
   async removeImages(
     @Body() ids: RemoveImagesDto,
