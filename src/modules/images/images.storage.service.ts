@@ -2,7 +2,7 @@ import { Readable, Transform, TransformCallback } from 'node:stream';
 import { IJobsService } from 'src/jobs/jobs.service';
 import { ObjectStorageS3Client } from 'src/object-storage/object-storage.s3-client';
 import { Upload } from '@aws-sdk/lib-storage';
-import { AsyncResult, Option, Result } from '@allawiii/results-ts';
+import { AsyncResult, Result } from '@allawiii/results-ts';
 import { ImageDeletionPayload } from './images-worker.service';
 import { createHash } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
