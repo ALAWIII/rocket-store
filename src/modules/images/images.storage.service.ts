@@ -132,7 +132,7 @@ export class ImagesStorageService {
    */
   sendDeleteImgs(
     imageKeys: string[],
-  ): AsyncResult<Option<string[]>, ImageDeletionError> {
+  ): AsyncResult<string[], ImageDeletionError> {
     return this.jobService
       .sendJobs(
         this.jobKind,

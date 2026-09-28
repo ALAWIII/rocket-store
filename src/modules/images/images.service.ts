@@ -128,12 +128,8 @@ export class ImagesService {
   async removeImages(
     imgIds: string[],
   ): Promise<Result<number, ImageServiceError>> {
-    const storageRes = await this.storageService
-      .sendDeleteImgs(imgIds)
-      .map((v) => v.unwrapOr([]).length)
-      .mapErr((e) => new ImageServiceError(e.message, e));
-    if (storageRes.isErr() || storageRes.isOkAnd((v) => v === 0))
-      return storageRes;
+    const storageRes = await this.storageService.sendDeleteImgs(imgIds);
+    if (storageRes.isErr()) return storageRes.map();
 
     return (await this.imgRepo.deleteMany(imgIds)).mapErr(
       mapToImagesServiceError,
@@ -155,11 +151,10 @@ export class ImagesService {
 
       const s3Res = await this.storageService
         .sendDeleteImgs(imgIds)
-        .map((v) => v.unwrapOr([]).length)
         .mapErr(mapToImagesServiceError);
 
-      if (s3Res.isErr() || s3Res.value === 0) {
-        return s3Res;
+      if (s3Res.isErr()) {
+        return s3Res.map();
       }
 
       const deleted = (await this.imgRepo.deleteMany(imgIds)).mapErr(
