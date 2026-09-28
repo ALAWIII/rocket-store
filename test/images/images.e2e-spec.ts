@@ -3,6 +3,7 @@ import sharp from 'sharp';
 import { uploadRandomImage } from 'test/support/utils/upload-random-image.util';
 import { calculateChecksum } from 'test/support/utils/calculate-checksum.util';
 import { v7 } from 'uuid';
+import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
 describe.concurrent('images (e2e)', () => {
   describe('POST /api/v1/images', () => {
     it('should success upload a valid image', async ({ imageController }) => {
@@ -138,6 +139,50 @@ describe.concurrent('images (e2e)', () => {
       await imageController.findById(v7(), {
         code: 404,
       });
+    });
+  });
+  describe('POST /api/v1/images/batch-delete', () => {
+    it('should success remove batch of images', async ({
+      imageController,
+      db,
+      storageClient,
+    }) => {
+      const images: ImageResponseDto[] = [];
+      for (let i = 1; i < 4; i++) {
+        const image = (await uploadRandomImage(imageController)).body!;
+        const imgInfo = await storageClient.fetchInfo(image.id);
+        // assert its stored in object storage before attemp to delete it.
+        expect(image.sizeBytes).toBe(imgInfo.contentLength);
+        images.push(image);
+      }
+      const imgIds = images.map((img) => img.id);
+      const deleteResult = await imageController.removeImages(
+        imgIds,
+        {
+          code: 200,
+          parseBody: true,
+        },
+        (id: string) => storageClient.exists(id),
+      );
+      expect(deleteResult.body!).toEqual({ affected: 3 });
+      // 2. Give pg-boss a moment to update the job state to 'completed'
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      const allCompleted = await db.dataSource.query<
+        { state: string; data: { Key: string } }[]
+      >(
+        `
+           SELECT state, data
+           FROM pgboss.job
+           WHERE name = 'image.delete' AND data->>'Key' = ANY($1);
+         `,
+        [imgIds],
+      );
+      expect(allCompleted.length).toBe(3);
+      expect(
+        allCompleted.every(
+          (d) => imgIds.includes(d.data.Key) && d.state === 'completed',
+        ),
+      ).toBe(true);
     });
   });
 });
