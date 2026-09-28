@@ -184,5 +184,16 @@ describe.concurrent('images (e2e)', () => {
         ),
       ).toBe(true);
     });
+    it('should success when attempt to delete not existed images ', async ({
+      imageController,
+    }) => {
+      const deleteBody = (
+        await imageController.removeImages([v7(), v7()], {
+          code: 200,
+          parseBody: true,
+        })
+      ).body!;
+      expect(deleteBody).toEqual({ affected: 0 });
+    });
   });
 });
