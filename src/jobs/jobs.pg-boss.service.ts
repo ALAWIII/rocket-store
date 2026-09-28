@@ -7,7 +7,7 @@ import {
   WorkerId,
 } from './jobs.service';
 import { PgBossCoreService } from './pg-boss.core.service';
-import { AsyncResult, Option, Result } from '@allawiii/results-ts';
+import { AsyncResult, Err, Ok, Result } from '@allawiii/results-ts';
 import { JobsError } from './jobs.error';
 
 @Injectable()
@@ -21,10 +21,12 @@ export class JobsPgBossService implements IJobsService {
   sendJobs<T extends JobData>(
     jobKind: string,
     jobs: T[],
-  ): AsyncResult<Option<JobId[]>, JobsError> {
+  ): AsyncResult<JobId[], JobsError> {
     return Result.wrapAsync(() => this.boss.insert(jobKind, jobs))
-      .map(Option.fromNullable)
-      .mapErr((e) => new JobsError(`Failed to send jobs`, e));
+      .mapErr((e) => new JobsError(`Failed to send jobs`, e))
+      .andThen((v) =>
+        v == null ? Err(new JobsError('sending jobs returned null')) : Ok(v),
+      );
   }
 
   createWorker<T extends JobData>(

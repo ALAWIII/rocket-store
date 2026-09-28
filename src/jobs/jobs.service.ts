@@ -1,4 +1,4 @@
-import { AsyncResult, Option } from '@allawiii/results-ts';
+import { AsyncResult } from '@allawiii/results-ts';
 import { JobsError } from './jobs.error';
 
 export type JobData = Record<string, unknown>;
@@ -14,7 +14,7 @@ export abstract class IJobsService {
   abstract sendJobs<T extends JobData>(
     jobKind: string,
     jobs: T[],
-  ): AsyncResult<Option<JobId[]>, JobsError>;
+  ): AsyncResult<JobId[], JobsError>;
   /**
    * Create new worker on a specified existed `jobKind` (queue name).
    * @param jobKind
