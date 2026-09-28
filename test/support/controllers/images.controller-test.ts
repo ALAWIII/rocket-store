@@ -7,6 +7,7 @@ import {
 } from '../utils/parse-response-body.util';
 import { UploadFileInfoDto } from 'src/modules/images/dto/upload-file-info.dto';
 import { Test } from 'supertest';
+import { RemoveImagesResponseDto } from 'src/modules/images/dto/remove-images-response.dto';
 
 export class ImagesControllerTest {
   readonly urlPrefix = '/api/v1/images';
@@ -43,6 +44,22 @@ export class ImagesControllerTest {
     );
     return { response, body };
   }
+  async removeImages(
+    imageIds: string[],
+    statusCodes: ExpectedTestStatusCode,
+    existsFn?: (id: string) => Promise<boolean>,
+  ) {
+    const response = await this.agent
+      .post(`${this.urlPrefix}/batch-delete`)
+      .send({ imageIds })
+      .expect(statusCodes.code);
+    const body = parseResponseBody<RemoveImagesResponseDto>(
+      response,
+      statusCodesListNormalize(statusCodes),
+    );
+    if (existsFn) await waitForAllDeletions(imageIds, existsFn);
+    return { response, body };
+  }
 }
 function fields<T extends object>(request: Test, data: T) {
   for (const [key, value] of Object.entries(data)) {
@@ -50,4 +67,31 @@ function fields<T extends object>(request: Test, data: T) {
     request.field(key, value);
   }
   return request;
+}
+
+async function waitForAllDeletions(
+  ids: string[],
+  checkExistsFn: (id: string) => Promise<boolean>,
+  intervalMs = 1000,
+) {
+  const pendingIds = new Set(ids);
+
+  while (pendingIds.size > 0) {
+    const checks = Array.from(pendingIds).map(async (id) => {
+      try {
+        const exists = await checkExistsFn(id);
+        if (!exists) {
+          pendingIds.delete(id); // Successfully deleted, remove from polling
+        }
+      } catch {
+        // Ignore transient network errors, retry next second
+      }
+    });
+
+    await Promise.all(checks);
+
+    if (pendingIds.size > 0) {
+      await new Promise((resolve) => setTimeout(resolve, intervalMs));
+    }
+  }
 }
