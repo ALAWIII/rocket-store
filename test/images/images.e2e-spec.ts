@@ -4,6 +4,8 @@ import { uploadRandomImage } from 'test/support/utils/upload-random-image.util';
 import { calculateChecksum } from 'test/support/utils/calculate-checksum.util';
 import { v7 } from 'uuid';
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
+import { waitJobUntilFinish } from 'test/support/utils/wait-job-until-finish.util';
+
 describe.concurrent('images (e2e)', () => {
   describe('POST /api/v1/images', () => {
     it('should success upload a valid image', async ({ imageController }) => {
@@ -167,16 +169,7 @@ describe.concurrent('images (e2e)', () => {
       expect(deleteResult.body!).toEqual({ affected: 3 });
       // 2. Give pg-boss a moment to update the job state to 'completed'
       await new Promise((resolve) => setTimeout(resolve, 300));
-      const allCompleted = await db.dataSource.query<
-        { state: string; data: { Key: string } }[]
-      >(
-        `
-           SELECT state, data
-           FROM pgboss.job
-           WHERE name = 'image.delete' AND data->>'Key' = ANY($1);
-         `,
-        [imgIds],
-      );
+      const allCompleted = await waitJobUntilFinish(db.dataSource, imgIds);
       expect(allCompleted.length).toBe(3);
       expect(
         allCompleted.every(
@@ -186,14 +179,22 @@ describe.concurrent('images (e2e)', () => {
     });
     it('should success when attempt to delete not existed images ', async ({
       imageController,
+      db,
     }) => {
+      const fakeImgs = [v7(), v7()];
       const deleteBody = (
-        await imageController.removeImages([v7(), v7()], {
+        await imageController.removeImages(fakeImgs, {
           code: 200,
           parseBody: true,
         })
       ).body!;
       expect(deleteBody).toEqual({ affected: 0 });
+      const finishedImgs = await waitJobUntilFinish(db.dataSource, fakeImgs);
+      expect(
+        finishedImgs.every(
+          (d) => fakeImgs.includes(d.data.Key) && d.state === 'completed',
+        ),
+      ).toBe(true);
     });
   });
 });
