@@ -6,6 +6,7 @@ import {
   statusCodesListNormalize,
 } from '../utils/parse-response-body.util';
 import { BrandResponseDto } from 'src/modules/brands/dto/brand-response.dto';
+import { RenameBrandDto } from 'src/modules/brands/dto/rename-brand.dto';
 
 export class BrandsControllerTest {
   readonly urlPrefix = '/api/v1/brands';
@@ -29,6 +30,22 @@ export class BrandsControllerTest {
     const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
     const response = await this.agent
       .get(`${this.urlPrefix}/${brandId}`)
+      .expect(expectedStatus.code);
+    const body = parseResponseBody<BrandResponseDto>(
+      response,
+      statusCodesListNormalize(expectedStatus),
+    );
+    return { response, body };
+  }
+  async rename(
+    brandId: string,
+    payload: RenameBrandDto,
+    statusCodes?: ExpectedTestStatusCode,
+  ) {
+    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
+    const response = await this.agent
+      .patch(`${this.urlPrefix}/${brandId}`)
+      .send(payload)
       .expect(expectedStatus.code);
     const body = parseResponseBody<BrandResponseDto>(
       response,
