@@ -7,6 +7,7 @@ import {
 } from '../utils/parse-response-body.util';
 import { BrandResponseDto } from 'src/modules/brands/dto/brand-response.dto';
 import { RenameBrandDto } from 'src/modules/brands/dto/rename-brand.dto';
+import { FindAllBrandsFilterDto } from 'src/modules/brands/dto/find-all-brands-filter.dto';
 
 export class BrandsControllerTest {
   readonly urlPrefix = '/api/v1/brands';
@@ -32,6 +33,21 @@ export class BrandsControllerTest {
       .get(`${this.urlPrefix}/${brandId}`)
       .expect(expectedStatus.code);
     const body = parseResponseBody<BrandResponseDto>(
+      response,
+      statusCodesListNormalize(expectedStatus),
+    );
+    return { response, body };
+  }
+  async findAll(
+    payload: FindAllBrandsFilterDto,
+    statusCodes?: ExpectedTestStatusCode,
+  ) {
+    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
+    const response = await this.agent
+      .get(this.urlPrefix)
+      .query(payload)
+      .expect(expectedStatus.code);
+    const body = parseResponseBody<BrandResponseDto[]>(
       response,
       statusCodesListNormalize(expectedStatus),
     );
