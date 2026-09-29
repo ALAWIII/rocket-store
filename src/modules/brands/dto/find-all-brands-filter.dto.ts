@@ -10,6 +10,7 @@ import {
 import { brandRegex } from 'src/modules/shared/value-objects/brand-name';
 
 export class FindAllBrandsFilterDto {
+  @IsOptional()
   @IsString()
   @Length(2, 50)
   @Matches(brandRegex, { message: 'Invalid brand name' })
