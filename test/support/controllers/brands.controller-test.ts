@@ -25,4 +25,15 @@ export class BrandsControllerTest {
     );
     return { response, body };
   }
+  async findById(brandId: string, statusCodes?: ExpectedTestStatusCode) {
+    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
+    const response = await this.agent
+      .get(`${this.urlPrefix}/${brandId}`)
+      .expect(expectedStatus.code);
+    const body = parseResponseBody<BrandResponseDto>(
+      response,
+      statusCodesListNormalize(expectedStatus),
+    );
+    return { response, body };
+  }
 }
