@@ -42,5 +42,16 @@ describe.concurrent('brands (e2e)', () => {
     }) => {
       await brandController.rename(v7(), { name: 'Huawie' }, { code: 404 });
     });
+    it('should conflict to rename brand with a name already taken by another brand', async ({
+      brandController,
+    }) => {
+      await brandController.create({ name: 'Huawie' });
+      const brand = await brandController.create({ name: 'Honor' });
+      await brandController.rename(
+        brand.body!.id,
+        { name: 'Huawie' },
+        { code: 409 },
+      );
+    });
   });
 });
