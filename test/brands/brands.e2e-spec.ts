@@ -54,6 +54,18 @@ describe.concurrent('brands (e2e)', () => {
       expect(findFirst5Brands.length).toBe(5);
       expect(findSecond5Brands.length).toBe(5);
     });
+    it('should success find all brands that matches given name.', async ({
+      brandController,
+    }) => {
+      const brands: Map<string, BrandResponseDto> = new Map();
+      for (let i = 1; i <= 10; i++) {
+        const b = (await brandController.create({ name: `brand-${i}` })).body!;
+        brands.set(b.id, b);
+      }
+      const findBrands = (await brandController.findAll({ name: 'd-2' })).body!;
+      expect(findBrands.length).toBe(1);
+      expect(findBrands[0].name).toBe('brand-2');
+    });
   });
   describe('PATCH /api/v1/brands/:id rename', () => {
     it('should success rename existed brand', async ({ brandController }) => {
