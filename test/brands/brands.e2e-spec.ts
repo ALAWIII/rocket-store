@@ -37,6 +37,23 @@ describe.concurrent('brands (e2e)', () => {
       const findBrands = (await brandController.findAll({})).body!;
       expect(findBrands.every((b) => brands.has(b.id)));
     });
+    it('should success find all brands by paging.', async ({
+      brandController,
+    }) => {
+      const brands: Map<string, BrandResponseDto> = new Map();
+      for (let i = 1; i <= 10; i++) {
+        const b = (await brandController.create({ name: `brand-${i}` })).body!;
+        brands.set(b.id, b);
+      }
+      const findFirst5Brands = (await brandController.findAll({ limit: 5 }))
+        .body!;
+      const findSecond5Brands = (
+        await brandController.findAll({ limit: 5, page: 2 })
+      ).body!;
+      expect(findFirst5Brands).not.toEqual(findSecond5Brands);
+      expect(findFirst5Brands.length).toBe(5);
+      expect(findSecond5Brands.length).toBe(5);
+    });
   });
   describe('PATCH /api/v1/brands/:id rename', () => {
     it('should success rename existed brand', async ({ brandController }) => {
