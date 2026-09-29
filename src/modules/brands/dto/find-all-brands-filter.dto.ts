@@ -5,7 +5,6 @@ import {
   IsString,
   Length,
   Matches,
-  Max,
   Min,
 } from 'class-validator';
 import { brandRegex } from 'src/modules/shared/value-objects/brand-name';
