@@ -26,4 +26,16 @@ describe.concurrent('brands (e2e)', () => {
       await brandController.findById(v7(), { code: 404 });
     });
   });
+  describe('PATCH /api/v1/brands/:id rename', () => {
+    it('should success rename existed brand', async ({ brandController }) => {
+      const brand = (await brandController.create({ name: 'Honor' })).body!;
+      const renamed = (
+        await brandController.rename(brand.id, { name: 'Huawie' })
+      ).body!;
+      expect(renamed.name).toBe('Huawie');
+      expect(renamed.id).toBe(brand.id);
+      expect(renamed.createdAt).toBe(brand.createdAt);
+      expect(renamed.name).not.toBe(brand.name);
+    });
+  });
 });
