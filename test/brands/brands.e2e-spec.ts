@@ -37,5 +37,10 @@ describe.concurrent('brands (e2e)', () => {
       expect(renamed.createdAt).toBe(brand.createdAt);
       expect(renamed.name).not.toBe(brand.name);
     });
+    it('should fail renaming non existed brand', async ({
+      brandController,
+    }) => {
+      await brandController.rename(v7(), { name: 'Huawie' }, { code: 404 });
+    });
   });
 });
