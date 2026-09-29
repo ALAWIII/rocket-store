@@ -1,5 +1,6 @@
 import { v7 } from 'uuid';
 import { it } from '../support/fixtures/authenticated-e2e.fixture';
+import { BrandResponseDto } from 'src/modules/brands/dto/brand-response.dto';
 
 describe.concurrent('brands (e2e)', () => {
   describe('POST /api/v1/brands', () => {
@@ -24,6 +25,17 @@ describe.concurrent('brands (e2e)', () => {
       brandController,
     }) => {
       await brandController.findById(v7(), { code: 404 });
+    });
+  });
+  describe('GET /api/v1/brands?name&page&limit findAll', () => {
+    it('should success find all brands.', async ({ brandController }) => {
+      const brands: Map<string, BrandResponseDto> = new Map();
+      for (let i = 1; i <= 10; i++) {
+        const b = (await brandController.create({ name: `brand-${i}` })).body!;
+        brands.set(b.id, b);
+      }
+      const findBrands = (await brandController.findAll({})).body!;
+      expect(findBrands.every((b) => brands.has(b.id)));
     });
   });
   describe('PATCH /api/v1/brands/:id rename', () => {
