@@ -136,20 +136,21 @@ export class BrandRepository implements IBrandRepository {
           BrandImagesEntity,
           'bi',
           'bi.imageId = img.id AND bi.imageRole = :role',
-          { role: 'logo' },
         )
+
         .addSelect('bi.brandId', 'brandId'); // Expose brandId for the main query join
 
       // 2. Main Query: Join CTE to Brands
       const brandEntities = this.brandRepo
         .createQueryBuilder('brand')
         .addCommonTableExpression(logoCte, 'brand_logos')
+        .setParameter('role', 'logo')
         .leftJoinAndMapOne(
           // is correct choice because every brand has at most one logo.
           'brand.logo',
           'brand_logos',
           'logo',
-          'logo.brandId = brand.id', // Join on the exposed brandId
+          'logo."brandId" = brand.id', // Join on the exposed brandId
         )
         .skip(skip)
         .take(limit);
@@ -159,7 +160,7 @@ export class BrandRepository implements IBrandRepository {
           .orderBy('brand.name', 'ASC'); // Alphabetical for search
       } else {
         brandEntities
-          .orderBy('brand."createdAt"', 'DESC') // Newest first for list
+          .orderBy('brand.createdAt', 'DESC') // Newest first for list
           .addOrderBy('brand.id', 'ASC');
       }
       return brandEntities.getMany();
