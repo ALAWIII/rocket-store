@@ -95,4 +95,18 @@ describe.concurrent('brands (e2e)', () => {
       );
     });
   });
+  describe('POST /api/v1/brands/batch-delete removeMany', () => {
+    it('should success remove many brands.', async ({ brandController }) => {
+      const brands: Map<string, BrandResponseDto> = new Map();
+      for (let i = 1; i <= 10; i++) {
+        const b = (await brandController.create({ name: `brand-${i}` })).body!;
+        brands.set(b.id, b);
+      }
+      const brandIds = [...brands.keys()];
+      const deleteBrands = (await brandController.removeMany(brandIds)).body!;
+      expect(deleteBrands).toEqual({ affected: 10 });
+      const all = (await brandController.findAll({})).body!;
+      expect(all.length).toBe(0);
+    });
+  });
 });
