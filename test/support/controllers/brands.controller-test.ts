@@ -8,6 +8,7 @@ import {
 import { BrandResponseDto } from 'src/modules/brands/dto/brand-response.dto';
 import { RenameBrandDto } from 'src/modules/brands/dto/rename-brand.dto';
 import { FindAllBrandsFilterDto } from 'src/modules/brands/dto/find-all-brands-filter.dto';
+import { RemoveBrandsResponseDto } from 'src/modules/brands/dto/remove-brands-response.dto';
 
 export class BrandsControllerTest {
   readonly urlPrefix = '/api/v1/brands';
@@ -64,6 +65,18 @@ export class BrandsControllerTest {
       .send(payload)
       .expect(expectedStatus.code);
     const body = parseResponseBody<BrandResponseDto>(
+      response,
+      statusCodesListNormalize(expectedStatus),
+    );
+    return { response, body };
+  }
+  async removeMany(brandIds: string[], statusCodes?: ExpectedTestStatusCode) {
+    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
+    const response = await this.agent
+      .post(`${this.urlPrefix}/batch-delete`)
+      .send({ brandIds })
+      .expect(expectedStatus.code);
+    const body = parseResponseBody<RemoveBrandsResponseDto>(
       response,
       statusCodesListNormalize(expectedStatus),
     );
