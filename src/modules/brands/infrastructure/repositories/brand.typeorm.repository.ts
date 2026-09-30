@@ -60,7 +60,6 @@ export class BrandRepository implements IBrandRepository {
       const images = await this.brandImageRepo.manager
         .createQueryBuilder(ImageEntity, 'images')
         .addCommonTableExpression(insertCte, 'image_ids')
-        .select('*')
         .where('images.id IN (SELECT "imageId" FROM image_ids)')
         .getMany();
       return images;
