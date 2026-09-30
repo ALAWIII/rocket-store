@@ -168,5 +168,37 @@ describe.concurrent('brands and images (e2e)', () => {
       );
       expect(attachHonorSuccess.body).toEqual(attachHuawieSuccess.body);
     });
+    it('should fail when attaching same image to the same brand multiple different times', async ({
+      imageController,
+      brandController,
+    }) => {
+      const logo = (await uploadRandomImage(imageController)).body!;
+      const banner = (await uploadRandomImage(imageController)).body!;
+
+      const honor = (await brandController.create({ name: 'Honor' })).body!;
+      const attachFirstTimeSuccess = await brandController.attachImages(
+        honor.id,
+        {
+          images: [
+            { imageId: logo.id, imageRole: 'logo' },
+            { imageId: banner.id, imageRole: 'banner' },
+          ],
+        },
+      );
+      await brandController.attachImages(
+        honor.id,
+        {
+          images: [{ imageId: logo.id, imageRole: 'logo' }],
+        },
+        { code: 409 },
+      );
+      await brandController.attachImages(
+        honor.id,
+        {
+          images: [{ imageId: banner.id, imageRole: 'banner' }],
+        },
+        { code: 409 },
+      );
+    });
   });
 });
