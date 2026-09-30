@@ -236,4 +236,30 @@ describe.concurrent('brands and images (e2e)', () => {
       expect(banners.length).toBe(0);
     });
   });
+  describe('POST /api/v1/brands/:id/images/detach detachImages', () => {
+    it('should success detach images from brand', async ({
+      brandController,
+      imageController,
+    }) => {
+      const logo = (await uploadRandomImage(imageController)).body!;
+      const banner1 = (await uploadRandomImage(imageController)).body!;
+      const banner2 = (await uploadRandomImage(imageController)).body!;
+      const honor = (await brandController.create({ name: 'Honor' })).body!;
+      await brandController.attachImages(honor.id, [
+        { imageId: logo.id, imageRole: 'logo' },
+        { imageId: banner1.id, imageRole: 'banner' },
+        { imageId: banner2.id, imageRole: 'banner' },
+      ]);
+      const dBody = (
+        await brandController.detachImages(honor.id, [
+          logo.id,
+          banner1.id,
+          banner2.id,
+        ])
+      ).body!;
+      const banners = (await brandController.findBanners(honor.id)).body!;
+      expect(banners.length).toBe(0);
+      expect(dBody).toEqual({ affected: 3 });
+    });
+  });
 });
