@@ -230,5 +230,24 @@ describe.concurrent('brands and images (e2e)', () => {
       ).toBe(true);
       expect(banners.some((b) => b.id === logo.id)).toBe(false);
     });
+    it('should return empty banners when brand has no banners.', async ({
+      imageController,
+      brandController,
+    }) => {
+      const logo = (await uploadRandomImage(imageController)).body!;
+      const banner1 = (await uploadRandomImage(imageController)).body!;
+      const banner2 = (await uploadRandomImage(imageController)).body!;
+      const honor = (await brandController.create({ name: 'Honor' })).body!;
+      const huawie = (await brandController.create({ name: 'Huawie' })).body!;
+      await brandController.attachImages(honor.id, {
+        images: [
+          { imageId: logo.id, imageRole: 'logo' },
+          { imageId: banner1.id, imageRole: 'banner' },
+          { imageId: banner2.id, imageRole: 'banner' },
+        ],
+      });
+      const banners = (await brandController.findBanners(huawie.id)).body!;
+      expect(banners.length).toBe(0);
+    });
   });
 });
