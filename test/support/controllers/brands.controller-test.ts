@@ -9,6 +9,8 @@ import { BrandResponseDto } from 'src/modules/brands/dto/brand-response.dto';
 import { RenameBrandDto } from 'src/modules/brands/dto/rename-brand.dto';
 import { FindAllBrandsFilterDto } from 'src/modules/brands/dto/find-all-brands-filter.dto';
 import { RemoveBrandsResponseDto } from 'src/modules/brands/dto/remove-brands-response.dto';
+import { AttachImagesToBrandDto } from 'src/modules/brands/dto/attach-images-to-brand.dto';
+import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
 
 export class BrandsControllerTest {
   readonly urlPrefix = '/api/v1/brands';
@@ -77,6 +79,22 @@ export class BrandsControllerTest {
       .send({ brandIds })
       .expect(expectedStatus.code);
     const body = parseResponseBody<RemoveBrandsResponseDto>(
+      response,
+      statusCodesListNormalize(expectedStatus),
+    );
+    return { response, body };
+  }
+  async attachImages(
+    brandId: string,
+    imges: AttachImagesToBrandDto,
+    statusCodes?: ExpectedTestStatusCode,
+  ) {
+    const expectedStatus = statusCodes ?? { code: 201, parseBody: true };
+    const response = await this.agent
+      .post(`${this.urlPrefix}/${brandId}/images`)
+      .send(imges)
+      .expect(expectedStatus.code);
+    const body = parseResponseBody<ImageResponseDto[]>(
       response,
       statusCodesListNormalize(expectedStatus),
     );
