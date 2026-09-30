@@ -208,4 +208,27 @@ describe.concurrent('brands and images (e2e)', () => {
       );
     });
   });
+  describe('GET /api/v1/brands/:id/images findBanners', () => {
+    it('should success fetch all brand banners excluding the logo by its id.', async ({
+      imageController,
+      brandController,
+    }) => {
+      const logo = (await uploadRandomImage(imageController)).body!;
+      const banner1 = (await uploadRandomImage(imageController)).body!;
+      const banner2 = (await uploadRandomImage(imageController)).body!;
+      const honor = (await brandController.create({ name: 'Honor' })).body!;
+      await brandController.attachImages(honor.id, {
+        images: [
+          { imageId: logo.id, imageRole: 'logo' },
+          { imageId: banner1.id, imageRole: 'banner' },
+          { imageId: banner2.id, imageRole: 'banner' },
+        ],
+      });
+      const banners = (await brandController.findBanners(honor.id)).body!;
+      expect(
+        banners.every((b) => b.id === banner1.id || b.id === banner2.id),
+      ).toBe(true);
+      expect(banners.some((b) => b.id === logo.id)).toBe(false);
+    });
+  });
 });
