@@ -2,6 +2,8 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseUUIDPipe,
   Patch,
@@ -50,6 +52,7 @@ export class BrandsController {
   }
 
   @Post('batch-delete')
+  @HttpCode(HttpStatus.OK)
   @RequirePermission(AllPermissions.brands.BrandsDeleteAny)
   removeMany(@Body() dto: RemoveBrandsDto): Promise<RemoveBrandsResponseDto> {
     return this.brandService.removeMany(dto);
@@ -70,6 +73,7 @@ export class BrandsController {
     return this.brandService.attachImages(id, dto);
   }
   @Post(':id/images/detach')
+  @HttpCode(HttpStatus.OK)
   @RequirePermission(AllPermissions.images.ImagesAttachAny)
   detachImages(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
