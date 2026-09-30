@@ -100,4 +100,15 @@ export class BrandsControllerTest {
     );
     return { response, body };
   }
+  async findBanners(brandId: string, statusCodes?: ExpectedTestStatusCode) {
+    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
+    const response = await this.agent
+      .get(`${this.urlPrefix}/${brandId}/images`)
+      .expect(expectedStatus.code);
+    const body = parseResponseBody<ImageResponseDto[]>(
+      response,
+      statusCodesListNormalize(expectedStatus),
+    );
+    return { response, body };
+  }
 }
