@@ -1,6 +1,9 @@
 import { v7 } from 'uuid';
 import { it } from '../support/fixtures/authenticated-e2e.fixture';
 import { BrandResponseDto } from 'src/modules/brands/dto/brand-response.dto';
+import { uploadRandomImage } from 'test/support/utils/upload-random-image.util';
+import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
+import { AttachImagesToBrandDto } from 'src/modules/brands/dto/attach-images-to-brand.dto';
 
 describe.concurrent('brands (e2e)', () => {
   describe('POST /api/v1/brands', () => {
@@ -107,6 +110,45 @@ describe.concurrent('brands (e2e)', () => {
       expect(deleteBrands).toEqual({ affected: 10 });
       const all = (await brandController.findAll({})).body!;
       expect(all.length).toBe(0);
+    });
+  });
+});
+describe.concurrent('brands and images (e2e)', () => {
+  describe('POST /api/v1/brands/:id/images attachImages', () => {
+    it('should success attach multiple images of logo and banners to brand', async ({
+      brandController,
+      imageController,
+    }) => {
+      const images: ImageResponseDto[] = [];
+      const imgAttach: { imageId: string; imageRole: string }[] = [];
+      for (let i = 1; i <= 3; i++) {
+        const img = (await uploadRandomImage(imageController)).body!;
+        images.push(img);
+        imgAttach.push({
+          imageId: img.id,
+          imageRole: i === 1 ? 'logo' : 'banner',
+        });
+      }
+      const honor = (await brandController.create({ name: 'Honor' })).body!;
+      const attachingBody = (
+        await brandController.attachImages(honor.id, {
+          images: imgAttach,
+        } as AttachImagesToBrandDto)
+      ).body!;
+      expect(attachingBody).toHaveLength(3);
+
+      const attachedIds = attachingBody.map((img) => img.id).sort();
+      const expectedIds = images.map((img) => img.id).sort();
+
+      expect(attachedIds).toEqual(expectedIds);
+
+      expect(
+        attachingBody.every((img) =>
+          imgAttach.some((attach) => attach.imageId === img.id),
+        ),
+      ).toBe(true);
+      const brandWithLogo = (await brandController.findById(honor.id)).body!;
+      expect(images[0].id).toBe(brandWithLogo.logo?.id);
     });
   });
 });
