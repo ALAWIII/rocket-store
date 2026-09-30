@@ -112,7 +112,7 @@ export class BrandRepository implements IBrandRepository {
     return Result.wrapAsync(async () =>
       this.brandImageRepo.delete({
         brandId,
-        id: In(imageIds),
+        imageId: In(imageIds),
       }),
     )
       .map((res) => res.affected ?? 0)
