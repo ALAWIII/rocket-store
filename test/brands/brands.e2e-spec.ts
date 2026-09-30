@@ -131,9 +131,7 @@ describe.concurrent('brands and images (e2e)', () => {
       }
       const honor = (await brandController.create({ name: 'Honor' })).body!;
       const attachingBody = (
-        await brandController.attachImages(honor.id, {
-          images: imgAttach,
-        } as AttachImagesToBrandDto)
+        await brandController.attachImages(honor.id, imgAttach as any)
       ).body!;
       expect(attachingBody).toHaveLength(3);
 
@@ -158,20 +156,16 @@ describe.concurrent('brands and images (e2e)', () => {
       const banner = (await uploadRandomImage(imageController)).body!;
       const honor = (await brandController.create({ name: 'Honor' })).body!;
       const huwaie = (await brandController.create({ name: 'Huawie' })).body!;
-      const attachHonorSuccess = await brandController.attachImages(honor.id, {
-        images: [
+      const attachHonorSuccess = await brandController.attachImages(honor.id, [
+        { imageId: logo.id, imageRole: 'logo' },
+        { imageId: banner.id, imageRole: 'banner' },
+      ]);
+      const attachHuawieSuccess = await brandController.attachImages(
+        huwaie.id,
+        [
           { imageId: logo.id, imageRole: 'logo' },
           { imageId: banner.id, imageRole: 'banner' },
         ],
-      });
-      const attachHuawieSuccess = await brandController.attachImages(
-        huwaie.id,
-        {
-          images: [
-            { imageId: logo.id, imageRole: 'logo' },
-            { imageId: banner.id, imageRole: 'banner' },
-          ],
-        },
       );
       expect(attachHonorSuccess.body).toEqual(attachHuawieSuccess.body);
     });
@@ -185,25 +179,21 @@ describe.concurrent('brands and images (e2e)', () => {
       const honor = (await brandController.create({ name: 'Honor' })).body!;
       const attachFirstTimeSuccess = await brandController.attachImages(
         honor.id,
-        {
-          images: [
-            { imageId: logo.id, imageRole: 'logo' },
-            { imageId: banner.id, imageRole: 'banner' },
-          ],
-        },
+        [
+          { imageId: logo.id, imageRole: 'logo' },
+          { imageId: banner.id, imageRole: 'banner' },
+        ],
       );
       await brandController.attachImages(
         honor.id,
-        {
-          images: [{ imageId: logo.id, imageRole: 'logo' }],
-        },
+
+        [{ imageId: logo.id, imageRole: 'logo' }],
+
         { code: 409 },
       );
       await brandController.attachImages(
         honor.id,
-        {
-          images: [{ imageId: banner.id, imageRole: 'banner' }],
-        },
+        [{ imageId: banner.id, imageRole: 'banner' }],
         { code: 409 },
       );
     });
@@ -217,13 +207,11 @@ describe.concurrent('brands and images (e2e)', () => {
       const banner1 = (await uploadRandomImage(imageController)).body!;
       const banner2 = (await uploadRandomImage(imageController)).body!;
       const honor = (await brandController.create({ name: 'Honor' })).body!;
-      await brandController.attachImages(honor.id, {
-        images: [
-          { imageId: logo.id, imageRole: 'logo' },
-          { imageId: banner1.id, imageRole: 'banner' },
-          { imageId: banner2.id, imageRole: 'banner' },
-        ],
-      });
+      await brandController.attachImages(honor.id, [
+        { imageId: logo.id, imageRole: 'logo' },
+        { imageId: banner1.id, imageRole: 'banner' },
+        { imageId: banner2.id, imageRole: 'banner' },
+      ]);
       const banners = (await brandController.findBanners(honor.id)).body!;
       expect(
         banners.every((b) => b.id === banner1.id || b.id === banner2.id),
@@ -239,13 +227,11 @@ describe.concurrent('brands and images (e2e)', () => {
       const banner2 = (await uploadRandomImage(imageController)).body!;
       const honor = (await brandController.create({ name: 'Honor' })).body!;
       const huawie = (await brandController.create({ name: 'Huawie' })).body!;
-      await brandController.attachImages(honor.id, {
-        images: [
-          { imageId: logo.id, imageRole: 'logo' },
-          { imageId: banner1.id, imageRole: 'banner' },
-          { imageId: banner2.id, imageRole: 'banner' },
-        ],
-      });
+      await brandController.attachImages(honor.id, [
+        { imageId: logo.id, imageRole: 'logo' },
+        { imageId: banner1.id, imageRole: 'banner' },
+        { imageId: banner2.id, imageRole: 'banner' },
+      ]);
       const banners = (await brandController.findBanners(huawie.id)).body!;
       expect(banners.length).toBe(0);
     });

@@ -11,6 +11,8 @@ import { FindAllBrandsFilterDto } from 'src/modules/brands/dto/find-all-brands-f
 import { RemoveBrandsResponseDto } from 'src/modules/brands/dto/remove-brands-response.dto';
 import { AttachImagesToBrandDto } from 'src/modules/brands/dto/attach-images-to-brand.dto';
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
+import { DetachBrandImagesDto } from 'src/modules/brands/dto/detach-images-of-brand.dto';
+import { DetachImagesResponseDto } from 'src/modules/brands/dto/detach-images.response.dto';
 
 export class BrandsControllerTest {
   readonly urlPrefix = '/api/v1/brands';
@@ -86,13 +88,13 @@ export class BrandsControllerTest {
   }
   async attachImages(
     brandId: string,
-    imges: AttachImagesToBrandDto,
+    images: AttachImagesToBrandDto['images'],
     statusCodes?: ExpectedTestStatusCode,
   ) {
     const expectedStatus = statusCodes ?? { code: 201, parseBody: true };
     const response = await this.agent
       .post(`${this.urlPrefix}/${brandId}/images`)
-      .send(imges)
+      .send({ images })
       .expect(expectedStatus.code);
     const body = parseResponseBody<ImageResponseDto[]>(
       response,
@@ -106,6 +108,22 @@ export class BrandsControllerTest {
       .get(`${this.urlPrefix}/${brandId}/images`)
       .expect(expectedStatus.code);
     const body = parseResponseBody<ImageResponseDto[]>(
+      response,
+      statusCodesListNormalize(expectedStatus),
+    );
+    return { response, body };
+  }
+  async detachImages(
+    brandId: string,
+    imageIds: string[],
+    statusCodes?: ExpectedTestStatusCode,
+  ) {
+    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
+    const response = await this.agent
+      .post(`${this.urlPrefix}/${brandId}/images/detach`)
+      .send({ imageIds })
+      .expect(expectedStatus.code);
+    const body = parseResponseBody<DetachImagesResponseDto>(
       response,
       statusCodesListNormalize(expectedStatus),
     );
