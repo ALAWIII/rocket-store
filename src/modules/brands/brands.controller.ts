@@ -68,7 +68,7 @@ export class BrandsController {
   @RequirePermission(AllPermissions.images.ImagesAttachAny)
   attachImages(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
-    dto: AttachImagesToBrandDto,
+    @Body() dto: AttachImagesToBrandDto,
   ): Promise<ImageResponseDto[]> {
     return this.brandService.attachImages(id, dto);
   }
@@ -77,7 +77,7 @@ export class BrandsController {
   @RequirePermission(AllPermissions.images.ImagesAttachAny)
   detachImages(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
-    dto: DetachBrandImagesDto,
+    @Body() dto: DetachBrandImagesDto,
   ): Promise<DetachImagesResponseDto> {
     return this.brandService.detachImages(id, dto);
   }
