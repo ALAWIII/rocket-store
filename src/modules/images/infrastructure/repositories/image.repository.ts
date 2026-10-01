@@ -15,10 +15,8 @@ export type FindUnUsedDbResponse = {
   };
 };
 export abstract class IImageRepository {
-  abstract save(image: Image): Promise<DBResult<Image>>;
-  abstract findById(imageId: string): Promise<DBResult<Image>>;
-  abstract findUnused(
-    options: Pagination,
-  ): Promise<DBResult<FindUnUsedDbResponse>>;
-  abstract deleteMany(imageIds: string[]): Promise<DBResult<number>>;
+  abstract save(image: Image): DBResult<Image>;
+  abstract findById(imageId: string): DBResult<Image>;
+  abstract findUnused(options: Pagination): DBResult<FindUnUsedDbResponse>;
+  abstract deleteMany(imageIds: string[]): DBResult<number>;
 }

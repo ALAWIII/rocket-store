@@ -28,36 +28,28 @@ export class ImageRepository implements IImageRepository {
     @InjectRepository(ImageEntity)
     private readonly imageRepo: Repository<ImageEntity>,
   ) {}
-  async save(image: Image): Promise<DBResult<Image>> {
-    return await Result.wrapAsync(async () => {
-      const imageJson = image.toJSON();
-      const entity = await this.imageRepo.save(
-        this.imageRepo.create(imageJson),
-      );
-      return entity;
-    })
+  save(image: Image): DBResult<Image> {
+    return Result.wrapAsync(() =>
+      this.imageRepo.save(this.imageRepo.create(image.toJSON())),
+    )
       .mapErr(mapTypeOrmError)
       .andThen((entity) => ImageMapper.toDomain(entity));
   }
-  async findById(imageId: string): Promise<DBResult<Image>> {
-    return await Result.wrapAsync(async () =>
+  findById(imageId: string): DBResult<Image> {
+    return Result.wrapAsync(() =>
       this.imageRepo.findOneByOrFail({ id: imageId }),
     )
       .mapErr(mapTypeOrmError)
       .andThen((img) => ImageMapper.toDomain(img));
   }
-  async deleteMany(imageIds: string[]): Promise<DBResult<number>> {
-    return await Result.wrapAsync(() =>
-      this.imageRepo.delete({ id: In(imageIds) }),
-    )
+  deleteMany(imageIds: string[]): DBResult<number> {
+    return Result.wrapAsync(() => this.imageRepo.delete({ id: In(imageIds) }))
       .map((v) => v.affected ?? 0)
       .mapErr(mapTypeOrmError);
   }
-  async findUnused(
-    options: Pagination,
-  ): Promise<DBResult<FindUnUsedDbResponse>> {
+  findUnused(options: Pagination): DBResult<FindUnUsedDbResponse> {
     const { page = 1, limit = 20, sortBy = 'createdAt' } = options;
-    return await Result.wrapAsync(async () => {
+    return Result.wrapAsync(async () => {
       const qb = this.imageRepo
         .createQueryBuilder('image')
         .orderBy(`image.${sortBy}`)

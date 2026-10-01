@@ -1,11 +1,13 @@
-import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Image } from '../../domain/image';
 import { ImageEntity } from '../entities/image.entity';
-import { CorruptedPersistenceDataError } from 'src/modules/shared/errors/database.error';
-import { Ok } from '@allawiii/results-ts';
+import {
+  CorruptedPersistenceDataError,
+  DatabaseError,
+} from 'src/modules/shared/errors/database.error';
+import { Ok, Result } from '@allawiii/results-ts';
 
 export class ImageMapper {
-  static toDomain(entity: ImageEntity): DBResult<Image> {
+  static toDomain(entity: ImageEntity): Result<Image, DatabaseError> {
     return Image.restore({ ...entity }).mapErr(
       (e) =>
         new CorruptedPersistenceDataError(
@@ -15,7 +17,7 @@ export class ImageMapper {
     );
   }
 
-  static toDomainList(entities: ImageEntity[]): DBResult<Image[]> {
+  static toDomainList(entities: ImageEntity[]): Result<Image[], DatabaseError> {
     const images: Image[] = [];
     for (const entity of entities) {
       const result = ImageMapper.toDomain(entity);
