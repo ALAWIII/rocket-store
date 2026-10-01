@@ -268,4 +268,27 @@ describe.concurrent('images (e2e)', () => {
       );
     });
   });
+  describe('DELETE /api/v1/images/unused removeUnused', () => {
+    it('should delete unused images.', async ({
+      imageController,
+      brandController,
+    }) => {
+      const imgs: ImageResponseDto[] = [];
+      for (let i = 1; i <= 6; i++) {
+        imgs.push((await uploadRandomImage(imageController)).body!);
+      }
+      const images3 = imgs.slice(0, 3);
+      const honor = (await brandController.create({ name: 'Honor' })).body!;
+      await brandController.attachImages(
+        honor.id,
+        images3.map((mg) => {
+          return { imageId: mg.id, imageRole: 'banner' };
+        }),
+      );
+      const affected = (await imageController.removeUnused()).body!.affected;
+      const honorBanners = (await brandController.findBanners(honor.id)).body!;
+      expect(affected).toBe(3);
+      expect(honorBanners).toEqual(images3);
+    });
+  });
 });
