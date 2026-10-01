@@ -10,10 +10,10 @@ import { PgBoss } from 'pg-boss';
 @Injectable()
 export class PgBossCoreService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PgBossCoreService.name);
-  private readonly boss: PgBoss;
+  private readonly _boss: PgBoss;
 
   constructor(config: ConfigService) {
-    this.boss = new PgBoss({
+    this._boss = new PgBoss({
       connectionString: config.getOrThrow<string>('DATABASE_URL'),
       application_name: config.get<string>('STORE_NAME') ?? 'pg-boss-store',
       useListenNotify: true,
@@ -29,22 +29,22 @@ export class PgBossCoreService implements OnModuleInit, OnModuleDestroy {
       queueCacheIntervalSeconds: 60,
     });
 
-    this.boss.on('error', (err) =>
+    this._boss.on('error', (err) =>
       this.logger.error(`pg-boss error: ${err.message}`, err.stack),
     );
   }
 
   async onModuleInit(): Promise<void> {
-    await this.boss.start(); // schema already created via CLI/migrations
+    await this._boss.start(); // schema already created via CLI/migrations
     this.logger.log('pg-boss started');
   }
 
   async onModuleDestroy(): Promise<void> {
-    await this.boss.stop({ graceful: true, timeout: 30_000 });
+    await this._boss.stop({ graceful: true, timeout: 30_000 });
     this.logger.log('pg-boss stopped');
   }
 
-  getBoss(): PgBoss {
-    return this.boss;
+  get boss(): PgBoss {
+    return this._boss;
   }
 }

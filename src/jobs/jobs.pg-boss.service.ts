@@ -7,17 +7,13 @@ import {
   WorkerId,
 } from './jobs.service';
 import { PgBossCoreService } from './pg-boss.core.service';
-import { AsyncResult, Err, Ok, Result } from '@allawiii/results-ts';
+import { AsyncResult, Ok, Result } from '@allawiii/results-ts';
 import { JobsError } from './jobs.error';
 
 @Injectable()
 export class JobsPgBossService implements IJobsService {
   private readonly logger = new Logger(JobsPgBossService.name);
   constructor(private readonly core: PgBossCoreService) {}
-
-  private get boss() {
-    return this.core.getBoss();
-  }
 
   sendJobs<T extends JobData>(
     jobKind: string,
@@ -26,7 +22,7 @@ export class JobsPgBossService implements IJobsService {
     this.logger.log(`sending ${jobs.length} of ${jobKind} jobs.`);
     const jobInserts = jobs.map((data) => ({ data }));
     return Result.wrapAsync(() =>
-      this.boss.insert(jobKind, jobInserts, { returnId: true }),
+      this.core.boss.insert(jobKind, jobInserts, { returnId: true }),
     )
       .mapErr((e) => new JobsError(`Failed to send jobs`, e))
       .andThen((v) => Ok(v ?? []));
@@ -38,7 +34,7 @@ export class JobsPgBossService implements IJobsService {
     options?: CreateWorkerOptions,
   ): AsyncResult<WorkerId, JobsError> {
     return Result.wrapAsync(() =>
-      this.boss.work<T>(
+      this.core.boss.work<T>(
         jobKind,
         {
           batchSize: options?.batchSize ?? 10,
@@ -52,7 +48,7 @@ export class JobsPgBossService implements IJobsService {
   }
   createJobQueue(name: string): AsyncResult<void, JobsError> {
     return Result.wrapAsync(() =>
-      this.boss.createQueue(name, {
+      this.core.boss.createQueue(name, {
         notify: true,
         // it will error if we provide Infinity
         retryLimit: 9999999,
