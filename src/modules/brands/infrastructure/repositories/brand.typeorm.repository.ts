@@ -28,7 +28,7 @@ export class BrandRepository implements IBrandRepository {
     @InjectRepository(BrandImagesEntity)
     private readonly brandImageRepo: Repository<BrandImagesEntity>,
   ) {}
-  async create(brand: Brand): Promise<DBResult<Brand>> {
+  create(brand: Brand): DBResult<Brand> {
     return Result.wrapAsync(async () => {
       const result = await this.brandRepo
         .createQueryBuilder()
@@ -48,7 +48,7 @@ export class BrandRepository implements IBrandRepository {
       .andThen((b) => BrandMapper.toDomain(b))
       .mapErr(mapTypeOrmError);
   }
-  async attachImages(brandImages: BrandImage[]): Promise<DBResult<Image[]>> {
+  attachImages(brandImages: BrandImage[]): DBResult<Image[]> {
     return Result.wrapAsync(async () => {
       const brandImagesList = brandImages.map((img) => img.toJSON());
       const insertCte = this.brandImageRepo
@@ -68,7 +68,7 @@ export class BrandRepository implements IBrandRepository {
       .mapErr(mapTypeOrmError);
   }
 
-  async rename(brandId: string, name: string): Promise<DBResult<Brand>> {
+  rename(brandId: string, name: string): DBResult<Brand> {
     return Result.wrapAsync(async () => {
       const result = await this.brandRepo
         .createQueryBuilder()
@@ -93,7 +93,7 @@ export class BrandRepository implements IBrandRepository {
    * @param ids
    * @returns number of affected rows
    */
-  async deleteMany(ids: string[]): Promise<DBResult<number>> {
+  deleteMany(ids: string[]): DBResult<number> {
     return Result.wrapAsync(() => this.brandRepo.delete({ id: In(ids) }))
       .map((res) => res.affected ?? 0)
       .mapErr(mapTypeOrmError);
@@ -105,10 +105,7 @@ export class BrandRepository implements IBrandRepository {
    * @param imageIds
    * @returns number of affected rows
    */
-  async detachImages(
-    brandId: string,
-    imageIds: string[],
-  ): Promise<DBResult<number>> {
+  detachImages(brandId: string, imageIds: string[]): DBResult<number> {
     return Result.wrapAsync(async () =>
       this.brandImageRepo.delete({
         brandId,
@@ -119,9 +116,7 @@ export class BrandRepository implements IBrandRepository {
       .mapErr(mapTypeOrmError);
   }
 
-  async findAll(
-    options: FindAllFilterOptions = {},
-  ): Promise<DBResult<Brand[]>> {
+  findAll(options: FindAllFilterOptions = {}): DBResult<Brand[]> {
     const { limit, skip } = this.normalizePagination(
       options.page,
       options.limit,
@@ -167,7 +162,7 @@ export class BrandRepository implements IBrandRepository {
       .andThen((brands) => BrandMapper.toDomainList(brands))
       .mapErr(mapTypeOrmError);
   }
-  async findById(id: string): Promise<DBResult<Brand>> {
+  findById(id: string): DBResult<Brand> {
     return (
       Result.wrapAsync(async () => {
         const brand = await this.brandRepo
@@ -197,8 +192,8 @@ export class BrandRepository implements IBrandRepository {
     );
   }
 
-  async findBanners(brandId: string): Promise<DBResult<Image[]>> {
-    return (await this.findImagesByRole(brandId, 'banner')).andThen((images) =>
+  findBanners(brandId: string): DBResult<Image[]> {
+    return this.findImagesByRole(brandId, 'banner').andThen((images) =>
       BrandMapper.toDomainBanners(images),
     );
   }
@@ -216,10 +211,10 @@ export class BrandRepository implements IBrandRepository {
   }
 
   // Execution wrapper
-  private async findImagesByRole(
+  private findImagesByRole(
     brandId: string,
     role: 'logo' | 'banner',
-  ): Promise<DBResult<ImageEntity[]>> {
+  ): DBResult<ImageEntity[]> {
     return Result.wrapAsync(() =>
       this.getImagesByRoleQb(brandId, role).getMany(),
     ).mapErr(mapTypeOrmError);

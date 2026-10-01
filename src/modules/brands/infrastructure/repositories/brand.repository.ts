@@ -10,16 +10,13 @@ export type FindAllFilterOptions = {
 };
 
 export abstract class IBrandRepository {
-  abstract findAll(options: FindAllFilterOptions): Promise<DBResult<Brand[]>>;
-  abstract findById(id: string): Promise<DBResult<Brand>>;
-  abstract findBanners(brandId: string): Promise<DBResult<Image[]>>;
+  abstract findAll(options: FindAllFilterOptions): DBResult<Brand[]>;
+  abstract findById(id: string): DBResult<Brand>;
+  abstract findBanners(brandId: string): DBResult<Image[]>;
 
-  abstract create(brand: Brand): Promise<DBResult<Brand>>;
-  abstract attachImages(brandImages: BrandImage[]): Promise<DBResult<Image[]>>;
-  abstract rename(brandId: string, name: string): Promise<DBResult<Brand>>;
-  abstract deleteMany(ids: string[]): Promise<DBResult<number>>;
-  abstract detachImages(
-    brandId: string,
-    imageIds: string[],
-  ): Promise<DBResult<number>>;
+  abstract create(brand: Brand): DBResult<Brand>;
+  abstract attachImages(brandImages: BrandImage[]): DBResult<Image[]>;
+  abstract rename(brandId: string, name: string): DBResult<Brand>;
+  abstract deleteMany(ids: string[]): DBResult<number>;
+  abstract detachImages(brandId: string, imageIds: string[]): DBResult<number>;
 }
