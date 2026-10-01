@@ -246,5 +246,26 @@ describe.concurrent('images (e2e)', () => {
         unused.images.map((img) => img.sizeBytes).toSorted(),
       );
     });
+    it('should return unused images sorted by name and paginated.', async ({
+      imageController,
+    }) => {
+      const imgs: ImageResponseDto[] = [];
+      for (let i = 1; i <= 6; i++) {
+        imgs.push((await uploadRandomImage(imageController)).body!);
+      }
+      const unused = (
+        await imageController.findUnused({
+          limit: 3,
+          page: 2,
+          sortBy: 'name',
+        })
+      ).body!;
+      expect(unused.images.length).toBe(3);
+      expect(unused.images.map((img) => img.name)).toEqual(
+        unused.images
+          .map((img) => img.name)
+          .toSorted((a, b) => a.localeCompare(b)),
+      );
+    });
   });
 });
