@@ -1,21 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { IRoleRepository } from './role.repository';
 import { Role } from '../../domain/role';
-import { Permission } from '../../domain/permission';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEntity } from '../entities/role.entity';
 import { Brackets, In, Repository } from 'typeorm';
 import type { DBResult } from 'src/modules/shared/errors/error.types';
-import { Err, None, Ok, Option, Some } from '@allawiii/results-ts';
+import { Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import {
-  CorruptedPersistenceDataError,
-  DatabaseError,
   RecordNotFoundError,
   UnknownDatabaseError,
 } from 'src/modules/shared/errors/database.error';
-import { PermissionError } from '../../domain/permission.error';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
+import { RoleMapper } from '../mappers/role.mapper';
 
 @Injectable()
 export class RoleRepository implements IRoleRepository {
@@ -23,8 +20,8 @@ export class RoleRepository implements IRoleRepository {
     @InjectRepository(RoleEntity)
     private readonly roleRepo: Repository<RoleEntity>,
   ) {}
-  async create(role: Role, creatorRoleId: string): Promise<DBResult<Role>> {
-    try {
+  create(role: Role, creatorRoleId: string): DBResult<Role> {
+    return Result.wrapAsync(async () => {
       const newRole = role.toJSON();
       const creatorRoleCte = this.roleRepo
         .createQueryBuilder('creator_role')
@@ -70,20 +67,18 @@ export class RoleRepository implements IRoleRepository {
         .execute();
 
       const [row] = result.raw as RoleEntity[];
-      if (!row) {
-        return Err(
-          new UnknownDatabaseError(
-            'Creator createScope does not contain new role permissions.',
-          ),
+      if (!row)
+        throw new UnknownDatabaseError(
+          'Creator createScope does not contain new role permissions.',
         );
-      }
-      return this.toDomain(row);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+
+      return row;
+    })
+      .andThen((r) => RoleMapper.toDomain(r))
+      .mapErr(mapTypeOrmError);
   }
-  async loadManageableRoles(roleId: string): Promise<DBResult<Role[]>> {
-    try {
+  loadManageableRoles(roleId: string): DBResult<Role[]> {
+    return Result.wrapAsync(async () => {
       const loadPerms = this.roleRepo
         .createQueryBuilder('r')
         .select([
@@ -106,13 +101,13 @@ export class RoleRepository implements IRoleRepository {
         )
         .getMany();
 
-      return this.mapRolesToDomain(loadRoles);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+      return loadRoles;
+    })
+      .andThen((r) => RoleMapper.toDomainList(r))
+      .mapErr(mapTypeOrmError);
   }
-  async loadAssignableRoles(roleId: string): Promise<DBResult<Role[]>> {
-    try {
+  loadAssignableRoles(roleId: string): DBResult<Role[]> {
+    return Result.wrapAsync(async () => {
       const loadPerms = this.roleRepo
         .createQueryBuilder('r')
         .select('r.assignScope', 'assignScope')
@@ -124,14 +119,13 @@ export class RoleRepository implements IRoleRepository {
         .where('(SELECT "assignScope" FROM role_perms) IS NOT NULL')
         .andWhere(`(SELECT "assignScope" FROM role_perms) @> role.permissions`)
         .getMany();
-
-      return this.mapRolesToDomain(loadRoles);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+      return loadRoles;
+    })
+      .andThen((r) => RoleMapper.toDomainList(r))
+      .mapErr(mapTypeOrmError);
   }
-  async loadCreatableRoles(roleId: string): Promise<DBResult<Role[]>> {
-    try {
+  loadCreatableRoles(roleId: string): DBResult<Role[]> {
+    return Result.wrapAsync(async () => {
       const loadPerms = this.roleRepo
         .createQueryBuilder('r')
         .select('r.createScope', 'createScope')
@@ -143,55 +137,39 @@ export class RoleRepository implements IRoleRepository {
         .where('(SELECT "createScope" FROM role_perms) IS NOT NULL')
         .andWhere(`(SELECT "createScope" FROM role_perms) @> role.permissions`)
         .getMany();
-      return this.mapRolesToDomain(loadRoles);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+      return loadRoles;
+    })
+      .andThen((r) => RoleMapper.toDomainList(r))
+      .mapErr(mapTypeOrmError);
   }
-  async loadByNames(names: string[]): Promise<DBResult<Role[]>> {
-    if (names.length === 0) return Ok([]);
-    try {
-      const roles = await this.roleRepo.findBy({
+  loadByNames(names: string[]): DBResult<Role[]> {
+    return Result.wrapAsync(async () => {
+      if (names.length === 0) return [];
+      return this.roleRepo.findBy({
         name: In(names),
       });
-
-      return this.mapRolesToDomain(roles);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+    })
+      .andThen((r) => RoleMapper.toDomainList(r))
+      .mapErr(mapTypeOrmError);
   }
-  async findById(id: string): Promise<DBResult<Option<Role>>> {
-    try {
-      const dbRole = await this.roleRepo.findOneBy({ id });
-      if (dbRole === null) return Ok(None());
-      return this.toDomain(dbRole).map((role) => Some(role));
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+  findById(id: string): DBResult<Role> {
+    return Result.wrapAsync(async () => this.roleRepo.findOneByOrFail({ id }))
+      .andThen((r) => RoleMapper.toDomain(r))
+      .mapErr(mapTypeOrmError);
   }
-  async findByName(name: string): Promise<DBResult<Option<Role>>> {
-    try {
-      const dbRole = await this.roleRepo.findOneBy({ name });
-      if (dbRole === null) return Ok(None());
-      return this.toDomain(dbRole).map((role) => Some(role));
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+  findByName(name: string): DBResult<Role> {
+    return Result.wrapAsync(async () => this.roleRepo.findOneByOrFail({ name }))
+      .andThen((r) => RoleMapper.toDomain(r))
+      .mapErr(mapTypeOrmError);
   }
-  async loadAll(): Promise<DBResult<Role[]>> {
-    try {
-      const roles = await this.roleRepo.find();
-      return this.mapRolesToDomain(roles);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+  loadAll(): DBResult<Role[]> {
+    return Result.wrapAsync(async () => this.roleRepo.find())
+      .andThen((r) => RoleMapper.toDomainList(r))
+      .mapErr(mapTypeOrmError);
   }
 
-  async rename(data: {
-    userRoleId: string;
-    role: Role;
-  }): Promise<DBResult<Role>> {
-    try {
+  rename(data: { userRoleId: string; role: Role }): DBResult<Role> {
+    return Result.wrapAsync(async () => {
       const requesterScope = this.roleRepo
         .createQueryBuilder('r')
         .select('r.createScope', 'createScope')
@@ -211,21 +189,17 @@ export class RoleRepository implements IRoleRepository {
         .execute();
 
       const [row] = result.raw as RoleEntity[];
-      if (result.affected === 0 || !row) {
-        return Err(
-          new RecordNotFoundError(
-            `role to be updated was not found: ${data.role.id}`,
-          ),
+      if (result.affected === 0 || !row)
+        throw new RecordNotFoundError(
+          `role to be updated was not found: ${data.role.id}`,
         );
-      }
-
-      return this.toDomain(row);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+      return row;
+    })
+      .andThen((r) => RoleMapper.toDomain(r))
+      .mapErr(mapTypeOrmError);
   }
-  async upsert(role: Role): Promise<DBResult<Role>> {
-    try {
+  upsert(role: Role): DBResult<Role> {
+    return Result.wrapAsync(async () => {
       const result = await this.roleRepo
         .createQueryBuilder()
         .insert()
@@ -237,21 +211,19 @@ export class RoleRepository implements IRoleRepository {
         .returning('*')
         .execute();
       const [row] = result.raw as RoleEntity[];
-      if (!row) {
-        return Err(new UnknownDatabaseError('Upsert did not return a row'));
-      }
+      if (!row) throw new UnknownDatabaseError('Upsert did not return a row');
 
-      return this.toDomain(row);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+      return row;
+    })
+      .andThen((r) => RoleMapper.toDomain(r))
+      .mapErr(mapTypeOrmError);
   }
-  async deleteById(ids: {
+  deleteById(ids: {
     requesterRoleId: string;
     targetRoleId: string;
     defaultRoleId: string;
-  }): Promise<DBResult<number>> {
-    try {
+  }): DBResult<number> {
+    return Result.wrapAsync(async () => {
       const requesterCreateScopeCte = this.roleRepo
         .createQueryBuilder('requester')
         .select('requester.createScope', 'createScope')
@@ -284,60 +256,7 @@ export class RoleRepository implements IRoleRepository {
         .where('id IN (SELECT id FROM deletable_target)')
         .andWhere('(SELECT COUNT(*) FROM reassigned_users) >= 0')
         .execute();
-
-      return Ok(result.affected ?? 0);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
-  }
-  private toDomain(r: RoleEntity): DBResult<Role> {
-    const permError = (e: PermissionError) =>
-      new CorruptedPersistenceDataError(
-        'Failed to construct Permission at the database level',
-        e,
-      );
-    const permissions = r.permissions.map((p) =>
-      Permission.fromPrimitives(p).mapErr(permError),
-    );
-    const assignScope = r.assignScope?.map((p) =>
-      Permission.fromPrimitives(p).mapErr(permError),
-    );
-
-    const createScope = r.createScope?.map((p) =>
-      Permission.fromPrimitives(p).mapErr(permError),
-    );
-    for (const permList of [permissions, assignScope, createScope]) {
-      const p = permList?.find((p) => p.isErr())?.map<Role>();
-      if (p) {
-        return p;
-      }
-    }
-    return Role.restore({
-      id: r.id,
-      name: r.name,
-      permissions: permissions.map((p) => p.unwrap()),
-      assignScope: assignScope?.map((p) => p.unwrap()),
-      createScope: createScope?.map((p) => p.unwrap()),
-    }).mapErr(
-      (e) =>
-        new CorruptedPersistenceDataError(
-          `Failed to construct Role from RoleEntity: ${e.message}`,
-          e,
-        ),
-    );
-  }
-  private mapRolesToDomain(roles: RoleEntity[]): DBResult<Role[]> {
-    const domainRoles: Role[] = [];
-
-    for (const role of roles) {
-      const result = this.toDomain(role);
-      if (result.isErr()) {
-        return result.map();
-      }
-
-      domainRoles.push(result.unwrap());
-    }
-
-    return Ok(domainRoles);
+      return result.affected ?? 0;
+    }).mapErr(mapTypeOrmError);
   }
 }
