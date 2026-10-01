@@ -8,6 +8,8 @@ import {
 import { UploadFileInfoDto } from 'src/modules/images/dto/upload-file-info.dto';
 import { Test } from 'supertest';
 import { RemoveImagesResponseDto } from 'src/modules/images/dto/remove-images-response.dto';
+import { FindUnusedImagesDto } from 'src/modules/images/dto/find-unused-images-pagination.dto';
+import { FindUnusedImagesResponseDto } from 'src/modules/images/dto/find-unused-images-response.dto';
 
 export class ImagesControllerTest {
   readonly urlPrefix = '/api/v1/images';
@@ -58,6 +60,21 @@ export class ImagesControllerTest {
       statusCodesListNormalize(statusCodes),
     );
     if (existsFn) await waitForAllDeletions(imageIds, existsFn);
+    return { response, body };
+  }
+  async findUnused(
+    payload: FindUnusedImagesDto,
+    statusCodes?: ExpectedTestStatusCode,
+  ) {
+    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
+    const response = await this.agent
+      .get(`${this.urlPrefix}/unused`)
+      .query(payload)
+      .expect(expectedStatus.code);
+    const body = parseResponseBody<FindUnusedImagesResponseDto>(
+      response,
+      statusCodesListNormalize(expectedStatus),
+    );
     return { response, body };
   }
 }
