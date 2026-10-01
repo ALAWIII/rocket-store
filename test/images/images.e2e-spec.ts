@@ -197,4 +197,36 @@ describe.concurrent('images (e2e)', () => {
       ).toBe(true);
     });
   });
+  describe('GET /api/v1/images/unused findUnused', () => {
+    it('should success only return unused images and exclude the used once.', async ({
+      brandController,
+      imageController,
+    }) => {
+      const honor = (await brandController.create({ name: 'Honor' })).body!;
+      const logo = (await uploadRandomImage(imageController)).body!;
+      const banner1 = (await uploadRandomImage(imageController)).body!;
+      const img = (await uploadRandomImage(imageController)).body!;
+      const attached = (
+        await brandController.attachImages(honor.id, [
+          { imageId: logo.id, imageRole: 'logo' },
+          { imageId: banner1.id, imageRole: 'banner' },
+        ])
+      ).body!;
+      const imgIds = [logo.id, banner1.id, img.id];
+      const unusedBefore = (await imageController.findUnused({})).body!;
+      expect(unusedBefore.images.length).toBe(1);
+      expect(unusedBefore.images[0]).toEqual(img);
+      expect(
+        unusedBefore.images.every(
+          (mg) => mg.id === logo.id || mg.id === banner1.id,
+        ),
+      ).toBe(false);
+      await brandController.detachImages(honor.id, [logo.id, banner1.id]);
+      const unusedAfter = (await imageController.findUnused({})).body!;
+      expect(unusedAfter.images.length).toBe(3);
+      expect(unusedAfter.images.every((img) => imgIds.includes(img.id))).toBe(
+        true,
+      );
+    });
+  });
 });
