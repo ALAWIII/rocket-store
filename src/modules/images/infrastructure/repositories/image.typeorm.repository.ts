@@ -60,7 +60,7 @@ export class ImageRepository implements IImageRepository {
     return await Result.wrapAsync(async () => {
       const qb = this.imageRepo
         .createQueryBuilder('image')
-        .orderBy(sortBy)
+        .orderBy(`image.${sortBy}`)
         .skip((page - 1) * limit)
         .take(limit);
 
