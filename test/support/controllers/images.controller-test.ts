@@ -77,6 +77,17 @@ export class ImagesControllerTest {
     );
     return { response, body };
   }
+  async removeUnused(statusCodes?: ExpectedTestStatusCode) {
+    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
+    const response = await this.agent
+      .delete(`${this.urlPrefix}/unused`)
+      .expect(expectedStatus.code);
+    const body = parseResponseBody<RemoveImagesResponseDto>(
+      response,
+      statusCodesListNormalize(expectedStatus),
+    );
+    return { response, body };
+  }
 }
 function fields<T extends object>(request: Test, data: T) {
   for (const [key, value] of Object.entries(data)) {
