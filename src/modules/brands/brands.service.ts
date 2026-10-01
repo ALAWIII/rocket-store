@@ -16,57 +16,71 @@ import { DetachImagesResponseDto } from './dto/detach-images.response.dto';
 @Injectable()
 export class BrandsService {
   constructor(private readonly brandRepo: IBrandRepository) {}
-  async createBrand(brandData: CreateBrandDto): Promise<BrandResponseDto> {
+  createBrand(brandData: CreateBrandDto): Promise<BrandResponseDto> {
     const brand = Brand.create({ name: brandData.name }).unwrap();
-    return (await this.brandRepo.create(brand)).unwrap().toJSON();
+    return this.brandRepo
+      .create(brand)
+      .map((b) => b.toJSON())
+      .unwrap();
   }
-  async renameBrand(
+  renameBrand(
     brandId: string,
     name: RenameBrandDto,
   ): Promise<BrandResponseDto> {
-    return (await this.brandRepo.rename(brandId, name.name)).unwrap().toJSON();
+    return this.brandRepo
+      .rename(brandId, name.name)
+      .map((b) => b.toJSON())
+      .unwrap();
   }
-  async removeMany(
-    brandIds: RemoveBrandsDto,
-  ): Promise<RemoveBrandsResponseDto> {
-    return {
-      affected: (await this.brandRepo.deleteMany(brandIds.brandIds)).unwrap(),
-    };
+  removeMany(brandIds: RemoveBrandsDto): Promise<RemoveBrandsResponseDto> {
+    return this.brandRepo
+      .deleteMany(brandIds.brandIds)
+      .map((v) => {
+        return { affected: v };
+      })
+      .unwrap();
   }
-  async findById(brandId: string): Promise<BrandResponseDto> {
-    return (await this.brandRepo.findById(brandId)).unwrap().toJSON();
+  findById(brandId: string): Promise<BrandResponseDto> {
+    return this.brandRepo
+      .findById(brandId)
+      .map((b) => b.toJSON())
+      .unwrap();
   }
 
-  async findAll(options: FindAllBrandsFilterDto): Promise<BrandResponseDto[]> {
-    return (await this.brandRepo.findAll(options))
-      .unwrap()
-      .map((b) => b.toJSON());
+  findAll(options: FindAllBrandsFilterDto): Promise<BrandResponseDto[]> {
+    return this.brandRepo
+      .findAll(options)
+      .map((brands) => brands.map((b) => b.toJSON()))
+      .unwrap();
   }
   // image related services.
-  async findBanners(brandId: string): Promise<ImageResponseDto[]> {
-    return (await this.brandRepo.findBanners(brandId))
-      .unwrap()
-      .map((bimg) => bimg.toJSON());
+  findBanners(brandId: string): Promise<ImageResponseDto[]> {
+    return this.brandRepo
+      .findBanners(brandId)
+      .map((bimgs) => bimgs.map((b) => b.toJSON()))
+      .unwrap();
   }
-  async attachImages(
+  attachImages(
     brandId: string,
     attachments: AttachImagesToBrandDto,
   ): Promise<ImageResponseDto[]> {
     const brandImages = attachments.images.map((img) =>
       BrandImage.create({ brandId, ...img }).unwrap(),
     );
-    return (await this.brandRepo.attachImages(brandImages))
-      .unwrap()
-      .map((bimg) => bimg.toJSON());
+    return this.brandRepo
+      .attachImages(brandImages)
+      .map((bimgs) => bimgs.map((b) => b.toJSON()))
+      .unwrap();
   }
-  async detachImages(
+  detachImages(
     brandId: string,
     imageIds: DetachBrandImagesDto,
   ): Promise<DetachImagesResponseDto> {
-    return {
-      affected: (
-        await this.brandRepo.detachImages(brandId, imageIds.imageIds)
-      ).unwrap(),
-    };
+    return this.brandRepo
+      .detachImages(brandId, imageIds.imageIds)
+      .map((v) => {
+        return { affected: v };
+      })
+      .unwrap();
   }
 }

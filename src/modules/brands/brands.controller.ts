@@ -59,7 +59,7 @@ export class BrandsController {
   }
   @Get(':id/images')
   @RequirePermission(AllPermissions.images.ImagesReadAny)
-  async findBanners(
+  findBanners(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
   ): Promise<ImageResponseDto[]> {
     return this.brandService.findBanners(id);
