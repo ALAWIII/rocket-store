@@ -228,5 +228,23 @@ describe.concurrent('images (e2e)', () => {
         true,
       );
     });
+    it('should return unused images sorted by size and paginated.', async ({
+      imageController,
+    }) => {
+      const imgs: ImageResponseDto[] = [];
+      for (let i = 1; i <= 5; i++) {
+        imgs.push((await uploadRandomImage(imageController)).body!);
+      }
+      const unused = (
+        await imageController.findUnused({
+          limit: 3,
+          sortBy: 'size',
+        })
+      ).body!;
+      expect(unused.images.length).toBe(3);
+      expect(unused.images.map((img) => img.sizeBytes)).toEqual(
+        unused.images.map((img) => img.sizeBytes).toSorted(),
+      );
+    });
   });
 });
