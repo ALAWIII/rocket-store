@@ -21,6 +21,7 @@ import {
   ImageServiceError,
 } from './images.service.error';
 import { RecordNotFoundError } from '../shared/errors/database.error';
+import { RemoveImagesResponseDto } from './dto/remove-images-response.dto';
 
 const mapToImagesServiceError = (e: Error) =>
   new ImageServiceError(e.message, e);
@@ -42,11 +43,11 @@ export class ImagesService {
     private readonly imgRepo: IImageRepository,
     private readonly storageService: ImagesStorageService,
   ) {}
-  async upload(
+  upload(
     file: Express.Multer.File,
     uploadedBy: string,
     metadata: { name: string; altText?: string },
-  ): Promise<Result<Image, ImageServiceError>> {
+  ): AsyncResult<Image, ImageServiceError> {
     const sourceStream = Readable.from(file.buffer);
     const [probeWeb, uploadWeb] = Readable.toWeb(sourceStream).tee();
     const probeStream = Readable.fromWeb(probeWeb);
@@ -54,10 +55,8 @@ export class ImagesService {
     const imgId = ImageId.create().unwrap().toJSON();
     let uploaded = false;
     //===
-    const upRes = await Result.wrapAsync<Image, ImageServiceError>(async () => {
-      const imgInfo = (
-        await this.extractMetadataFromBytes(probeStream)
-      ).unwrap();
+    const upRes = Result.wrapAsync<Image, ImageServiceError>(async () => {
+      const imgInfo = await this.extractMetadataFromBytes(probeStream).unwrap();
       //===
       const width = Dimension.create(imgInfo.width).unwrap().toJSON();
       const height = Dimension.create(imgInfo.height).unwrap().toJSON();
@@ -68,13 +67,13 @@ export class ImagesService {
         ?.toJSON();
       //===
 
-      const upResult = (
-        await this.storageService.uploadToStorage({
+      const upResult = await this.storageService
+        .uploadToStorage({
           stream: uploadStream,
           imageKey: imgId,
           contentType: imgMime,
         })
-      ).unwrap();
+        .unwrap();
       uploaded = true;
       //===
       const image = Image.restore({
@@ -91,10 +90,11 @@ export class ImagesService {
       })
         .mapErr((e) => new CorruptedUploadedImageError(e.message, e))
         .unwrap();
-      const imgDb = (await this.imgRepo.save(image)).mapErr(
-        (e) => new ImagePersistenceDatabaseError(e.message, e),
-      );
-      return imgDb.unwrap();
+      const imgDb = await this.imgRepo
+        .save(image)
+        .mapErr((e) => new ImagePersistenceDatabaseError(e.message, e))
+        .unwrap();
+      return imgDb;
     }).inspectErr(async () => {
       if (uploaded)
         await this.storageService
@@ -107,48 +107,54 @@ export class ImagesService {
     });
     return upRes;
   }
-  async findImageById(
-    imgId: string,
-  ): Promise<Result<Image, ImageServiceError>> {
-    return (await this.imgRepo.findById(imgId)).mapErr((e) =>
-      e instanceof RecordNotFoundError
-        ? new ImageNotFoundError(e.message, e)
-        : new ImageServiceError(e.message, e),
-    );
+  findImageById(imgId: string): AsyncResult<Image, ImageServiceError> {
+    return this.imgRepo
+      .findById(imgId)
+      .mapErr((e) =>
+        e instanceof RecordNotFoundError
+          ? new ImageNotFoundError(e.message, e)
+          : new ImageServiceError(e.message, e),
+      );
   }
-  async findUnusedImages(
+  findUnusedImages(
     options: FindUnUsedOptions,
-  ): Promise<Result<FindUnUsedDbResponse, ImageServiceError>> {
-    const imagesRes = await this.imgRepo.findUnused({
-      ...options,
-      sortBy: sortByMap.get(options.sortBy ?? 'date')!,
-    });
-    return imagesRes.mapErr(mapToImagesServiceError);
+  ): AsyncResult<FindUnUsedDbResponse, ImageServiceError> {
+    return this.imgRepo
+      .findUnused({
+        ...options,
+        sortBy: sortByMap.get(options.sortBy ?? 'date')!,
+      })
+      .mapErr(mapToImagesServiceError);
   }
   async removeImages(
     imgIds: string[],
-  ): Promise<Result<number, ImageServiceError>> {
-    if (imgIds.length === 0) return Ok(0);
+  ): Promise<Result<RemoveImagesResponseDto, ImageServiceError>> {
+    if (imgIds.length === 0) return Ok({ affected: 0 });
     const storageRes = await this.storageService.sendDeleteImgs(imgIds);
     if (storageRes.isErr()) return storageRes.map();
 
-    return (await this.imgRepo.deleteMany(imgIds)).mapErr(
-      mapToImagesServiceError,
-    );
+    return this.imgRepo
+      .deleteMany(imgIds)
+      .map((v) => {
+        return { affected: v };
+      })
+      .mapErr(mapToImagesServiceError);
   }
 
-  async removeUnusedImages(): Promise<Result<number, ImageServiceError>> {
+  async removeUnusedImages(): Promise<
+    Result<RemoveImagesResponseDto, ImageServiceError>
+  > {
     let count = 0;
 
     while (true) {
       // fetch and delete by patches rather than infinite fetching.
-      const imgsRes = (await this.imgRepo.findUnused({ limit: 100 })).mapErr(
-        mapToImagesServiceError,
-      );
+      const imgsRes = await this.imgRepo
+        .findUnused({ limit: 100 })
+        .mapErr(mapToImagesServiceError);
       if (imgsRes.isErr()) return imgsRes.map();
 
       const imgIds = imgsRes.value.images.map((img) => img.key);
-      if (!imgIds.length) return Ok(count);
+      if (!imgIds.length) return Ok({ affected: count });
 
       const s3Res = await this.storageService
         .sendDeleteImgs(imgIds)
@@ -158,11 +164,11 @@ export class ImagesService {
         return s3Res.map();
       }
 
-      const deleted = (await this.imgRepo.deleteMany(imgIds)).mapErr(
-        mapToImagesServiceError,
-      );
+      const deleted = await this.imgRepo
+        .deleteMany(imgIds)
+        .mapErr(mapToImagesServiceError);
 
-      if (deleted.isErr()) return deleted;
+      if (deleted.isErr()) return deleted.map();
       count += deleted.value;
     }
   }

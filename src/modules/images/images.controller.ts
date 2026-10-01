@@ -37,27 +37,30 @@ export class ImagesController {
       fileFilter: fileFilter,
     }),
   )
-  async upload(
+  upload(
     @UploadedFile() file: Express.Multer.File,
     @Body() fileInfo: UploadFileInfoDto,
     @Session() session: AppSession,
   ): Promise<ImageResponseDto> {
-    return (await this.imagesService.upload(file, session.user.id, fileInfo))
-      .unwrap()
-      .toJSON();
+    return this.imagesService
+      .upload(file, session.user.id, fileInfo)
+      .map((v) => v.toJSON())
+      .unwrap();
   }
   @Get('unused')
   @RequirePermission(AllPermissions.images.ImagesReadAny)
-  async findUnused(
+  findUnused(
     @Query() filters: FindUnusedImagesDto,
   ): Promise<FindUnusedImagesResponseDto> {
-    const findImgs = (
-      await this.imagesService.findUnusedImages(filters)
-    ).unwrap();
-    return {
-      pagination: findImgs.pagination,
-      images: findImgs.images.map((img) => img.toJSON()),
-    };
+    return this.imagesService
+      .findUnusedImages(filters)
+      .map((v) => {
+        return {
+          pagination: v.pagination,
+          images: v.images.map((img) => img.toJSON()),
+        };
+      })
+      .unwrap();
   }
   @Post('batch-delete')
   @HttpCode(HttpStatus.OK)
@@ -65,22 +68,21 @@ export class ImagesController {
   async removeImages(
     @Body() ids: RemoveImagesDto,
   ): Promise<RemoveImagesResponseDto> {
-    return {
-      affected: (await this.imagesService.removeImages(ids.imageIds)).unwrap(),
-    };
+    return (await this.imagesService.removeImages(ids.imageIds)).unwrap();
   }
   @Delete('unused')
   @RequirePermission(AllPermissions.images.ImagesDeleteAny)
   async removeUnused(): Promise<RemoveImagesResponseDto> {
-    return {
-      affected: (await this.imagesService.removeUnusedImages()).unwrap(),
-    };
+    return (await this.imagesService.removeUnusedImages()).unwrap();
   }
   @Get(':id')
   @RequirePermission(AllPermissions.images.ImagesReadAny)
-  async findById(
+  findById(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
   ): Promise<ImageResponseDto> {
-    return (await this.imagesService.findImageById(id)).unwrap().toJSON();
+    return this.imagesService
+      .findImageById(id)
+      .map((v) => v.toJSON())
+      .unwrap();
   }
 }
