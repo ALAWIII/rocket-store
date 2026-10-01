@@ -29,9 +29,7 @@ export class JobsPgBossService implements IJobsService {
       this.boss.insert(jobKind, jobInserts, { returnId: true }),
     )
       .mapErr((e) => new JobsError(`Failed to send jobs`, e))
-      .andThen((v) =>
-        v == null ? Err(new JobsError('sending jobs returned null')) : Ok(v),
-      );
+      .andThen((v) => Ok(v ?? []));
   }
 
   createWorker<T extends JobData>(
