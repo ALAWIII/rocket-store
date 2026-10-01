@@ -119,7 +119,7 @@ export class ImagesService {
   async findUnusedImages(
     options: FindUnUsedOptions,
   ): Promise<Result<FindUnUsedDbResponse, ImageServiceError>> {
-    const imagesRes = await this.imgRepo.findUnUsed({
+    const imagesRes = await this.imgRepo.findUnused({
       ...options,
       sortBy: sortByMap.get(options.sortBy ?? 'date')!,
     });
@@ -142,7 +142,7 @@ export class ImagesService {
 
     while (true) {
       // fetch and delete by patches rather than infinite fetching.
-      const imgsRes = (await this.imgRepo.findUnUsed({ limit: 100 })).mapErr(
+      const imgsRes = (await this.imgRepo.findUnused({ limit: 100 })).mapErr(
         mapToImagesServiceError,
       );
       if (imgsRes.isErr()) return imgsRes.map();

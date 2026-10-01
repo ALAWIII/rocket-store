@@ -53,7 +53,7 @@ export class ImageRepository implements IImageRepository {
       .map((v) => v.affected ?? 0)
       .mapErr(mapTypeOrmError);
   }
-  async findUnUsed(
+  async findUnused(
     options: Pagination,
   ): Promise<DBResult<FindUnUsedDbResponse>> {
     const { page = 1, limit = 20, sortBy = 'createdAt' } = options;
