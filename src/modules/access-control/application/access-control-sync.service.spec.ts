@@ -64,7 +64,7 @@ describe('AccessControlSyncService', () => {
       }).unwrap();
       const roles = [adminRole, workerRole];
       //-----------------
-      roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
+      roleRepositoryMock.loadAll.mockImplementation(() => Ok(roles));
 
       const loggerSpy = vi
         .spyOn(Logger.prototype, 'log')
@@ -89,7 +89,7 @@ describe('AccessControlSyncService', () => {
         permissions: [],
       }).unwrap();
       const roles = [anyrole];
-      roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
+      roleRepositoryMock.loadAll.mockImplementation(() => Ok(roles));
 
       const loggerSpy = vi
         .spyOn(Logger.prototype, 'log')
@@ -119,7 +119,7 @@ describe('AccessControlSyncService', () => {
         }).unwrap(),
       ];
 
-      roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
+      roleRepositoryMock.loadAll.mockImplementation(() => Ok(roles));
       enforcerHolderMock.addPolicies.mockResolvedValue(true);
 
       await service.reloadFromDatabase();
@@ -148,7 +148,7 @@ describe('AccessControlSyncService', () => {
         }).unwrap(),
       ];
 
-      roleRepositoryMock.loadAll.mockResolvedValue(Ok(roles));
+      roleRepositoryMock.loadAll.mockImplementation(() => Ok(roles));
       newEnforcerMock.addPolicies.mockRejectedValue(new Error('casbin failed'));
 
       await expect(service.reloadFromDatabase()).rejects.toThrow(

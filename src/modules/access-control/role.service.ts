@@ -66,7 +66,7 @@ export class RoleService {
       roleId: newRole.id,
     });
 
-    const role = (await this.roleRepo.create(newRole, userRoleId)).unwrap();
+    const role = await this.roleRepo.create(newRole, userRoleId).unwrap();
     await this.acsyncService.upsertRole(role);
 
     return role.toJSON();
@@ -84,28 +84,28 @@ export class RoleService {
       name: updateData.name,
       permissions: [],
     }).unwrap();
-
-    return (await this.roleRepo.rename({ role: targetRole, userRoleId }))
-      .unwrap()
-      .toJSON();
+    const renamed = await this.roleRepo
+      .rename({ role: targetRole, userRoleId })
+      .unwrap();
+    return renamed.toJSON();
   }
   async removeRole(userRoleId: string, roleId: string): Promise<number> {
-    if (userRoleId === roleId) {
+    if (userRoleId === roleId)
       throw new RoleServiceError(
         'Deleting user requester Role is forbidden, should only be able to delete other than his current role.',
       );
-    }
+
     const isSystemRole = this.systemRole.hasId(roleId);
-    if (isSystemRole) {
+    if (isSystemRole)
       throw new SystemRoleError('System roles cannot be removed');
-    }
-    const deleteResult = (
-      await this.roleRepo.deleteById({
+
+    const deleteResult = await this.roleRepo
+      .deleteById({
         requesterRoleId: userRoleId,
         targetRoleId: roleId,
         defaultRoleId: this.systemRole.getCustomerRoleId(),
       })
-    ).unwrap();
+      .unwrap();
     const isRemoved = await this.acsyncService.removeRole(roleId);
     if (!isRemoved)
       throw new Error(

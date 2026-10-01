@@ -23,7 +23,8 @@ export class SystemRolesSeedService {
   private async seed(): Promise<void> {
     const updatedRoles: Role[] = [];
     for (const role of SYSTEM_ROLES) {
-      const upRole = (await this.roleRepository.upsert(role))
+      const upRole = await this.roleRepository
+        .upsert(role)
         .mapErr(
           (e) =>
             new SystemRoleError(

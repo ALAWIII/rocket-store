@@ -127,7 +127,7 @@ describe('AccessControlService', () => {
       systemRoleMock.hasId.mockReturnValue(false);
       systemRoleMock.getCustomerRoleId.mockReturnValue('customer-id');
       acsyncServiceMock.removeRole.mockResolvedValue(true);
-      roleRepoMock.deleteById.mockResolvedValue(Ok(1));
+      roleRepoMock.deleteById.mockImplementation(() => Ok(1));
 
       const result = await service.removeRole('user-role-id', 'role-id');
 

@@ -18,13 +18,9 @@ export class AccessControlSyncService {
   ) {}
 
   async reloadFromDatabase(): Promise<number> {
-    const roles = await this.roleRepository.loadAll();
-    if (roles.isErr()) {
-      throw roles.error;
-    }
+    const roles = await this.roleRepository.loadAll().unwrap();
 
-    const allRoles = roles.unwrap();
-    const policies = this.toPolicies(allRoles);
+    const policies = this.toPolicies(roles);
     const newEnforcer = await createCasbinEnforcer();
 
     if (policies.length > 0) {
@@ -34,7 +30,7 @@ export class AccessControlSyncService {
     this.enforcer.set(newEnforcer);
     this.reloadAttempt += 1;
     this.logger.log(
-      `Casbin policies reloaded: ${policies.length} policies from ${allRoles.length} roles, reload count= ${this.reloadAttempt}`,
+      `Casbin policies reloaded: ${policies.length} policies from ${roles.length} roles, reload count= ${this.reloadAttempt}`,
     );
     return this.reloadAttempt;
   }
