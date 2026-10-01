@@ -290,5 +290,18 @@ describe.concurrent('images (e2e)', () => {
       expect(affected).toBe(3);
       expect(honorBanners).toEqual(images3);
     });
+    it('should delete more than 100 unused images.', async ({
+      imageController,
+    }) => {
+      const imgs: ImageResponseDto[] = [];
+      for (let i = 1; i <= 150; i++) {
+        imgs.push((await uploadRandomImage(imageController)).body!);
+      }
+      const affected = (await imageController.removeUnused()).body!.affected;
+      expect(affected).toBe(150);
+      const fetchUnused = (await imageController.findUnused({ limit: 100 }))
+        .body!;
+      expect(fetchUnused.images.length).toBe(0);
+    });
   });
 });
