@@ -128,6 +128,7 @@ export class ImagesService {
   async removeImages(
     imgIds: string[],
   ): Promise<Result<number, ImageServiceError>> {
+    if (imgIds.length === 0) return Ok(0);
     const storageRes = await this.storageService.sendDeleteImgs(imgIds);
     if (storageRes.isErr()) return storageRes.map();
 
