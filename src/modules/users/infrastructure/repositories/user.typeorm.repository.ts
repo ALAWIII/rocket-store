@@ -9,15 +9,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { User } from '../../domain/user';
-import {
-  CorruptedPersistenceDataError,
-  RecordNotFoundError,
-  UnknownDatabaseError,
-} from 'src/modules/shared/errors/database.error';
+import { RecordNotFoundError } from 'src/modules/shared/errors/database.error';
 import { DBResult } from 'src/modules/shared/errors/error.types';
-import { Err, None, Ok, Option, Some } from '@allawiii/results-ts';
+import { None, Ok, Option, Result, Some } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
+import { UserMapper } from '../mappers/users.mapper';
 
 type UsersFindResult = {
   users: User[];
@@ -45,89 +42,44 @@ export class UserRepository implements IUserRepository {
     private readonly userRepo: Repository<UserEntity>,
   ) {}
 
-  async findMe(id: string): Promise<DBResult<User>> {
-    try {
-      const result = await this.userRepo.findOneBy({ id });
-      if (!result) {
-        return Err(new RecordNotFoundError(`user was not found: ${id}`));
-      }
-      return this.toDomain(result);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+  findMe(id: string): DBResult<User> {
+    return Result.wrapAsync(() => this.userRepo.findOneByOrFail({ id }))
+      .andThen((v) => UserMapper.toDomain(v))
+      .mapErr(mapTypeOrmError);
   }
-  async findById(data: {
-    requesterRoleId: string;
-    userId: string;
-  }): Promise<DBResult<User>> {
-    try {
-      const qb = this.createFindUsersQuery(data.requesterRoleId);
-
-      qb.andWhere(`${usr}.id = :userId`, { userId: data.userId });
-
-      const user = await qb.getOne();
-
-      if (!user) {
-        return Err(
-          new RecordNotFoundError(`user was not found: ${data.userId}`),
-        );
-      }
-
-      return this.toDomain(user);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+  findById(data: { requesterRoleId: string; userId: string }): DBResult<User> {
+    return Result.wrapAsync(() =>
+      this.createFindUsersQuery(data.requesterRoleId)
+        .andWhere(`${usr}.id = :userId`, { userId: data.userId })
+        .getOneOrFail(),
+    )
+      .andThen((v) => UserMapper.toDomain(v))
+      .mapErr(mapTypeOrmError);
   }
-  async save(user: User): Promise<DBResult<User>> {
-    try {
-      const userJson = user.toJSON();
-      const result = await this.userRepo
-        .createQueryBuilder()
-        .insert()
-        .values({
-          ...userJson,
-          givenName: userJson.givenName ?? undefined,
-          familyName: userJson.familyName ?? undefined,
-        })
-        .returning('*')
-        .execute();
-
-      const [row] = result.raw as UserEntity[];
-      if (!row) {
-        return Err(
-          new UnknownDatabaseError('Failed to return the newly inserted user.'),
-        );
-      }
-      return this.toDomain(row);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
-  }
-  async updateById(
-    id: string,
-    data: UpdateUserRepoData,
-  ): Promise<DBResult<Option<User>>> {
-    try {
+  updateById(id: string, data: UpdateUserRepoData): DBResult<Option<User>> {
+    return Result.wrapAsync(async () => {
       const result = await this.userRepo
         .createQueryBuilder()
         .update(UserEntity)
         .set({ ...data })
-        .where('id= :id', { id })
+        .where('id = :id', { id })
         .returning('*')
         .execute();
-      const [user] = result.raw as UserEntity[];
 
-      return user ? this.toDomain(user).map((r) => Some(r)) : Ok(None());
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+      const [user] = result.raw as UserEntity[];
+      return user ?? null;
+    })
+      .andThen((user) =>
+        user ? UserMapper.toDomain(user).map((r) => Some(r)) : Ok(None()),
+      )
+      .mapErr(mapTypeOrmError);
   }
-  async assignUserRole(d: {
+  assignUserRole(d: {
     requesterRoleId: string;
     targetUserId: string;
     targetRoleId: string;
-  }): Promise<DBResult<User>> {
-    try {
+  }): DBResult<User> {
+    return Result.wrapAsync(async () => {
       const oldUserRoleIdCte = this.userRepo
         .createQueryBuilder('user')
         .select('user.roleId', 'id')
@@ -193,24 +145,22 @@ export class UserRepository implements IUserRepository {
       const [user] = result.raw as UserEntity[];
 
       if (result.affected === 0 || !user) {
-        return Err(
-          new RecordNotFoundError(
-            `user role could not be assigned: ${d.targetUserId}`,
-          ),
+        throw new RecordNotFoundError(
+          `user role could not be assigned: ${d.targetUserId}`,
         );
       }
 
-      return this.toDomain(user);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+      return user;
+    })
+      .andThen((v) => UserMapper.toDomain(v))
+      .mapErr(mapTypeOrmError);
   }
-  async assignUsersRole(d: {
+  assignUsersRole(d: {
     requesterRoleId: string;
     oldRoleId: string;
     newRoleId: string;
-  }): Promise<DBResult<number>> {
-    try {
+  }): DBResult<number> {
+    return Result.wrapAsync(async () => {
       const requesterScope = this.userRepo.manager
         .createQueryBuilder(RoleEntity, 'role')
         .select('role.assignScope', 'assignScope')
@@ -253,13 +203,12 @@ export class UserRepository implements IUserRepository {
          `,
         )
         .execute();
-      return Ok(updateResult.affected ?? 0);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+
+      return updateResult.affected ?? 0;
+    }).mapErr(mapTypeOrmError);
   }
-  async findBy(params: FindUsersByParams): Promise<DBResult<UsersFindResult>> {
-    try {
+  findBy(params: FindUsersByParams): DBResult<UsersFindResult> {
+    return Result.wrapAsync(async () => {
       const pagination = this.normalizePagination(params.page, params.limit);
       const filters = this.normalizeUserFilters(params.filters);
 
@@ -273,16 +222,12 @@ export class UserRepository implements IUserRepository {
       this.applyPagination(qb, pagination);
 
       const [rows, total] = await qb.getManyAndCount();
-      const users: User[] = [];
-      for (const row of rows) {
-        const result = this.toDomain(row);
-        if (result.isErr()) return result.map();
-        users.push(result.unwrap());
-      }
-      return Ok({ users, total });
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+      return { rows, total };
+    })
+      .andThen(({ rows, total }) => {
+        return UserMapper.toDomainList(rows).map((users) => ({ users, total }));
+      })
+      .mapErr(mapTypeOrmError);
   }
 
   private createFindUsersQuery(
@@ -418,27 +363,5 @@ export class UserRepository implements IUserRepository {
 
   private escapeLikePattern(value: string): string {
     return value.replace(/[\\%_]/g, '\\$&');
-  }
-  private toDomain(userEntity: UserEntity): DBResult<User> {
-    const mappedUser = User.fromPrimitives({
-      id: userEntity.id,
-      email: userEntity.email,
-      name: userEntity.name,
-      givenName: userEntity.givenName,
-      familyName: userEntity.familyName,
-      image: userEntity.image ?? undefined,
-      roleId: userEntity.roleId,
-      phone: userEntity.phone ?? undefined,
-      updatedAt: userEntity.updatedAt,
-      createdAt: userEntity.createdAt,
-    }).mapErr(
-      (e) =>
-        new CorruptedPersistenceDataError(
-          `Failed to construct User from UserEntity: ${e.message}`,
-          e,
-        ),
-    );
-
-    return mappedUser;
   }
 }
