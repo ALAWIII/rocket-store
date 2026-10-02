@@ -1,6 +1,5 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Address } from '../../domain/address';
-import { Option } from '@allawiii/results-ts';
 
 export abstract class IAddressRepository {
   abstract findAll(userId: string): DBResult<Address[]>;
