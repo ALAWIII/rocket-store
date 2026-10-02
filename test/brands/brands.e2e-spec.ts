@@ -3,7 +3,6 @@ import { it } from '../support/fixtures/authenticated-e2e.fixture';
 import { BrandResponseDto } from 'src/modules/brands/dto/brand-response.dto';
 import { uploadRandomImage } from 'test/support/utils/upload-random-image.util';
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
-import { AttachImagesToBrandDto } from 'src/modules/brands/dto/attach-images-to-brand.dto';
 
 describe.concurrent('brands (e2e)', () => {
   describe('POST /api/v1/brands', () => {
