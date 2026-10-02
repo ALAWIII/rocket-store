@@ -57,10 +57,13 @@ export class ApplicationConfig {
 export class MailConfig {
   readonly resendApiKey: string;
   readonly mailFrom: string;
-
+  readonly mailhogHost: string;
+  readonly mailhogPort: number;
   constructor(cfg: ConfigReader) {
     this.resendApiKey = cfg.getOrThrow<string>('RESEND_API_KEY');
     this.mailFrom = cfg.getOrThrow<string>('MAIL_FROM');
+    this.mailhogHost = cfg.get<string>('MAILHOG_API_HOST', '127.0.0.1');
+    this.mailhogPort = Number(cfg.get<string>('MAILHOG_API_PORT', '1025'));
   }
 }
 
@@ -69,8 +72,6 @@ export class StorageConfig {
   readonly endpoint: string;
   readonly accessKey: string;
   readonly secretKey: string;
-  readonly adminName: string;
-  readonly adminKey: string;
   readonly maxSockets: number;
   readonly bucket: string;
 
@@ -79,8 +80,6 @@ export class StorageConfig {
     this.endpoint = cfg.getOrThrow<string>('RUSTFS_ENDPOINT');
     this.accessKey = cfg.getOrThrow<string>('RUSTFS_ACCESS_KEY');
     this.secretKey = cfg.getOrThrow<string>('RUSTFS_SECRET_KEY');
-    this.adminName = cfg.get<string>('RUSTFS_ADMIN_NAME', 'admin');
-    this.adminKey = cfg.getOrThrow<string>('RUSTFS_ADMIN_KEY');
     this.maxSockets = Number(cfg.get<string>('RUSTFS_MAX_SOCKETS', '256'));
     this.bucket = cfg.get<string>('STORAGE_BUCKET', 'images');
   }

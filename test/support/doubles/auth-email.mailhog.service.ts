@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { createTransport, Transporter } from 'nodemailer';
+import { AppConfigService } from 'src/app-config/app-config.service';
 import {
   IAuthEmailService,
   SendEmailParams,
@@ -19,14 +19,14 @@ export class MailHogAuthEmailService implements IAuthEmailService {
   private readonly logger = new Logger(MailHogAuthEmailService.name);
   private readonly logoUrl?: string;
 
-  constructor(config: ConfigService) {
-    this.from = config.getOrThrow<string>('MAIL_FROM');
-    this.storeName = config.get<string>('STORE_NAME') ?? 'Rocket Store';
-    this.logoUrl = config.get<string>('LOGO_URL');
+  constructor(config: AppConfigService) {
+    this.from = config.mail.mailFrom;
+    this.storeName = config.app.storeName;
+    this.logoUrl = config.app.logoUrl;
 
     this.sender = createTransport({
-      host: config.get<string>('MAILHOG_SMTP_HOST') ?? '127.0.0.1',
-      port: config.get<number>('MAILHOG_SMTP_PORT') ?? 1025,
+      host: config.mail.mailhogHost,
+      port: config.mail.mailhogPort,
       secure: false,
     });
   }
