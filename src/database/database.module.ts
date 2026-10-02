@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
 import path from 'path';
+import { AppConfigService } from 'src/app-config/app-config.service';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
+      inject: [AppConfigService],
+      useFactory: (config: AppConfigService) => ({
         type: 'postgres',
-        url: config.getOrThrow('DATABASE_URL'),
+        url: config.db.url,
         entities: [
           path.join(process.cwd(), 'dist/**/*.entity.js'),
           path.join(process.cwd(), 'dist/typeorm/entities/*.js'),
@@ -19,8 +19,8 @@ import path from 'path';
         ],
         autoLoadEntities: true,
         migrationsRun: true,
-        synchronize: config.get<string>('DB_SYNC') === 'true', // for development only
-        poolSize: config.get<number>('DATABASE_POOL_SIZE', 50),
+        synchronize: config.db.sync,
+        poolSize: config.db.poolSize,
       }),
     }),
   ],

@@ -1,28 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { S3Client } from '@aws-sdk/client-s3';
 import { NodeHttpHandler } from '@smithy/node-http-handler';
-import { ConfigService } from '@nestjs/config';
 import https from 'https';
+import { AppConfigService } from 'src/app-config/app-config.service';
 
 @Injectable()
 export class ObjectStorageS3Client {
   private readonly _client: S3Client;
   private readonly _bucket: string;
 
-  constructor(config: ConfigService) {
-    this._bucket = config.get('STORAGE_BUCKET', 'images');
+  constructor(config: AppConfigService) {
+    this._bucket = config.storage.bucket;
     const agent = new https.Agent({
       keepAlive: true,
-      maxSockets: config.get<number>('RUSTFS_MAX_SOCKETS', 256),
+      maxSockets: config.storage.maxSockets,
       keepAliveMsecs: 1000,
     });
 
     this._client = new S3Client({
-      region: config.getOrThrow('RUSTFS_REGION'),
-      endpoint: config.getOrThrow('RUSTFS_ENDPOINT'),
+      region: config.storage.region,
+      endpoint: config.storage.endpoint,
       credentials: {
-        accessKeyId: config.getOrThrow('RUSTFS_ACCESS_KEY'),
-        secretAccessKey: config.getOrThrow('RUSTFS_SECRET_KEY'),
+        accessKeyId: config.storage.accessKey,
+        secretAccessKey: config.storage.secretKey,
       },
       forcePathStyle: true,
       requestHandler: new NodeHttpHandler({

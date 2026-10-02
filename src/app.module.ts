@@ -11,7 +11,6 @@ import { PaymentsModule } from './modules/payments/payments.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { ImagesModule } from './modules/images/images.module';
 import { CartsModule } from './modules/carts/carts.module';
-import { ConfigModule } from '@nestjs/config';
 import { AppAuthModule } from './auth/auth.module';
 import { AccessControlModule } from './modules/access-control/access-control.module';
 import { AppErrorModule } from './error/app-error.module';
@@ -21,9 +20,9 @@ import { BrandsModule } from './modules/brands/brands.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { ObjectStorageModule } from './object-storage/object-storage.module';
 import { JobsModule } from './jobs/jobs.module';
+import { AppConfigModule } from './app-config/app-config.module';
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
     AppLoggerModule,
     AppErrorModule,
     DatabaseModule,
@@ -45,6 +44,7 @@ import { JobsModule } from './jobs/jobs.module';
     CategoriesModule,
     ObjectStorageModule,
     JobsModule,
+    AppConfigModule,
   ],
 })
 export class AppModule {}

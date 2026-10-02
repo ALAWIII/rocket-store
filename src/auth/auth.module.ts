@@ -3,13 +3,13 @@ import { AuthModule } from '@thallesp/nestjs-better-auth';
 import { DatabaseModule } from 'src/database/database.module';
 import { DataSource } from 'typeorm';
 import { createAuth } from './auth.config';
-import { ConfigService } from '@nestjs/config';
 import { Logger } from 'nestjs-pino';
 import { AccessControlModule } from 'src/modules/access-control/access-control.module';
 import { EmailModule } from 'src/email/email.module';
 import { SystemRolesSeedService } from 'src/modules/access-control/application/system-roles/system-roles.seed.service';
 import { SystemRolesRegistry } from 'src/modules/access-control/application/system-roles/system-roles.registry';
 import { IAuthEmailService } from 'src/email/auth-email.service';
+import { AppConfigService } from 'src/app-config/app-config.service';
 
 @Module({
   imports: [
@@ -18,7 +18,7 @@ import { IAuthEmailService } from 'src/email/auth-email.service';
       inject: [
         DataSource,
         Logger,
-        ConfigService,
+        AppConfigService,
         SystemRolesRegistry,
         SystemRolesSeedService,
         IAuthEmailService,
@@ -26,7 +26,7 @@ import { IAuthEmailService } from 'src/email/auth-email.service';
       useFactory: async (
         dataSource: DataSource,
         logger: Logger,
-        config: ConfigService,
+        config: AppConfigService,
         systemRoles: SystemRolesRegistry,
         systemRolesSeed: SystemRolesSeedService,
         emailService: IAuthEmailService,

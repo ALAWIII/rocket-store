@@ -10,7 +10,7 @@ export const TEST_ENV = {
   DB_SYNC: 'true',
   PG_BOSS_POOL_SIZE: 1,
   DATABASE_POOL_SIZE: 1,
-  NODE_ENV: 'test',
+  IS_DEVELOPMENT_ENV: true,
   LOG_LEVEL: 'debug',
   STORE_NAME: 'Nuclear Store',
   LOGO_URL: 'Nuclear Store',

@@ -4,24 +4,24 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PgBoss } from 'pg-boss';
+import { AppConfigService } from 'src/app-config/app-config.service';
 
 @Injectable()
 export class PgBossCoreService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(PgBossCoreService.name);
   private readonly _boss: PgBoss;
 
-  constructor(config: ConfigService) {
+  constructor(config: AppConfigService) {
     this._boss = new PgBoss({
-      connectionString: config.getOrThrow<string>('DATABASE_URL'),
-      application_name: config.get<string>('STORE_NAME') ?? 'pg-boss-store',
+      connectionString: config.db.url,
+      application_name: config.app.storeName,
       useListenNotify: true,
       // pool sizing (separate from TypeORM)
-      max: config.get<number>('PG_BOSS_POOL_SIZE', 50),
+      max: config.db.pgBossPoolSize,
       // we will use CLI in production DOCKERFILE, and in testing we will write code to migrate and setup the schema before run the app and tests.
-      migrate: config.get<string>('NODE_ENV') ? true : false,
-      createSchema: config.get<string>('NODE_ENV') ? true : false,
+      migrate: config.app.isDevelopmentEnv,
+      createSchema: config.app.isDevelopmentEnv,
       //
       supervise: true,
       schedule: true,

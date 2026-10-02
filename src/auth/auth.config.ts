@@ -8,9 +8,9 @@ import { Request } from 'express';
 import { loggerMethodFor, toAppLogLevel } from 'src/app-logger/app-log.level';
 import { Logger } from 'nestjs-pino';
 import { IAuthEmailService } from 'src/email/auth-email.service';
-import { ConfigService } from '@nestjs/config';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 import { UnauthorizedException } from '@nestjs/common';
+import { AppConfigService } from 'src/app-config/app-config.service';
 
 //========================= Types
 type Auth = ReturnType<typeof createAuth>;
@@ -26,7 +26,7 @@ interface SessionWithRoleId {
 export function createAuth(
   dataSource: DataSource,
   logger: Logger,
-  config: ConfigService,
+  config: AppConfigService,
   customerRoleId: string,
   emailService: IAuthEmailService,
 ) {
@@ -36,7 +36,7 @@ export function createAuth(
     }),
     //--------------------------
     logger: {
-      level: toAppLogLevel(config.get('LOG_LEVEL')),
+      level: toAppLogLevel(config.app.logLevel),
       disableColors: true,
       disabled: false,
       log: (level, message, ...args) => {
@@ -47,8 +47,8 @@ export function createAuth(
     socialProviders: {
       google: {
         prompt: 'select_account',
-        clientSecret: config.getOrThrow<string>('GOOGLE_CLIENT_SECRET'),
-        clientId: config.getOrThrow<string>('GOOGLE_WEB_CLIENT_ID'),
+        clientSecret: config.auth.googleClientSecret,
+        clientId: config.auth.googleWebClientId,
       },
     },
     //----------------------
@@ -136,8 +136,8 @@ export function createAuth(
       },
     },
     //-------------------
-    secret: config.getOrThrow<string>('BETTER_AUTH_SECRET'),
-    baseURL: config.getOrThrow<string>('BETTER_AUTH_URL'),
+    secret: config.auth.betterAuthSecret,
+    baseURL: config.auth.betterAuthUrl,
     advanced: { database: { generateId: () => v7() } },
     //--------------------
     emailAndPassword: {
@@ -177,9 +177,7 @@ export function createAuth(
           session,
         };
       }),
-      ...(config.getOrThrow<string>('NODE_ENV') === 'development'
-        ? [openAPI()]
-        : []),
+      ...(config.app.isDevelopmentEnv ? [openAPI()] : []),
     ],
   });
 }

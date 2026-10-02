@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 import { buildAuthEmailHtml } from './email-message.template';
 import { IAuthEmailService, SendEmailParams } from './auth-email.service';
+import { AppConfigService } from 'src/app-config/app-config.service';
 
 @Injectable()
 export class ResendAuthEmailService implements IAuthEmailService {
@@ -11,11 +11,11 @@ export class ResendAuthEmailService implements IAuthEmailService {
   private readonly from: string;
   private readonly logger: Logger = new Logger(IAuthEmailService.name);
   private readonly logoUrl: string | undefined;
-  constructor(config: ConfigService) {
-    this.resend = new Resend(config.getOrThrow<string>('RESEND_API_KEY'));
-    this.from = config.getOrThrow<string>('MAIL_FROM');
-    this.storeName = config.get<string>('STORE_NAME') ?? 'Nuclear Store';
-    this.logoUrl = config.get<string>('LOGO_URL');
+  constructor(config: AppConfigService) {
+    this.resend = new Resend(config.mail.resendApiKey);
+    this.from = config.mail.mailFrom;
+    this.storeName = config.app.storeName;
+    this.logoUrl = config.app.logoUrl;
   }
   async sendVerificationEmail(params: SendEmailParams): Promise<void> {
     const html = buildAuthEmailHtml({
