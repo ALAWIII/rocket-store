@@ -11,7 +11,7 @@ import { UserEntity } from '../entities/user.entity';
 import { User } from '../../domain/user';
 import { RecordNotFoundError } from 'src/modules/shared/errors/database.error';
 import { DBResult } from 'src/modules/shared/errors/error.types';
-import { None, Ok, Option, Result, Some } from '@allawiii/results-ts';
+import { Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
 import { UserMapper } from '../mappers/users.mapper';
@@ -56,7 +56,7 @@ export class UserRepository implements IUserRepository {
       .andThen((v) => UserMapper.toDomain(v))
       .mapErr(mapTypeOrmError);
   }
-  updateById(id: string, data: UpdateUserRepoData): DBResult<Option<User>> {
+  updateById(id: string, data: UpdateUserRepoData): DBResult<User> {
     return Result.wrapAsync(async () => {
       const result = await this.userRepo
         .createQueryBuilder()
@@ -66,12 +66,13 @@ export class UserRepository implements IUserRepository {
         .returning('*')
         .execute();
 
+      if (result.affected === 0) {
+        throw new RecordNotFoundError(`Update user not found: ${id}`);
+      }
       const [user] = result.raw as UserEntity[];
-      return user ?? null;
+      return user;
     })
-      .andThen((user) =>
-        user ? UserMapper.toDomain(user).map((r) => Some(r)) : Ok(None()),
-      )
+      .andThen((user) => UserMapper.toDomain(user))
       .mapErr(mapTypeOrmError);
   }
   assignUserRole(d: {
