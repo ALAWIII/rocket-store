@@ -6,17 +6,15 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
-import {
-  CorruptedPersistenceDataError,
-  UnknownDatabaseError,
-} from 'src/modules/shared/errors/database.error';
+import { RecordNotFoundError } from 'src/modules/shared/errors/database.error';
 import { DBResult } from 'src/modules/shared/errors/error.types';
-import { Err, Ok } from '@allawiii/results-ts';
+import { Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { OrderEntity } from 'src/modules/orders/infrastructure/entities/order.entity';
 import { OrderAddressEntity } from '../entities/order-address.entity';
 import { OrderAddress } from '../../domain/order-address';
 import { AddressEntity } from 'src/modules/users/infrastructure/entities/address.entity';
+import { OrderAddressMapper } from '../mappers/order-addresses.mapper';
 
 @Injectable()
 export class OrderAddressRepositroy implements IOrderAddressRepository {
@@ -24,40 +22,20 @@ export class OrderAddressRepositroy implements IOrderAddressRepository {
     @InjectRepository(OrderAddressEntity)
     private readonly orderAddressRepo: Repository<OrderAddressEntity>,
   ) {}
-  async findByOrderId(
-    userId: string,
-    orderId: string,
-  ): Promise<DBResult<OrderAddress[]>> {
-    try {
-      const entities = await this.orderAddressRepo
+  findByOrderId(userId: string, orderId: string): DBResult<OrderAddress[]> {
+    return Result.wrapAsync(() =>
+      this.orderAddressRepo
         .createQueryBuilder('orderAddress')
         .innerJoin(OrderEntity, 'order', 'order.id = orderAddress.order_id')
         .where('orderAddress.order_id = :orderId', { orderId })
         .andWhere('order.user_id = :userId', { userId })
-        .getMany();
-
-      const domains: OrderAddress[] = [];
-
-      for (const entity of entities) {
-        const result = this.toDomain(entity);
-
-        if (result.isErr()) {
-          return result.map();
-        }
-
-        domains.push(result.unwrap());
-      }
-
-      return Ok(domains);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
+        .getMany(),
+    )
+      .andThen((entities) => OrderAddressMapper.toDomainList(entities))
+      .mapErr(mapTypeOrmError);
   }
-  async create(
-    userId: string,
-    d: createOrderAddressData,
-  ): Promise<DBResult<OrderAddress>> {
-    try {
+  create(userId: string, d: createOrderAddressData): DBResult<OrderAddress> {
+    return Result.wrapAsync(async () => {
       const isAddressOwner = this.orderAddressRepo.manager
         .createQueryBuilder(OrderEntity, 'orders')
         .select('1')
@@ -101,28 +79,18 @@ export class OrderAddressRepositroy implements IOrderAddressRepository {
         .returning('*')
         .execute();
 
-      const rows = result.raw as OrderAddressEntity[];
-      const row = rows[0] ?? null;
+      const [row] = result.raw as OrderAddressEntity[];
 
+      // ✅ CHANGED: throw instead of return Err()
       if (!row) {
-        throw new UnknownDatabaseError(
-          'Failed to obtain the order address entity after insertion.',
+        throw new RecordNotFoundError(
+          'Could not create order address: address or order not found',
         );
       }
 
-      return this.toDomain(row);
-    } catch (e) {
-      return Err(mapTypeOrmError(e));
-    }
-  }
-
-  private toDomain(oae: OrderAddressEntity): DBResult<OrderAddress> {
-    return OrderAddress.fromPrimitives({ ...oae }).mapErr(
-      (e) =>
-        new CorruptedPersistenceDataError(
-          `Failed to construct order address from OrderAddressEntity.`,
-          e,
-        ),
-    );
+      return row;
+    })
+      .andThen((entity) => OrderAddressMapper.toDomain(entity))
+      .mapErr(mapTypeOrmError);
   }
 }

@@ -7,22 +7,24 @@ import { OrderAddressResponseDto } from './dto/order-address-response.dto';
 export class OrderAddressService {
   constructor(private readonly oAdrsRepo: IOrderAddressRepository) {}
 
-  async findByOrderId(
+  findByOrderId(
     userId: string,
     orderId: string,
   ): Promise<OrderAddressResponseDto[]> {
-    const oadrs = (
-      await this.oAdrsRepo.findByOrderId(userId, orderId)
-    ).unwrap();
-    return oadrs.map((oad) => oad.toJSON());
+    return this.oAdrsRepo
+      .findByOrderId(userId, orderId)
+      .map((list) => list.map((oad) => oad.toJSON()))
+      .unwrap();
   }
-  async createOrderAddress(
+
+  createOrderAddress(
     userId: string,
     orderId: string,
     data: CreateOrderAddressDto,
   ): Promise<OrderAddressResponseDto> {
-    return (await this.oAdrsRepo.create(userId, { orderId, ...data }))
-      .unwrap()
-      .toJSON();
+    return this.oAdrsRepo
+      .create(userId, { orderId, ...data })
+      .map((oad) => oad.toJSON())
+      .unwrap();
   }
 }
