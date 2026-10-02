@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { IAddressRepository } from './infrastructure/repositories/address.repository';
 import { UpdateAddressDto } from './dto/update-address.dto';
 import { Address } from './domain/address';
@@ -9,21 +9,22 @@ import { AddressResponseDto } from './dto/address-response.dto';
 export class AddressService {
   constructor(private readonly addressRepo: IAddressRepository) {}
 
-  async findAll(userId: string): Promise<AddressResponseDto[]> {
-    const addresses = (await this.addressRepo.findAll(userId)).unwrap();
-    return addresses.map((ad) => ad.toJSON());
+  findAll(userId: string): Promise<AddressResponseDto[]> {
+    return this.addressRepo
+      .findAll(userId)
+      .map((addresses) => addresses.map((ad) => ad.toJSON()))
+      .unwrap();
   }
-  async findById(userId: string, adrsId: string): Promise<AddressResponseDto> {
-    const address = (await this.addressRepo.findById(userId, adrsId)).unwrap();
-    if (address.isNone())
-      throw new NotFoundException(`Address ${adrsId} not found.`);
-
-    return address.unwrap().toJSON();
+  findById(userId: string, adrsId: string): Promise<AddressResponseDto> {
+    return this.addressRepo
+      .findById(userId, adrsId)
+      .map((ad) => ad.toJSON())
+      .unwrap();
   }
-  async deleteAdrs(userId: string, adrsId: string): Promise<number> {
-    return (await this.addressRepo.delete({ userId, id: adrsId })).unwrap();
+  deleteAdrs(userId: string, adrsId: string): Promise<number> {
+    return this.addressRepo.delete({ userId, id: adrsId }).unwrap();
   }
-  async createAdrs(
+  createAdrs(
     userId: string,
     data: CreateAddressDto,
   ): Promise<AddressResponseDto> {
@@ -31,9 +32,12 @@ export class AddressService {
       userId,
       ...data,
     }).unwrap();
-    return (await this.addressRepo.create(newAdrs)).unwrap().toJSON();
+    return this.addressRepo
+      .create(newAdrs)
+      .map((ad) => ad.toJSON())
+      .unwrap();
   }
-  async updateAdrs(
+  updateAdrs(
     userId: string,
     id: string,
     data: UpdateAddressDto,
@@ -45,6 +49,9 @@ export class AddressService {
       createdAt: new Date(),
       updatedAt: new Date(),
     }).unwrap();
-    return (await this.addressRepo.update(adrs)).unwrap().toJSON();
+    return this.addressRepo
+      .update(adrs)
+      .map((ad) => ad.toJSON())
+      .unwrap();
   }
 }

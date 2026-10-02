@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { IUserRepository } from './infrastructure/repositories/user.repository';
 import { FindUsersFlatQueryDto } from './dto/find-users-by-filter.dto';
 import { ReassignUsersRoleDto } from './dto/reassign-users-role.dto';
@@ -15,61 +15,61 @@ type FindUsersByQueryDto = Pick<FindUsersFlatQueryDto, 'page' | 'limit'> & {
 export class UsersService {
   constructor(private readonly userRepo: IUserRepository) {}
 
-  async findMe(id: string): Promise<UserResponseDto> {
-    const user = (await this.userRepo.findMe(id)).unwrap();
-    return user.toJSON();
+  findMe(id: string): Promise<UserResponseDto> {
+    return this.userRepo
+      .findMe(id)
+      .map((v) => v.toJSON())
+      .unwrap();
   }
-  async findBy(
+  findBy(
     requesterRoleId: string,
     filters: FindUsersByQueryDto,
   ): Promise<FindUsersResponseDto> {
-    const users = (
-      await this.userRepo.findBy({
+    return this.userRepo
+      .findBy({
         ...filters,
         requesterRoleId,
       })
-    ).unwrap();
-    return { users: users.users.map((u) => u.toJSON()), total: users.total };
+      .map(({ users, total }) => {
+        return { users: users.map((u) => u.toJSON()), total };
+      })
+      .unwrap();
   }
-  async findById(
-    requesterRoleId: string,
-    userId: string,
-  ): Promise<UserResponseDto> {
-    const user = (
-      await this.userRepo.findById({ requesterRoleId, userId })
-    ).unwrap();
-    return user.toJSON();
+  findById(requesterRoleId: string, userId: string): Promise<UserResponseDto> {
+    return this.userRepo
+      .findById({ requesterRoleId, userId })
+      .map((v) => v.toJSON())
+      .unwrap();
   }
-  async assignRoleToUser(
+  assignRoleToUser(
     requesterRoleId: string,
     targetUserId: string,
     targetRoleId: string,
   ): Promise<UserResponseDto> {
-    const user = (
-      await this.userRepo.assignUserRole({
+    return this.userRepo
+      .assignUserRole({
         targetRoleId,
         requesterRoleId,
         targetUserId,
       })
-    ).map((u) => u.toJSON());
-    return user.unwrap();
+      .map((u) => u.toJSON())
+      .unwrap();
   }
-  async assignRoleToUsers(
+  assignRoleToUsers(
     requesterRoleId: string,
     d: ReassignUsersRoleDto,
   ): Promise<number> {
-    const result = await this.userRepo.assignUsersRole({
-      ...d,
-      requesterRoleId,
-    });
-    return result.unwrap();
-  }
-  async updateUser(id: string, d: UpdateMeDto): Promise<UserResponseDto> {
-    const user = (await this.userRepo.updateById(id, d))
-      .map((u) => u.okOr(new NotFoundException(`User ${id} not found`)))
-      .unwrap()
+    return this.userRepo
+      .assignUsersRole({
+        ...d,
+        requesterRoleId,
+      })
       .unwrap();
-
-    return user.toJSON();
+  }
+  updateUser(id: string, d: UpdateMeDto): Promise<UserResponseDto> {
+    return this.userRepo
+      .updateById(id, d)
+      .map((u) => u.toJSON())
+      .unwrap();
   }
 }
