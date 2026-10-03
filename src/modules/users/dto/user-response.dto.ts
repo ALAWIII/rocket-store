@@ -1,3 +1,5 @@
+import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
+
 export class UserResponseDto {
   id!: string;
   email!: string;
@@ -5,8 +7,8 @@ export class UserResponseDto {
   givenName?: string | null;
   familyName?: string | null;
   roleId!: string;
-  image?: string;
+  image?: ImageResponseDto;
   phone?: string;
-  updatedAt!: Date;
-  createdAt!: Date;
+  updatedAt!: string;
+  createdAt!: string;
 }
