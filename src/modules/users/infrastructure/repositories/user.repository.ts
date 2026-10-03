@@ -6,7 +6,6 @@ export type UpdateUserRepoData = {
   name?: string;
   givenName?: string;
   familyName?: string;
-  image?: string;
   phone?: string;
 };
 export type UserFilters = {

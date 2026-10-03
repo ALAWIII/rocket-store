@@ -20,6 +20,7 @@ import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/r
 import { UserMapper } from '../mappers/users.mapper';
 import { UserImagesEntity } from '../entities/user-images.entity';
 import { UserImage } from '../../domain/user-image';
+import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 
 type UsersFindResult = {
   users: User[];
@@ -50,19 +51,24 @@ export class UserRepository implements IUserRepository {
   ) {}
 
   findMe(id: string): DBResult<User> {
-    return Result.wrapAsync(() => this.userRepo.findOneByOrFail({ id }))
+    return Result.wrapAsync(() =>
+      this.withProfileImage(this.userRepo.createQueryBuilder(usr))
+        .where(`${usr}.id = :id`, { id })
+        .getOneOrFail(),
+    )
       .andThen((v) => UserMapper.toDomain(v))
       .mapErr(mapTypeOrmError);
   }
   findById(data: { requesterRoleId: string; userId: string }): DBResult<User> {
     return Result.wrapAsync(() =>
-      this.createFindUsersQuery(data.requesterRoleId)
+      this.withProfileImage(this.createFindUsersQuery(data.requesterRoleId))
         .andWhere(`${usr}.id = :userId`, { userId: data.userId })
         .getOneOrFail(),
     )
       .andThen((v) => UserMapper.toDomain(v))
       .mapErr(mapTypeOrmError);
   }
+
   updateById(id: string, data: UpdateUserRepoData): DBResult<User> {
     return Result.wrapAsync(async () => {
       const result = await this.userRepo
@@ -396,5 +402,18 @@ export class UserRepository implements IUserRepository {
 
   private escapeLikePattern(value: string): string {
     return value.replace(/[\\%_]/g, '\\$&');
+  }
+  private withProfileImage(
+    qb: SelectQueryBuilder<UserEntity>,
+    alias = usr,
+  ): SelectQueryBuilder<UserEntity & { profileImage?: ImageEntity }> {
+    return qb
+      .leftJoin(UserImagesEntity, 'ui', `ui.userId = ${alias}.id`)
+      .leftJoinAndMapOne(
+        `${alias}.profileImage`,
+        ImageEntity,
+        'img',
+        'img.id = ui.imageId',
+      );
   }
 }
