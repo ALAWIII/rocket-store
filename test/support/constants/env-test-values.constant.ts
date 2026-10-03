@@ -8,8 +8,8 @@ export const TEST_ENV = {
   DB_PASSWORD: 'postgres',
   DB_NAME: 'postgres',
   DB_SYNC: 'true',
-  PG_BOSS_POOL_SIZE: 1,
-  DATABASE_POOL_SIZE: 1,
+  PG_BOSS_POOL_SIZE: 3,
+  DATABASE_POOL_SIZE: 3,
   IS_DEVELOPMENT_ENV: true,
   LOG_LEVEL: 'debug',
   STORE_NAME: 'Nuclear Store',
@@ -25,6 +25,6 @@ export const TEST_ENV = {
   RUSTFS_ENDPOINT: 'http://localhost:9000',
   RUSTFS_ACCESS_KEY: 'admin',
   RUSTFS_SECRET_KEY: '12345678',
-  RUSTFS_MAX_SOCKETS: 1,
+  RUSTFS_MAX_SOCKETS: 3,
   STORAGE_BUCKET: 'images', // as default but the testing will take care generating and creating random bucket using uuid v7.
 } as const;
