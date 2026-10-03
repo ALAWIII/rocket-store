@@ -126,19 +126,20 @@ export class ImagesService {
       })
       .mapErr(mapToImagesServiceError);
   }
-  async removeImages(
+  removeImages(
     imgIds: string[],
-  ): Promise<Result<RemoveImagesResponseDto, ImageServiceError>> {
-    if (imgIds.length === 0) return Ok({ affected: 0 });
-    const storageRes = await this.storageService.sendDeleteImgs(imgIds);
-    if (storageRes.isErr()) return storageRes.map();
-
-    return this.imgRepo
-      .deleteMany(imgIds)
-      .map((v) => {
-        return { affected: v };
-      })
-      .mapErr(mapToImagesServiceError);
+  ): AsyncResult<RemoveImagesResponseDto, ImageServiceError> {
+    return Result.wrapAsync(async () => {
+      if (imgIds.length === 0) return { affected: 0 };
+      await this.storageService.sendDeleteImgs(imgIds).unwrap();
+      return this.imgRepo
+        .deleteMany(imgIds)
+        .map((v) => {
+          return { affected: v };
+        })
+        .mapErr(mapToImagesServiceError)
+        .unwrap();
+    });
   }
 
   async removeUnusedImages(): Promise<

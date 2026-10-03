@@ -23,5 +23,6 @@ import { ObjectStorageModule } from 'src/object-storage/object-storage.module';
     { provide: IImageRepository, useClass: ImageRepository },
   ],
   controllers: [ImagesController],
+  exports: [ImagesService],
 })
 export class ImagesModule {}
