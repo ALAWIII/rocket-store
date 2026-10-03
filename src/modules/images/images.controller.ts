@@ -65,10 +65,8 @@ export class ImagesController {
   @Post('batch-delete')
   @HttpCode(HttpStatus.OK)
   @RequirePermission(AllPermissions.images.ImagesDeleteAny)
-  async removeImages(
-    @Body() ids: RemoveImagesDto,
-  ): Promise<RemoveImagesResponseDto> {
-    return (await this.imagesService.removeImages(ids.imageIds)).unwrap();
+  removeImages(@Body() ids: RemoveImagesDto): Promise<RemoveImagesResponseDto> {
+    return this.imagesService.removeImages(ids.imageIds).unwrap();
   }
   @Delete('unused')
   @RequirePermission(AllPermissions.images.ImagesDeleteAny)
