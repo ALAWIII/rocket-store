@@ -6,6 +6,8 @@ import {
 } from 'src/modules/shared/errors/database.error';
 import { Ok, Result } from '@allawiii/results-ts';
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
+import { UserImagesEntity } from '../entities/user-images.entity';
+import { UserImage } from '../../domain/user-image';
 
 export class UserMapper {
   static toDomain(
@@ -44,5 +46,19 @@ export class UserMapper {
       users.push(result.unwrap());
     }
     return Ok(users);
+  }
+  static toDomainUserImg(
+    entity: UserImagesEntity,
+  ): Result<UserImage, DatabaseError> {
+    return UserImage.restore({
+      ...entity,
+      createdAt: new Date(entity.createdAt),
+    }).mapErr(
+      (e) =>
+        new CorruptedPersistenceDataError(
+          `Failed to construct UserImage from UserImagesEntity: ${e.message}`,
+          e,
+        ),
+    );
   }
 }
