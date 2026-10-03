@@ -12,7 +12,8 @@ export default defineConfig({
     }),
   ],
   test: {
-    maxConcurrency: 50,
+    fileParallelism: false,
+    maxConcurrency: 12,
     globals: true,
     environment: 'node',
     include: ['src/**/*.spec.ts', 'test/**/*.e2e-spec.ts'],
