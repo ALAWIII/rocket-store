@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { IUserRepository } from './infrastructure/repositories/user.repository';
 import { FindUsersFlatQueryDto } from './dto/find-users-by-filter.dto';
 import { ReassignUsersRoleDto } from './dto/reassign-users-role.dto';
 import { UpdateMeDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { FindUsersResponseDto } from './dto/find-users-response.dto';
+import { ImagesService } from '../images/images.service';
+import { UserImage } from './domain/user-image';
+import { ImageResponseDto } from '../shared/dto/image-response.dto';
 
 type Filters = Omit<FindUsersFlatQueryDto, 'limit' | 'page'>;
 type FindUsersByQueryDto = Pick<FindUsersFlatQueryDto, 'page' | 'limit'> & {
@@ -13,7 +16,11 @@ type FindUsersByQueryDto = Pick<FindUsersFlatQueryDto, 'page' | 'limit'> & {
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly userRepo: IUserRepository) {}
+  private readonly logger = new Logger(UsersService.name);
+  constructor(
+    private readonly userRepo: IUserRepository,
+    private readonly imgService: ImagesService,
+  ) {}
 
   findMe(id: string): Promise<UserResponseDto> {
     return this.userRepo
@@ -71,5 +78,36 @@ export class UsersService {
       .updateById(id, d)
       .map((u) => u.toJSON())
       .unwrap();
+  }
+  async setProfileImage(
+    file: Express.Multer.File,
+    userId: string,
+    metadata: { name: string; altText?: string },
+  ): Promise<ImageResponseDto> {
+    const image = await this.imgService
+      .upload(file, userId, metadata)
+      .map((mg) => mg.toJSON())
+      .unwrap();
+
+    const removeImageQuietly = (id: string) =>
+      this.imgService
+        .removeImages([id])
+        .inspectErr((e) => this.logger.error(e.message, e));
+
+    const userImg = UserImage.create({
+      userId: userId,
+      imageId: image.id,
+    }).unwrap();
+
+    const oldImageId = await this.userRepo
+      .attachImage(userImg)
+      .inspectErr(async () => {
+        await removeImageQuietly(image.id);
+      })
+      .unwrap();
+
+    if (oldImageId.isSome()) await removeImageQuietly(oldImageId.unwrap());
+
+    return image;
   }
 }
