@@ -13,8 +13,13 @@ import {
   MyAddressesController,
   UserAddressesController,
 } from './addresses.controller';
+import { UserImagesEntity } from './infrastructure/entities/user-images.entity';
+import { ImagesModule } from '../images/images.module';
 @Module({
-  imports: [TypeOrmModule.forFeature([UserEntity, AddressEntity])],
+  imports: [
+    TypeOrmModule.forFeature([UserEntity, UserImagesEntity, AddressEntity]),
+    ImagesModule,
+  ],
   providers: [
     { provide: IUserRepository, useClass: UserRepository },
     { provide: IAddressRepository, useClass: AddressRepository },
