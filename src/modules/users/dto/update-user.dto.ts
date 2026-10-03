@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsUUID, Length, Matches } from 'class-validator';
+import { IsOptional, IsString, Length, Matches } from 'class-validator';
 import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-least-one-defined.decorator';
 
 export class UpdateMeDto {
@@ -14,10 +14,6 @@ export class UpdateMeDto {
   @IsString()
   @Length(2, 50)
   familyName?: string;
-  @IsOptional()
-  @IsString()
-  @IsUUID('7')
-  image?: string;
   @IsOptional()
   @IsString()
   @Matches(/^\+[1-9]\d{3,15}$/, {
