@@ -24,7 +24,7 @@ type ImageProps = {
   uploadedBy?: UserId | null;
   createdAt: Date;
 };
-type ImagePrimitives = {
+export type ImagePrimitives = {
   id: string;
   name: string;
   mimeType: string;
@@ -81,6 +81,6 @@ export class Image {
     return this.props.uploadedBy?.toString();
   }
   toJSON() {
-    return serializeProps(this.props);
+    return { ...serializeProps(this.props) };
   }
 }
