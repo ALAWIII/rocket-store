@@ -8,6 +8,9 @@ import { FindUsersResponseDto } from './dto/find-users-response.dto';
 import { ImagesService } from '../images/images.service';
 import { UserImage } from './domain/user-image';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
+import { AsyncResult, Result } from '@allawiii/results-ts';
+import { ImageServiceError } from '../images/images.service.error';
+import { RemoveImagesResponseDto } from '../images/dto/remove-images-response.dto';
 
 type Filters = Omit<FindUsersFlatQueryDto, 'limit' | 'page'>;
 type FindUsersByQueryDto = Pick<FindUsersFlatQueryDto, 'page' | 'limit'> & {
@@ -109,5 +112,11 @@ export class UsersService {
     if (oldImageId.isSome()) await removeImageQuietly(oldImageId.unwrap());
 
     return image;
+  }
+  removeProfileImage(userId: string): Promise<RemoveImagesResponseDto> {
+    return this.userRepo
+      .findUserImage(userId)
+      .andThen((uimg) => this.imgService.removeImages([uimg.toJSON().imageId]))
+      .unwrap();
   }
 }
