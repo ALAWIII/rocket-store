@@ -27,7 +27,7 @@ export class ObjectStorageS3Client {
       forcePathStyle: true,
       requestHandler: new NodeHttpHandler({
         connectionTimeout: 5_000,
-        requestTimeout: 30_000,
+        requestTimeout: 120_000,
         httpsAgent: agent,
       }),
     });
