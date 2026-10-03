@@ -43,4 +43,5 @@ export abstract class IUserRepository {
     targetUserId: string;
     targetRoleId: string;
   }): DBResult<User>;
+  abstract findUserImage(userId: string): DBResult<UserImage>;
 }

@@ -14,7 +14,7 @@ import {
   UnknownDatabaseError,
 } from 'src/modules/shared/errors/database.error';
 import { DBResult } from 'src/modules/shared/errors/error.types';
-import { Option, Result } from '@allawiii/results-ts';
+import { AsyncResult, Option, Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
 import { UserMapper } from '../mappers/users.mapper';
@@ -268,6 +268,13 @@ export class UserRepository implements IUserRepository {
 
       return Option.fromNullish(row.oldImageId);
     }).mapErr(mapTypeOrmError);
+  }
+  findUserImage(userId: string): DBResult<UserImage> {
+    return Result.wrapAsync(() =>
+      this.userImageRepo.findOneByOrFail({ userId }),
+    )
+      .andThen((simg) => UserMapper.toDomainUserImg(simg))
+      .mapErr(mapTypeOrmError);
   }
   private createFindUsersQuery(
     requesterRoleId: string,
