@@ -27,6 +27,7 @@ export class PgBossCoreService implements OnModuleInit, OnModuleDestroy {
       schedule: true,
       maintenanceIntervalSeconds: 86400, // 1 day
       queueCacheIntervalSeconds: 60,
+      connectionTimeoutMillis: 10_000, // wait for a connection 10 seconds
     });
 
     this._boss.on('error', (err) =>
@@ -40,7 +41,7 @@ export class PgBossCoreService implements OnModuleInit, OnModuleDestroy {
   }
 
   async onModuleDestroy(): Promise<void> {
-    await this._boss.stop({ graceful: true, timeout: 30_000 });
+    await this._boss.stop({ graceful: true, timeout: 30_000 }); // 30 second
     this.logger.log('pg-boss stopped');
   }
 
