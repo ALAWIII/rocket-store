@@ -9,12 +9,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { User } from '../../domain/user';
-import { RecordNotFoundError } from 'src/modules/shared/errors/database.error';
+import {
+  RecordNotFoundError,
+  UnknownDatabaseError,
+} from 'src/modules/shared/errors/database.error';
 import { DBResult } from 'src/modules/shared/errors/error.types';
-import { Result } from '@allawiii/results-ts';
+import { Option, Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
 import { UserMapper } from '../mappers/users.mapper';
+import { UserImagesEntity } from '../entities/user-images.entity';
+import { UserImage } from '../../domain/user-image';
 
 type UsersFindResult = {
   users: User[];
@@ -40,6 +45,8 @@ export class UserRepository implements IUserRepository {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepo: Repository<UserEntity>,
+    @InjectRepository(UserImagesEntity)
+    private readonly userImageRepo: Repository<UserImagesEntity>,
   ) {}
 
   findMe(id: string): DBResult<User> {
@@ -230,7 +237,32 @@ export class UserRepository implements IUserRepository {
       })
       .mapErr(mapTypeOrmError);
   }
+  attachImage(userImg: UserImage): DBResult<Option<string>> {
+    return Result.wrapAsync(async () => {
+      const values = userImg.toJSON();
 
+      const old = this.userImageRepo
+        .createQueryBuilder('o')
+        .select('o.imageId', 'imageId')
+        .where('o.userId = :userId', { userId: values.userId })
+        .setLock('pessimistic_write'); // FOR UPDATE
+
+      const result = await this.userImageRepo
+        .createQueryBuilder()
+        .addCommonTableExpression(old, 'old_img')
+        .insert()
+        .values(values)
+        .orUpdate(['id', 'imageId', 'createdAt'], ['userId'])
+        .returning('(SELECT "imageId" FROM old_img) AS "oldImageId"')
+        .execute();
+
+      const [row] = result.raw as { oldImageId: string | null }[];
+
+      if (!row) throw new UnknownDatabaseError('attachImage: no row returned');
+
+      return Option.fromNullish(row.oldImageId);
+    }).mapErr(mapTypeOrmError);
+  }
   private createFindUsersQuery(
     requesterRoleId: string,
   ): SelectQueryBuilder<UserEntity> {

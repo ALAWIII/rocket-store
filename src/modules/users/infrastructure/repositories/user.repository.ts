@@ -1,5 +1,7 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { User } from '../../domain/user';
+import { UserImage } from '../../domain/user-image';
+import { Option } from '@allawiii/results-ts';
 export type UpdateUserRepoData = {
   name?: string;
   givenName?: string;
@@ -31,6 +33,7 @@ export abstract class IUserRepository {
     data: FindUsersByParams,
   ): DBResult<{ users: User[]; total: number }>;
   abstract updateById(id: string, data: UpdateUserRepoData): DBResult<User>;
+  abstract attachImage(userImg: UserImage): DBResult<Option<string>>;
   abstract assignUsersRole(d: {
     requesterRoleId: string;
     oldRoleId: string;
