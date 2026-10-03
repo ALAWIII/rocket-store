@@ -1,4 +1,4 @@
-import { UserId } from 'src/modules/shared/value-objects/ids';
+import { RoleId, UserId } from 'src/modules/shared/value-objects/ids';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 import { Email } from 'src/modules/shared/value-objects/email';
 import { Name } from 'src/modules/shared/value-objects/name';
@@ -6,6 +6,11 @@ import { Phone } from 'src/modules/shared/value-objects/phone';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { Err, Ok, Result } from '@allawiii/results-ts';
 import { optional } from 'src/modules/shared/utils/optional.util';
+import { Image, ImagePrimitives } from 'src/modules/images/domain/image';
+import {
+  Serialized,
+  serializeProps,
+} from 'src/modules/shared/utils/serialize-props.util';
 
 type UserProps = {
   readonly id: UserId;
@@ -13,8 +18,8 @@ type UserProps = {
   name: Name;
   givenName?: Name | null;
   familyName?: Name | null;
-  roleId: string;
-  image?: string;
+  roleId: RoleId;
+  image?: Image;
   phone?: Phone;
   updatedAt: Date;
   readonly createdAt: Date;
@@ -26,7 +31,7 @@ type UserPrimitives = {
   givenName?: string | null;
   familyName?: string | null;
   roleId: string;
-  image?: string;
+  image?: Serialized<ImagePrimitives>;
   phone?: string;
   updatedAt: Date;
   createdAt: Date;
@@ -40,37 +45,28 @@ export class User {
   static fromPrimitives(data: UserPrimitives): Result<User, ValueObjectError> {
     const dataValidated = unwrapResultObject({
       id: UserId.create(data.id),
+      roleId: RoleId.create(data.roleId),
       email: Email.create(data.email),
       name: Name.create(data.name),
       givenName: optional(data.givenName, (value) => Name.create(value)),
       familyName: optional(data.familyName, (value) => Name.create(value)),
       phone: optional(data.phone, (value) => Phone.create(value)),
+      image: optional(data.image, (value) =>
+        Image.restore({ ...value, createdAt: new Date(value.createdAt) }),
+      ),
     });
     if (dataValidated.isErr()) return Err(dataValidated.error);
 
     return Ok(
       new User({
         ...dataValidated.value,
-        image: data.image,
-        roleId: data.roleId,
         createdAt: data.createdAt,
         updatedAt: data.updatedAt,
       }),
     );
   }
 
-  toJSON(): UserPrimitives {
-    return {
-      id: this.data.id.toString(),
-      name: this.data.name.value,
-      email: this.data.email.value,
-      givenName: this.data.givenName?.value,
-      familyName: this.data.familyName?.value,
-      roleId: this.data.roleId,
-      image: this.data.image,
-      phone: this.data.phone?.value,
-      updatedAt: this.data.updatedAt,
-      createdAt: this.data.createdAt,
-    };
+  toJSON() {
+    return serializeProps(this.data);
   }
 }
