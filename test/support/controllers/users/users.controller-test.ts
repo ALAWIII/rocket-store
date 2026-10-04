@@ -71,4 +71,12 @@ export class UsersControllerTest {
     const body = parseResponseBody<ImageResponseDto>(response, statusCodesListNormalize(statusCodes));
     return { response, body };
   }
+  async deleteProfileImage(statusCodes?: ExpectedTestStatusCode) {
+    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
+
+    const response = await this.agent.delete(`${this.urlPrefix}/me/profile-image`).expect(expectedStatus.code);
+
+    const body = parseResponseBody<ImageResponseDto>(response, statusCodesListNormalize(expectedStatus));
+    return { response, body };
+  }
 }
