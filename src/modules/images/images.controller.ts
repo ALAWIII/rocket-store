@@ -23,8 +23,8 @@ import { RemoveImagesResponseDto } from './dto/remove-images-response.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Session } from '@thallesp/nestjs-better-auth';
 import type { AppSession } from 'src/auth/auth.config';
-import { UploadFileInfoDto } from './dto/upload-file-info.dto';
-import { fileFilter } from './util/file-filter.util';
+import { UploadFileInfoDto } from '../shared/dto/upload-file-info.dto';
+import { fileFilter } from '../shared/utils/file-filter.util';
 @Controller('images')
 export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}

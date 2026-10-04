@@ -2,7 +2,7 @@ import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
 import { UserAgent } from '../helpers/app-test.helper';
 import { ExpectedTestStatusCode } from '../types/expected-test-status-code.type';
 import { parseResponseBody, statusCodesListNormalize } from '../utils/parse-response-body.util';
-import { UploadFileInfoDto } from 'src/modules/images/dto/upload-file-info.dto';
+import { UploadFileInfoDto } from 'src/modules/shared/dto/upload-file-info.dto';
 import { Test } from 'supertest';
 import { RemoveImagesResponseDto } from 'src/modules/images/dto/remove-images-response.dto';
 import { FindUnusedImagesDto } from 'src/modules/images/dto/find-unused-images-pagination.dto';
