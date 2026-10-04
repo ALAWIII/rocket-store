@@ -27,9 +27,13 @@ export class UsersControllerTest {
   withAgent(agent: UserAgent): UsersControllerTest {
     return new UsersControllerTest(agent);
   }
-  async findMe(statusCode: ExpectedTestStatusCode) {
-    const response = await this.agent.get('/api/v1/users/me').expect(statusCode.code);
-    const body = parseResponseBody<UserTestDto>(response, statusCodesListNormalize(statusCode));
+  async findMe(statusCode?: ExpectedTestStatusCode) {
+    const expectedStatusCode = statusCode ?? {
+      code: 200,
+      parseBody: true,
+    };
+    const response = await this.agent.get('/api/v1/users/me').expect(expectedStatusCode.code);
+    const body = parseResponseBody<UserTestDto>(response, statusCodesListNormalize(expectedStatusCode));
     return { response, body };
   }
   async findAll(statusCode: ExpectedTestStatusCode, query: FindUsersFilterTest = {}) {
