@@ -2,12 +2,12 @@ import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
 import { UserAgent } from '../helpers/app-test.helper';
 import { ExpectedTestStatusCode } from '../types/expected-test-status-code.type';
 import { parseResponseBody, statusCodesListNormalize } from '../utils/parse-response-body.util';
-import { UploadFileInfoDto } from 'src/modules/shared/dto/upload-file-info.dto';
 import { RemoveImagesResponseDto } from 'src/modules/images/dto/remove-images-response.dto';
 import { FindUnusedImagesDto } from 'src/modules/images/dto/find-unused-images-pagination.dto';
 import { FindUnusedImagesResponseDto } from 'src/modules/images/dto/find-unused-images-response.dto';
 import { waitStorageForAllDeletions } from '../utils/wait-storage-for-all-deletions.util';
 import { attachBodyFields } from '../utils/attach-body-fields.util';
+import { UploadImage, UploadImageOptions } from '../utils/upload-random-image.util';
 
 export class ImagesControllerTest {
   readonly urlPrefix = '/api/v1/images';
@@ -15,13 +15,11 @@ export class ImagesControllerTest {
   withAgent(agent: UserAgent): ImagesControllerTest {
     return new ImagesControllerTest(agent);
   }
-  async upload(file: Buffer, finfo: UploadFileInfoDto, statusCodes: ExpectedTestStatusCode) {
-    const nameWithExt = finfo.name;
-    const name = finfo.name.split('.')[0];
-    const fileInfo = { name, altText: finfo.altText };
+  async upload(options?: UploadImageOptions) {
+    const { fileBuffer, finfo, statusCodes, nameWithExt } = await UploadImage.prepare(options);
     const response = await attachBodyFields(
-      this.agent.post(this.urlPrefix).attach('file', file, nameWithExt),
-      fileInfo,
+      this.agent.post(this.urlPrefix).attach('file', fileBuffer, nameWithExt),
+      finfo,
     ).expect(statusCodes.code);
 
     const body = parseResponseBody<ImageResponseDto>(response, statusCodesListNormalize(statusCodes));
