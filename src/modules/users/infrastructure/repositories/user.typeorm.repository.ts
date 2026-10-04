@@ -219,25 +219,30 @@ export class UserRepository implements IUserRepository {
   }
   attachImage(userImg: UserImage): DBResult<Option<string>> {
     return Result.wrapAsync(async () => {
-      const values = userImg.toJSON();
+      const v = userImg.toJSON();
 
-      const old = this.userImageRepo
-        .createQueryBuilder('o')
-        .select('o.imageId', 'imageId')
-        .where('o.userId = :userId', { userId: values.userId })
-        .setLock('pessimistic_write'); // FOR UPDATE
+      const deleted = this.userImageRepo
+        .createQueryBuilder()
+        .delete()
+        .where('"userId" = :userId', { userId: v.userId })
+        .returning('"imageId"');
 
       const result = await this.userImageRepo
         .createQueryBuilder()
-        .addCommonTableExpression(old, 'old_img')
+        .addCommonTableExpression(deleted, 'deleted')
         .insert()
-        .values(values)
-        .orUpdate(['id', 'imageId', 'createdAt'], ['userId'])
-        .returning('(SELECT "imageId" FROM old_img) AS "oldImageId"')
+        .values({
+          ...v,
+          // forces `deleted` to finish before the row is inserted
+          createdAt: () =>
+            `CASE WHEN (SELECT count(*) FROM deleted) >= 0
+                  THEN CAST(:createdAt AS timestamptz) END`,
+        })
+        .setParameter('createdAt', v.createdAt)
+        .returning('(SELECT "imageId" FROM deleted) AS "oldImageId"')
         .execute();
 
       const [row] = result.raw as { oldImageId: string | null }[];
-
       if (!row) throw new UnknownDatabaseError('attachImage: no row returned');
 
       return Option.fromNullish(row.oldImageId);
