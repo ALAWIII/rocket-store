@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -25,6 +26,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UploadFileInfoDto } from '../shared/dto/upload-file-info.dto';
 import { fileFilter } from '../shared/utils/file-filter.util';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
+import { AffectedDeletedResponseDto } from '../shared/dto/affected-deleted-response.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly service: UsersService) {}
@@ -81,7 +83,7 @@ export class UsersController {
       affected: await this.service.assignRoleToUsers(session.user.roleId, dto),
     };
   }
-  @Put(':id/profile-image')
+  @Put('me/profile-image')
   @RequirePermission(AllPermissions.images.ImagesUploadOwn)
   @UseInterceptors(
     FileInterceptor('file', {
@@ -95,5 +97,10 @@ export class UsersController {
     @Session() session: AppSession,
   ): Promise<ImageResponseDto> {
     return this.service.setProfileImage(file, session.user.id, fileInfo);
+  }
+  @Delete('me/profile-image')
+  @RequirePermission(AllPermissions.images.ImagesDeleteOwn)
+  deleteProfileImage(@Session() session: AppSession): Promise<AffectedDeletedResponseDto> {
+    return this.service.removeProfileImage(session.user.id);
   }
 }
