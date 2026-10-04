@@ -8,7 +8,7 @@ import { FindUsersResponseDto } from './dto/find-users-response.dto';
 import { ImagesService } from '../images/images.service';
 import { UserImage } from './domain/user-image';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
-import { RemoveImagesResponseDto } from '../images/dto/remove-images-response.dto';
+import { AffectedDeletedResponseDto } from '../shared/dto/affected-deleted-response.dto';
 
 type Filters = Omit<FindUsersFlatQueryDto, 'limit' | 'page'>;
 type FindUsersByQueryDto = Pick<FindUsersFlatQueryDto, 'page' | 'limit'> & {
@@ -99,7 +99,7 @@ export class UsersService {
 
     return image;
   }
-  removeProfileImage(userId: string): Promise<RemoveImagesResponseDto> {
+  removeProfileImage(userId: string): Promise<AffectedDeletedResponseDto> {
     return this.userRepo
       .findUserImage(userId)
       .andThen((uimg) => this.imgService.removeImages([uimg.toJSON().imageId]))
