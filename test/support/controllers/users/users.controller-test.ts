@@ -1,8 +1,11 @@
+import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
 import { UserAgent } from 'test/support/helpers/app-test.helper';
 import { ExpectedTestStatusCode } from 'test/support/types/expected-test-status-code.type';
 import { UpdateUserTestDto } from 'test/support/types/user/update-user.dto.type';
 import { UserTestDto } from 'test/support/types/user/user.dto.type';
+import { attachBodyFields } from 'test/support/utils/attach-body-fields.util';
 import { parseResponseBody, statusCodesListNormalize } from 'test/support/utils/parse-response-body.util';
+import { UploadImage, UploadImageOptions } from 'test/support/utils/upload-random-image.util';
 
 type FindUsersFilterTest = {
   name?: string;
@@ -19,6 +22,7 @@ type FindUsersFilterTest = {
 };
 
 export class UsersControllerTest {
+  readonly urlPrefix = '/api/v1/users';
   constructor(private readonly agent: UserAgent) {}
   withAgent(agent: UserAgent): UsersControllerTest {
     return new UsersControllerTest(agent);
@@ -54,6 +58,17 @@ export class UsersControllerTest {
   async reassignUsersRole(roles: { oldRoleId: string; newRoleId: string }, statusCode: ExpectedTestStatusCode) {
     const response = await this.agent.patch(`/api/v1/users/roles/reassign`).send(roles).expect(statusCode.code);
     const body = parseResponseBody<{ affected: number }>(response, statusCodesListNormalize(statusCode));
+    return { response, body };
+  }
+
+  async uploadProfileImage(options?: UploadImageOptions) {
+    const { fileBuffer, finfo, statusCodes, nameWithExt } = await UploadImage.prepare(options);
+    const response = await attachBodyFields(
+      this.agent.put(`${this.urlPrefix}/me/profile-image`).attach('file', fileBuffer, nameWithExt),
+      finfo,
+    ).expect(statusCodes.code);
+
+    const body = parseResponseBody<ImageResponseDto>(response, statusCodesListNormalize(statusCodes));
     return { response, body };
   }
 }
