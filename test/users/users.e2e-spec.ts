@@ -579,9 +579,9 @@ describe.concurrent('users profile-image (e2e)', () => {
     }) => {
       const img = (await userController.updateProfileImage()).body!;
       const affected = (await userController.deleteProfileImage()).body!;
+      expect(affected).toEqual({ affected: 1 });
       await waitJobUntilFinish(db.dataSource, [img.id]);
       await waitStorageForAllDeletions([img.id], (id: string) => storageClient.exists(id));
-      expect(affected).toEqual({ affected: 1 });
       const userAfterImgDeletion = (await userController.findById(adminUser.userDb.id)).body!;
       expect(userAfterImgDeletion.image).toBeUndefined();
     });
