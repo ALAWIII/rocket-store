@@ -61,7 +61,7 @@ export class UsersControllerTest {
     return { response, body };
   }
 
-  async uploadProfileImage(options?: UploadImageOptions) {
+  async updateProfileImage(options?: UploadImageOptions) {
     const { fileBuffer, finfo, statusCodes, nameWithExt } = await UploadImage.prepare(options);
     const response = await attachBodyFields(
       this.agent.put(`${this.urlPrefix}/me/profile-image`).attach('file', fileBuffer, nameWithExt),
