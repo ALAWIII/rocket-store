@@ -571,10 +571,16 @@ describe.concurrent('users profile-image (e2e)', () => {
     });
   });
   describe('DELETE /api/v1/users/me/profile-image deleteProfileImage', () => {
-    it('should success delete existed user profile image.', async ({ userController, db, adminUser }) => {
+    it('should success delete existed user profile image.', async ({
+      userController,
+      db,
+      storageClient,
+      adminUser,
+    }) => {
       const img = (await userController.updateProfileImage()).body!;
-      waitJobUntilFinish(db.dataSource, [img.id]);
       const affected = (await userController.deleteProfileImage()).body!;
+      await waitJobUntilFinish(db.dataSource, [img.id]);
+      await waitStorageForAllDeletions([img.id], (id: string) => storageClient.exists(id));
       expect(affected).toEqual({ affected: 1 });
       const userAfterImgDeletion = (await userController.findById(adminUser.userDb.id)).body!;
       expect(userAfterImgDeletion.image).toBeUndefined();
