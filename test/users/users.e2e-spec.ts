@@ -539,6 +539,13 @@ describe.concurrent('users (e2e)', () => {
 });
 describe.concurrent('users profile-image (e2e)', () => {
   describe('PUT /api/v1/users/me/profile-image updateProfileImage', () => {
+    it('should success upload user profile image for the first time.', async ({ userController }) => {
+      const img = (await userController.updateProfileImage()).body!;
+      const userInfo = (await userController.findMe()).body!;
+      console.log(img);
+      console.log(userInfo.image);
+      expect(img).toEqual(userInfo.image);
+    });
     it('should fail upload user profile image exceeds 2mb in size.', async ({ userController }) => {
       await userController.updateProfileImage({
         expectedStatus: { code: 413 },
