@@ -1,8 +1,4 @@
-import {
-  CategoryId,
-  PageTemplateId,
-  UserId,
-} from 'src/modules/shared/value-objects/ids';
+import { CategoryId, PageTemplateId, UserId } from 'src/modules/shared/value-objects/ids';
 import { Name } from 'src/modules/shared/value-objects/name';
 
 // draft templates only allowed to be hard deleted!
@@ -37,10 +33,7 @@ abstract class PageTemplate {
       this.data.name = info.name;
     }
     if (info.categoryId !== undefined) {
-      this.data.categoryId =
-        info.categoryId === null
-          ? null
-          : CategoryId.create(info.categoryId).unwrap(); // create new id for categoryId if not exist, will cause a bug later!
+      this.data.categoryId = info.categoryId === null ? null : CategoryId.create(info.categoryId).unwrap(); // create new id for categoryId if not exist, will cause a bug later!
     }
   }
   get id(): PageTemplateId {
@@ -78,10 +71,7 @@ export class PageTemplateDraft extends PageTemplate {
   static restore(props: PageTemplateProps): PageTemplateDraft {
     return new PageTemplateDraft(props);
   }
-  updateContent(props: {
-    editorState: EditorState;
-    renderedHtml: string;
-  }): void {
+  updateContent(props: { editorState: EditorState; renderedHtml: string }): void {
     PageTemplate.validateHtml(props.renderedHtml);
 
     this.data.editorState = props.editorState;

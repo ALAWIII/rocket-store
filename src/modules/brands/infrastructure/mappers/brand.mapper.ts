@@ -1,7 +1,4 @@
-import {
-  CorruptedPersistenceDataError,
-  DatabaseError,
-} from 'src/modules/shared/errors/database.error';
+import { CorruptedPersistenceDataError, DatabaseError } from 'src/modules/shared/errors/database.error';
 import { Brand } from '../../domain/brand';
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 import { ImageMapper } from 'src/modules/images/infrastructure/mappers/images.mapper';
@@ -16,11 +13,7 @@ export class BrandMapper {
     const img = brandDb.logo ? ImageMapper.toDomain(brandDb.logo) : undefined;
     if (img?.isErr()) return img.map();
     return Brand.restore({ ...brandDb, logo: img?.unwrap() }).mapErr(
-      (e) =>
-        new CorruptedPersistenceDataError(
-          `Failed to construct brand from BrandEntity: ${e.message}`,
-          e,
-        ),
+      (e) => new CorruptedPersistenceDataError(`Failed to construct brand from BrandEntity: ${e.message}`, e),
     );
   }
   static toDomainList(brands: BrandEntity[]): Result<Brand[], DatabaseError> {

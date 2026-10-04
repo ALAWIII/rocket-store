@@ -7,9 +7,7 @@ export async function waitJobUntilFinish(
   waiting = 1000,
 ) {
   while (true) {
-    const allCompleted = await dataSource.query<
-      { state: string; data: { Key: string } }[]
-    >(
+    const allCompleted = await dataSource.query<{ state: string; data: { Key: string } }[]>(
       `
        SELECT state, data
        FROM pgboss.job

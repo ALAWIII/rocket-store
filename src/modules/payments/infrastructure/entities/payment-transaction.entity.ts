@@ -16,10 +16,16 @@ export class PaymentTransactionEntity {
   status!: PaymentStatus;
 
   @Column('uuid')
-  @ForeignKey(() => PaymentEntity, (p) => p.id)
+  @ForeignKey(
+    () => PaymentEntity,
+    (p) => p.id,
+  )
   paymentId!: string;
   @Column('uuid')
-  @ForeignKey(() => PaymentProviderEntity, (p) => p.id)
+  @ForeignKey(
+    () => PaymentProviderEntity,
+    (p) => p.id,
+  )
   providerId!: string;
   @Column('text')
   gatewayTransactionId!: string;

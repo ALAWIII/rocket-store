@@ -1,11 +1,6 @@
 // shipment.entity.ts
 
-import {
-  AddressId,
-  OrderId,
-  ShipmentId,
-  ShippingProviderId,
-} from 'src/modules/shared/value-objects/ids';
+import { AddressId, OrderId, ShipmentId, ShippingProviderId } from 'src/modules/shared/value-objects/ids';
 import { ShipmentMethod } from './shipping-method';
 import { ShipmentStatus } from './shipping-status';
 
@@ -26,11 +21,7 @@ type ShipmentProps = {
 
 type CreateShipmentProps = Pick<
   ShipmentProps,
-  | 'orderId'
-  | 'orderAddressId'
-  | 'shipmentMethod'
-  | 'shippingFeeInMinorUnit'
-  | 'providerId'
+  'orderId' | 'orderAddressId' | 'shipmentMethod' | 'shippingFeeInMinorUnit' | 'providerId'
 >;
 
 export class Shipment {
@@ -90,13 +81,8 @@ export class Shipment {
   }
 
   cancel(): void {
-    if (
-      this.props.status === ShipmentStatus.DELIVERED ||
-      this.props.status === ShipmentStatus.CANCELLED
-    ) {
-      throw new Error(
-        'Cannot cancel a DELIVERED or already CANCELLED shipment',
-      );
+    if (this.props.status === ShipmentStatus.DELIVERED || this.props.status === ShipmentStatus.CANCELLED) {
+      throw new Error('Cannot cancel a DELIVERED or already CANCELLED shipment');
     }
     this.props.status = ShipmentStatus.CANCELLED;
     this.touch();

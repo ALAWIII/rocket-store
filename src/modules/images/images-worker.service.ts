@@ -14,12 +14,7 @@ export class ImagesWorkerService implements OnModuleInit {
   async onModuleInit() {
     (await this.jobService.createJobQueue('image.delete')).unwrap();
     for (let x = 1; x <= 5; x++) {
-      (
-        await this.jobService.createWorker<ImageDeletionPayload>(
-          'image.delete',
-          (d) => this.deleteImages(d),
-        )
-      ).unwrap();
+      (await this.jobService.createWorker<ImageDeletionPayload>('image.delete', (d) => this.deleteImages(d))).unwrap();
     }
   }
   private async deleteImages(imgs: ImageDeletionPayload[]) {

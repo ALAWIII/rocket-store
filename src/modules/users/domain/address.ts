@@ -36,10 +36,7 @@ type AddressPrimitives = {
   updatedAt: Date;
   deletedAt?: Date;
 };
-type CreateAddressProps = Omit<
-  AddressPrimitives,
-  'id' | 'createdAt' | 'updatedAt' | 'deletedAt'
->;
+type CreateAddressProps = Omit<AddressPrimitives, 'id' | 'createdAt' | 'updatedAt' | 'deletedAt'>;
 export class Address {
   private constructor(private props: AddressProps) {}
 
@@ -56,9 +53,7 @@ export class Address {
     return newAdrs;
   }
 
-  static fromPrimitives(
-    data: AddressPrimitives,
-  ): Result<Address, ValueObjectError> {
+  static fromPrimitives(data: AddressPrimitives): Result<Address, ValueObjectError> {
     const dataValidate = unwrapResultObject({
       id: AddressId.create(data.id),
       userId: UserId.create(data.userId),

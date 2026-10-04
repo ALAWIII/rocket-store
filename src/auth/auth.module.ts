@@ -15,14 +15,7 @@ import { AppConfigService } from 'src/app-config/app-config.service';
   imports: [
     AuthModule.forRootAsync({
       imports: [DatabaseModule, AccessControlModule, EmailModule],
-      inject: [
-        DataSource,
-        Logger,
-        AppConfigService,
-        SystemRolesRegistry,
-        SystemRolesSeedService,
-        IAuthEmailService,
-      ],
+      inject: [DataSource, Logger, AppConfigService, SystemRolesRegistry, SystemRolesSeedService, IAuthEmailService],
       useFactory: async (
         dataSource: DataSource,
         logger: Logger,
@@ -33,13 +26,7 @@ import { AppConfigService } from 'src/app-config/app-config.service';
       ) => {
         await systemRolesSeed.ensureSeeded();
         return {
-          auth: createAuth(
-            dataSource,
-            logger,
-            config,
-            systemRoles.getCustomerRoleId(),
-            emailService,
-          ),
+          auth: createAuth(dataSource, logger, config, systemRoles.getCustomerRoleId(), emailService),
         };
       },
     }),

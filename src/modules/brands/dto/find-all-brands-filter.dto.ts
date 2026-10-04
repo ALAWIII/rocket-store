@@ -1,12 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsInt,
-  IsOptional,
-  IsString,
-  Length,
-  Matches,
-  Min,
-} from 'class-validator';
+import { IsInt, IsOptional, IsString, Length, Matches, Min } from 'class-validator';
 import { brandRegex } from 'src/modules/shared/value-objects/brand-name';
 
 export class FindAllBrandsFilterDto {

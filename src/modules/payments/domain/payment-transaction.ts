@@ -1,8 +1,4 @@
-import {
-  PaymentId,
-  PaymentProviderId,
-  PaymentTransactionId,
-} from 'src/modules/shared/value-objects/ids';
+import { PaymentId, PaymentProviderId, PaymentTransactionId } from 'src/modules/shared/value-objects/ids';
 import { PaymentStatus } from './payment-status';
 
 type PaymentTransactionProps = {
@@ -20,10 +16,7 @@ type PaymentTransactionProps = {
   cardBrand?: string | null; // The card type/brand (e.g. "visa", "mastercard", "amex").
   receiptUrl?: string | null; // A URL to the payment receipt from the gateway
 };
-type CreatePaymentTransactionProps = Omit<
-  PaymentTransactionProps,
-  'id' | 'status' | 'createdAt' | 'updatedAt'
->;
+type CreatePaymentTransactionProps = Omit<PaymentTransactionProps, 'id' | 'status' | 'createdAt' | 'updatedAt'>;
 export class PaymentTransaction {
   private constructor(private props: PaymentTransactionProps) {}
 

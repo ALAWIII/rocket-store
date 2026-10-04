@@ -8,8 +8,7 @@ export class Phone {
     const v = value.trim();
 
     const regex = /^\+[1-9]\d{3,15}$/;
-    if (!regex.test(v))
-      return Err(new ValueObjectError('Invalid phone number'));
+    if (!regex.test(v)) return Err(new ValueObjectError('Invalid phone number'));
 
     return Ok(new Phone(v));
   }

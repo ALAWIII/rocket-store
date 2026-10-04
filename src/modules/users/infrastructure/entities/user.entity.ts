@@ -28,11 +28,18 @@ export class UserEntity {
   phone!: string | null;
 
   @Column('uuid', { name: 'image', nullable: true })
-  @ForeignKey(() => ImageEntity, (i) => i.id, { onDelete: 'SET NULL' })
+  @ForeignKey(
+    () => ImageEntity,
+    (i) => i.id,
+    { onDelete: 'SET NULL' },
+  )
   image!: string | null;
 
   @Column({ type: 'uuid' })
-  @ForeignKey(() => RoleEntity, (r) => r.id)
+  @ForeignKey(
+    () => RoleEntity,
+    (r) => r.id,
+  )
   roleId!: string;
   @UpdateDateColumnTz({ name: 'updatedAt' })
   updatedAt!: Date;

@@ -139,16 +139,11 @@ export class ObjectStorageClientTest {
   /** checks if an object of a given key exists in storage or not */
   async exists(key: string): Promise<boolean> {
     try {
-      await this.client.send(
-        new HeadObjectCommand({ Bucket: this.bucket, Key: key }),
-      );
+      await this.client.send(new HeadObjectCommand({ Bucket: this.bucket, Key: key }));
       return true; // Object exists
     } catch (error: any) {
       // S3 throws NotFound or 404 when the object is deleted
-      if (
-        error instanceof NotFound &&
-        (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404)
-      ) {
+      if (error instanceof NotFound && (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404)) {
         return false;
       }
       throw error; // Rethrow actual network/permission errors

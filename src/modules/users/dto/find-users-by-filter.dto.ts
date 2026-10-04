@@ -1,14 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsOptional,
-  IsString,
-  Length,
-  IsInt,
-  Min,
-  IsEmail,
-  IsUUID,
-  Matches,
-} from 'class-validator';
+import { IsOptional, IsString, Length, IsInt, Min, IsEmail, IsUUID, Matches } from 'class-validator';
 
 export class FindUsersFlatQueryDto {
   @IsOptional()

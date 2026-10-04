@@ -1,9 +1,4 @@
-import {
-  BrandId,
-  CategoryId,
-  PaymentProviderId,
-  ProductId,
-} from 'src/modules/shared/value-objects/ids';
+import { BrandId, CategoryId, PaymentProviderId, ProductId } from 'src/modules/shared/value-objects/ids';
 // extend this type with more field types if you encountered new props that requires new types.
 type TypeMap = {
   string: string;
@@ -19,10 +14,7 @@ export abstract class PromotionRuleType<T extends Record<string, unknown>> {
   abstract readonly ruleType: string;
 
   protected constructor(protected readonly props: T) {}
-  protected static validateShape(
-    data: Record<string, unknown>,
-    shape: Shape,
-  ): void {
+  protected static validateShape(data: Record<string, unknown>, shape: Shape): void {
     for (const [key, type] of Object.entries(shape)) {
       if (!(key in data)) throw new Error(`Missing field: ${key}`);
       if (typeof data[key] !== type) {

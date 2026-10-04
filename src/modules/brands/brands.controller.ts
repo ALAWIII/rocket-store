@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Param,
-  ParseUUIDPipe,
-  Patch,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { BrandsService } from './brands.service';
@@ -41,9 +30,7 @@ export class BrandsController {
     return this.brandService.renameBrand(id, name);
   }
   @Get(':id')
-  findById(
-    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
-  ): Promise<BrandResponseDto> {
+  findById(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string): Promise<BrandResponseDto> {
     return this.brandService.findById(id);
   }
   @Get()
@@ -59,9 +46,7 @@ export class BrandsController {
   }
   @Get(':id/images')
   @RequirePermission(AllPermissions.images.ImagesReadAny)
-  findBanners(
-    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
-  ): Promise<ImageResponseDto[]> {
+  findBanners(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string): Promise<ImageResponseDto[]> {
     return this.brandService.findBanners(id);
   }
   @Post(':id/images')

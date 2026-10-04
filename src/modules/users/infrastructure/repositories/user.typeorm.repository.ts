@@ -1,20 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import {
-  FindUsersByParams,
-  IUserRepository,
-  UpdateUserRepoData,
-  UserFilters,
-} from './user.repository';
+import { FindUsersByParams, IUserRepository, UpdateUserRepoData, UserFilters } from './user.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
 import { User } from '../../domain/user';
-import {
-  RecordNotFoundError,
-  UnknownDatabaseError,
-} from 'src/modules/shared/errors/database.error';
+import { RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
 import { DBResult } from 'src/modules/shared/errors/error.types';
-import { AsyncResult, Option, Result } from '@allawiii/results-ts';
+import { Option, Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { RoleEntity } from 'src/modules/access-control/infrastructure/entities/role.entity';
 import { UserMapper } from '../mappers/users.mapper';
@@ -52,9 +44,7 @@ export class UserRepository implements IUserRepository {
 
   findMe(id: string): DBResult<User> {
     return Result.wrapAsync(() =>
-      this.withProfileImage(this.userRepo.createQueryBuilder(usr))
-        .where(`${usr}.id = :id`, { id })
-        .getOneOrFail(),
+      this.withProfileImage(this.userRepo.createQueryBuilder(usr)).where(`${usr}.id = :id`, { id }).getOneOrFail(),
     )
       .andThen((v) => UserMapper.toDomain(v))
       .mapErr(mapTypeOrmError);
@@ -88,11 +78,7 @@ export class UserRepository implements IUserRepository {
       .andThen((user) => UserMapper.toDomain(user))
       .mapErr(mapTypeOrmError);
   }
-  assignUserRole(d: {
-    requesterRoleId: string;
-    targetUserId: string;
-    targetRoleId: string;
-  }): DBResult<User> {
+  assignUserRole(d: { requesterRoleId: string; targetUserId: string; targetRoleId: string }): DBResult<User> {
     return Result.wrapAsync(async () => {
       const oldUserRoleIdCte = this.userRepo
         .createQueryBuilder('user')
@@ -124,14 +110,8 @@ export class UserRepository implements IUserRepository {
         .createQueryBuilder()
         .addCommonTableExpression(oldUserRoleIdCte, 'old_user_role_id')
         .addCommonTableExpression(oldRolePermissionsCte, 'old_role_permissions')
-        .addCommonTableExpression(
-          targetRolePermissionsCte,
-          'target_role_permissions',
-        )
-        .addCommonTableExpression(
-          requesterAssignScopeCte,
-          'requester_assign_scope',
-        )
+        .addCommonTableExpression(targetRolePermissionsCte, 'target_role_permissions')
+        .addCommonTableExpression(requesterAssignScopeCte, 'requester_assign_scope')
         .update(UserEntity)
         .set({ roleId: d.targetRoleId })
         .where('id = :targetUserId', {
@@ -159,9 +139,7 @@ export class UserRepository implements IUserRepository {
       const [user] = result.raw as UserEntity[];
 
       if (result.affected === 0 || !user) {
-        throw new RecordNotFoundError(
-          `user role could not be assigned: ${d.targetUserId}`,
-        );
+        throw new RecordNotFoundError(`user role could not be assigned: ${d.targetUserId}`);
       }
 
       return user;
@@ -169,11 +147,7 @@ export class UserRepository implements IUserRepository {
       .andThen((v) => UserMapper.toDomain(v))
       .mapErr(mapTypeOrmError);
   }
-  assignUsersRole(d: {
-    requesterRoleId: string;
-    oldRoleId: string;
-    newRoleId: string;
-  }): DBResult<number> {
+  assignUsersRole(d: { requesterRoleId: string; oldRoleId: string; newRoleId: string }): DBResult<number> {
     return Result.wrapAsync(async () => {
       const requesterScope = this.userRepo.manager
         .createQueryBuilder(RoleEntity, 'role')
@@ -270,15 +244,11 @@ export class UserRepository implements IUserRepository {
     }).mapErr(mapTypeOrmError);
   }
   findUserImage(userId: string): DBResult<UserImage> {
-    return Result.wrapAsync(() =>
-      this.userImageRepo.findOneByOrFail({ userId }),
-    )
+    return Result.wrapAsync(() => this.userImageRepo.findOneByOrFail({ userId }))
       .andThen((simg) => UserMapper.toDomainUserImg(simg))
       .mapErr(mapTypeOrmError);
   }
-  private createFindUsersQuery(
-    requesterRoleId: string,
-  ): SelectQueryBuilder<UserEntity> {
+  private createFindUsersQuery(requesterRoleId: string): SelectQueryBuilder<UserEntity> {
     const qb = this.userRepo.createQueryBuilder(usr);
 
     this.applyAllowedRolesScope(qb, requesterRoleId);
@@ -286,10 +256,7 @@ export class UserRepository implements IUserRepository {
     return qb;
   }
 
-  private applyAllowedRolesScope(
-    qb: SelectQueryBuilder<UserEntity>,
-    requesterRoleId: string,
-  ): void {
+  private applyAllowedRolesScope(qb: SelectQueryBuilder<UserEntity>, requesterRoleId: string): void {
     // bring assignScope of user requester.
     const requesterScopeCte = this.userRepo.manager
       .createQueryBuilder(RoleEntity, 'requester_role')
@@ -303,19 +270,14 @@ export class UserRepository implements IUserRepository {
         .subQuery()
         .select('candidate_role.id')
         .from(RoleEntity, 'candidate_role')
-        .where(
-          `(SELECT permissions FROM requester_scope) @> candidate_role.permissions`,
-        )
+        .where(`(SELECT permissions FROM requester_scope) @> candidate_role.permissions`)
         .getQuery();
       // here return a query for fetching all users that their roles fall in this list of role Id's
       return `${usr}."roleId" IN ${allowedRolesSubQuery}`;
     });
   }
 
-  private applyRoleFilter(
-    qb: SelectQueryBuilder<UserEntity>,
-    filters: NormalizedUserFilters,
-  ): void {
+  private applyRoleFilter(qb: SelectQueryBuilder<UserEntity>, filters: NormalizedUserFilters): void {
     if (!filters.roleId) return;
 
     qb.andWhere(`${usr}."roleId" = :filterRoleId`, {
@@ -323,10 +285,7 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  private applyEmailFilter(
-    qb: SelectQueryBuilder<UserEntity>,
-    filters: NormalizedUserFilters,
-  ): void {
+  private applyEmailFilter(qb: SelectQueryBuilder<UserEntity>, filters: NormalizedUserFilters): void {
     if (!filters.email) return;
 
     qb.andWhere(`${usr}.email ILIKE :email ESCAPE '\\'`, {
@@ -334,10 +293,7 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  private applyPhoneFilter(
-    qb: SelectQueryBuilder<UserEntity>,
-    filters: NormalizedUserFilters,
-  ): void {
+  private applyPhoneFilter(qb: SelectQueryBuilder<UserEntity>, filters: NormalizedUserFilters): void {
     if (!filters.phone) return;
 
     qb.andWhere(`${usr}.phone ILIKE :phone ESCAPE '\\'`, {
@@ -345,10 +301,7 @@ export class UserRepository implements IUserRepository {
     });
   }
 
-  private applyNameFilter(
-    qb: SelectQueryBuilder<UserEntity>,
-    filters: NormalizedUserFilters,
-  ): void {
+  private applyNameFilter(qb: SelectQueryBuilder<UserEntity>, filters: NormalizedUserFilters): void {
     if (!filters.name) return;
 
     const namePattern = this.toContainsPattern(filters.name);
@@ -371,10 +324,7 @@ export class UserRepository implements IUserRepository {
     qb.orderBy(`${usr}."createdAt"`, 'DESC');
   }
 
-  private applyPagination(
-    qb: SelectQueryBuilder<UserEntity>,
-    pagination: Pagination,
-  ): void {
+  private applyPagination(qb: SelectQueryBuilder<UserEntity>, pagination: Pagination): void {
     qb.skip(pagination.skip).take(pagination.limit);
   }
 
@@ -416,11 +366,6 @@ export class UserRepository implements IUserRepository {
   ): SelectQueryBuilder<UserEntity & { profileImage?: ImageEntity }> {
     return qb
       .leftJoin(UserImagesEntity, 'ui', `ui.userId = ${alias}.id`)
-      .leftJoinAndMapOne(
-        `${alias}.profileImage`,
-        ImageEntity,
-        'img',
-        'img.id = ui.imageId',
-      );
+      .leftJoinAndMapOne(`${alias}.profileImage`, ImageEntity, 'img', 'img.id = ui.imageId');
   }
 }

@@ -11,10 +11,7 @@ export abstract class IJobsService {
    * @param jobKind
    * @param data
    */
-  abstract sendJobs<T extends JobData>(
-    jobKind: string,
-    jobs: T[],
-  ): AsyncResult<JobId[], JobsError>;
+  abstract sendJobs<T extends JobData>(jobKind: string, jobs: T[]): AsyncResult<JobId[], JobsError>;
   /**
    * Create new worker on a specified existed `jobKind` (queue name).
    * @param jobKind

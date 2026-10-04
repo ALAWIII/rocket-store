@@ -8,8 +8,6 @@ import { FindUsersResponseDto } from './dto/find-users-response.dto';
 import { ImagesService } from '../images/images.service';
 import { UserImage } from './domain/user-image';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
-import { AsyncResult, Result } from '@allawiii/results-ts';
-import { ImageServiceError } from '../images/images.service.error';
 import { RemoveImagesResponseDto } from '../images/dto/remove-images-response.dto';
 
 type Filters = Omit<FindUsersFlatQueryDto, 'limit' | 'page'>;
@@ -31,10 +29,7 @@ export class UsersService {
       .map((v) => v.toJSON())
       .unwrap();
   }
-  findBy(
-    requesterRoleId: string,
-    filters: FindUsersByQueryDto,
-  ): Promise<FindUsersResponseDto> {
+  findBy(requesterRoleId: string, filters: FindUsersByQueryDto): Promise<FindUsersResponseDto> {
     return this.userRepo
       .findBy({
         ...filters,
@@ -51,11 +46,7 @@ export class UsersService {
       .map((v) => v.toJSON())
       .unwrap();
   }
-  assignRoleToUser(
-    requesterRoleId: string,
-    targetUserId: string,
-    targetRoleId: string,
-  ): Promise<UserResponseDto> {
+  assignRoleToUser(requesterRoleId: string, targetUserId: string, targetRoleId: string): Promise<UserResponseDto> {
     return this.userRepo
       .assignUserRole({
         targetRoleId,
@@ -65,10 +56,7 @@ export class UsersService {
       .map((u) => u.toJSON())
       .unwrap();
   }
-  assignRoleToUsers(
-    requesterRoleId: string,
-    d: ReassignUsersRoleDto,
-  ): Promise<number> {
+  assignRoleToUsers(requesterRoleId: string, d: ReassignUsersRoleDto): Promise<number> {
     return this.userRepo
       .assignUsersRole({
         ...d,
@@ -93,9 +81,7 @@ export class UsersService {
       .unwrap();
 
     const removeImageQuietly = (id: string) =>
-      this.imgService
-        .removeImages([id])
-        .inspectErr((e) => this.logger.error(e.message, e));
+      this.imgService.removeImages([id]).inspectErr((e) => this.logger.error(e.message, e));
 
     const userImg = UserImage.create({
       userId: userId,

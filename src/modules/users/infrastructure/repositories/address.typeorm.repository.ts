@@ -52,8 +52,7 @@ export class AddressRepository implements IAddressRepository {
   }
   update(adrs: Address): DBResult<Address> {
     return Result.wrapAsync(async () => {
-      const { id, userId, createdAt, updatedAt, deletedAt, ...values } =
-        adrs.toJSON();
+      const { id, userId, createdAt, updatedAt, deletedAt, ...values } = adrs.toJSON();
 
       const result = await this.addressRepo
         .createQueryBuilder()

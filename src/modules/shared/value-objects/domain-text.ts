@@ -4,10 +4,7 @@ import { ValueObjectError } from './value-object.error';
 export class DomainText {
   private constructor(private readonly _value: string) {}
 
-  static create(
-    value?: string,
-    maxLength = 500,
-  ): Result<DomainText | undefined, ValueObjectError> {
+  static create(value?: string, maxLength = 500): Result<DomainText | undefined, ValueObjectError> {
     if (value === undefined || value.trim() === '') {
       return Ok(undefined);
     }
@@ -15,11 +12,7 @@ export class DomainText {
     const v = value.trim();
 
     if (v.length > maxLength) {
-      return Err(
-        new ValueObjectError(
-          `alt text must not exceed ${maxLength} characters`,
-        ),
-      );
+      return Err(new ValueObjectError(`alt text must not exceed ${maxLength} characters`));
     }
 
     return Ok(new DomainText(v));

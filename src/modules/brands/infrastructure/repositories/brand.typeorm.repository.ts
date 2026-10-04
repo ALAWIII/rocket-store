@@ -7,10 +7,7 @@ import { Brand } from '../../domain/brand';
 import { BrandImagesEntity } from '../entities/brand-images.entity';
 import { Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
-import {
-  RecordNotFoundError,
-  UnknownDatabaseError,
-} from 'src/modules/shared/errors/database.error';
+import { RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
 import { BrandImage } from '../../domain/brand-image';
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 import { Image } from 'src/modules/images/domain/image';
@@ -38,10 +35,7 @@ export class BrandRepository implements IBrandRepository {
         .returning('*')
         .execute();
       const [b] = result.raw as BrandEntity[];
-      if (!b)
-        throw new UnknownDatabaseError(
-          'Failed to return the newly created brand.',
-        );
+      if (!b) throw new UnknownDatabaseError('Failed to return the newly created brand.');
 
       return b;
     })
@@ -79,8 +73,7 @@ export class BrandRepository implements IBrandRepository {
         .execute();
 
       const [brand] = result.raw as BrandEntity[];
-      if (!brand)
-        throw new RecordNotFoundError(`Brand with id ${brandId} not found`);
+      if (!brand) throw new RecordNotFoundError(`Brand with id ${brandId} not found`);
 
       return brand;
     })
@@ -117,20 +110,13 @@ export class BrandRepository implements IBrandRepository {
   }
 
   findAll(options: FindAllFilterOptions = {}): DBResult<Brand[]> {
-    const { limit, skip } = this.normalizePagination(
-      options.page,
-      options.limit,
-    );
+    const { limit, skip } = this.normalizePagination(options.page, options.limit);
 
     return Result.wrapAsync(async () => {
       // 1. CTE: Fetch Images + their brandId from the junction table
       const logoCte = this.brandImageRepo.manager
         .createQueryBuilder(ImageEntity, 'img')
-        .innerJoin(
-          BrandImagesEntity,
-          'bi',
-          'bi.imageId = img.id AND bi.imageRole = :role',
-        )
+        .innerJoin(BrandImagesEntity, 'bi', 'bi.imageId = img.id AND bi.imageRole = :role')
 
         .addSelect('bi.brandId', 'brandId'); // Expose brandId for the main query join
 
@@ -149,9 +135,7 @@ export class BrandRepository implements IBrandRepository {
         .skip(skip)
         .take(limit);
       if (options.name) {
-        brandEntities
-          .andWhere('brand.name ILIKE :name', { name: `%${options.name}%` })
-          .orderBy('brand.name', 'ASC'); // Alphabetical for search
+        brandEntities.andWhere('brand.name ILIKE :name', { name: `%${options.name}%` }).orderBy('brand.name', 'ASC'); // Alphabetical for search
       } else {
         brandEntities
           .orderBy('brand.createdAt', 'DESC') // Newest first for list
@@ -168,19 +152,9 @@ export class BrandRepository implements IBrandRepository {
         const brand = await this.brandRepo
           .createQueryBuilder('brand')
           // 1. Join the junction table
-          .leftJoin(
-            BrandImagesEntity,
-            'bi',
-            'bi.brandId = brand.id AND bi.imageRole = :role',
-            { role: 'logo' },
-          )
+          .leftJoin(BrandImagesEntity, 'bi', 'bi.brandId = brand.id AND bi.imageRole = :role', { role: 'logo' })
           // 2. Map the actual ImageEntity to 'brand.logo'
-          .leftJoinAndMapOne(
-            'brand.logo',
-            ImageEntity,
-            'img',
-            'img.id = bi.imageId',
-          )
+          .leftJoinAndMapOne('brand.logo', ImageEntity, 'img', 'img.id = bi.imageId')
           .where('brand.id = :id', { id })
           .getOneOrFail();
 
@@ -193,9 +167,7 @@ export class BrandRepository implements IBrandRepository {
   }
 
   findBanners(brandId: string): DBResult<Image[]> {
-    return this.findImagesByRole(brandId, 'banner').andThen((images) =>
-      BrandMapper.toDomainBanners(images),
-    );
+    return this.findImagesByRole(brandId, 'banner').andThen((images) => BrandMapper.toDomainBanners(images));
   }
 
   // ============= helper methods ====
@@ -211,13 +183,8 @@ export class BrandRepository implements IBrandRepository {
   }
 
   // Execution wrapper
-  private findImagesByRole(
-    brandId: string,
-    role: 'logo' | 'banner',
-  ): DBResult<ImageEntity[]> {
-    return Result.wrapAsync(() =>
-      this.getImagesByRoleQb(brandId, role).getMany(),
-    ).mapErr(mapTypeOrmError);
+  private findImagesByRole(brandId: string, role: 'logo' | 'banner'): DBResult<ImageEntity[]> {
+    return Result.wrapAsync(() => this.getImagesByRoleQb(brandId, role).getMany()).mapErr(mapTypeOrmError);
   }
   // Helper to build the query (composable)
   private getImagesByRoleQb(
@@ -225,9 +192,7 @@ export class BrandRepository implements IBrandRepository {
     role: 'logo' | 'banner',
     qb?: SelectQueryBuilder<ImageEntity>,
   ): SelectQueryBuilder<ImageEntity> {
-    const baseQb =
-      qb ??
-      this.brandImageRepo.manager.createQueryBuilder(ImageEntity, 'image');
+    const baseQb = qb ?? this.brandImageRepo.manager.createQueryBuilder(ImageEntity, 'image');
 
     return baseQb
       .innerJoin(BrandImagesEntity, 'bi', 'bi.imageId = image.id')

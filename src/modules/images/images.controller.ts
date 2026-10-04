@@ -49,9 +49,7 @@ export class ImagesController {
   }
   @Get('unused')
   @RequirePermission(AllPermissions.images.ImagesReadAny)
-  findUnused(
-    @Query() filters: FindUnusedImagesDto,
-  ): Promise<FindUnusedImagesResponseDto> {
+  findUnused(@Query() filters: FindUnusedImagesDto): Promise<FindUnusedImagesResponseDto> {
     return this.imagesService
       .findUnusedImages(filters)
       .map((v) => {
@@ -75,9 +73,7 @@ export class ImagesController {
   }
   @Get(':id')
   @RequirePermission(AllPermissions.images.ImagesReadAny)
-  findById(
-    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
-  ): Promise<ImageResponseDto> {
+  findById(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string): Promise<ImageResponseDto> {
     return this.imagesService
       .findImageById(id)
       .map((v) => v.toJSON())

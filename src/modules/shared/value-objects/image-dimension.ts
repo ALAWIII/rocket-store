@@ -4,10 +4,7 @@ import { ValueObjectError } from './value-object.error';
 export class Dimension {
   private constructor(private readonly _value: number) {}
 
-  static create(
-    value: number,
-    max = 4096,
-  ): Result<Dimension, ValueObjectError> {
+  static create(value: number, max = 4096): Result<Dimension, ValueObjectError> {
     if (!Number.isSafeInteger(value) || value <= 0) {
       return Err(new ValueObjectError('size must be a positive integer'));
     }

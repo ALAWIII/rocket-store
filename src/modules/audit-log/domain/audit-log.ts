@@ -1,8 +1,4 @@
-import {
-  AuditLogId,
-  UserId,
-  UuidV7Id,
-} from 'src/modules/shared/value-objects/ids';
+import { AuditLogId, UserId, UuidV7Id } from 'src/modules/shared/value-objects/ids';
 import { ValueOf } from 'src/modules/shared/types/value-of';
 export const AuditAction = {
   CREATED: 'created',

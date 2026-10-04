@@ -1,25 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import {
-  FindUnUsedDbResponse,
-  IImageRepository,
-  Pagination,
-} from './image.repository';
+import { FindUnUsedDbResponse, IImageRepository, Pagination } from './image.repository';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Image } from '../../domain/image';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { Result } from '@allawiii/results-ts';
-import {
-  DeleteQueryBuilder,
-  In,
-  Repository,
-  SelectQueryBuilder,
-} from 'typeorm';
+import { DeleteQueryBuilder, In, Repository, SelectQueryBuilder } from 'typeorm';
 import { ImageEntity } from '../entities/image.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  IMAGE_FK_COLUMN,
-  IMAGE_USAGE_TABLES,
-} from 'src/modules/shared/domain/image-usage-table';
+import { IMAGE_FK_COLUMN, IMAGE_USAGE_TABLES } from 'src/modules/shared/domain/image-usage-table';
 import { ImageMapper } from '../mappers/images.mapper';
 
 @Injectable()
@@ -29,16 +17,12 @@ export class ImageRepository implements IImageRepository {
     private readonly imageRepo: Repository<ImageEntity>,
   ) {}
   save(image: Image): DBResult<Image> {
-    return Result.wrapAsync(() =>
-      this.imageRepo.save(this.imageRepo.create(image.toJSON())),
-    )
+    return Result.wrapAsync(() => this.imageRepo.save(this.imageRepo.create(image.toJSON())))
       .mapErr(mapTypeOrmError)
       .andThen((entity) => ImageMapper.toDomain(entity));
   }
   findById(imageId: string): DBResult<Image> {
-    return Result.wrapAsync(() =>
-      this.imageRepo.findOneByOrFail({ id: imageId }),
-    )
+    return Result.wrapAsync(() => this.imageRepo.findOneByOrFail({ id: imageId }))
       .mapErr(mapTypeOrmError)
       .andThen((img) => ImageMapper.toDomain(img));
   }

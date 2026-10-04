@@ -8,10 +8,7 @@ export class AuthConfig {
 
   constructor(cfg: ConfigReader) {
     this.betterAuthSecret = cfg.getOrThrow<string>('BETTER_AUTH_SECRET');
-    this.betterAuthUrl = cfg.get<string>(
-      'BETTER_AUTH_URL',
-      'http://localhost:3000',
-    );
+    this.betterAuthUrl = cfg.get<string>('BETTER_AUTH_URL', 'http://localhost:3000');
     this.googleWebClientId = cfg.getOrThrow<string>('GOOGLE_WEB_CLIENT_ID');
     this.googleClientSecret = cfg.getOrThrow<string>('GOOGLE_CLIENT_SECRET');
   }

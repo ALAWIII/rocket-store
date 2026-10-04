@@ -12,9 +12,5 @@ export abstract class IRoleRepository {
   abstract upsert(role: Role): DBResult<Role>;
   abstract create(role: Role, creatorRoleId: string): DBResult<Role>;
   abstract rename(data: { userRoleId: string; role: Role }): DBResult<Role>;
-  abstract deleteById(ids: {
-    requesterRoleId: string;
-    targetRoleId: string;
-    defaultRoleId: string;
-  }): DBResult<number>;
+  abstract deleteById(ids: { requesterRoleId: string; targetRoleId: string; defaultRoleId: string }): DBResult<number>;
 }

@@ -1,5 +1,5 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, CreateDateColumn, Entity, ForeignKey } from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 import { CategoryEntity } from '../../../categories/infrastructure/entities/category.entity';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
@@ -16,10 +16,17 @@ export class PageTemplateEntity {
   renderedHtml!: string;
 
   @Column('uuid', { nullable: true })
-  @ForeignKey(() => CategoryEntity, (c) => c.id, { onDelete: 'SET NULL' })
+  @ForeignKey(
+    () => CategoryEntity,
+    (c) => c.id,
+    { onDelete: 'SET NULL' },
+  )
   categoryId?: string | null;
   @Column('uuid')
-  @ForeignKey(() => UserEntity, (u) => u.id)
+  @ForeignKey(
+    () => UserEntity,
+    (u) => u.id,
+  )
   createdBy!: string;
   @CreateDateColumnTz()
   createdAt!: Date;

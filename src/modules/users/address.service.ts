@@ -24,10 +24,7 @@ export class AddressService {
   deleteAdrs(userId: string, adrsId: string): Promise<number> {
     return this.addressRepo.delete({ userId, id: adrsId }).unwrap();
   }
-  createAdrs(
-    userId: string,
-    data: CreateAddressDto,
-  ): Promise<AddressResponseDto> {
+  createAdrs(userId: string, data: CreateAddressDto): Promise<AddressResponseDto> {
     const newAdrs = Address.create({
       userId,
       ...data,
@@ -37,11 +34,7 @@ export class AddressService {
       .map((ad) => ad.toJSON())
       .unwrap();
   }
-  updateAdrs(
-    userId: string,
-    id: string,
-    data: UpdateAddressDto,
-  ): Promise<AddressResponseDto> {
+  updateAdrs(userId: string, id: string, data: UpdateAddressDto): Promise<AddressResponseDto> {
     const adrs = Address.fromPrimitives({
       ...data,
       id,

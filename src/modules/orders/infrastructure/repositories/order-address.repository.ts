@@ -8,12 +8,6 @@ export type createOrderAddressData = {
 };
 
 export abstract class IOrderAddressRepository {
-  abstract findByOrderId(
-    userId: string,
-    orderId: string,
-  ): DBResult<OrderAddress[]>;
-  abstract create(
-    userId: string,
-    adrs: createOrderAddressData,
-  ): DBResult<OrderAddress>;
+  abstract findByOrderId(userId: string, orderId: string): DBResult<OrderAddress[]>;
+  abstract create(userId: string, adrs: createOrderAddressData): DBResult<OrderAddress>;
 }

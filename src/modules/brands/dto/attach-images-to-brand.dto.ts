@@ -1,10 +1,4 @@
-import {
-  ArrayNotEmpty,
-  IsArray,
-  IsIn,
-  IsUUID,
-  ValidateNested,
-} from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsIn, IsUUID, ValidateNested } from 'class-validator';
 import { type BrandImageRole } from '../domain/brand-image';
 
 class AttachBrandImageDto {

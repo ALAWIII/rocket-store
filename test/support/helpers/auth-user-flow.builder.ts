@@ -102,9 +102,7 @@ export class UserAuthFlowBuilder {
     let verificationUrl: string | undefined;
 
     if (this.shouldVerify) {
-      verificationUrl = await this.extractVerificationUrl(
-        signup.body.user.email,
-      );
+      verificationUrl = await this.extractVerificationUrl(signup.body.user.email);
       await this.verifySignup(verificationUrl);
       await this.cleanInboxMail(signup.body.user.email);
     }
@@ -135,9 +133,7 @@ export class UserAuthFlowBuilder {
   }
   //==================
   private async fetchUserFromDatabase(userId: string): Promise<UserTestDto> {
-    const user = await this.props.dbDataSource
-      .getRepository(UserEntity)
-      .findOneByOrFail({ id: userId });
+    const user = await this.props.dbDataSource.getRepository(UserEntity).findOneByOrFail({ id: userId });
     return {
       id: user.id,
       name: user.name,
@@ -153,9 +149,7 @@ export class UserAuthFlowBuilder {
     };
   }
   private async fetchRoleFromDatabase(roleId: string): Promise<RoleEntity> {
-    return await this.props.dbDataSource
-      .getRepository(RoleEntity)
-      .findOneByOrFail({ id: roleId });
+    return await this.props.dbDataSource.getRepository(RoleEntity).findOneByOrFail({ id: roleId });
   }
   //==================
   private randomPayload(): UserPayload {
@@ -172,23 +166,15 @@ export class UserAuthFlowBuilder {
       subject: 'Verify your email',
     });
   }
-  private async sendSignupRequest(
-    payload: UserPayload,
-  ): Promise<SignupResponse> {
-    const response = await this.props.userAgent
-      .post('/api/auth/sign-up/email')
-      .send(payload)
-      .expect(200);
+  private async sendSignupRequest(payload: UserPayload): Promise<SignupResponse> {
+    const response = await this.props.userAgent.post('/api/auth/sign-up/email').send(payload).expect(200);
 
     return {
       response,
       body: response.body as SignupResponseBody,
     };
   }
-  private async signinRequest(payload: {
-    email: string;
-    password: string;
-  }): Promise<SiginResponse> {
+  private async signinRequest(payload: { email: string; password: string }): Promise<SiginResponse> {
     const siginrawResp = await this.props.userAgent
       .post('/api/auth/sign-in/email')
       .send({
@@ -214,8 +200,7 @@ export class UserAuthFlowBuilder {
 
     const urls = extractUrlsFromHtml(message.html ?? '');
 
-    const verificationUrl =
-      urls.find((u) => u.includes('/api/auth/verify-email')) ?? urls[0];
+    const verificationUrl = urls.find((u) => u.includes('/api/auth/verify-email')) ?? urls[0];
 
     if (!verificationUrl) {
       throw new Error(`Verification URL was not found for ${email}`);
@@ -229,17 +214,10 @@ export class UserAuthFlowBuilder {
     await this.props.userAgent.get(`${url.pathname}${url.search}`).expect(302);
   }
 
-  private async changeUserRole(
-    userId: string,
-    roleName: string,
-  ): Promise<void> {
-    const role = await this.props.dbDataSource
-      .getRepository(RoleEntity)
-      .findOneByOrFail({ name: roleName });
+  private async changeUserRole(userId: string, roleName: string): Promise<void> {
+    const role = await this.props.dbDataSource.getRepository(RoleEntity).findOneByOrFail({ name: roleName });
 
-    const result = await this.props.dbDataSource
-      .getRepository(UserEntity)
-      .update({ id: userId }, { roleId: role.id });
+    const result = await this.props.dbDataSource.getRepository(UserEntity).update({ id: userId }, { roleId: role.id });
 
     if (result.affected !== 1) {
       throw new Error(`User was not found: ${userId}`);

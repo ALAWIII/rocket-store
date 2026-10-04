@@ -1,8 +1,4 @@
-import {
-  ValidationArguments,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
-} from 'class-validator';
+import { ValidationArguments, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
 import { Permission } from 'src/modules/access-control/domain/permission';
 
 type PermissionDto = {
@@ -12,9 +8,7 @@ type PermissionDto = {
 };
 type CompletePermissionDto = Required<PermissionDto>;
 
-function hasCompletePermissionDto(
-  dto: PermissionDto,
-): dto is CompletePermissionDto {
+function hasCompletePermissionDto(dto: PermissionDto): dto is CompletePermissionDto {
   return !!dto.entity && !!dto.action && !!dto.visibility;
 }
 

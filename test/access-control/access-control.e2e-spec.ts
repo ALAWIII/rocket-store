@@ -6,18 +6,14 @@ import { Role } from 'src/modules/access-control/domain/role';
 
 describe.concurrent('access-control (e2e)', () => {
   describe('GET /api/v1/roles', () => {
-    it('should return all roles for admin user.', async ({
-      roleController,
-    }) => {
+    it('should return all roles for admin user.', async ({ roleController }) => {
       const response = await roleController.findAll({
         code: 200,
         parseBody: true,
       });
       expect(response.body).toEqual(SYSTEM_ROLES.map((r) => r.toJSON()));
     });
-    it('should return all assignable roles only.', async ({
-      roleController,
-    }) => {
+    it('should return all assignable roles only.', async ({ roleController }) => {
       const response = await roleController.findAll(
         {
           code: 200,
@@ -63,10 +59,7 @@ describe.concurrent('access-control (e2e)', () => {
       const rolesResp = await roleController
         .withAgent(newManager.userAgent)
         .findAll({ code: 200, parseBody: true }, 'creatable');
-      expect(rolesResp.body).toEqual([
-        ...SYSTEM_ROLES.slice(1).map((r) => r.toJSON()),
-        responseRole.body,
-      ]);
+      expect(rolesResp.body).toEqual([...SYSTEM_ROLES.slice(1).map((r) => r.toJSON()), responseRole.body]);
     });
 
     it('should return 403 forbidden when an unauthorized user request roles without having roles.read permission.', async ({
@@ -89,9 +82,7 @@ describe.concurrent('access-control (e2e)', () => {
     });
   });
   describe('POST /api/v1/roles/policies/reload', () => {
-    it('should successfully reload policies in the system internally.', async ({
-      roleController,
-    }) => {
+    it('should successfully reload policies in the system internally.', async ({ roleController }) => {
       const resp = await roleController.reloadPolicies({
         code: 200,
         parseBody: true,
@@ -100,12 +91,7 @@ describe.concurrent('access-control (e2e)', () => {
     });
   });
   describe('POST /api/v1/roles', () => {
-    it('should successfully create new role.', async ({
-      app,
-      db,
-      mailClient,
-      roleController,
-    }) => {
+    it('should successfully create new role.', async ({ app, db, mailClient, roleController }) => {
       const newRole = {
         name: 'babyadmin',
         permissions: [
@@ -161,9 +147,7 @@ describe.concurrent('access-control (e2e)', () => {
     });
   });
   describe('PUT /api/v1/roles/:id', () => {
-    it('should successfully rename non-system role.', async ({
-      roleController,
-    }) => {
+    it('should successfully rename non-system role.', async ({ roleController }) => {
       const newRole = {
         name: 'manager',
         permissions: [AllPermissions.role.RoleReadLessOrEqual],
@@ -213,23 +197,16 @@ describe.concurrent('access-control (e2e)', () => {
         .verified()
         .signin()
         .build();
-      await roleController
-        .withAgent(newUser.userAgent)
-        .update(createdRoleBody.id, 'shawarma', { code: 403 });
+      await roleController.withAgent(newUser.userAgent).update(createdRoleBody.id, 'shawarma', { code: 403 });
     });
-    it('should fail to rename admin system role.', async ({
-      adminUser,
-      roleController,
-    }) => {
+    it('should fail to rename admin system role.', async ({ adminUser, roleController }) => {
       await roleController.update(adminUser.userDb.roleId!, 'shawarma', {
         code: 400,
       });
     });
   });
   describe('DELETE /api/v1/roles/:id', () => {
-    it('should successfully delete non-system role.', async ({
-      roleController,
-    }) => {
+    it('should successfully delete non-system role.', async ({ roleController }) => {
       const newRole = {
         name: 'manager',
         permissions: [AllPermissions.role.RoleReadLessOrEqual],
@@ -248,20 +225,12 @@ describe.concurrent('access-control (e2e)', () => {
       ).body!;
       expect(deleted).toStrictEqual({ affected: 1 });
     });
-    it('should fail when delete system role.', async ({
-      adminUser,
-      roleController,
-    }) => {
+    it('should fail when delete system role.', async ({ adminUser, roleController }) => {
       await roleController.remove(adminUser.userDb.roleId!, {
         code: 403,
       });
     });
-    it('should fail when delete role by unauthorized user.', async ({
-      app,
-      db,
-      mailClient,
-      roleController,
-    }) => {
+    it('should fail when delete role by unauthorized user.', async ({ app, db, mailClient, roleController }) => {
       const newRole = {
         name: 'manager',
         permissions: [AllPermissions.role.RoleReadLessOrEqual],
@@ -282,9 +251,7 @@ describe.concurrent('access-control (e2e)', () => {
         .verified()
         .signin()
         .build();
-      await roleController
-        .withAgent(customer.userAgent)
-        .remove(createdRoleBody.id, { code: 403 });
+      await roleController.withAgent(customer.userAgent).remove(createdRoleBody.id, { code: 403 });
     });
     it('should fail to delete a role its permissions list not subset of the authorized user createScope permission list.', async ({
       app,
@@ -301,9 +268,7 @@ describe.concurrent('access-control (e2e)', () => {
         ],
         createScope: [AllPermissions.role.RoleReadLessOrEqual],
       };
-      const createdManagerRole = (
-        await roleController.create(newRole, { code: 201, parseBody: true })
-      ).body!;
+      const createdManagerRole = (await roleController.create(newRole, { code: 201, parseBody: true })).body!;
       const manager = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
         mailhogClient: mailClient,
@@ -332,17 +297,10 @@ describe.concurrent('access-control (e2e)', () => {
       ).body!;
       expect(deleteResponseBody.affected).toBe(0);
       //============== fetching all roles to see it fails to delete the intended role.
-      const roles = (
-        await roleController.findAll({ code: 200, parseBody: true })
-      ).body!;
+      const roles = (await roleController.findAll({ code: 200, parseBody: true })).body!;
       expect(roles.some((r) => r.id === createdDeletableRole.id)).toBe(true);
     });
-    it('should fail to delete user requester role.', async ({
-      app,
-      db,
-      mailClient,
-      roleController,
-    }) => {
+    it('should fail to delete user requester role.', async ({ app, db, mailClient, roleController }) => {
       const newRole = {
         name: 'manager',
         permissions: [
@@ -352,9 +310,7 @@ describe.concurrent('access-control (e2e)', () => {
         ],
         createScope: [AllPermissions.role.RoleReadLessOrEqual],
       };
-      const role = (
-        await roleController.create(newRole, { code: 201, parseBody: true })
-      ).body!;
+      const role = (await roleController.create(newRole, { code: 201, parseBody: true })).body!;
       const manager = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
         mailhogClient: mailClient,
@@ -365,9 +321,7 @@ describe.concurrent('access-control (e2e)', () => {
         .verified()
         .signin()
         .build();
-      await roleController
-        .withAgent(manager.userAgent)
-        .remove(role.id, { code: 403 });
+      await roleController.withAgent(manager.userAgent).remove(role.id, { code: 403 });
     });
   });
 });

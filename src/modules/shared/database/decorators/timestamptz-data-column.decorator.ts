@@ -1,9 +1,4 @@
-import {
-  CreateDateColumn,
-  UpdateDateColumn,
-  ColumnOptions,
-  DeleteDateColumn,
-} from 'typeorm';
+import { CreateDateColumn, UpdateDateColumn, ColumnOptions, DeleteDateColumn } from 'typeorm';
 
 // Custom Create Date Decorator
 export function CreateDateColumnTz(options?: ColumnOptions) {

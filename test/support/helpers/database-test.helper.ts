@@ -47,9 +47,7 @@ export class TestDatabase {
 
     const adminClient = new Client({ ...this.adminOptions });
     await adminClient.connect();
-    await adminClient.query(
-      `DROP DATABASE IF EXISTS "${this.databaseName}" WITH (FORCE)`,
-    );
+    await adminClient.query(`DROP DATABASE IF EXISTS "${this.databaseName}" WITH (FORCE)`);
     await adminClient.end();
   }
 }

@@ -1,9 +1,4 @@
-import {
-  CartId,
-  CartItemId,
-  ProductVariantId,
-  UserId,
-} from 'src/modules/shared/value-objects/ids';
+import { CartId, CartItemId, ProductVariantId, UserId } from 'src/modules/shared/value-objects/ids';
 
 type CartItemProps = {
   readonly id: CartItemId;
@@ -51,9 +46,7 @@ export class Cart {
     this.items.push(item);
   }
   getItem(productVariantId: ProductVariantId): CartItem | undefined {
-    return this.items.find(
-      (citem) => citem.productVariantId == productVariantId,
-    );
+    return this.items.find((citem) => citem.productVariantId == productVariantId);
   }
 
   toJSON() {

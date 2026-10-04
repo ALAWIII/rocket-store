@@ -50,9 +50,7 @@ export class Role {
     const superPermsMap = this.toMap(data.permissions);
 
     //======================= validate if assign role permission persists and its scope permission list.
-    const assignScopeMap = data.assignScope
-      ? this.toMap(data.assignScope)
-      : undefined;
+    const assignScopeMap = data.assignScope ? this.toMap(data.assignScope) : undefined;
 
     const assignScope = this.resolveScope(
       superPermsMap,
@@ -63,18 +61,12 @@ export class Role {
     if (assignScope.isErr()) return Err(assignScope.error);
     const resolvedAssign = assignScope.unwrap();
     const assignResult = resolvedAssign
-      ? this.validateSupersetPerms(
-          superPermsMap,
-          resolvedAssign,
-          'assign scope',
-        )
+      ? this.validateSupersetPerms(superPermsMap, resolvedAssign, 'assign scope')
       : undefined;
     if (assignResult?.isErr()) return Err(assignResult.error);
 
     //======================= validate if create role permission persists and its scope permission list.
-    const createScopeMap = data.createScope
-      ? this.toMap(data.createScope)
-      : undefined;
+    const createScopeMap = data.createScope ? this.toMap(data.createScope) : undefined;
     const createScope = this.resolveScope(
       superPermsMap,
       AllPermissions.role.RoleCreateLessOrEqual.key(),
@@ -85,11 +77,7 @@ export class Role {
 
     const resolvedCreate = createScope.unwrap();
     const createResult = resolvedCreate
-      ? this.validateSupersetPerms(
-          superPermsMap,
-          resolvedCreate,
-          'create scope',
-        )
+      ? this.validateSupersetPerms(superPermsMap, resolvedCreate, 'create scope')
       : undefined;
     if (createResult?.isErr()) return Err(createResult.error);
     //=======================
@@ -121,11 +109,7 @@ export class Role {
     const hasScopeValues = !!scope && scope.size > 0;
 
     if (hasScopePerm !== hasScopeValues) {
-      return Err(
-        new RoleError(
-          `${scopeName} must be provided if and only if its related scoped permission exists.`,
-        ),
-      );
+      return Err(new RoleError(`${scopeName} must be provided if and only if its related scoped permission exists.`));
     }
 
     return Ok(scope);
@@ -137,11 +121,7 @@ export class Role {
     scopeName: 'assign scope' | 'create scope',
   ): Result<boolean, RoleError> {
     if (!this.isSuperSetOf(superPermsMap, permScopes)) {
-      return Err(
-        new RoleError(
-          `Main permissions map is not superset of ${scopeName} permissions.`,
-        ),
-      );
+      return Err(new RoleError(`Main permissions map is not superset of ${scopeName} permissions.`));
     }
     return Ok(true);
   }
@@ -158,10 +138,7 @@ export class Role {
   private static toMap(permissions: Permission[]): Map<string, Permission> {
     return new Map(permissions.map((p) => [p.key(), p]));
   }
-  static isSuperSetOf(
-    superPermsMap: Map<string, Permission>,
-    subsetPerms: Map<string, Permission>,
-  ): boolean {
+  static isSuperSetOf(superPermsMap: Map<string, Permission>, subsetPerms: Map<string, Permission>): boolean {
     if (superPermsMap.size < subsetPerms.size) return false;
     for (const perm of subsetPerms.values()) {
       if (!superPermsMap.has(perm.key())) {
@@ -210,12 +187,7 @@ export class Role {
     const permList: string[][] = [];
     for (const perm of this.permissions) {
       const permJson = perm.toJSON();
-      permList.push([
-        this.id,
-        permJson.entity,
-        permJson.action,
-        permJson.visibility,
-      ]);
+      permList.push([this.id, permJson.entity, permJson.action, permJson.visibility]);
     }
     return permList;
   }
@@ -224,12 +196,8 @@ export class Role {
       id: this.id,
       name: this.name,
       permissions: this.permissions.map((p) => p.toJSON()),
-      assignScope: this.assignScopePermissions.mapOr(undefined, (ps) =>
-        ps.map((p) => p.toJSON()),
-      ),
-      createScope: this.createScopePermissions.mapOr(undefined, (ps) =>
-        ps.map((p) => p.toJSON()),
-      ),
+      assignScope: this.assignScopePermissions.mapOr(undefined, (ps) => ps.map((p) => p.toJSON())),
+      createScope: this.createScopePermissions.mapOr(undefined, (ps) => ps.map((p) => p.toJSON())),
     };
   }
 }

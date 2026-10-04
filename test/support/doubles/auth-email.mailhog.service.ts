@@ -1,10 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { createTransport, Transporter } from 'nodemailer';
 import { AppConfigService } from 'src/app-config/app-config.service';
-import {
-  IAuthEmailService,
-  SendEmailParams,
-} from 'src/email/auth-email.service';
+import { IAuthEmailService, SendEmailParams } from 'src/email/auth-email.service';
 import { buildAuthEmailHtml } from 'src/email/email-message.template';
 type MailSendResult = {
   messageId?: string;
@@ -36,8 +33,7 @@ export class MailHogAuthEmailService implements IAuthEmailService {
       logoUrl: this.logoUrl,
       recipientName: params.name,
       heading: 'Verify your email',
-      message:
-        'Confirm your email address to activate your Rocket Store account.',
+      message: 'Confirm your email address to activate your Rocket Store account.',
       buttonText: 'Verify Email',
       url: params.url,
       expiresInText: 'This link expires in 24 hours.',
@@ -52,15 +48,11 @@ export class MailHogAuthEmailService implements IAuthEmailService {
         html,
       })) as MailSendResult;
 
-      this.logger.log(
-        `Verification email sent to ${params.to}. MessageId: ${info.messageId}`,
-      );
+      this.logger.log(`Verification email sent to ${params.to}. MessageId: ${info.messageId}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
 
-      this.logger.error(
-        `Failed to send verification email to ${params.to}: ${message}`,
-      );
+      this.logger.error(`Failed to send verification email to ${params.to}: ${message}`);
     }
   }
   async sendPasswordResetEmail(params: SendEmailParams): Promise<void> {
@@ -69,8 +61,7 @@ export class MailHogAuthEmailService implements IAuthEmailService {
       logoUrl: this.logoUrl,
       recipientName: params.name,
       heading: 'Reset your password',
-      message:
-        'We received a request to reset your password. Click below to set a new one.',
+      message: 'We received a request to reset your password. Click below to set a new one.',
       buttonText: 'Reset Password',
       url: params.url,
       expiresInText: 'This link expires in 1 hour.',
@@ -84,15 +75,11 @@ export class MailHogAuthEmailService implements IAuthEmailService {
         html,
       })) as MailSendResult;
 
-      this.logger.log(
-        `Password-reset email sent to ${params.to}. MessageId: ${info.messageId}`,
-      );
+      this.logger.log(`Password-reset email sent to ${params.to}. MessageId: ${info.messageId}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
 
-      this.logger.error(
-        `Failed to send password-reset email to ${params.to}: ${message}`,
-      );
+      this.logger.error(`Failed to send password-reset email to ${params.to}: ${message}`);
     }
   }
   async sendChangeEmailConfirmation(params: {
@@ -121,15 +108,11 @@ export class MailHogAuthEmailService implements IAuthEmailService {
         html,
       })) as MailSendResult;
 
-      this.logger.log(
-        `confirmation email change sent to ${params.to}. MessageId: ${info.messageId}`,
-      );
+      this.logger.log(`confirmation email change sent to ${params.to}. MessageId: ${info.messageId}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
 
-      this.logger.error(
-        `Failed to send change email confirmation message to ${to}: ${message}`,
-      );
+      this.logger.error(`Failed to send change email confirmation message to ${to}: ${message}`);
     }
   }
 }

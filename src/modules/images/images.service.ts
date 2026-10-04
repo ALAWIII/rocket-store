@@ -23,8 +23,7 @@ import {
 import { RecordNotFoundError } from '../shared/errors/database.error';
 import { RemoveImagesResponseDto } from './dto/remove-images-response.dto';
 
-const mapToImagesServiceError = (e: Error) =>
-  new ImageServiceError(e.message, e);
+const mapToImagesServiceError = (e: Error) => new ImageServiceError(e.message, e);
 
 type FindUnUsedOptions = {
   limit?: number;
@@ -62,9 +61,7 @@ export class ImagesService {
       const height = Dimension.create(imgInfo.height).unwrap().toJSON();
       const imgMime = ImageMimeType.create(imgInfo.mime).unwrap().toJSON();
       const name = Name.create(metadata.name).unwrap().toJSON();
-      const altText = DomainText.create(metadata.altText, 125)
-        .unwrap()
-        ?.toJSON();
+      const altText = DomainText.create(metadata.altText, 125).unwrap()?.toJSON();
       //===
 
       const upResult = await this.storageService
@@ -97,9 +94,7 @@ export class ImagesService {
       return imgDb;
     }).inspectErr(async () => {
       if (uploaded)
-        await this.storageService
-          .sendDeleteImgs([imgId])
-          .inspectErr((e) => this.logger.error(e.message, e));
+        await this.storageService.sendDeleteImgs([imgId]).inspectErr((e) => this.logger.error(e.message, e));
 
       sourceStream.destroy();
       probeStream.destroy();
@@ -111,14 +106,10 @@ export class ImagesService {
     return this.imgRepo
       .findById(imgId)
       .mapErr((e) =>
-        e instanceof RecordNotFoundError
-          ? new ImageNotFoundError(e.message, e)
-          : new ImageServiceError(e.message, e),
+        e instanceof RecordNotFoundError ? new ImageNotFoundError(e.message, e) : new ImageServiceError(e.message, e),
       );
   }
-  findUnusedImages(
-    options: FindUnUsedOptions,
-  ): AsyncResult<FindUnUsedDbResponse, ImageServiceError> {
+  findUnusedImages(options: FindUnUsedOptions): AsyncResult<FindUnUsedDbResponse, ImageServiceError> {
     return this.imgRepo
       .findUnused({
         ...options,
@@ -126,9 +117,7 @@ export class ImagesService {
       })
       .mapErr(mapToImagesServiceError);
   }
-  removeImages(
-    imgIds: string[],
-  ): AsyncResult<RemoveImagesResponseDto, ImageServiceError> {
+  removeImages(imgIds: string[]): AsyncResult<RemoveImagesResponseDto, ImageServiceError> {
     return Result.wrapAsync(async () => {
       if (imgIds.length === 0) return { affected: 0 };
       await this.storageService.sendDeleteImgs(imgIds).unwrap();
@@ -142,32 +131,24 @@ export class ImagesService {
     });
   }
 
-  async removeUnusedImages(): Promise<
-    Result<RemoveImagesResponseDto, ImageServiceError>
-  > {
+  async removeUnusedImages(): Promise<Result<RemoveImagesResponseDto, ImageServiceError>> {
     let count = 0;
 
     while (true) {
       // fetch and delete by patches rather than infinite fetching.
-      const imgsRes = await this.imgRepo
-        .findUnused({ limit: 100 })
-        .mapErr(mapToImagesServiceError);
+      const imgsRes = await this.imgRepo.findUnused({ limit: 100 }).mapErr(mapToImagesServiceError);
       if (imgsRes.isErr()) return imgsRes.map();
 
       const imgIds = imgsRes.value.images.map((img) => img.key);
       if (!imgIds.length) return Ok({ affected: count });
 
-      const s3Res = await this.storageService
-        .sendDeleteImgs(imgIds)
-        .mapErr(mapToImagesServiceError);
+      const s3Res = await this.storageService.sendDeleteImgs(imgIds).mapErr(mapToImagesServiceError);
 
       if (s3Res.isErr()) {
         return s3Res.map();
       }
 
-      const deleted = await this.imgRepo
-        .deleteMany(imgIds)
-        .mapErr(mapToImagesServiceError);
+      const deleted = await this.imgRepo.deleteMany(imgIds).mapErr(mapToImagesServiceError);
 
       if (deleted.isErr()) return deleted.map();
       count += deleted.value;
@@ -180,9 +161,7 @@ export class ImagesService {
    * @param stream
    * @returns `AsyncResult<ProbeResult, CorruptedUploadedImageError>`
    */
-  private extractMetadataFromBytes(
-    stream: Readable,
-  ): AsyncResult<ProbeResult, CorruptedUploadedImageError> {
+  private extractMetadataFromBytes(stream: Readable): AsyncResult<ProbeResult, CorruptedUploadedImageError> {
     return Result.wrapAsync((): Promise<ProbeResult> => probe(stream)).mapErr(
       (e) =>
         new CorruptedUploadedImageError('Corrupted image magic bytes.', {

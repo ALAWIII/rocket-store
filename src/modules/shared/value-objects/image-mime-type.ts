@@ -1,12 +1,7 @@
 import { Err, Ok, Result } from '@allawiii/results-ts';
 import { ValueObjectError } from './value-object.error';
 
-const ALLOWED_IMAGE_MIME_TYPES = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/avif',
-] as const;
+const ALLOWED_IMAGE_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'] as const;
 
 export type ImageMimeTypes = (typeof ALLOWED_IMAGE_MIME_TYPES)[number];
 

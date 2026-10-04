@@ -1,9 +1,7 @@
 import { AllPermissions } from '../../domain/permission';
 import { Role } from '../../domain/role';
 
-const AllPermissionsFlat = Object.values(AllPermissions).flatMap((v1) =>
-  Object.values(v1),
-);
+const AllPermissionsFlat = Object.values(AllPermissions).flatMap((v1) => Object.values(v1));
 
 export const ADMIN_ROLE = Role.create({
   name: 'admin',

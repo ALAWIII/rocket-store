@@ -23,10 +23,7 @@ export class BrandsService {
       .map((b) => b.toJSON())
       .unwrap();
   }
-  renameBrand(
-    brandId: string,
-    name: RenameBrandDto,
-  ): Promise<BrandResponseDto> {
+  renameBrand(brandId: string, name: RenameBrandDto): Promise<BrandResponseDto> {
     return this.brandRepo
       .rename(brandId, name.name)
       .map((b) => b.toJSON())
@@ -60,22 +57,14 @@ export class BrandsService {
       .map((bimgs) => bimgs.map((b) => b.toJSON()))
       .unwrap();
   }
-  attachImages(
-    brandId: string,
-    attachments: AttachImagesToBrandDto,
-  ): Promise<ImageResponseDto[]> {
-    const brandImages = attachments.images.map((img) =>
-      BrandImage.create({ brandId, ...img }).unwrap(),
-    );
+  attachImages(brandId: string, attachments: AttachImagesToBrandDto): Promise<ImageResponseDto[]> {
+    const brandImages = attachments.images.map((img) => BrandImage.create({ brandId, ...img }).unwrap());
     return this.brandRepo
       .attachImages(brandImages)
       .map((bimgs) => bimgs.map((b) => b.toJSON()))
       .unwrap();
   }
-  detachImages(
-    brandId: string,
-    imageIds: DetachBrandImagesDto,
-  ): Promise<DetachImagesResponseDto> {
+  detachImages(brandId: string, imageIds: DetachBrandImagesDto): Promise<DetachImagesResponseDto> {
     return this.brandRepo
       .detachImages(brandId, imageIds.imageIds)
       .map((v) => {

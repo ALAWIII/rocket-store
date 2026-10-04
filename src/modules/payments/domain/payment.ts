@@ -13,10 +13,7 @@ type PaymentProps = {
   createdAt: Date;
   updatedAt: Date;
 };
-type CreatePaymentProps = Pick<
-  PaymentProps,
-  'orderId' | 'amountInMinorUnit' | 'currency' | 'method'
->;
+type CreatePaymentProps = Pick<PaymentProps, 'orderId' | 'amountInMinorUnit' | 'currency' | 'method'>;
 export class Payment {
   private constructor(private props: PaymentProps) {}
   static create(data: CreatePaymentProps): Payment {

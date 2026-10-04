@@ -8,7 +8,10 @@ export class PromotionRuleEntity {
   @UuidV7PrimaryColumn()
   id!: string;
   @Column('uuid')
-  @ForeignKey(() => PromotionEntity, (p) => p.id)
+  @ForeignKey(
+    () => PromotionEntity,
+    (p) => p.id,
+  )
   promotionId!: string;
   @Column('varchar', { length: 40 })
   ruleType!: string;

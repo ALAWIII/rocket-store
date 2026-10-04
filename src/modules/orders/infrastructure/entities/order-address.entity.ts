@@ -38,6 +38,9 @@ export class OrderAddressEntity {
   @CreateDateColumnTz()
   createdAt!: Date;
   @Column({ type: 'uuid', name: 'order_id' })
-  @ForeignKey(() => OrderEntity, (o) => o.id)
+  @ForeignKey(
+    () => OrderEntity,
+    (o) => o.id,
+  )
   orderId!: string;
 }

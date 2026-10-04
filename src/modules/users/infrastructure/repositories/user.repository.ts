@@ -23,25 +23,12 @@ export type FindUsersByParams = {
 };
 
 export abstract class IUserRepository {
-  abstract findById(data: {
-    requesterRoleId: string;
-    userId: string;
-  }): DBResult<User>;
+  abstract findById(data: { requesterRoleId: string; userId: string }): DBResult<User>;
   abstract findMe(id: string): DBResult<User>;
-  abstract findBy(
-    data: FindUsersByParams,
-  ): DBResult<{ users: User[]; total: number }>;
+  abstract findBy(data: FindUsersByParams): DBResult<{ users: User[]; total: number }>;
   abstract updateById(id: string, data: UpdateUserRepoData): DBResult<User>;
   abstract attachImage(userImg: UserImage): DBResult<Option<string>>;
-  abstract assignUsersRole(d: {
-    requesterRoleId: string;
-    oldRoleId: string;
-    newRoleId: string;
-  }): DBResult<number>;
-  abstract assignUserRole(d: {
-    requesterRoleId: string;
-    targetUserId: string;
-    targetRoleId: string;
-  }): DBResult<User>;
+  abstract assignUsersRole(d: { requesterRoleId: string; oldRoleId: string; newRoleId: string }): DBResult<number>;
+  abstract assignUserRole(d: { requesterRoleId: string; targetUserId: string; targetRoleId: string }): DBResult<User>;
   abstract findUserImage(userId: string): DBResult<UserImage>;
 }

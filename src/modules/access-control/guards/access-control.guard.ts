@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AUTHZ_MODULE_OPTIONS, type AuthZModuleOptions } from 'nest-authz';
 import {
@@ -23,10 +18,10 @@ export class AccessGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const permissions = this.reflector.getAllAndMerge<PermissionAttr[]>(
-      PERMISSION_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const permissions = this.reflector.getAllAndMerge<PermissionAttr[]>(PERMISSION_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (!permissions?.length) return true;
 

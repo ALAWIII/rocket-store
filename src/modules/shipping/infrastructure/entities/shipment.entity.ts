@@ -15,13 +15,22 @@ export class ShipmentEntity {
   @UuidV7PrimaryColumn()
   id!: string;
   @Column('uuid')
-  @ForeignKey(() => OrderEntity, (o) => o.id)
+  @ForeignKey(
+    () => OrderEntity,
+    (o) => o.id,
+  )
   orderId!: string;
   @Column('uuid', { nullable: true })
-  @ForeignKey(() => ShippingProviderEntity, (sp) => sp.id)
+  @ForeignKey(
+    () => ShippingProviderEntity,
+    (sp) => sp.id,
+  )
   shippingProviderId!: string | null;
   @Column('uuid')
-  @ForeignKey(() => OrderAddressEntity, (oa) => oa.id)
+  @ForeignKey(
+    () => OrderAddressEntity,
+    (oa) => oa.id,
+  )
   orderAddressId!: string;
   @Column('varchar', { length: 20 })
   shipmentMethod!: ShipmentMethod;

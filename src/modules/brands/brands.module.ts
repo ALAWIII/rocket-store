@@ -9,10 +9,7 @@ import { BrandsController } from './brands.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([BrandEntity, BrandImagesEntity])],
-  providers: [
-    { provide: IBrandRepository, useClass: BrandRepository },
-    BrandsService,
-  ],
+  providers: [{ provide: IBrandRepository, useClass: BrandRepository }, BrandsService],
   controllers: [BrandsController],
 })
 export class BrandsModule {}

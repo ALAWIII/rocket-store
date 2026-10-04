@@ -21,10 +21,7 @@ export class Id extends UuidV7Id {
     super(value);
   }
 
-  static create<T extends typeof Id>(
-    this: T,
-    value?: string,
-  ): Result<InstanceType<T>, ValueObjectError> {
+  static create<T extends typeof Id>(this: T, value?: string): Result<InstanceType<T>, ValueObjectError> {
     if (value && (!validate(value) || version(value) !== 7)) {
       return Err(new ValueObjectError(`${this.name} must be UUID v7`));
     }

@@ -10,10 +10,7 @@ type ShippingProviderProps = {
   updatedAt: Date;
 };
 
-type CreateShippingProviderProps = Pick<
-  ShippingProviderProps,
-  'slug' | 'displayName' | 'config' | 'isActive'
->;
+type CreateShippingProviderProps = Pick<ShippingProviderProps, 'slug' | 'displayName' | 'config' | 'isActive'>;
 
 export class ShippingProvider {
   private constructor(private readonly props: ShippingProviderProps) {}
@@ -133,9 +130,7 @@ export class ShippingProvider {
     }
 
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
-      throw new Error(
-        'slug must contain only lowercase letters, numbers, and hyphens',
-      );
+      throw new Error('slug must contain only lowercase letters, numbers, and hyphens');
     }
   }
 
@@ -143,9 +138,7 @@ export class ShippingProvider {
     if (!value) throw new Error('displayName is required');
 
     if (value.length < 2 || value.length > 100) {
-      throw new Error(
-        'displayName length must be between 2 and 100 characters',
-      );
+      throw new Error('displayName length must be between 2 and 100 characters');
     }
   }
 

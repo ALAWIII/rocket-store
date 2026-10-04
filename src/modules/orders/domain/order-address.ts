@@ -44,9 +44,7 @@ type CreateOrderAddressProps = Omit<OrderAddressPrimitives, 'id' | 'createdAt'>;
 export class OrderAddress {
   private constructor(private props: OrderAddressProps) {}
 
-  static create(
-    data: CreateOrderAddressProps,
-  ): Result<OrderAddress, ValueObjectError> {
+  static create(data: CreateOrderAddressProps): Result<OrderAddress, ValueObjectError> {
     const newAdrs = {
       id: AddressId.create().toString(),
       createdAt: new Date(),
@@ -55,9 +53,7 @@ export class OrderAddress {
     return OrderAddress.fromPrimitives(newAdrs);
   }
 
-  static fromPrimitives(
-    data: OrderAddressPrimitives,
-  ): Result<OrderAddress, ValueObjectError> {
+  static fromPrimitives(data: OrderAddressPrimitives): Result<OrderAddress, ValueObjectError> {
     const dataValidate = unwrapResultObject({
       id: AddressId.create(data.id),
       orderId: OrderId.create(data.orderId),

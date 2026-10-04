@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  OnModuleInit,
-  OnModuleDestroy,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PgBoss } from 'pg-boss';
 import { AppConfigService } from 'src/app-config/app-config.service';
 
@@ -30,9 +25,7 @@ export class PgBossCoreService implements OnModuleInit, OnModuleDestroy {
       connectionTimeoutMillis: 10_000, // wait for a connection 10 seconds
     });
 
-    this._boss.on('error', (err) =>
-      this.logger.error(`pg-boss error: ${err.message}`, err.stack),
-    );
+    this._boss.on('error', (err) => this.logger.error(`pg-boss error: ${err.message}`, err.stack));
   }
 
   async onModuleInit(): Promise<void> {

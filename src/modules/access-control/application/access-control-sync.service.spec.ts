@@ -53,10 +53,7 @@ describe('AccessControlSyncService', () => {
     it('should create new enforcer and call addPolicies to load a list of policies from database to the enforcer.', async () => {
       const adminRole = Role.create({
         name: 'admin',
-        permissions: [
-          AllPermissions.role.RoleReadLessOrEqual,
-          AllPermissions.role.RoleRenameLessOrEqual,
-        ],
+        permissions: [AllPermissions.role.RoleReadLessOrEqual, AllPermissions.role.RoleRenameLessOrEqual],
       }).unwrap();
       const workerRole = Role.create({
         name: 'worker',
@@ -66,9 +63,7 @@ describe('AccessControlSyncService', () => {
       //-----------------
       roleRepositoryMock.loadAll.mockImplementation(() => Ok(roles));
 
-      const loggerSpy = vi
-        .spyOn(Logger.prototype, 'log')
-        .mockImplementation(() => undefined);
+      const loggerSpy = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
 
       await service.reloadFromDatabase();
 
@@ -76,9 +71,7 @@ describe('AccessControlSyncService', () => {
       expect(newEnforcerMock.addPolicies).toHaveBeenCalledTimes(1);
       expect(enforcerHolderMock.set).toHaveBeenCalledWith(newEnforcerMock);
 
-      expect(loggerSpy).toHaveBeenCalledWith(
-        'Casbin policies reloaded: 3 policies from 2 roles, reload count= 1',
-      );
+      expect(loggerSpy).toHaveBeenCalledWith('Casbin policies reloaded: 3 policies from 2 roles, reload count= 1');
 
       loggerSpy.mockRestore();
     });
@@ -91,9 +84,7 @@ describe('AccessControlSyncService', () => {
       const roles = [anyrole];
       roleRepositoryMock.loadAll.mockImplementation(() => Ok(roles));
 
-      const loggerSpy = vi
-        .spyOn(Logger.prototype, 'log')
-        .mockImplementation(() => undefined);
+      const loggerSpy = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
 
       await service.reloadFromDatabase();
 
@@ -101,9 +92,7 @@ describe('AccessControlSyncService', () => {
       expect(newEnforcerMock.addPolicies).not.toHaveBeenCalled();
       expect(enforcerHolderMock.set).toHaveBeenCalledWith(newEnforcerMock);
 
-      expect(loggerSpy).toHaveBeenCalledWith(
-        'Casbin policies reloaded: 0 policies from 1 roles, reload count= 1',
-      );
+      expect(loggerSpy).toHaveBeenCalledWith('Casbin policies reloaded: 0 policies from 1 roles, reload count= 1');
 
       loggerSpy.mockRestore();
     });
@@ -112,10 +101,7 @@ describe('AccessControlSyncService', () => {
       const roles = [
         Role.create({
           name: 'admin',
-          permissions: [
-            AllPermissions.role.RoleReadLessOrEqual,
-            AllPermissions.role.RoleReadLessOrEqual,
-          ],
+          permissions: [AllPermissions.role.RoleReadLessOrEqual, AllPermissions.role.RoleReadLessOrEqual],
         }).unwrap(),
       ];
 
@@ -151,9 +137,7 @@ describe('AccessControlSyncService', () => {
       roleRepositoryMock.loadAll.mockImplementation(() => Ok(roles));
       newEnforcerMock.addPolicies.mockRejectedValue(new Error('casbin failed'));
 
-      await expect(service.reloadFromDatabase()).rejects.toThrow(
-        'casbin failed',
-      );
+      await expect(service.reloadFromDatabase()).rejects.toThrow('casbin failed');
       expect(newEnforcerMock.addPolicies).toHaveBeenCalledTimes(1);
     });
   });
@@ -173,10 +157,7 @@ describe('AccessControlSyncService', () => {
     it('should remove existing policies and return enforcer result', async () => {
       const adminRole = Role.create({
         name: 'admin',
-        permissions: [
-          AllPermissions.role.RoleReadLessOrEqual,
-          AllPermissions.role.RoleRenameLessOrEqual,
-        ],
+        permissions: [AllPermissions.role.RoleReadLessOrEqual, AllPermissions.role.RoleRenameLessOrEqual],
       }).unwrap();
 
       const existingPolicies = adminRole.toFlatPolicies();
@@ -186,23 +167,16 @@ describe('AccessControlSyncService', () => {
 
       const result = await service.removeRole(adminRole.id);
 
-      expect(enforcerHolderMock.getPoliciesById).toHaveBeenCalledWith(
-        adminRole.id,
-      );
+      expect(enforcerHolderMock.getPoliciesById).toHaveBeenCalledWith(adminRole.id);
       expect(enforcerHolderMock.removePolicies).toHaveBeenCalledTimes(1);
-      expect(enforcerHolderMock.removePolicies).toHaveBeenCalledWith(
-        existingPolicies,
-      );
+      expect(enforcerHolderMock.removePolicies).toHaveBeenCalledWith(existingPolicies);
       expect(result).toBe(true);
     });
 
     it('should return false when enforcer removePolicies returns false', async () => {
       const adminRole = Role.create({
         name: 'admin',
-        permissions: [
-          AllPermissions.role.RoleReadLessOrEqual,
-          AllPermissions.role.RoleRenameLessOrEqual,
-        ],
+        permissions: [AllPermissions.role.RoleReadLessOrEqual, AllPermissions.role.RoleRenameLessOrEqual],
       }).unwrap();
 
       const existingPolicies = adminRole.toFlatPolicies();
@@ -212,9 +186,7 @@ describe('AccessControlSyncService', () => {
 
       const result = await service.removeRole(adminRole.id);
 
-      expect(enforcerHolderMock.removePolicies).toHaveBeenCalledWith(
-        existingPolicies,
-      );
+      expect(enforcerHolderMock.removePolicies).toHaveBeenCalledWith(existingPolicies);
       expect(result).toBe(false);
     });
   });
@@ -235,10 +207,7 @@ describe('AccessControlSyncService', () => {
     it('should add policies for role permissions and return enforcer result', async () => {
       const adminRole = Role.create({
         name: 'admin',
-        permissions: [
-          AllPermissions.role.RoleReadLessOrEqual,
-          AllPermissions.role.RoleRenameLessOrEqual,
-        ],
+        permissions: [AllPermissions.role.RoleReadLessOrEqual, AllPermissions.role.RoleRenameLessOrEqual],
       }).unwrap();
 
       enforcerHolderMock.addPolicies.mockResolvedValue(true);
@@ -246,28 +215,21 @@ describe('AccessControlSyncService', () => {
       const result = await service.addRole(adminRole);
 
       expect(enforcerHolderMock.addPolicies).toHaveBeenCalledTimes(1);
-      expect(enforcerHolderMock.addPolicies).toHaveBeenCalledWith(
-        adminRole.toFlatPolicies(),
-      );
+      expect(enforcerHolderMock.addPolicies).toHaveBeenCalledWith(adminRole.toFlatPolicies());
       expect(result).toBe(true);
     });
 
     it('should ignore duplicate permissions when adding role', async () => {
       const adminRole = Role.create({
         name: 'admin',
-        permissions: [
-          AllPermissions.role.RoleReadLessOrEqual,
-          AllPermissions.role.RoleReadLessOrEqual,
-        ],
+        permissions: [AllPermissions.role.RoleReadLessOrEqual, AllPermissions.role.RoleReadLessOrEqual],
       }).unwrap();
 
       enforcerHolderMock.addPolicies.mockResolvedValue(true);
 
       const result = await service.addRole(adminRole);
 
-      expect(enforcerHolderMock.addPolicies).toHaveBeenCalledWith([
-        adminRole.toFlatPolicies()[0],
-      ]);
+      expect(enforcerHolderMock.addPolicies).toHaveBeenCalledWith([adminRole.toFlatPolicies()[0]]);
       expect(result).toBe(true);
     });
 
@@ -292,15 +254,11 @@ describe('AccessControlSyncService', () => {
         name: 'admin',
         permissions: [AllPermissions.role.RoleReadLessOrEqual],
       }).unwrap();
-      enforcerHolderMock.getPoliciesById.mockResolvedValue(
-        adminRole.toFlatPolicies(),
-      );
+      enforcerHolderMock.getPoliciesById.mockResolvedValue(adminRole.toFlatPolicies());
 
       const result = await service.hasRole(adminRole.id);
 
-      expect(enforcerHolderMock.getPoliciesById).toHaveBeenCalledWith(
-        adminRole.id,
-      );
+      expect(enforcerHolderMock.getPoliciesById).toHaveBeenCalledWith(adminRole.id);
       expect(result).toBe(true);
     });
 
@@ -309,9 +267,7 @@ describe('AccessControlSyncService', () => {
 
       const result = await service.hasRole('admin-role-id');
 
-      expect(enforcerHolderMock.getPoliciesById).toHaveBeenCalledWith(
-        'admin-role-id',
-      );
+      expect(enforcerHolderMock.getPoliciesById).toHaveBeenCalledWith('admin-role-id');
       expect(result).toBe(false);
     });
   });
@@ -323,9 +279,7 @@ describe('AccessControlSyncService', () => {
         permissions: [AllPermissions.role.RoleReadLessOrEqual],
       }).unwrap();
 
-      const removeRoleSpy = vi
-        .spyOn(service, 'removeRole')
-        .mockResolvedValue(true);
+      const removeRoleSpy = vi.spyOn(service, 'removeRole').mockResolvedValue(true);
       const addRoleSpy = vi.spyOn(service, 'addRole').mockResolvedValue(true);
 
       await expect(service.upsertRole(adminRole)).resolves.toBeUndefined();
@@ -335,9 +289,7 @@ describe('AccessControlSyncService', () => {
       expect(addRoleSpy).toHaveBeenCalledTimes(1);
       expect(addRoleSpy).toHaveBeenCalledWith(adminRole);
 
-      expect(removeRoleSpy.mock.invocationCallOrder[0]).toBeLessThan(
-        addRoleSpy.mock.invocationCallOrder[0],
-      );
+      expect(removeRoleSpy.mock.invocationCallOrder[0]).toBeLessThan(addRoleSpy.mock.invocationCallOrder[0]);
     });
 
     it('should throw when addRole returns false', async () => {
@@ -360,13 +312,9 @@ describe('AccessControlSyncService', () => {
         permissions: [AllPermissions.role.RoleReadLessOrEqual],
       }).unwrap();
 
-      vi.spyOn(service, 'removeRole').mockRejectedValue(
-        new Error('remove failed'),
-      );
+      vi.spyOn(service, 'removeRole').mockRejectedValue(new Error('remove failed'));
 
-      await expect(service.upsertRole(workerRole)).rejects.toThrow(
-        'remove failed',
-      );
+      await expect(service.upsertRole(workerRole)).rejects.toThrow('remove failed');
     });
 
     it('should propagate addRole errors', async () => {
@@ -377,9 +325,7 @@ describe('AccessControlSyncService', () => {
       vi.spyOn(service, 'removeRole').mockResolvedValue(true);
       vi.spyOn(service, 'addRole').mockRejectedValue(new Error('add failed'));
 
-      await expect(service.upsertRole(workerRole)).rejects.toThrow(
-        'add failed',
-      );
+      await expect(service.upsertRole(workerRole)).rejects.toThrow('add failed');
     });
   });
 });

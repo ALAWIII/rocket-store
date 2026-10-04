@@ -1,8 +1,4 @@
-import {
-  CouponId,
-  PromotionId,
-  UserId,
-} from 'src/modules/shared/value-objects/ids';
+import { CouponId, PromotionId, UserId } from 'src/modules/shared/value-objects/ids';
 
 type CouponProps = {
   id: CouponId;
@@ -35,13 +31,10 @@ export class Coupon {
     });
   }
 
-  private static validate(
-    data: Omit<CouponProps, 'createdAt'> | CouponProps,
-  ): void {
+  private static validate(data: Omit<CouponProps, 'createdAt'> | CouponProps): void {
     if (!data.id) throw new Error('Coupon id is required.');
     if (!data.promotionId) throw new Error('Coupon promotionId is required.');
-    if (!data.code || !data.code.trim())
-      throw new Error('Coupon code is required.');
+    if (!data.code || !data.code.trim()) throw new Error('Coupon code is required.');
 
     const normalizedCode = data.code.trim().toUpperCase();
 

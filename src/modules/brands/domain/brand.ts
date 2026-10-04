@@ -20,10 +20,7 @@ type BrandPrimitives = {
 export class Brand {
   private constructor(private props: BrandProps) {}
 
-  static create(data: {
-    name: string;
-    logo?: Image;
-  }): Result<Brand, ValueObjectError> {
+  static create(data: { name: string; logo?: Image }): Result<Brand, ValueObjectError> {
     const resultData = unwrapResultObject({
       name: BrandName.create(data.name),
       id: BrandId.create(),

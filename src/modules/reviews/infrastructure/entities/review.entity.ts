@@ -11,13 +11,22 @@ export class ReviewEntity {
   @UuidV7PrimaryColumn()
   id!: string;
   @Column('uuid')
-  @ForeignKey(() => UserEntity, (u) => u.id)
+  @ForeignKey(
+    () => UserEntity,
+    (u) => u.id,
+  )
   userId!: string;
   @Column('uuid')
-  @ForeignKey(() => ProductEntity, (p) => p.id)
+  @ForeignKey(
+    () => ProductEntity,
+    (p) => p.id,
+  )
   productId!: string;
   @Column('uuid')
-  @ForeignKey(() => OrderEntity, (o) => o.id)
+  @ForeignKey(
+    () => OrderEntity,
+    (o) => o.id,
+  )
   orderId!: string;
   @Column('integer')
   rating!: number;

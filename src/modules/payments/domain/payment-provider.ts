@@ -10,9 +10,7 @@ type PaymentProviderProps = {
   createdAt: Date;
   updatedAt: Date;
 };
-type CreatePaymentProviderProps = Partial<
-  Pick<PaymentProviderProps, 'config' | 'isActive'>
-> &
+type CreatePaymentProviderProps = Partial<Pick<PaymentProviderProps, 'config' | 'isActive'>> &
   Pick<PaymentProviderProps, 'slug' | 'displayName'>;
 export class PaymentProvider {
   private constructor(private props: PaymentProviderProps) {}
@@ -109,9 +107,7 @@ export class PaymentProvider {
       throw new Error('slug length must be between 2 and 50 characters');
     }
     if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value)) {
-      throw new Error(
-        'slug must contain only lowercase letters, numbers, and hyphens',
-      );
+      throw new Error('slug must contain only lowercase letters, numbers, and hyphens');
     }
   }
 

@@ -1,11 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  CreateWorkerOptions,
-  IJobsService,
-  JobData,
-  JobId,
-  WorkerId,
-} from './jobs.service';
+import { CreateWorkerOptions, IJobsService, JobData, JobId, WorkerId } from './jobs.service';
 import { PgBossCoreService } from './pg-boss.core.service';
 import { AsyncResult, Ok, Result } from '@allawiii/results-ts';
 import { JobsError } from './jobs.error';
@@ -15,15 +9,10 @@ export class JobsPgBossService implements IJobsService {
   private readonly logger = new Logger(JobsPgBossService.name);
   constructor(private readonly core: PgBossCoreService) {}
 
-  sendJobs<T extends JobData>(
-    jobKind: string,
-    jobs: T[],
-  ): AsyncResult<JobId[], JobsError> {
+  sendJobs<T extends JobData>(jobKind: string, jobs: T[]): AsyncResult<JobId[], JobsError> {
     this.logger.log(`sending ${jobs.length} of ${jobKind} jobs.`);
     const jobInserts = jobs.map((data) => ({ data }));
-    return Result.wrapAsync(() =>
-      this.core.boss.insert(jobKind, jobInserts, { returnId: true }),
-    )
+    return Result.wrapAsync(() => this.core.boss.insert(jobKind, jobInserts, { returnId: true }))
       .mapErr((e) => new JobsError(`Failed to send jobs`, e))
       .andThen((v) => Ok(v ?? []));
   }

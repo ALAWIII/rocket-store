@@ -67,10 +67,7 @@ describe('RolesController', () => {
       const removeResult = await controller.remove(expectedRole.id, {
         user: { roleId: 'user' },
       } as AppSession);
-      expect(serviceMock.removeRole).toHaveBeenCalledWith(
-        'user',
-        expectedRole.id,
-      );
+      expect(serviceMock.removeRole).toHaveBeenCalledWith('user', expectedRole.id);
       expect(removeResult.affected).toBe(1);
     });
   });

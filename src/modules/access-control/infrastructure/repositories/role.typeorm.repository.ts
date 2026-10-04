@@ -7,10 +7,7 @@ import { Brackets, In, Repository } from 'typeorm';
 import type { DBResult } from 'src/modules/shared/errors/error.types';
 import { Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
-import {
-  RecordNotFoundError,
-  UnknownDatabaseError,
-} from 'src/modules/shared/errors/database.error';
+import { RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 import { RoleMapper } from '../mappers/role.mapper';
 
@@ -33,44 +30,25 @@ export class RoleRepository implements IRoleRepository {
         .createQueryBuilder()
         .addCommonTableExpression(creatorRoleCte, 'authorized_creator')
         .insert()
-        .into(RoleEntity, [
-          'id',
-          'name',
-          'permissions',
-          'createScope',
-          'assignScope',
-        ])
+        .into(RoleEntity, ['id', 'name', 'permissions', 'createScope', 'assignScope'])
         .valuesFromSelect((qb) =>
           qb
-            .select([
-              ':id',
-              ':name',
-              ':permissions::jsonb',
-              ':createScope::jsonb',
-              ':assignScope::jsonb',
-            ])
+            .select([':id', ':name', ':permissions::jsonb', ':createScope::jsonb', ':assignScope::jsonb'])
             .from('authorized_creator', 'creator'),
         )
         .setParameters({
           id: newRole.id,
           name: newRole.name,
           permissions: JSON.stringify(newRole.permissions),
-          assignScope: newRole.assignScope
-            ? JSON.stringify(newRole.assignScope)
-            : null,
-          createScope: newRole.createScope
-            ? JSON.stringify(newRole.createScope)
-            : null,
+          assignScope: newRole.assignScope ? JSON.stringify(newRole.assignScope) : null,
+          createScope: newRole.createScope ? JSON.stringify(newRole.createScope) : null,
           creatorRoleId,
         })
         .returning('*')
         .execute();
 
       const [row] = result.raw as RoleEntity[];
-      if (!row)
-        throw new UnknownDatabaseError(
-          'Creator createScope does not contain new role permissions.',
-        );
+      if (!row) throw new UnknownDatabaseError('Creator createScope does not contain new role permissions.');
 
       return row;
     })
@@ -81,10 +59,7 @@ export class RoleRepository implements IRoleRepository {
     return Result.wrapAsync(async () => {
       const loadPerms = this.roleRepo
         .createQueryBuilder('r')
-        .select([
-          'r.createScope AS createScope',
-          'r.assignScope AS assignScope',
-        ])
+        .select(['r.createScope AS createScope', 'r.assignScope AS assignScope'])
         .where('r.id = :id', { id: roleId });
 
       const loadRoles = await this.roleRepo
@@ -92,9 +67,7 @@ export class RoleRepository implements IRoleRepository {
         .addCommonTableExpression(loadPerms, 'role_perms')
         .where(
           new Brackets((qb) => {
-            qb.where(
-              `COALESCE((SELECT createScope FROM role_perms), '[]'::jsonb) @> role.permissions`,
-            ).orWhere(
+            qb.where(`COALESCE((SELECT createScope FROM role_perms), '[]'::jsonb) @> role.permissions`).orWhere(
               `COALESCE((SELECT assignScope FROM role_perms), '[]'::jsonb) @> role.permissions`,
             );
           }),
@@ -190,9 +163,7 @@ export class RoleRepository implements IRoleRepository {
 
       const [row] = result.raw as RoleEntity[];
       if (result.affected === 0 || !row)
-        throw new RecordNotFoundError(
-          `role to be updated was not found: ${data.role.id}`,
-        );
+        throw new RecordNotFoundError(`role to be updated was not found: ${data.role.id}`);
       return row;
     })
       .andThen((r) => RoleMapper.toDomain(r))
@@ -218,11 +189,7 @@ export class RoleRepository implements IRoleRepository {
       .andThen((r) => RoleMapper.toDomain(r))
       .mapErr(mapTypeOrmError);
   }
-  deleteById(ids: {
-    requesterRoleId: string;
-    targetRoleId: string;
-    defaultRoleId: string;
-  }): DBResult<number> {
+  deleteById(ids: { requesterRoleId: string; targetRoleId: string; defaultRoleId: string }): DBResult<number> {
     return Result.wrapAsync(async () => {
       const requesterCreateScopeCte = this.roleRepo
         .createQueryBuilder('requester')
@@ -235,9 +202,7 @@ export class RoleRepository implements IRoleRepository {
         .createQueryBuilder('target')
         .select('target.id', 'id')
         .where('target.id = :targetRoleId', { targetRoleId: ids.targetRoleId })
-        .andWhere(
-          'target.permissions <@ (SELECT createScope FROM requester_scope)',
-        );
+        .andWhere('target.permissions <@ (SELECT createScope FROM requester_scope)');
 
       const reassignedUsersCte = this.roleRepo.manager
         .createQueryBuilder()

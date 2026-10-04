@@ -1,10 +1,4 @@
-import {
-  CouponId,
-  OrderId,
-  PromotionId,
-  PromotionRedemptionId,
-  UserId,
-} from 'src/modules/shared/value-objects/ids';
+import { CouponId, OrderId, PromotionId, PromotionRedemptionId, UserId } from 'src/modules/shared/value-objects/ids';
 
 type PromotionRedemptionProps = {
   id: PromotionRedemptionId;
@@ -16,10 +10,7 @@ type PromotionRedemptionProps = {
   redeemedAt: Date;
 };
 
-type CreatePromotionRedemptionProps = Omit<
-  PromotionRedemptionProps,
-  'redeemedAt'
->;
+type CreatePromotionRedemptionProps = Omit<PromotionRedemptionProps, 'redeemedAt'>;
 
 export class PromotionRedemption {
   private constructor(private props: PromotionRedemptionProps) {}

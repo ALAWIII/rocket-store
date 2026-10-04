@@ -1,7 +1,4 @@
-import {
-  AuthUserResult,
-  UserAuthFlowBuilder,
-} from '../support/helpers/auth-user-flow.builder';
+import { AuthUserResult, UserAuthFlowBuilder } from '../support/helpers/auth-user-flow.builder';
 import { it } from '../support/fixtures/authenticated-e2e.fixture';
 import { AllPermissions } from 'src/modules/access-control/domain/permission';
 import {
@@ -42,10 +39,7 @@ describe.concurrent('users (e2e)', () => {
     }) => {
       const managerRole = {
         name: 'manager',
-        permissions: [
-          AllPermissions.address.AddressReadLessOrEqual,
-          AllPermissions.user.UserReadLessOrEqual,
-        ],
+        permissions: [AllPermissions.address.AddressReadLessOrEqual, AllPermissions.user.UserReadLessOrEqual],
       };
       await roleController.create(managerRole, { code: 201, parseBody: true });
 
@@ -66,16 +60,10 @@ describe.concurrent('users (e2e)', () => {
         );
       }
       const managerRequestUsersList = (
-        await userController
-          .withAgent(expectedUsers[0].userAgent)
-          .findAll({ code: 200, parseBody: true })
+        await userController.withAgent(expectedUsers[0].userAgent).findAll({ code: 200, parseBody: true })
       ).body!;
-      const returndUserIds = managerRequestUsersList.users
-        .map((user) => user.id)
-        .sort();
-      expect(returndUserIds).toEqual(
-        expectedUsers.map((u) => u.userDb.id).sort(),
-      );
+      const returndUserIds = managerRequestUsersList.users.map((user) => user.id).sort();
+      expect(returndUserIds).toEqual(expectedUsers.map((u) => u.userDb.id).sort());
 
       expect(managerRequestUsersList.total).toStrictEqual(3);
       expect(returndUserIds).not.toContain(adminUser.userDb.id);
@@ -122,29 +110,11 @@ describe.concurrent('users (e2e)', () => {
             .build(),
         );
       }
-      const first10Users = (
-        await userController.findAll(
-          { code: 200, parseBody: true },
-          { page: 1, limit: 10 },
-        )
-      ).body!;
-      const second10Users = (
-        await userController.findAll(
-          { code: 200, parseBody: true },
-          { page: 2, limit: 10 },
-        )
-      ).body!;
-      const lastUser = (
-        await userController.findAll(
-          { code: 200, parseBody: true },
-          { page: 3, limit: 10 },
-        )
-      ).body!;
-      const allReturnedUsersIds = [
-        ...first10Users.users,
-        ...second10Users.users,
-        ...lastUser.users,
-      ]
+      const first10Users = (await userController.findAll({ code: 200, parseBody: true }, { page: 1, limit: 10 })).body!;
+      const second10Users = (await userController.findAll({ code: 200, parseBody: true }, { page: 2, limit: 10 }))
+        .body!;
+      const lastUser = (await userController.findAll({ code: 200, parseBody: true }, { page: 3, limit: 10 })).body!;
+      const allReturnedUsersIds = [...first10Users.users, ...second10Users.users, ...lastUser.users]
         .map((us) => us.id)
         .sort();
       const usersIdsSet = new Set(allReturnedUsersIds);
@@ -190,27 +160,14 @@ describe.concurrent('users (e2e)', () => {
         .verified()
         .signin()
         .build();
-      const usersByRoleId = (
-        await userController.findAll(
-          { code: 200, parseBody: true },
-          { roleId: CUSTOMER_ROLE.id },
-        )
-      ).body!;
+      const usersByRoleId = (await userController.findAll({ code: 200, parseBody: true }, { roleId: CUSTOMER_ROLE.id }))
+        .body!;
       expect(usersByRoleId.users.length).toBe(20);
-      expect(
-        usersByRoleId.users.some((u) =>
-          [adminUser.userDb.id, workerUser.userDb.id].includes(u.id),
-        ),
-      ).toBe(false);
-      expect(
-        usersByRoleId.users.every((u) => u.roleId === CUSTOMER_ROLE.id),
-      ).toBe(true);
+      expect(usersByRoleId.users.some((u) => [adminUser.userDb.id, workerUser.userDb.id].includes(u.id))).toBe(false);
+      expect(usersByRoleId.users.every((u) => u.roleId === CUSTOMER_ROLE.id)).toBe(true);
 
       const usersByEmail = (
-        await userController.findAll(
-          { code: 200, parseBody: true },
-          { email: allUsers[1].userDb.email },
-        )
+        await userController.findAll({ code: 200, parseBody: true }, { email: allUsers[1].userDb.email })
       ).body!;
       expect(usersByEmail.users.length).toBe(1);
       expect(usersByEmail.users[0].id).toEqual(allUsers[1].userDb.id);
@@ -218,12 +175,7 @@ describe.concurrent('users (e2e)', () => {
   });
 
   describe('GET /api/v1/users/:id (findById)', () => {
-    it('should successfully return user profile', async ({
-      userController,
-      db,
-      mailClient,
-      app,
-    }) => {
+    it('should successfully return user profile', async ({ userController, db, mailClient, app }) => {
       const userWorker = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
         mailhogClient: mailClient,
@@ -271,29 +223,22 @@ describe.concurrent('users (e2e)', () => {
         .signin()
         .build();
 
-      await userController
-        .withAgent(manager.userAgent)
-        .findById(adminUser.userDb.id, { code: 404 });
+      await userController.withAgent(manager.userAgent).findById(adminUser.userDb.id, { code: 404 });
     });
   });
 
   describe('PATCH /api/v1/users/me (updateMe)', () => {
-    it('should successfully update user profile', async ({
-      userController,
-      adminUser,
-    }) => {
+    it('should successfully update user profile', async ({ userController, adminUser }) => {
       const userProfile: UpdateUserTestDto = {
         name: 'cat',
         givenName: 'lion',
         familyName: 'tigers',
         phone: '+19363463473',
       };
-      const updateResp = await userController
-        .withAgent(adminUser.userAgent)
-        .updateMe(userProfile, {
-          code: 200,
-          parseBody: true,
-        });
+      const updateResp = await userController.withAgent(adminUser.userAgent).updateMe(userProfile, {
+        code: 200,
+        parseBody: true,
+      });
       const getUpdatedProfile = (
         await userController.findMe({
           code: 200,
@@ -303,30 +248,20 @@ describe.concurrent('users (e2e)', () => {
       expect(updateResp.body!).toEqual(getUpdatedProfile);
     });
 
-    it('should fail update user profile because of malformed phone number', async ({
-      userController,
-      adminUser,
-    }) => {
+    it('should fail update user profile because of malformed phone number', async ({ userController, adminUser }) => {
       const userProfile: UpdateUserTestDto = {
         phone: '9363463473',
       };
       const errorMessage = (
-        await userController
-          .withAgent(adminUser.userAgent)
-          .updateMe(userProfile, {
-            code: 400,
-            parseBody: false,
-          })
+        await userController.withAgent(adminUser.userAgent).updateMe(userProfile, {
+          code: 400,
+          parseBody: false,
+        })
       ).response.body as { message: string[] };
-      expect(errorMessage.message).toEqual([
-        'phone must be a valid E.164 phone number',
-      ]);
+      expect(errorMessage.message).toEqual(['phone must be a valid E.164 phone number']);
     });
 
-    it('should fail update user profile when sending empty object.', async ({
-      userController,
-      adminUser,
-    }) => {
+    it('should fail update user profile when sending empty object.', async ({ userController, adminUser }) => {
       const errorMessage = (
         await userController.withAgent(adminUser.userAgent).updateMe(
           {},
@@ -336,19 +271,12 @@ describe.concurrent('users (e2e)', () => {
           },
         )
       ).response.body as { message: string[] };
-      expect(errorMessage.message).toEqual([
-        'At least one field must be provided',
-      ]);
+      expect(errorMessage.message).toEqual(['At least one field must be provided']);
     });
   });
 
   describe('PATCH /api/v1/users/:id/role (assignRole)', () => {
-    it('should successfully assign new role to user.', async ({
-      userController,
-      db,
-      mailClient,
-      app,
-    }) => {
+    it('should successfully assign new role to user.', async ({ userController, db, mailClient, app }) => {
       const customer = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
         mailhogClient: mailClient,
@@ -359,11 +287,10 @@ describe.concurrent('users (e2e)', () => {
         .signin()
         .verified()
         .build();
-      const assignedUser = await userController.assignRole(
-        customer.userDb.id,
-        WORKER_ROLE.id,
-        { code: 200, parseBody: true },
-      );
+      const assignedUser = await userController.assignRole(customer.userDb.id, WORKER_ROLE.id, {
+        code: 200,
+        parseBody: true,
+      });
 
       expect({
         userId: assignedUser.body!.id,
@@ -391,9 +318,7 @@ describe.concurrent('users (e2e)', () => {
         .verified()
         .signin()
         .build();
-      await userController
-        .withAgent(customer.userAgent)
-        .assignRole(adminUser.userDb.id, WORKER_ROLE.id, { code: 403 });
+      await userController.withAgent(customer.userAgent).assignRole(adminUser.userDb.id, WORKER_ROLE.id, { code: 403 });
     });
 
     it('should fail when authorized user request to assign role and this role is not of user requester scope.', async ({
@@ -432,9 +357,7 @@ describe.concurrent('users (e2e)', () => {
         .signin()
         .verified()
         .build();
-      await userController
-        .withAgent(manager.userAgent)
-        .assignRole(customer.userDb.id, ADMIN_ROLE.id, { code: 404 });
+      await userController.withAgent(manager.userAgent).assignRole(customer.userDb.id, ADMIN_ROLE.id, { code: 404 });
     });
 
     it('should fail when authorized user request to assign role to a user higher than the requester.', async ({
@@ -470,12 +393,7 @@ describe.concurrent('users (e2e)', () => {
     });
   });
   describe('PATCH /api/v1/users/roles/reassign (reassignUsersRole)', () => {
-    it('should successfully reassign all users to new role.', async ({
-      mailClient,
-      app,
-      db,
-      userController,
-    }) => {
+    it('should successfully reassign all users to new role.', async ({ mailClient, app, db, userController }) => {
       const customers: AuthUserResult[] = [];
       for (let i = 1; i <= 5; i++) {
         customers.push(
@@ -504,9 +422,7 @@ describe.concurrent('users (e2e)', () => {
       );
       expect(assignResponse.body).toEqual({ affected: 5 });
       expect(findAllUsers.body?.total).toBe(5);
-      expect(
-        findAllUsers.body?.users.every((u) => u.roleId === WORKER_ROLE.id),
-      ).toBe(true);
+      expect(findAllUsers.body?.users.every((u) => u.roleId === WORKER_ROLE.id)).toBe(true);
     });
     it('should fail when try to assign different new role that is not a subset of the user requester role.', async ({
       roleController,
@@ -520,10 +436,7 @@ describe.concurrent('users (e2e)', () => {
       const managerRole = await roleController.create(
         {
           name: 'manager',
-          permissions: [
-            AllPermissions.role.RoleAssignLessOrEqual,
-            AllPermissions.user.UserReadLessOrEqual,
-          ],
+          permissions: [AllPermissions.role.RoleAssignLessOrEqual, AllPermissions.user.UserReadLessOrEqual],
           assignScope: [AllPermissions.user.UserReadLessOrEqual],
         },
         {
@@ -555,24 +468,16 @@ describe.concurrent('users (e2e)', () => {
 
       const assignResp = await userController
         .withAgent(manager.userAgent)
-        .reassignUsersRole(
-          { oldRoleId: CUSTOMER_ROLE.id, newRoleId: WORKER_ROLE.id },
-          { code: 200, parseBody: true },
-        );
+        .reassignUsersRole({ oldRoleId: CUSTOMER_ROLE.id, newRoleId: WORKER_ROLE.id }, { code: 200, parseBody: true });
       expect(assignResp.body).toEqual({ affected: 0 });
       //====
-      const userAfterAssign = await userController.findById(
-        userBeforeAssign.userDb.id,
-        {
-          code: 200,
-          parseBody: true,
-        },
-      );
+      const userAfterAssign = await userController.findById(userBeforeAssign.userDb.id, {
+        code: 200,
+        parseBody: true,
+      });
       /// its role id must be unchanged.
       expect(userAfterAssign.body?.id).toEqual(userBeforeAssign.userDb.id);
-      expect(userAfterAssign.body?.roleId).toEqual(
-        userBeforeAssign.userDb.roleId,
-      );
+      expect(userAfterAssign.body?.roleId).toEqual(userBeforeAssign.userDb.roleId);
       expect(userAfterAssign.body?.roleId).toEqual(CUSTOMER_ROLE.id);
     });
     it('should fail to assign against users that thier role is not subset of the requester role while the new role is subset of the user requester role .', async ({
@@ -586,10 +491,7 @@ describe.concurrent('users (e2e)', () => {
       const managerRole = await roleController.create(
         {
           name: 'manager',
-          permissions: [
-            AllPermissions.role.RoleAssignLessOrEqual,
-            AllPermissions.user.UserReadLessOrEqual,
-          ],
+          permissions: [AllPermissions.role.RoleAssignLessOrEqual, AllPermissions.user.UserReadLessOrEqual],
           assignScope: [AllPermissions.user.UserReadLessOrEqual],
         },
         {
@@ -621,24 +523,16 @@ describe.concurrent('users (e2e)', () => {
         .build();
       const assignResp = await userController
         .withAgent(manager.userAgent)
-        .reassignUsersRole(
-          { oldRoleId: WORKER_ROLE.id, newRoleId: CUSTOMER_ROLE.id },
-          { code: 200, parseBody: true },
-        );
+        .reassignUsersRole({ oldRoleId: WORKER_ROLE.id, newRoleId: CUSTOMER_ROLE.id }, { code: 200, parseBody: true });
       expect(assignResp.body).toEqual({ affected: 0 });
       //====
-      const userAfterAssign = await userController.findById(
-        userBeforeAssign.userDb.id,
-        {
-          code: 200,
-          parseBody: true,
-        },
-      );
+      const userAfterAssign = await userController.findById(userBeforeAssign.userDb.id, {
+        code: 200,
+        parseBody: true,
+      });
       /// its role id must be unchanged.
       expect(userAfterAssign.body?.id).toEqual(userBeforeAssign.userDb.id);
-      expect(userAfterAssign.body?.roleId).toEqual(
-        userBeforeAssign.userDb.roleId,
-      );
+      expect(userAfterAssign.body?.roleId).toEqual(userBeforeAssign.userDb.roleId);
       expect(userAfterAssign.body?.roleId).toEqual(WORKER_ROLE.id);
     });
   });

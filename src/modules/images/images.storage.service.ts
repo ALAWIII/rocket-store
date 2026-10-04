@@ -6,11 +6,7 @@ import { AsyncResult, Result } from '@allawiii/results-ts';
 import { ImageDeletionPayload } from './images-worker.service';
 import { createHash } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  ImageDeletionError,
-  ImageMaxSizeExceededError,
-  ImageServiceError,
-} from './images.service.error';
+import { ImageDeletionError, ImageMaxSizeExceededError, ImageServiceError } from './images.service.error';
 
 const DEFAULT_MAX_SIZE_BYTES = 10 * 1024 * 1024;
 
@@ -67,12 +63,7 @@ export class ImagesStorageService {
   ) {}
 
   uploadToStorage(params: UploadImageParams): ImgResult<UploadImageResult> {
-    const {
-      stream,
-      imageKey,
-      contentType,
-      maxSizeBytes = DEFAULT_MAX_SIZE_BYTES,
-    } = params;
+    const { stream, imageKey, contentType, maxSizeBytes = DEFAULT_MAX_SIZE_BYTES } = params;
 
     return Result.wrapAsync(async () => {
       const meter = new MeteringHashStream(maxSizeBytes);
@@ -108,19 +99,13 @@ export class ImagesStorageService {
         };
       } catch (err) {
         await up.abort().catch((abortErr) => {
-          this.logger.error(
-            `Failed to abort S3 upload for key=${imageKey}`,
-            abortErr,
-          );
+          this.logger.error(`Failed to abort S3 upload for key=${imageKey}`, abortErr);
         });
         throw err;
       }
     }).mapErr((e: unknown) => {
       if (e instanceof ImageMaxSizeExceededError) return e;
-      return new ImageServiceError(
-        'Uploading image to storage was failed or aborted',
-        e,
-      );
+      return new ImageServiceError('Uploading image to storage was failed or aborted', e);
     });
   }
   /**
@@ -130,9 +115,7 @@ export class ImagesStorageService {
    * after a failed DB save) should be aware there's a window where the
    * object still exists in storage.
    */
-  sendDeleteImgs(
-    imageKeys: string[],
-  ): AsyncResult<string[], ImageDeletionError> {
+  sendDeleteImgs(imageKeys: string[]): AsyncResult<string[], ImageDeletionError> {
     return this.jobService
       .sendJobs(
         this.jobKind,
@@ -140,12 +123,6 @@ export class ImagesStorageService {
           return { Key: k };
         }),
       )
-      .mapErr(
-        (e) =>
-          new ImageDeletionError(
-            `Failed to send delete image jobs: ${e.message}`,
-            e,
-          ),
-      );
+      .mapErr((e) => new ImageDeletionError(`Failed to send delete image jobs: ${e.message}`, e));
   }
 }

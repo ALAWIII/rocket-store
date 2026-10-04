@@ -8,10 +8,17 @@ export class CartItemEntity {
   @UuidV7PrimaryColumn()
   id!: string;
   @Column('uuid')
-  @ForeignKey(() => ProductVariantEntity, (p) => p.id)
+  @ForeignKey(
+    () => ProductVariantEntity,
+    (p) => p.id,
+  )
   productVariantId!: string;
   @Column('uuid')
-  @ForeignKey(() => CartEntity, (c) => c.id, { onDelete: 'CASCADE' })
+  @ForeignKey(
+    () => CartEntity,
+    (c) => c.id,
+    { onDelete: 'CASCADE' },
+  )
   cartId!: string;
 
   @Column('integer', { default: 1 })

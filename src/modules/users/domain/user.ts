@@ -7,10 +7,7 @@ import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.
 import { Err, Ok, Result } from '@allawiii/results-ts';
 import { optional } from 'src/modules/shared/utils/optional.util';
 import { Image, ImagePrimitives } from 'src/modules/images/domain/image';
-import {
-  Serialized,
-  serializeProps,
-} from 'src/modules/shared/utils/serialize-props.util';
+import { Serialized, serializeProps } from 'src/modules/shared/utils/serialize-props.util';
 
 type UserProps = {
   readonly id: UserId;
@@ -51,9 +48,7 @@ export class User {
       givenName: optional(data.givenName, (value) => Name.create(value)),
       familyName: optional(data.familyName, (value) => Name.create(value)),
       phone: optional(data.phone, (value) => Phone.create(value)),
-      image: optional(data.image, (value) =>
-        Image.restore({ ...value, createdAt: new Date(value.createdAt) }),
-      ),
+      image: optional(data.image, (value) => Image.restore({ ...value, createdAt: new Date(value.createdAt) })),
     });
     if (dataValidated.isErr()) return Err(dataValidated.error);
 

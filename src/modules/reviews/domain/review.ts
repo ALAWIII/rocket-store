@@ -1,9 +1,4 @@
-import {
-  OrderId,
-  ProductId,
-  ReviewId,
-  UserId,
-} from 'src/modules/shared/value-objects/ids';
+import { OrderId, ProductId, ReviewId, UserId } from 'src/modules/shared/value-objects/ids';
 
 export type ReviewStatus = 'published' | 'hidden';
 
@@ -99,11 +94,7 @@ export class Review {
 
   // Behavior
   edit(data: EditReviewProps): void {
-    if (
-      data.title === undefined &&
-      data.body === undefined &&
-      data.rating === undefined
-    ) {
+    if (data.title === undefined && data.body === undefined && data.rating === undefined) {
       return;
     }
 

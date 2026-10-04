@@ -12,11 +12,7 @@ type WishlistProps = {
 export class Wishlist {
   private constructor(private props: WishlistProps) {}
 
-  static create(params: {
-    id: WishlistId;
-    userId: UserId;
-    name: Name;
-  }): Wishlist {
+  static create(params: { id: WishlistId; userId: UserId; name: Name }): Wishlist {
     const now = new Date();
 
     return new Wishlist({

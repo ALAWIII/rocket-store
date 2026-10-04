@@ -55,10 +55,7 @@ export function createAuth(
     user: {
       changeEmail: {
         enabled: true,
-        sendChangeEmailConfirmation: async (
-          { user, newEmail, url, token },
-          request,
-        ) => {
+        sendChangeEmailConfirmation: async ({ user, newEmail, url, token }, request) => {
           await emailService.sendChangeEmailConfirmation({
             to: user.email,
             currentEmail: user.email,
@@ -115,20 +112,13 @@ export function createAuth(
           before: async (session) => {
             let dbUser: UserEntity | null;
             try {
-              dbUser = await dataSource
-                .getRepository(UserEntity)
-                .findOneBy({ id: session.userId });
+              dbUser = await dataSource.getRepository(UserEntity).findOneBy({ id: session.userId });
             } catch (error) {
-              throw new Error(
-                `Database failure while fetching user info for session construction.`,
-                { cause: error },
-              );
+              throw new Error(`Database failure while fetching user info for session construction.`, { cause: error });
             }
 
             if (!dbUser) {
-              throw new UnauthorizedException(
-                `User ${session.userId} not found while building session.`,
-              );
+              throw new UnauthorizedException(`User ${session.userId} not found while building session.`);
             }
             return { data: { ...session, roleId: dbUser.roleId } };
           },
@@ -159,18 +149,11 @@ export function createAuth(
       },
     },
     //-------------------
-    disabledPaths: [
-      '/update-user',
-      '/delete-user',
-      '/delete-user/callback',
-      '/account-info',
-    ],
+    disabledPaths: ['/update-user', '/delete-user', '/delete-user/callback', '/account-info'],
     plugins: [
       customSession(async ({ user, session }) => {
         if (!hasRoleId(session)) {
-          throw new Error(
-            'Expected roleId on session — check databaseHooks.session.create',
-          );
+          throw new Error('Expected roleId on session — check databaseHooks.session.create');
         }
         return {
           user: { ...user, roleId: session.roleId },

@@ -25,9 +25,7 @@ export class PasswordResetFlowBuilder {
 
   async build() {
     const reqPassRest = await this.requestPasswordReset();
-    const passwordRestUrl = await this.extractPasswordRestUrl(
-      this.payload.email,
-    );
+    const passwordRestUrl = await this.extractPasswordRestUrl(this.payload.email);
   }
 
   private async requestPasswordReset() {
@@ -52,8 +50,7 @@ export class PasswordResetFlowBuilder {
 
     const urls = extractUrlsFromHtml(message.html ?? '');
 
-    const passwordResetUrl =
-      urls.find((u) => u.includes('/api/auth/reset-password')) ?? urls[0];
+    const passwordResetUrl = urls.find((u) => u.includes('/api/auth/reset-password')) ?? urls[0];
 
     if (!passwordResetUrl) {
       throw new Error(`Password reset URL was not found for ${email}`);

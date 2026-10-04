@@ -10,13 +10,22 @@ export class WishlistItemEntity {
   @UuidV7PrimaryColumn()
   id!: string;
   @Column('uuid')
-  @ForeignKey(() => WishlistEntity, (w) => w.id)
+  @ForeignKey(
+    () => WishlistEntity,
+    (w) => w.id,
+  )
   wishlistId!: string;
   @Column('uuid')
-  @ForeignKey(() => ProductEntity, (p) => p.id)
+  @ForeignKey(
+    () => ProductEntity,
+    (p) => p.id,
+  )
   productId!: string;
   @Column('uuid', { nullable: true })
-  @ForeignKey(() => ProductVariantEntity, (pv) => pv.id)
+  @ForeignKey(
+    () => ProductVariantEntity,
+    (pv) => pv.id,
+  )
   variantId!: string | null;
   @Column('varchar', { nullable: true, length: 500 })
   note!: string | null;

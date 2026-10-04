@@ -1,10 +1,4 @@
-import {
-  IsArray,
-  IsOptional,
-  IsString,
-  Length,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsOptional, IsString, Length, ValidateNested } from 'class-validator';
 import { PermissionDto } from './permission.dto';
 import { Type } from 'class-transformer';
 

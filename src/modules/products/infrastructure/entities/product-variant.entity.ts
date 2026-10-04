@@ -8,7 +8,10 @@ export class ProductVariantEntity {
   @UuidV7PrimaryColumn()
   id!: string;
   @Column('uuid')
-  @ForeignKey(() => ProductEntity, (p) => p.id)
+  @ForeignKey(
+    () => ProductEntity,
+    (p) => p.id,
+  )
   productId!: string;
   @Column('integer')
   price!: number;

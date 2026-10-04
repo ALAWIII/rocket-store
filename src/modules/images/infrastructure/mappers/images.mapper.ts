@@ -1,19 +1,12 @@
 import { Image } from '../../domain/image';
 import { ImageEntity } from '../entities/image.entity';
-import {
-  CorruptedPersistenceDataError,
-  DatabaseError,
-} from 'src/modules/shared/errors/database.error';
+import { CorruptedPersistenceDataError, DatabaseError } from 'src/modules/shared/errors/database.error';
 import { Ok, Result } from '@allawiii/results-ts';
 
 export class ImageMapper {
   static toDomain(entity: ImageEntity): Result<Image, DatabaseError> {
     return Image.restore({ ...entity }).mapErr(
-      (e) =>
-        new CorruptedPersistenceDataError(
-          `Failed to construct image from ImageEntity: ${e.message}`,
-          e,
-        ),
+      (e) => new CorruptedPersistenceDataError(`Failed to construct image from ImageEntity: ${e.message}`, e),
     );
   }
 

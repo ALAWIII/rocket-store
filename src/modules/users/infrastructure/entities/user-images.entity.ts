@@ -12,10 +12,18 @@ export class UserImagesEntity {
   @UuidV7PrimaryColumn()
   id!: string;
   @Column({ type: 'uuid' })
-  @ForeignKey(() => UserEntity, (i) => i.id, { onDelete: 'CASCADE' })
+  @ForeignKey(
+    () => UserEntity,
+    (i) => i.id,
+    { onDelete: 'CASCADE' },
+  )
   userId!: string;
   @Column({ type: 'uuid' })
-  @ForeignKey(() => ImageEntity, (i) => i.id, { onDelete: 'CASCADE' })
+  @ForeignKey(
+    () => ImageEntity,
+    (i) => i.id,
+    { onDelete: 'CASCADE' },
+  )
   imageId!: string;
   @CreateDateColumnTz()
   createdAt!: string;

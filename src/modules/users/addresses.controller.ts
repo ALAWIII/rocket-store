@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  Post,
-  Put,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
 import { AddressService } from './address.service';
 import { Session } from '@thallesp/nestjs-better-auth';
 import { type AppSession } from 'src/auth/auth.config';
@@ -33,10 +24,7 @@ export class MyAddressesController {
     return this.service.findById(session.user.id, id);
   }
   @Post()
-  async create(
-    @Session() session: AppSession,
-    @Body() d: CreateAddressDto,
-  ): Promise<AddressResponseDto> {
+  async create(@Session() session: AppSession, @Body() d: CreateAddressDto): Promise<AddressResponseDto> {
     return await this.service.createAdrs(session.user.id, d);
   }
   @Put(':id')

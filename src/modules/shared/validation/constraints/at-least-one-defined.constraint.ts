@@ -1,8 +1,4 @@
-import {
-  ValidationArguments,
-  ValidatorConstraintInterface,
-  ValidatorConstraint,
-} from 'class-validator';
+import { ValidationArguments, ValidatorConstraintInterface, ValidatorConstraint } from 'class-validator';
 
 @ValidatorConstraint({
   name: 'atLeastOneDefined',

@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseUUIDPipe,
-  Patch,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Query } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { type AppSession } from 'src/auth/auth.config';
 import { Session } from '@thallesp/nestjs-better-auth';
@@ -28,10 +20,7 @@ export class UsersController {
   }
   @Get()
   @RequirePermission(AllPermissions.user.UserReadLessOrEqual)
-  async findAll(
-    @Session() session: AppSession,
-    @Query() dto: FindUsersFlatQueryDto,
-  ): Promise<FindUsersResponseDto> {
+  async findAll(@Session() session: AppSession, @Query() dto: FindUsersFlatQueryDto): Promise<FindUsersResponseDto> {
     const mappedDto = {
       page: dto.page,
       limit: dto.limit,
@@ -65,11 +54,7 @@ export class UsersController {
     @Param('id', new ParseUUIDPipe({ version: '7' })) targetUserId: string,
     @Body() body: AssignRoleToUserDto,
   ): Promise<UserResponseDto> {
-    return this.service.assignRoleToUser(
-      session.user.roleId,
-      targetUserId,
-      body.roleId,
-    );
+    return this.service.assignRoleToUser(session.user.roleId, targetUserId, body.roleId);
   }
   @Patch('roles/reassign')
   @RequirePermission(AllPermissions.role.RoleAssignLessOrEqual)

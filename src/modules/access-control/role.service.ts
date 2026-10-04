@@ -39,10 +39,7 @@ export class RoleService {
   async reloadPolicies(): Promise<number> {
     return await this.acsyncService.reloadFromDatabase();
   }
-  async createRole(
-    userRoleId: string,
-    roleData: CreateRoleDto,
-  ): Promise<RoleResponseDto> {
+  async createRole(userRoleId: string, roleData: CreateRoleDto): Promise<RoleResponseDto> {
     if (this.systemRole.isSystemRoleName(roleData.name))
       throw new SystemRoleError('Try to create an existing system role.');
     const permissions = roleData.permissions
@@ -71,22 +68,15 @@ export class RoleService {
 
     return role.toJSON();
   }
-  async renameRole(
-    userRoleId: string,
-    roleId: string,
-    updateData: UpdateRoleDto,
-  ): Promise<RoleResponseDto> {
-    if (this.systemRole.hasId(roleId))
-      throw new SystemRoleError('Try to rename an existing System Role.');
+  async renameRole(userRoleId: string, roleId: string, updateData: UpdateRoleDto): Promise<RoleResponseDto> {
+    if (this.systemRole.hasId(roleId)) throw new SystemRoleError('Try to rename an existing System Role.');
 
     const targetRole = Role.restore({
       id: roleId,
       name: updateData.name,
       permissions: [],
     }).unwrap();
-    const renamed = await this.roleRepo
-      .rename({ role: targetRole, userRoleId })
-      .unwrap();
+    const renamed = await this.roleRepo.rename({ role: targetRole, userRoleId }).unwrap();
     return renamed.toJSON();
   }
   async removeRole(userRoleId: string, roleId: string): Promise<number> {
@@ -96,8 +86,7 @@ export class RoleService {
       );
 
     const isSystemRole = this.systemRole.hasId(roleId);
-    if (isSystemRole)
-      throw new SystemRoleError('System roles cannot be removed');
+    if (isSystemRole) throw new SystemRoleError('System roles cannot be removed');
 
     const deleteResult = await this.roleRepo
       .deleteById({
@@ -107,10 +96,7 @@ export class RoleService {
       })
       .unwrap();
     const isRemoved = await this.acsyncService.removeRole(roleId);
-    if (!isRemoved)
-      throw new Error(
-        `Failed to remove Casbin policies for role id: ${roleId}.`,
-      );
+    if (!isRemoved) throw new Error(`Failed to remove Casbin policies for role id: ${roleId}.`);
     return deleteResult;
   }
 }

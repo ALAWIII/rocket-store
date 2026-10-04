@@ -7,9 +7,7 @@ type UnwrapResultObjectOk<T extends Record<string, Result<any, any>>> = {
   [K in keyof T]: ExtractOk<T[K]>;
 };
 
-type ResultObjectError<T extends Record<string, Result<any, any>>> = ExtractErr<
-  T[keyof T]
->;
+type ResultObjectError<T extends Record<string, Result<any, any>>> = ExtractErr<T[keyof T]>;
 
 /**
  * Unwraps an object whose values are `Result` instances and returns a new object
@@ -93,10 +91,7 @@ type FieldError<T extends string, E> = {
  *
  * const user = new User(validated.value);
  */
-export function collectResultObjectErrors<
-  T extends Record<string, Result<any, E>>,
-  E extends Error,
->(
+export function collectResultObjectErrors<T extends Record<string, Result<any, E>>, E extends Error>(
   obj: T,
 ): Result<UnwrapResultObjectOk<T>, FieldError<Extract<keyof T, string>, E>[]> {
   const output = {} as UnwrapResultObjectOk<T>;

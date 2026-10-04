@@ -16,9 +16,13 @@ export class AuditLogEntity {
   occurredAt!: Date;
 
   @Column('uuid', { name: 'actor_id', nullable: true })
-  @ForeignKey(() => UserEntity, (user) => user.id, {
-    onDelete: 'SET NULL',
-  })
+  @ForeignKey(
+    () => UserEntity,
+    (user) => user.id,
+    {
+      onDelete: 'SET NULL',
+    },
+  )
   actorId!: string | null;
 
   @Column('varchar', { length: 10 })

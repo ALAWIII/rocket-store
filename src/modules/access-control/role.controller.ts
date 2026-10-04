@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Param,
-  ParseUUIDPipe,
-  Post,
-  Put,
-  Query,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
@@ -38,10 +27,7 @@ export class RolesController {
 
   @Get()
   @RequirePermission(AllPermissions.role.RoleReadLessOrEqual)
-  async findAll(
-    @Session() session: AppSession,
-    @Query() query: FindRolesQueryDto,
-  ): Promise<RoleResponseDto[]> {
+  async findAll(@Session() session: AppSession, @Query() query: FindRolesQueryDto): Promise<RoleResponseDto[]> {
     if (query.scope === 'assignable') {
       return this.service.findAssignableRoles(session.user.roleId);
     }

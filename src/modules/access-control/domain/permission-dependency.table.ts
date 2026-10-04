@@ -38,10 +38,7 @@ class PermissionDependencyTableBuilder {
 class PermissionDependencyTable {
   constructor(private readonly table: ReadonlyMap<string, PermissionNode>) {}
 
-  getDependenciesTreeFor(
-    permission: Permission,
-    maxDepth = Number.POSITIVE_INFINITY,
-  ): Permission[] {
+  getDependenciesTreeFor(permission: Permission, maxDepth = Number.POSITIVE_INFINITY): Permission[] {
     const collected = new Map<string, Permission>();
     const visiting = new Set<string>();
 
@@ -87,12 +84,8 @@ const roleTable = new PermissionDependencyTableBuilder()
     AllPermissions.role.RoleReadLessOrEqual,
     AllPermissions.user.UserReadLessOrEqual,
   ])
-  .register(AllPermissions.role.RoleCreateLessOrEqual, [
-    AllPermissions.role.RoleReadLessOrEqual,
-  ])
-  .register(AllPermissions.role.RoleDeleteLess, [
-    AllPermissions.role.RoleCreateLessOrEqual,
-  ])
+  .register(AllPermissions.role.RoleCreateLessOrEqual, [AllPermissions.role.RoleReadLessOrEqual])
+  .register(AllPermissions.role.RoleDeleteLess, [AllPermissions.role.RoleCreateLessOrEqual])
   .register(AllPermissions.role.RoleRenameLessOrEqual, [
     // users can rename only what can they create
     AllPermissions.role.RoleCreateLessOrEqual,
@@ -109,21 +102,15 @@ const imagesTable = new PermissionDependencyTableBuilder()
     AllPermissions.images.ImagesReadAny,
     AllPermissions.images.ImagesDeleteAny,
   ])
-  .register(AllPermissions.images.ImagesAttachAny, [
-    AllPermissions.images.ImagesUploadAny,
-  ])
+  .register(AllPermissions.images.ImagesAttachAny, [AllPermissions.images.ImagesUploadAny])
   .register(AllPermissions.images.ImagesReadAny, [])
-  .register(AllPermissions.images.ImagesDeleteAny, [
-    AllPermissions.images.ImagesReadAny,
-  ])
+  .register(AllPermissions.images.ImagesDeleteAny, [AllPermissions.images.ImagesReadAny])
   .register(AllPermissions.images.ImagesUploadOwn, [
     AllPermissions.images.ImagesReadOwn,
     AllPermissions.images.ImagesDeleteOwn,
   ])
   .register(AllPermissions.images.ImagesReadOwn, [])
-  .register(AllPermissions.images.ImagesDeleteOwn, [
-    AllPermissions.images.ImagesReadOwn,
-  ])
+  .register(AllPermissions.images.ImagesDeleteOwn, [AllPermissions.images.ImagesReadOwn])
   .getTable();
 const brandTable = new PermissionDependencyTableBuilder()
   .register(AllPermissions.brands.BrandsCreateAny, [])

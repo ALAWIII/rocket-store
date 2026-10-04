@@ -6,15 +6,10 @@ import { ExpectedTestStatusCode } from '../types/expected-test-status-code.type'
  * @param statuses
  * @returns T
  */
-export function parseResponseBody<T>(
-  response: Response,
-  statuses: number[],
-): T | undefined {
-  return statuses.includes(response.statusCode)
-    ? (response.body as T)
-    : undefined;
+export function parseResponseBody<T>(response: Response, statuses: number[]): T | undefined {
+  return statuses.includes(response.statusCode) ? (response.body as T) : undefined;
 }
 
-export const statusCodesListNormalize = (
-  expectedStatusCode: ExpectedTestStatusCode,
-) => [...(expectedStatusCode?.parseBody ? [expectedStatusCode.code] : [])];
+export const statusCodesListNormalize = (expectedStatusCode: ExpectedTestStatusCode) => [
+  ...(expectedStatusCode?.parseBody ? [expectedStatusCode.code] : []),
+];

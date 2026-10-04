@@ -1,8 +1,4 @@
-import {
-  BrandId,
-  BrandImageId,
-  ImageId,
-} from 'src/modules/shared/value-objects/ids';
+import { BrandId, BrandImageId, ImageId } from 'src/modules/shared/value-objects/ids';
 import { unwrapResultObject } from 'src/modules/shared/errors/result/unwrap-result-object';
 import { Ok, Result } from '@allawiii/results-ts';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
@@ -19,10 +15,7 @@ type CreateBrandImageProps = {
   brandId: string;
   imageRole: BrandImageRole;
 };
-type BrandImagePrimitives = Omit<
-  BrandImageProps,
-  'id' | 'imageId' | 'brandId'
-> & {
+type BrandImagePrimitives = Omit<BrandImageProps, 'id' | 'imageId' | 'brandId'> & {
   id: string;
   imageId: string;
   brandId: string;
@@ -30,9 +23,7 @@ type BrandImagePrimitives = Omit<
 export class BrandImage {
   private constructor(private props: BrandImageProps) {}
 
-  static create(
-    data: CreateBrandImageProps,
-  ): Result<BrandImage, ValueObjectError> {
+  static create(data: CreateBrandImageProps): Result<BrandImage, ValueObjectError> {
     const newDate = new Date();
     const resultData = unwrapResultObject({
       id: BrandImageId.create(),
@@ -50,9 +41,7 @@ export class BrandImage {
       }),
     );
   }
-  static restore(
-    data: BrandImagePrimitives,
-  ): Result<BrandImage, ValueObjectError> {
+  static restore(data: BrandImagePrimitives): Result<BrandImage, ValueObjectError> {
     const resultData = unwrapResultObject({
       id: BrandImageId.create(data.id),
       imageId: ImageId.create(data.imageId),

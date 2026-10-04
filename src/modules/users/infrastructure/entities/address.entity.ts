@@ -1,5 +1,5 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, Entity, ForeignKey, Unique } from 'typeorm';
+import { Column, Entity, ForeignKey } from 'typeorm';
 import { UserEntity } from './user.entity';
 import {
   CreateDateColumnTz,
@@ -46,6 +46,9 @@ export class AddressEntity {
   deletedAt?: Date;
 
   @Column({ type: 'uuid', name: 'user_id' })
-  @ForeignKey(() => UserEntity, (u) => u.id)
+  @ForeignKey(
+    () => UserEntity,
+    (u) => u.id,
+  )
   userId!: string;
 }

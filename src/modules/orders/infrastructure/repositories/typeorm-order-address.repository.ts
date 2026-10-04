@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {
-  createOrderAddressData,
-  IOrderAddressRepository,
-} from './order-address.repository';
+import { createOrderAddressData, IOrderAddressRepository } from './order-address.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { Repository } from 'typeorm';
@@ -83,9 +80,7 @@ export class OrderAddressRepositroy implements IOrderAddressRepository {
 
       // ✅ CHANGED: throw instead of return Err()
       if (!row) {
-        throw new RecordNotFoundError(
-          'Could not create order address: address or order not found',
-        );
+        throw new RecordNotFoundError('Could not create order address: address or order not found');
       }
 
       return row;

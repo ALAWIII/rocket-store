@@ -10,11 +10,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { ErrorMapperRegistry } from './error-mapper.registry';
-import {
-  DatabaseError,
-  RecordNotFoundError,
-  UniqueViolationError,
-} from 'src/modules/shared/errors/database.error';
+import { DatabaseError, RecordNotFoundError, UniqueViolationError } from 'src/modules/shared/errors/database.error';
 import { PermissionError } from 'src/modules/access-control/domain/permission.error';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { SystemRoleError } from 'src/modules/access-control/application/system-roles/system-roles.error';
@@ -38,26 +34,11 @@ export class ErrorMappingBootstrap implements OnModuleInit {
       .register(SystemRoleError, (e) => new BadRequestException(e.message))
       .register(RoleServiceError, (e) => new ForbiddenException(e.message))
       .register(RoleError, (e) => new BadRequestException(e.message))
-      .register(
-        DatabaseError,
-        (e) => new InternalServerErrorException('unexpected error'),
-      )
-      .register(
-        ValueObjectError,
-        (e) => new UnprocessableEntityException(e.message),
-      )
-      .register(
-        CorruptedUploadedImageError,
-        (e) => new UnprocessableEntityException(e.message),
-      )
-      .register(
-        ImageServiceError,
-        (e) => new InternalServerErrorException(e.message),
-      )
+      .register(DatabaseError, (e) => new InternalServerErrorException('unexpected error'))
+      .register(ValueObjectError, (e) => new UnprocessableEntityException(e.message))
+      .register(CorruptedUploadedImageError, (e) => new UnprocessableEntityException(e.message))
+      .register(ImageServiceError, (e) => new InternalServerErrorException(e.message))
       .register(ImageNotFoundError, (e) => new NotFoundException(e.message))
-      .register(
-        ImageMaxSizeExceededError,
-        (e) => new PayloadTooLargeException(e.message),
-      );
+      .register(ImageMaxSizeExceededError, (e) => new PayloadTooLargeException(e.message));
   }
 }

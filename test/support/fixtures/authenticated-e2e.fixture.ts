@@ -7,10 +7,7 @@ import { createMailhogClient } from '../helpers/mailhog-client.helper';
 import { UserAuthFlowBuilder } from '../helpers/auth-user-flow.builder';
 import { RolesControllerTest } from '../controllers/roles.controller-test';
 import { UsersControllerTest } from '../controllers/users/users.controller-test';
-import {
-  MyAddressesControllerTest,
-  UserAddressesControllerTest,
-} from '../controllers/users/addresses.controller-test';
+import { MyAddressesControllerTest, UserAddressesControllerTest } from '../controllers/users/addresses.controller-test';
 import { ImagesControllerTest } from '../controllers/images.controller-test';
 import { ObjectStorageClientTest } from '../helpers/object-storage-client.helper';
 import { BrandsControllerTest } from '../controllers/brands.controller-test';
@@ -75,8 +72,5 @@ export const test = baseTest
   .extend('imageController', async ({ adminUser }) => {
     return new ImagesControllerTest(adminUser.userAgent);
   })
-  .extend(
-    'brandController',
-    async ({ adminUser }) => new BrandsControllerTest(adminUser.userAgent),
-  );
+  .extend('brandController', async ({ adminUser }) => new BrandsControllerTest(adminUser.userAgent));
 export const it = test;

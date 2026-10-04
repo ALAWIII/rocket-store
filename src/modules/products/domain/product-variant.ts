@@ -1,7 +1,4 @@
-import {
-  ProductId,
-  ProductVariantId,
-} from 'src/modules/shared/value-objects/ids';
+import { ProductId, ProductVariantId } from 'src/modules/shared/value-objects/ids';
 
 type ProductVariantProps = {
   readonly id: ProductVariantId;
@@ -12,15 +9,10 @@ type ProductVariantProps = {
   description?: string;
   createdAt: Date;
 };
-type UpdateProductVariantProps = Omit<
-  ProductVariantProps,
-  'productId' | 'id' | 'createdAt'
->;
+type UpdateProductVariantProps = Omit<ProductVariantProps, 'productId' | 'id' | 'createdAt'>;
 
 export class ProductVaraintList {
-  constructor(
-    private _variants = new Map<ProductVariantId, ProductVariant>(),
-  ) {}
+  constructor(private _variants = new Map<ProductVariantId, ProductVariant>()) {}
   static restore(variants: ProductVariantProps[]): ProductVaraintList {
     const list = new ProductVaraintList();
     for (const props of variants) {

@@ -13,7 +13,10 @@ export class OrderEntity {
   @Column({ type: 'varchar', length: 15 })
   status!: OrderStatus;
   @Column('uuid')
-  @ForeignKey(() => UserEntity, (u) => u.id)
+  @ForeignKey(
+    () => UserEntity,
+    (u) => u.id,
+  )
   userId!: string;
 
   @CreateDateColumnTz()

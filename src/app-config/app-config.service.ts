@@ -1,13 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ConfigReader } from './config-reader';
-import {
-  ApplicationConfig,
-  AuthConfig,
-  DatabaseConfig,
-  MailConfig,
-  StorageConfig,
-} from './configs';
+import { ApplicationConfig, AuthConfig, DatabaseConfig, MailConfig, StorageConfig } from './configs';
 
 @Injectable()
 export class AppConfigService {

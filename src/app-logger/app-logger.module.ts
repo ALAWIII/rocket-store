@@ -18,10 +18,7 @@ import { AppConfigService } from 'src/app-config/app-config.service';
             autoLogging: true,
             genReqId: (req, res) => {
               const inReqId = req.headers['x-request-id'];
-              const reqId =
-                typeof inReqId === 'string' && inReqId.trim() !== ''
-                  ? inReqId
-                  : undefined;
+              const reqId = typeof inReqId === 'string' && inReqId.trim() !== '' ? inReqId : undefined;
 
               const id = v7();
               res.setHeader('x-request-id', reqId ?? id);

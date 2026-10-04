@@ -1,8 +1,4 @@
-import {
-  INestApplication,
-  ValidationPipe,
-  VersioningType,
-} from '@nestjs/common';
+import { INestApplication, ValidationPipe, VersioningType } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import type { Server } from 'http';
@@ -32,9 +28,7 @@ export class TestApp {
   createAgent(): UserAgent {
     return request.agent(this.app.getHttpServer());
   }
-  private static async createTestingModule(
-    configServiceMock: ConfigServiceMock,
-  ): Promise<TestingModule> {
+  private static async createTestingModule(configServiceMock: ConfigServiceMock): Promise<TestingModule> {
     return Test.createTestingModule({
       imports: [AppModule],
     })
@@ -45,9 +39,7 @@ export class TestApp {
       .compile();
   }
 
-  private static async createAndInitApp(
-    moduleRef: TestingModule,
-  ): Promise<INestApplication<Server>> {
+  private static async createAndInitApp(moduleRef: TestingModule): Promise<INestApplication<Server>> {
     const app = moduleRef.createNestApplication<INestApplication<Server>>({
       bodyParser: false,
       bufferLogs: true,

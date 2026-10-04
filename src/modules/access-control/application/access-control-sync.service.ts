@@ -48,9 +48,7 @@ export class AccessControlSyncService {
     const removed = await this.removeRole(role.id);
     const added = await this.addRole(role);
     if (!added) {
-      throw new Error(
-        `Failed adding Casbin policies for role ${role.id.toString()}`,
-      );
+      throw new Error(`Failed adding Casbin policies for role ${role.id.toString()}`);
     }
   }
   async hasPolicy(roleId: string, perm: Permission): Promise<boolean> {

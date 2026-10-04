@@ -12,12 +12,18 @@ export class CouponEntity {
   @Column('varchar', { length: 50 })
   code!: string;
   @Column('uuid')
-  @ForeignKey(() => PromotionEntity, (p) => p.id)
+  @ForeignKey(
+    () => PromotionEntity,
+    (p) => p.id,
+  )
   promotionId!: string;
   @Column('boolean', { default: true })
   isActive!: boolean;
   @Column('uuid', { nullable: true })
-  @ForeignKey(() => UserEntity, (u) => u.id)
+  @ForeignKey(
+    () => UserEntity,
+    (u) => u.id,
+  )
   userId!: string | null;
   @CreateDateColumnTz()
   createdAt!: Date;

@@ -25,13 +25,7 @@ export class SystemRolesSeedService {
     for (const role of SYSTEM_ROLES) {
       const upRole = await this.roleRepository
         .upsert(role)
-        .mapErr(
-          (e) =>
-            new SystemRoleError(
-              `Failed to upsert a system Role: ${role.name}`,
-              { cause: e },
-            ),
-        )
+        .mapErr((e) => new SystemRoleError(`Failed to upsert a system Role: ${role.name}`, { cause: e }))
         .unwrap();
       updatedRoles.push(upRole);
     }

@@ -23,8 +23,7 @@ export class ResendAuthEmailService implements IAuthEmailService {
       logoUrl: this.logoUrl,
       recipientName: params.name,
       heading: 'Verify your email',
-      message:
-        'Confirm your email address to activate your Rocket Store account.',
+      message: 'Confirm your email address to activate your Rocket Store account.',
       buttonText: 'Verify Email',
       url: params.url,
       expiresInText: 'This link expires in 24 hours.',
@@ -36,10 +35,7 @@ export class ResendAuthEmailService implements IAuthEmailService {
       subject: 'Verify your email',
       html,
     });
-    if (error)
-      this.logger.error(
-        `Failed to send verification email to ${params.to}: ${error.message}`,
-      );
+    if (error) this.logger.error(`Failed to send verification email to ${params.to}: ${error.message}`);
   }
 
   async sendPasswordResetEmail(params: SendEmailParams): Promise<void> {
@@ -48,8 +44,7 @@ export class ResendAuthEmailService implements IAuthEmailService {
       logoUrl: this.logoUrl,
       recipientName: params.name,
       heading: 'Reset your password',
-      message:
-        'We received a request to reset your password. Click below to set a new one.',
+      message: 'We received a request to reset your password. Click below to set a new one.',
       buttonText: 'Reset Password',
       url: params.url,
       expiresInText: 'This link expires in 1 hour.',
@@ -61,10 +56,7 @@ export class ResendAuthEmailService implements IAuthEmailService {
       subject: 'Reset your password',
       html,
     });
-    if (error)
-      this.logger.error(
-        `Failed to send password-reset email to ${params.to}: ${error.message}`,
-      );
+    if (error) this.logger.error(`Failed to send password-reset email to ${params.to}: ${error.message}`);
   }
   async sendChangeEmailConfirmation(params: {
     to: string;
@@ -90,9 +82,6 @@ export class ResendAuthEmailService implements IAuthEmailService {
       subject: 'Approve Email Change',
       html,
     });
-    if (error)
-      this.logger.error(
-        `Failed to send change email confirmation message to ${to}: ${error.message}`,
-      );
+    if (error) this.logger.error(`Failed to send change email confirmation message to ${to}: ${error.message}`);
   }
 }

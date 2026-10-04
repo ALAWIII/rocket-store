@@ -56,14 +56,7 @@ export async function uploadRandomImage(
       [imgExt]()
       .toBuffer();
   }
-  const expandedBuf = Buffer.concat([
-    imgBuffer,
-    Buffer.alloc(Math.max(exactSizeBytes - imgBuffer.length, 0)),
-  ]);
+  const expandedBuf = Buffer.concat([imgBuffer, Buffer.alloc(Math.max(exactSizeBytes - imgBuffer.length, 0))]);
   // --- Execute Upload ---
-  return imageController.upload(
-    expandedBuf,
-    { name: nameWithExt, altText },
-    expectedStatus,
-  );
+  return imageController.upload(expandedBuf, { name: nameWithExt, altText }, expectedStatus);
 }

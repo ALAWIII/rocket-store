@@ -1,10 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { ErrorMapperRegistry } from './error-mapper.registry';
-import {
-  BadRequestException,
-  ForbiddenException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, InternalServerErrorException } from '@nestjs/common';
 
 abstract class AppError extends Error {}
 class Child1 extends AppError {}

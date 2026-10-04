@@ -9,31 +9,11 @@ export class EnforcerHolder implements IEnforcerHolder {
   set(enforcer: Enforcer) {
     this.enforcer = enforcer;
   }
-  async enforce(policy: {
-    roleId: string;
-    entity: string;
-    action: string;
-    visibility: string;
-  }): Promise<boolean> {
-    return await this.get().enforce(
-      policy.roleId,
-      policy.entity,
-      policy.action,
-      policy.visibility,
-    );
+  async enforce(policy: { roleId: string; entity: string; action: string; visibility: string }): Promise<boolean> {
+    return await this.get().enforce(policy.roleId, policy.entity, policy.action, policy.visibility);
   }
-  async hasPolicy(policy: {
-    roleId: string;
-    entity: string;
-    action: string;
-    visibility: string;
-  }): Promise<boolean> {
-    return await this.get().hasPolicy(
-      policy.roleId,
-      policy.entity,
-      policy.action,
-      policy.visibility,
-    );
+  async hasPolicy(policy: { roleId: string; entity: string; action: string; visibility: string }): Promise<boolean> {
+    return await this.get().hasPolicy(policy.roleId, policy.entity, policy.action, policy.visibility);
   }
   private get(): Enforcer {
     if (!this.enforcer) throw new Error('Enforcer not initialized');

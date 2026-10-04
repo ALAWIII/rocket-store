@@ -9,7 +9,11 @@ export class CategoryEntity {
   @Column('varchar', { length: 50 }) // categories with same name may be children of other categories
   name!: string;
   @Column('uuid', { nullable: true })
-  @ForeignKey(() => CategoryEntity, (c) => c.id, { onDelete: 'SET NULL' })
+  @ForeignKey(
+    () => CategoryEntity,
+    (c) => c.id,
+    { onDelete: 'SET NULL' },
+  )
   parentCategoryId!: string | null;
   @CreateDateColumnTz()
   createdAt!: Date;

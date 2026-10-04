@@ -11,11 +11,7 @@ import { JobsModule } from 'src/jobs/jobs.module';
 import { ObjectStorageModule } from 'src/object-storage/object-storage.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([ImageEntity]),
-    JobsModule,
-    ObjectStorageModule,
-  ],
+  imports: [TypeOrmModule.forFeature([ImageEntity]), JobsModule, ObjectStorageModule],
   providers: [
     ImagesWorkerService,
     ImagesService,

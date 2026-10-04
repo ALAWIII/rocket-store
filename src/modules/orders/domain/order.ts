@@ -1,13 +1,7 @@
 //----------------- after checkout ------------------
 // sku: Stock Keeping Unit. It’s an internal code used to identify and track a specific product variant in inventory, like a shirt in one size and color.
 
-import {
-  AddressId,
-  OrderId,
-  OrderItemId,
-  ProductVariantId,
-  UserId,
-} from 'src/modules/shared/value-objects/ids';
+import { AddressId, OrderId, OrderItemId, ProductVariantId, UserId } from 'src/modules/shared/value-objects/ids';
 import { ValueOf } from 'src/modules/shared/types/value-of';
 
 export const OrderStatus = {

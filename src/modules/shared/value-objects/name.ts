@@ -13,11 +13,7 @@ export class Name {
 
     if (!v) return Err(new ValueObjectError('Name is required'));
     if (v.length < 2 || v.length > maxLength)
-      return Err(
-        new ValueObjectError(
-          `Name must be between 2 and ${maxLength} characters`,
-        ),
-      );
+      return Err(new ValueObjectError(`Name must be between 2 and ${maxLength} characters`));
 
     if (!customRegex.test(v)) return Err(new ValueObjectError('Invalid name'));
 

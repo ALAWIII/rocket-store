@@ -11,7 +11,10 @@ export class WishlistEntity {
   @UuidV7PrimaryColumn()
   id!: string;
   @Column('uuid')
-  @ForeignKey(() => UserEntity, (u) => u.id)
+  @ForeignKey(
+    () => UserEntity,
+    (u) => u.id,
+  )
   userId!: string;
   @Column('varchar', { length: 50 })
   name!: string;

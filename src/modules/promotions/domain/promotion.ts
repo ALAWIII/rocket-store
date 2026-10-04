@@ -1,4 +1,4 @@
-import { PromotionId, UserId } from 'src/modules/shared/value-objects/ids';
+import { PromotionId } from 'src/modules/shared/value-objects/ids';
 import { ValueOf } from 'src/modules/shared/types/value-of';
 import { Name } from 'src/modules/shared/value-objects/name';
 
@@ -61,20 +61,13 @@ type PromotionProps = {
   createdAt: Date;
 };
 
-type CreatePromotionProps = Omit<
-  PromotionProps,
-  'usageCount' | 'createdAt' | 'status'
->;
+type CreatePromotionProps = Omit<PromotionProps, 'usageCount' | 'createdAt' | 'status'>;
 
 export class Promotion {
   private constructor(private props: PromotionProps) {}
 
   static create(props: CreatePromotionProps): Promotion {
-    Promotion.validateDiscount(
-      props.discountType,
-      props.value,
-      props.maxDiscountAmount,
-    );
+    Promotion.validateDiscount(props.discountType, props.value, props.maxDiscountAmount);
     Promotion.validateDates(props.startsAt, props.endsAt);
     Promotion.validateLimits(props.usageLimit, props.perUserLimit);
     Promotion.validatePriority(props.priority);
@@ -90,11 +83,7 @@ export class Promotion {
   }
 
   static restore(props: PromotionProps): Promotion {
-    Promotion.validateDiscount(
-      props.discountType,
-      props.value,
-      props.maxDiscountAmount,
-    );
+    Promotion.validateDiscount(props.discountType, props.value, props.maxDiscountAmount);
     Promotion.validateDates(props.startsAt, props.endsAt);
     Promotion.validateLimits(props.usageLimit, props.perUserLimit);
     Promotion.validatePriority(props.priority);
@@ -111,22 +100,14 @@ export class Promotion {
   }
 
   changeDiscount(value: number, maxDiscountAmount?: number | null) {
-    Promotion.validateDiscount(
-      this.props.discountType,
-      value,
-      maxDiscountAmount,
-    );
+    Promotion.validateDiscount(this.props.discountType, value, maxDiscountAmount);
 
     this.props.value = value;
     this.props.maxDiscountAmount = maxDiscountAmount ?? null;
   }
 
   changeDiscountType(discountType: DiscountType) {
-    Promotion.validateDiscount(
-      discountType,
-      this.props.value,
-      this.props.maxDiscountAmount,
-    );
+    Promotion.validateDiscount(discountType, this.props.value, this.props.maxDiscountAmount);
 
     this.props.discountType = discountType;
   }
@@ -136,12 +117,7 @@ export class Promotion {
 
     this.props.startsAt = startsAt ?? null;
     this.props.endsAt = endsAt ?? null;
-    this.props.status = Promotion.resolveStatus(
-      new Date(),
-      this.props.startsAt,
-      this.props.endsAt,
-      this.props.status,
-    );
+    this.props.status = Promotion.resolveStatus(new Date(), this.props.startsAt, this.props.endsAt, this.props.status);
   }
 
   changeLimits(usageLimit?: number | null, perUserLimit?: number | null) {
@@ -168,11 +144,7 @@ export class Promotion {
   activate() {
     if (this.props.status !== PromotionStatus.DISABLED) return;
 
-    this.props.status = Promotion.resolveStatus(
-      new Date(),
-      this.props.startsAt,
-      this.props.endsAt,
-    );
+    this.props.status = Promotion.resolveStatus(new Date(), this.props.startsAt, this.props.endsAt);
   }
 
   disable() {
@@ -182,12 +154,7 @@ export class Promotion {
   }
 
   refreshStatus(now = new Date()) {
-    this.props.status = Promotion.resolveStatus(
-      now,
-      this.props.startsAt,
-      this.props.endsAt,
-      this.props.status,
-    );
+    this.props.status = Promotion.resolveStatus(now, this.props.startsAt, this.props.endsAt, this.props.status);
   }
 
   increaseUsageCount(by = 1) {
@@ -199,21 +166,14 @@ export class Promotion {
       throw new Error('Promotion is not active');
     }
 
-    if (
-      this.props.usageLimit != null &&
-      this.props.usageCount + by > this.props.usageLimit
-    ) {
+    if (this.props.usageLimit != null && this.props.usageCount + by > this.props.usageLimit) {
       throw new Error('Promotion usage limit exceeded');
     }
 
     this.props.usageCount += by;
   }
 
-  private static validateDiscount(
-    discountType: DiscountType,
-    value: number,
-    maxDiscountAmount?: number | null,
-  ): void {
+  private static validateDiscount(discountType: DiscountType, value: number, maxDiscountAmount?: number | null): void {
     if (value <= 0) throw new Error('Promotion value must be greater than 0');
 
     if (discountType === DiscountType.PERCENTAGE && value > 100) {
@@ -225,19 +185,13 @@ export class Promotion {
     }
   }
 
-  private static validateDates(
-    startsAt?: Date | null,
-    endsAt?: Date | null,
-  ): void {
+  private static validateDates(startsAt?: Date | null, endsAt?: Date | null): void {
     if (startsAt && endsAt && startsAt > endsAt) {
       throw new Error('startsAt cannot be after endsAt');
     }
   }
 
-  private static validateLimits(
-    usageLimit?: number | null,
-    perUserLimit?: number | null,
-  ): void {
+  private static validateLimits(usageLimit?: number | null, perUserLimit?: number | null): void {
     if (usageLimit != null && usageLimit <= 0) {
       throw new Error('usageLimit must be greater than 0');
     }
@@ -246,11 +200,7 @@ export class Promotion {
       throw new Error('perUserLimit must be greater than 0');
     }
 
-    if (
-      usageLimit != null &&
-      perUserLimit != null &&
-      perUserLimit > usageLimit
-    ) {
+    if (usageLimit != null && perUserLimit != null && perUserLimit > usageLimit) {
       throw new Error('perUserLimit cannot exceed usageLimit');
     }
   }
@@ -267,8 +217,7 @@ export class Promotion {
     endsAt?: Date | null,
     currentState?: PromotionStatus,
   ): PromotionStatus {
-    if (currentState === PromotionStatus.DISABLED)
-      return PromotionStatus.DISABLED;
+    if (currentState === PromotionStatus.DISABLED) return PromotionStatus.DISABLED;
     if (startsAt && startsAt > now) return PromotionStatus.SCHEDULED;
     if (endsAt && endsAt < now) return PromotionStatus.EXPIRED;
     return PromotionStatus.ACTIVE;

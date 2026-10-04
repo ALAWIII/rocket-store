@@ -1,9 +1,6 @@
 import { UserAgent } from '../helpers/app-test.helper';
 
-export function extractRawCookieToken(
-  userAgent: UserAgent,
-  cookieName: string,
-): string {
+export function extractRawCookieToken(userAgent: UserAgent, cookieName: string): string {
   const cookies = userAgent.jar.getCookies({
     domain: '127.0.0.1',
     path: '/',
@@ -21,9 +18,6 @@ export function extractRawCookieToken(
 }
 
 export function extractDecodedSessionToken(userAgent: UserAgent): string {
-  const rawToken = extractRawCookieToken(
-    userAgent,
-    'better-auth.session_token',
-  );
+  const rawToken = extractRawCookieToken(userAgent, 'better-auth.session_token');
   return decodeURIComponent(rawToken);
 }

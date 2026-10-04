@@ -15,7 +15,10 @@ export class PaymentEntity {
   @Column({ type: 'timestamptz', nullable: true })
   paidAt!: Date | null;
   @Column('uuid')
-  @ForeignKey(() => OrderEntity, (o) => o.id)
+  @ForeignKey(
+    () => OrderEntity,
+    (o) => o.id,
+  )
   orderId!: string;
   @Column('integer', { default: 0 })
   amountInMinorUnit!: number;

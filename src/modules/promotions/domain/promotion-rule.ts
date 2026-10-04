@@ -1,7 +1,4 @@
-import {
-  PromotionId,
-  PromotionRuleId,
-} from 'src/modules/shared/value-objects/ids';
+import { PromotionId, PromotionRuleId } from 'src/modules/shared/value-objects/ids';
 import { PromotionRuleType } from './promotion-rule-type';
 
 export type PromotionRuleProps<T extends Record<string, unknown>> = {
@@ -10,26 +7,19 @@ export type PromotionRuleProps<T extends Record<string, unknown>> = {
   rule: PromotionRuleType<T>;
   createdAt: Date;
 };
-export type CreatePromotionRuleProps<T extends Record<string, unknown>> = Omit<
-  PromotionRuleProps<T>,
-  'createdAt'
->;
+export type CreatePromotionRuleProps<T extends Record<string, unknown>> = Omit<PromotionRuleProps<T>, 'createdAt'>;
 
 export class PromotionRule<T extends Record<string, unknown>> {
   private constructor(private readonly props: PromotionRuleProps<T>) {}
 
-  static create<T extends Record<string, unknown>>(
-    props: CreatePromotionRuleProps<T>,
-  ): PromotionRule<T> {
+  static create<T extends Record<string, unknown>>(props: CreatePromotionRuleProps<T>): PromotionRule<T> {
     return new PromotionRule({
       ...props,
       createdAt: new Date(),
     });
   }
 
-  static restore<T extends Record<string, unknown>>(
-    props: PromotionRuleProps<T>,
-  ): PromotionRule<T> {
+  static restore<T extends Record<string, unknown>>(props: PromotionRuleProps<T>): PromotionRule<T> {
     return new PromotionRule(props);
   }
 

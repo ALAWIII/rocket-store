@@ -1,10 +1,6 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { Column, Entity } from 'typeorm';
-import {
-  DiscountType,
-  PromotionStatus,
-  PromotionType,
-} from '../../domain/promotion';
+import { DiscountType, PromotionStatus, PromotionType } from '../../domain/promotion';
 import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('promotions')

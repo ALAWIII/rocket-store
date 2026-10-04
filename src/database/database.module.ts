@@ -14,9 +14,7 @@ import { AppConfigService } from 'src/app-config/app-config.service';
           path.join(process.cwd(), 'dist/**/*.entity.js'),
           path.join(process.cwd(), 'dist/typeorm/entities/*.js'),
         ],
-        migrations: [
-          path.join(process.cwd(), 'dist/typeorm/migrations/**/*.js'),
-        ],
+        migrations: [path.join(process.cwd(), 'dist/typeorm/migrations/**/*.js')],
         autoLoadEntities: true,
         migrationsRun: true,
         synchronize: config.db.sync,

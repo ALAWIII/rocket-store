@@ -7,9 +7,7 @@ import { createRandomAddress } from 'test/support/utils/create-random-address.ut
 describe.concurrent('addresses (e2e)', () => {
   const apiPrefix = '/api/v1/users/me/addresses';
   describe(`POST ${apiPrefix} (create)`, () => {
-    it('should successfully create new address for user.', async ({
-      myAddressController,
-    }) => {
+    it('should successfully create new address for user.', async ({ myAddressController }) => {
       const adrs = createRandomAddress();
       const response = await myAddressController.create(adrs, {
         code: 201,
@@ -19,19 +17,14 @@ describe.concurrent('addresses (e2e)', () => {
     });
   });
   describe(`GET ${apiPrefix} (findAll)`, () => {
-    it('should successfully return all addresses for the requester user.', async ({
-      myAddressController,
-    }) => {
+    it('should successfully return all addresses for the requester user.', async ({ myAddressController }) => {
       const addresses: AddressTestDto[] = [];
 
       for (let i = 1; i <= 5; i++) {
-        const response = await myAddressController.create(
-          createRandomAddress(),
-          {
-            code: 201,
-            parseBody: true,
-          },
-        );
+        const response = await myAddressController.create(createRandomAddress(), {
+          code: 201,
+          parseBody: true,
+        });
 
         addresses.push(response.body!);
       }
@@ -43,21 +36,16 @@ describe.concurrent('addresses (e2e)', () => {
         })
       ).body!;
 
-      const sortById = (a: AddressTestDto, b: AddressTestDto) =>
-        a.id.localeCompare(b.id);
+      const sortById = (a: AddressTestDto, b: AddressTestDto) => a.id.localeCompare(b.id);
 
       expect(fetchedAddresses).toHaveLength(addresses.length);
       expect(fetchedAddresses).toHaveLength(5);
 
-      expect([...fetchedAddresses].sort(sortById)).toEqual(
-        [...addresses].sort(sortById),
-      );
+      expect([...fetchedAddresses].sort(sortById)).toEqual([...addresses].sort(sortById));
     });
   });
   describe(`GET ${apiPrefix}/:id (findById)`, () => {
-    it('should successfully return address by its id for requester user.', async ({
-      myAddressController,
-    }) => {
+    it('should successfully return address by its id for requester user.', async ({ myAddressController }) => {
       const adrs = await myAddressController.create(createRandomAddress(), {
         code: 201,
         parseBody: true,
@@ -91,32 +79,22 @@ describe.concurrent('addresses (e2e)', () => {
     });
   });
   describe(`PUT ${apiPrefix}/:id (update)`, () => {
-    it('should successfully update user address.', async ({
-      myAddressController,
-    }) => {
+    it('should successfully update user address.', async ({ myAddressController }) => {
       const adrs = await myAddressController.create(createRandomAddress(), {
         code: 201,
         parseBody: true,
       });
       const adrsPayload = createRandomAddress();
-      const updatedAdrs = await myAddressController.update(
-        adrs.body!.id,
-        adrsPayload,
-        {
-          code: 200,
-          parseBody: true,
-        },
-      );
-      expect(pickSharedFields(adrsPayload, updatedAdrs.body!)).toEqual(
-        adrsPayload,
-      );
+      const updatedAdrs = await myAddressController.update(adrs.body!.id, adrsPayload, {
+        code: 200,
+        parseBody: true,
+      });
+      expect(pickSharedFields(adrsPayload, updatedAdrs.body!)).toEqual(adrsPayload);
       expect(updatedAdrs.body).not.toEqual(adrs.body);
     });
   });
   describe(`DELETE ${apiPrefix} (delete)`, () => {
-    it('should success delete user requester address.', async ({
-      myAddressController,
-    }) => {
+    it('should success delete user requester address.', async ({ myAddressController }) => {
       const adrs = await myAddressController.create(createRandomAddress(), {
         code: 201,
         parseBody: true,
@@ -152,17 +130,14 @@ describe.concurrent('adminstrative addresses (e2e)', () => {
         .verified()
         .signin()
         .build();
-      const customerAdrs = await myAddressController
-        .withAgent(customer.userAgent)
-        .create(createRandomAddress(), {
-          code: 201,
-          parseBody: true,
-        });
-      const fetchedAdrs = await userAddressController.findById(
-        customer.userDb.id,
-        customerAdrs.body!.id,
-        { code: 200, parseBody: true },
-      );
+      const customerAdrs = await myAddressController.withAgent(customer.userAgent).create(createRandomAddress(), {
+        code: 201,
+        parseBody: true,
+      });
+      const fetchedAdrs = await userAddressController.findById(customer.userDb.id, customerAdrs.body!.id, {
+        code: 200,
+        parseBody: true,
+      });
       expect(fetchedAdrs.body).toEqual(customerAdrs.body);
     });
     it('should fail find address by unauthorized requester user.', async ({
@@ -182,12 +157,10 @@ describe.concurrent('adminstrative addresses (e2e)', () => {
         .verified()
         .signin()
         .build();
-      const customerAdrs = await myAddressController
-        .withAgent(customer.userAgent)
-        .create(createRandomAddress(), {
-          code: 201,
-          parseBody: true,
-        });
+      const customerAdrs = await myAddressController.withAgent(customer.userAgent).create(createRandomAddress(), {
+        code: 201,
+        parseBody: true,
+      });
       //===================== create another user who doesnt has AddressReadLessOrEqual permission
       const customer2 = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
@@ -222,17 +195,15 @@ describe.concurrent('adminstrative addresses (e2e)', () => {
         .verified()
         .signin()
         .build();
-      const customerAdrs = await myAddressController
-        .withAgent(customer.userAgent)
-        .create(createRandomAddress(), {
-          code: 201,
-          parseBody: true,
-        });
+      const customerAdrs = await myAddressController.withAgent(customer.userAgent).create(createRandomAddress(), {
+        code: 201,
+        parseBody: true,
+      });
       //============================
-      const fetchedAdrss = await userAddressController.findAllForUser(
-        customer.userDb.id,
-        { code: 200, parseBody: true },
-      );
+      const fetchedAdrss = await userAddressController.findAllForUser(customer.userDb.id, {
+        code: 200,
+        parseBody: true,
+      });
       expect(fetchedAdrss.body).toEqual([customerAdrs.body]);
     });
     it('should fail find all addresses by unauthorized requester user for user.', async ({
@@ -252,12 +223,10 @@ describe.concurrent('adminstrative addresses (e2e)', () => {
         .verified()
         .signin()
         .build();
-      const customerAdrs = await myAddressController
-        .withAgent(customer.userAgent)
-        .create(createRandomAddress(), {
-          code: 201,
-          parseBody: true,
-        });
+      const customerAdrs = await myAddressController.withAgent(customer.userAgent).create(createRandomAddress(), {
+        code: 201,
+        parseBody: true,
+      });
       //===================== create another user who doesnt has AddressReadLessOrEqual permission
       const customer2 = await UserAuthFlowBuilder.create({
         dbDataSource: db.dataSource,
@@ -269,9 +238,7 @@ describe.concurrent('adminstrative addresses (e2e)', () => {
         .verified()
         .signin()
         .build();
-      await userAddressController
-        .withAgent(customer2.userAgent)
-        .findAllForUser(customer.userDb.id, { code: 403 });
+      await userAddressController.withAgent(customer2.userAgent).findAllForUser(customer.userDb.id, { code: 403 });
     });
   });
 });

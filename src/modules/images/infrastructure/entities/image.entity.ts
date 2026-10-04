@@ -23,7 +23,11 @@ export class ImageEntity {
   @Column('varchar', { length: 125, nullable: true })
   altText!: string | null;
   @Column({ type: 'uuid', nullable: true })
-  @ForeignKey(() => UserEntity, (u) => u.id, { onDelete: 'SET NULL' })
+  @ForeignKey(
+    () => UserEntity,
+    (u) => u.id,
+    { onDelete: 'SET NULL' },
+  )
   uploadedBy!: string | null;
   @CreateDateColumnTz()
   createdAt!: Date;

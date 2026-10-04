@@ -1,10 +1,7 @@
 import { customAlphabet } from 'nanoid';
 import { createRandomPhoneNumber } from './create-random-phone-number.util';
 
-const nanoidLetters = customAlphabet(
-  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz',
-  12,
-);
+const nanoidLetters = customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', 12);
 export function createRandomAddress() {
   const gen = () => nanoidLetters();
   return {

@@ -1,10 +1,7 @@
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
 import { UserAgent } from '../helpers/app-test.helper';
 import { ExpectedTestStatusCode } from '../types/expected-test-status-code.type';
-import {
-  parseResponseBody,
-  statusCodesListNormalize,
-} from '../utils/parse-response-body.util';
+import { parseResponseBody, statusCodesListNormalize } from '../utils/parse-response-body.util';
 import { UploadFileInfoDto } from 'src/modules/images/dto/upload-file-info.dto';
 import { Test } from 'supertest';
 import { RemoveImagesResponseDto } from 'src/modules/images/dto/remove-images-response.dto';
@@ -17,33 +14,20 @@ export class ImagesControllerTest {
   withAgent(agent: UserAgent): ImagesControllerTest {
     return new ImagesControllerTest(agent);
   }
-  async upload(
-    file: Buffer,
-    finfo: UploadFileInfoDto,
-    statusCodes: ExpectedTestStatusCode,
-  ) {
+  async upload(file: Buffer, finfo: UploadFileInfoDto, statusCodes: ExpectedTestStatusCode) {
     const nameWithExt = finfo.name;
     const name = finfo.name.split('.')[0];
     const fileInfo = { name, altText: finfo.altText };
-    const response = await fields(
-      this.agent.post(this.urlPrefix).attach('file', file, nameWithExt),
-      fileInfo,
-    ).expect(statusCodes.code);
-
-    const body = parseResponseBody<ImageResponseDto>(
-      response,
-      statusCodesListNormalize(statusCodes),
+    const response = await fields(this.agent.post(this.urlPrefix).attach('file', file, nameWithExt), fileInfo).expect(
+      statusCodes.code,
     );
+
+    const body = parseResponseBody<ImageResponseDto>(response, statusCodesListNormalize(statusCodes));
     return { response, body };
   }
   async findById(imgId: string, statusCodes: ExpectedTestStatusCode) {
-    const response = await this.agent
-      .get(`${this.urlPrefix}/${imgId}`)
-      .expect(statusCodes.code);
-    const body = parseResponseBody<ImageResponseDto>(
-      response,
-      statusCodesListNormalize(statusCodes),
-    );
+    const response = await this.agent.get(`${this.urlPrefix}/${imgId}`).expect(statusCodes.code);
+    const body = parseResponseBody<ImageResponseDto>(response, statusCodesListNormalize(statusCodes));
     return { response, body };
   }
   async removeImages(
@@ -55,37 +39,20 @@ export class ImagesControllerTest {
       .post(`${this.urlPrefix}/batch-delete`)
       .send({ imageIds })
       .expect(statusCodes.code);
-    const body = parseResponseBody<RemoveImagesResponseDto>(
-      response,
-      statusCodesListNormalize(statusCodes),
-    );
+    const body = parseResponseBody<RemoveImagesResponseDto>(response, statusCodesListNormalize(statusCodes));
     if (existsFn) await waitForAllDeletions(imageIds, existsFn);
     return { response, body };
   }
-  async findUnused(
-    payload: FindUnusedImagesDto,
-    statusCodes?: ExpectedTestStatusCode,
-  ) {
+  async findUnused(payload: FindUnusedImagesDto, statusCodes?: ExpectedTestStatusCode) {
     const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
-    const response = await this.agent
-      .get(`${this.urlPrefix}/unused`)
-      .query(payload)
-      .expect(expectedStatus.code);
-    const body = parseResponseBody<FindUnusedImagesResponseDto>(
-      response,
-      statusCodesListNormalize(expectedStatus),
-    );
+    const response = await this.agent.get(`${this.urlPrefix}/unused`).query(payload).expect(expectedStatus.code);
+    const body = parseResponseBody<FindUnusedImagesResponseDto>(response, statusCodesListNormalize(expectedStatus));
     return { response, body };
   }
   async removeUnused(statusCodes?: ExpectedTestStatusCode) {
     const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
-    const response = await this.agent
-      .delete(`${this.urlPrefix}/unused`)
-      .expect(expectedStatus.code);
-    const body = parseResponseBody<RemoveImagesResponseDto>(
-      response,
-      statusCodesListNormalize(expectedStatus),
-    );
+    const response = await this.agent.delete(`${this.urlPrefix}/unused`).expect(expectedStatus.code);
+    const body = parseResponseBody<RemoveImagesResponseDto>(response, statusCodesListNormalize(expectedStatus));
     return { response, body };
   }
 }
@@ -97,11 +64,7 @@ function fields<T extends object>(request: Test, data: T) {
   return request;
 }
 
-async function waitForAllDeletions(
-  ids: string[],
-  checkExistsFn: (id: string) => Promise<boolean>,
-  intervalMs = 1000,
-) {
+async function waitForAllDeletions(ids: string[], checkExistsFn: (id: string) => Promise<boolean>, intervalMs = 1000) {
   const pendingIds = new Set(ids);
 
   while (pendingIds.size > 0) {

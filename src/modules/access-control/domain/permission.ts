@@ -57,32 +57,22 @@ type Matrix = typeof Matrix;
 export type Entity = StringKeyOf<Matrix>;
 export type Action<E extends Entity = Entity> = StringKeyOf<Matrix[E]>;
 
-export type Visibility<
-  E extends Entity = Entity,
-  A extends Action<E> = Action<E>,
-> = Extract<Matrix[E][A], readonly string[]>[number];
+export type Visibility<E extends Entity = Entity, A extends Action<E> = Action<E>> = Extract<
+  Matrix[E][A],
+  readonly string[]
+>[number];
 
 //=================================
-type PermissionProps<
-  E extends Entity = Entity,
-  A extends Action<E> = Action<E>,
-> = {
+type PermissionProps<E extends Entity = Entity, A extends Action<E> = Action<E>> = {
   entity: E;
   action: A;
   visibility: Visibility<E, A>;
 };
 
-export class Permission<
-  E extends Entity = Entity,
-  A extends Action<E> = Action<E>,
-> {
+export class Permission<E extends Entity = Entity, A extends Action<E> = Action<E>> {
   private constructor(private readonly props: PermissionProps<E, A>) {}
 
-  static fromPrimitives(data: {
-    entity: string;
-    action: string;
-    visibility: string;
-  }): PermissionResult<Permission> {
+  static fromPrimitives(data: { entity: string; action: string; visibility: string }): PermissionResult<Permission> {
     if (!isEntity(data.entity)) {
       return Err(new InvalidPermissionEntityError(data.entity));
     }
@@ -99,11 +89,7 @@ export class Permission<
   static fromString(value: string): PermissionResult<Permission> {
     const parts = value.toLowerCase().split('.');
     if (parts.length !== 3) {
-      return Err(
-        new InvalidPermissionFormatError(
-          `Inconsistent permission, length: ${parts.length}.`,
-        ),
-      );
+      return Err(new InvalidPermissionFormatError(`Inconsistent permission, length: ${parts.length}.`));
     }
     const [entity, action, visibility] = parts;
 
@@ -132,10 +118,7 @@ function isEntity(value: string): value is Entity {
   return value in Matrix;
 }
 
-function isActionForEntity<E extends Entity>(
-  entity: E,
-  value: string,
-): value is Action<E> {
+function isActionForEntity<E extends Entity>(entity: E, value: string): value is Action<E> {
   return value in Matrix[entity];
 }
 
@@ -150,9 +133,7 @@ function isVisibilityForEntity<E extends Entity, A extends Action<E>>(
 type CapitalizeWord<T extends string> = Capitalize<T>;
 
 type PermissionKey<E extends Entity> = {
-  [
-    A in Action<E>
-  ]: `${CapitalizeWord<E>}${CapitalizeWord<A>}${CapitalizeWord<Visibility<E, A>>}`;
+  [A in Action<E>]: `${CapitalizeWord<E>}${CapitalizeWord<A>}${CapitalizeWord<Visibility<E, A>>}`;
 }[Action<E>];
 
 type EntityPermissionMap<E extends Entity> = {
@@ -166,21 +147,15 @@ type AllPermissionsMap = {
 function capitalize<T extends string>(value: T): Capitalize<T> {
   return (value.charAt(0).toUpperCase() + value.slice(1)) as Capitalize<T>;
 }
-function buildEntityPermissions<E extends Entity>(
-  entity: E,
-): EntityPermissionMap<E> {
+function buildEntityPermissions<E extends Entity>(entity: E): EntityPermissionMap<E> {
   const actions = Object.keys(Matrix[entity]) as Action<E>[];
 
   return Object.fromEntries(
     actions.flatMap((action: Action<E>) => {
-      const visibilities = Matrix[entity][action] as readonly Visibility<
-        E,
-        typeof action
-      >[];
+      const visibilities = Matrix[entity][action] as readonly Visibility<E, typeof action>[];
 
       return visibilities.map((visibility: Visibility<E, Action<E>>) => {
-        const key =
-          `${capitalize(entity)}${capitalize(action)}${capitalize(visibility)}` as const;
+        const key = `${capitalize(entity)}${capitalize(action)}${capitalize(visibility)}` as const;
 
         return [
           key,

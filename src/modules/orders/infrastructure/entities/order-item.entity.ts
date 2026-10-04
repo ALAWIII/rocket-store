@@ -16,14 +16,22 @@ export class OrderItemEntity {
   @Column('integer', { default: 0 })
   subtotal!: number;
   @Column({ type: 'uuid', name: 'order_id' })
-  @ForeignKey(() => OrderEntity, (o) => o.id, {
-    onDelete: 'CASCADE',
-  })
+  @ForeignKey(
+    () => OrderEntity,
+    (o) => o.id,
+    {
+      onDelete: 'CASCADE',
+    },
+  )
   orderId!: string;
 
   @Column({ type: 'uuid', name: 'product_variant_id' })
-  @ForeignKey(() => ProductVariantEntity, (p) => p.id, {
-    onDelete: 'RESTRICT',
-  })
+  @ForeignKey(
+    () => ProductVariantEntity,
+    (p) => p.id,
+    {
+      onDelete: 'RESTRICT',
+    },
+  )
   productVariantId!: string;
 }

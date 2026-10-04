@@ -13,7 +13,10 @@ export class ProductEntity {
   description!: string;
 
   @Column('uuid', { nullable: true })
-  @ForeignKey(() => BrandEntity, (b) => b.id)
+  @ForeignKey(
+    () => BrandEntity,
+    (b) => b.id,
+  )
   brandId?: string | null;
   @CreateDateColumnTz()
   createdAt!: Date;

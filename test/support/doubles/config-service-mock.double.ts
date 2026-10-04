@@ -1,9 +1,7 @@
 import { TEST_ENV } from '../constants/env-test-values.constant';
 
 /// responsible for mocking and overriding ConfigService for every single test.
-export function createConfigServiceMock(
-  overrides: Partial<Record<keyof typeof TEST_ENV, string>> = {},
-) {
+export function createConfigServiceMock(overrides: Partial<Record<keyof typeof TEST_ENV, string>> = {}) {
   const values = { ...TEST_ENV, ...overrides };
 
   return {

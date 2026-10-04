@@ -43,9 +43,9 @@ describe('AccessControlService', () => {
       const adminRole = { name: 'admin', permissions: [] };
       systemRoleMock.isSystemRoleName.mockReturnValue(true);
 
-      await expect(
-        service.createRole('not-important', adminRole),
-      ).rejects.toThrow('Try to create an existing system role.');
+      await expect(service.createRole('not-important', adminRole)).rejects.toThrow(
+        'Try to create an existing system role.',
+      );
       expect(systemRoleMock.isSystemRoleName).toHaveBeenCalledTimes(1);
       expect(roleRepoMock.create).toHaveBeenCalledTimes(0);
     });
@@ -84,9 +84,7 @@ describe('AccessControlService', () => {
       const role = service.renameRole('not-important', adminRole.id, {
         name: adminRole.name,
       });
-      await expect(role).rejects.toThrow(
-        'Try to rename an existing System Role.',
-      );
+      await expect(role).rejects.toThrow('Try to rename an existing System Role.');
       expect(systemRoleMock.hasId).toHaveBeenCalledTimes(1);
       expect(roleRepoMock.rename).toHaveBeenCalledTimes(0);
     });
@@ -96,9 +94,7 @@ describe('AccessControlService', () => {
         permissions: [],
       }).unwrap();
 
-      roleRepoMock.rename.mockImplementation(
-        (data: { userRoleId: string; role: Role }) => Ok(worker2Role),
-      );
+      roleRepoMock.rename.mockImplementation((data: { userRoleId: string; role: Role }) => Ok(worker2Role));
       systemRoleMock.hasId.mockReturnValue(false);
       const role = await service.renameRole('roleId', worker2Role.id, {
         name: worker2Role.name,
@@ -116,9 +112,9 @@ describe('AccessControlService', () => {
     it('should throw when trying to remove a system role', async () => {
       systemRoleMock.hasId.mockReturnValue(true);
 
-      await expect(
-        service.removeRole('user-role-id', 'role-id'),
-      ).rejects.toThrow(new Error('System roles cannot be removed'));
+      await expect(service.removeRole('user-role-id', 'role-id')).rejects.toThrow(
+        new Error('System roles cannot be removed'),
+      );
 
       expect(acsyncServiceMock.removeRole).toHaveBeenCalledTimes(0);
       expect(roleRepoMock.deleteById).toHaveBeenCalledTimes(0);

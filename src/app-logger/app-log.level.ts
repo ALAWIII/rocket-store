@@ -6,10 +6,8 @@ export type AppLogLevel = (typeof LOG_LEVELS)[number];
 export function loggerMethodFor(level: string, logger: Logger) {
   return (message: string, ...args: unknown[]) => {
     if (level === 'warn') return logger.warn(message, ...args);
-    if (level === 'debug' || level === 'verbose')
-      return logger.debug(message, ...args);
-    if (level === 'fatal' || level === 'error')
-      return logger.error(message, ...args);
+    if (level === 'debug' || level === 'verbose') return logger.debug(message, ...args);
+    if (level === 'fatal' || level === 'error') return logger.error(message, ...args);
     return logger.log(message, ...args);
   };
 }
