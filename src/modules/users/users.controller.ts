@@ -1,4 +1,15 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Put,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
 import { type AppSession } from 'src/auth/auth.config';
 import { Session } from '@thallesp/nestjs-better-auth';
@@ -10,6 +21,10 @@ import { FindUsersFlatQueryDto } from './dto/find-users-by-filter.dto';
 import { UpdateMeDto } from './dto/update-user.dto';
 import { AssignRoleToUserDto } from './dto/assign-role-to-user.dto';
 import { ReassignUsersRoleDto } from './dto/reassign-users-role.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadFileInfoDto } from '../shared/dto/upload-file-info.dto';
+import { fileFilter } from '../shared/utils/file-filter.util';
+import { ImageResponseDto } from '../shared/dto/image-response.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly service: UsersService) {}
@@ -65,5 +80,20 @@ export class UsersController {
     return {
       affected: await this.service.assignRoleToUsers(session.user.roleId, dto),
     };
+  }
+  @Put(':id/profile-image')
+  @RequirePermission(AllPermissions.images.ImagesUploadOwn)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 2 * 1024 * 1024 },
+      fileFilter: fileFilter,
+    }),
+  )
+  updateProfileImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() fileInfo: UploadFileInfoDto,
+    @Session() session: AppSession,
+  ): Promise<ImageResponseDto> {
+    return this.service.setProfileImage(file, session.user.id, fileInfo);
   }
 }
