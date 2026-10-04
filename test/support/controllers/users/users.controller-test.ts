@@ -1,4 +1,5 @@
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
+import { UserResponseDto } from 'src/modules/users/dto/user-response.dto';
 import { UserAgent } from 'test/support/helpers/app-test.helper';
 import { ExpectedTestStatusCode } from 'test/support/types/expected-test-status-code.type';
 import { UpdateUserTestDto } from 'test/support/types/user/update-user.dto.type';
@@ -33,7 +34,7 @@ export class UsersControllerTest {
       parseBody: true,
     };
     const response = await this.agent.get('/api/v1/users/me').expect(expectedStatusCode.code);
-    const body = parseResponseBody<UserTestDto>(response, statusCodesListNormalize(expectedStatusCode));
+    const body = parseResponseBody<UserResponseDto>(response, statusCodesListNormalize(expectedStatusCode));
     return { response, body };
   }
   async findAll(statusCode: ExpectedTestStatusCode, query: FindUsersFilterTest = {}) {
@@ -66,7 +67,10 @@ export class UsersControllerTest {
   }
 
   async updateProfileImage(options?: UploadImageOptions) {
-    const { fileBuffer, finfo, statusCodes, nameWithExt } = await UploadImage.prepare(options);
+    const { fileBuffer, finfo, statusCodes, nameWithExt } = await UploadImage.prepare({
+      expectedStatus: { code: 200, parseBody: true },
+      ...options,
+    });
     const response = await attachBodyFields(
       this.agent.put(`${this.urlPrefix}/me/profile-image`).attach('file', fileBuffer, nameWithExt),
       finfo,
