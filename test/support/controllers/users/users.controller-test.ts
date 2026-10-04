@@ -51,7 +51,7 @@ export class UsersControllerTest {
       parseBody: true,
     };
     const response = await this.agent.get(`/api/v1/users/${userId}`).expect(expectedStatusCode.code);
-    const body = parseResponseBody<UserTestDto>(response, statusCodesListNormalize(expectedStatusCode));
+    const body = parseResponseBody<UserResponseDto>(response, statusCodesListNormalize(expectedStatusCode));
     return { response, body };
   }
   async updateMe(updateData: UpdateUserTestDto, statusCode: ExpectedTestStatusCode) {
