@@ -45,9 +45,13 @@ export class UsersControllerTest {
     );
     return { response, body };
   }
-  async findById(userId: string, statusCode: ExpectedTestStatusCode) {
-    const response = await this.agent.get(`/api/v1/users/${userId}`).expect(statusCode.code);
-    const body = parseResponseBody<UserTestDto>(response, statusCodesListNormalize(statusCode));
+  async findById(userId: string, statusCode?: ExpectedTestStatusCode) {
+    const expectedStatusCode = statusCode ?? {
+      code: 200,
+      parseBody: true,
+    };
+    const response = await this.agent.get(`/api/v1/users/${userId}`).expect(expectedStatusCode.code);
+    const body = parseResponseBody<UserTestDto>(response, statusCodesListNormalize(expectedStatusCode));
     return { response, body };
   }
   async updateMe(updateData: UpdateUserTestDto, statusCode: ExpectedTestStatusCode) {
