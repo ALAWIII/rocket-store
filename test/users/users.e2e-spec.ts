@@ -579,5 +579,8 @@ describe.concurrent('users profile-image (e2e)', () => {
       const userAfterImgDeletion = (await userController.findById(adminUser.userDb.id)).body!;
       expect(userAfterImgDeletion.image).toBeUndefined();
     });
+    it('should fail delete non-existed user profile image.', async ({ userController }) => {
+      await userController.deleteProfileImage({ code: 404 });
+    });
   });
 });
