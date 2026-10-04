@@ -537,3 +537,15 @@ describe.concurrent('users (e2e)', () => {
     });
   });
 });
+describe.concurrent('users profile-image (e2e)', () => {
+  describe('PUT /api/v1/users/me/profile-image updateProfileImage', () => {
+    it('should fail upload user image exceeds 2mb in size.', async ({ userController }) => {
+      await userController.updateProfileImage({
+        expectedStatus: { code: 413 },
+        imgOpts: { exactSizeBytes: 4 * 1024 * 1024 },
+      });
+      const userInfo = (await userController.findMe()).body!;
+      expect(userInfo.image).toBeUndefined();
+    });
+  });
+});
