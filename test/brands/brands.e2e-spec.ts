@@ -1,7 +1,6 @@
 import { v7 } from 'uuid';
 import { it } from '../support/fixtures/authenticated-e2e.fixture';
 import { BrandResponseDto } from 'src/modules/brands/dto/brand-response.dto';
-import { uploadRandomImage } from 'test/support/utils/upload-random-image.util';
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
 
 describe.concurrent('brands (e2e)', () => {
@@ -100,7 +99,7 @@ describe.concurrent('brands and images (e2e)', () => {
       const images: ImageResponseDto[] = [];
       const imgAttach: { imageId: string; imageRole: string }[] = [];
       for (let i = 1; i <= 3; i++) {
-        const img = (await uploadRandomImage(imageController)).body!;
+        const img = (await imageController.upload()).body!;
         images.push(img);
         imgAttach.push({
           imageId: img.id,
@@ -124,8 +123,8 @@ describe.concurrent('brands and images (e2e)', () => {
       imageController,
       brandController,
     }) => {
-      const logo = (await uploadRandomImage(imageController)).body!;
-      const banner = (await uploadRandomImage(imageController)).body!;
+      const logo = (await imageController.upload()).body!;
+      const banner = (await imageController.upload()).body!;
       const honor = (await brandController.create({ name: 'Honor' })).body!;
       const huwaie = (await brandController.create({ name: 'Huawie' })).body!;
       const attachHonorSuccess = await brandController.attachImages(honor.id, [
@@ -142,8 +141,8 @@ describe.concurrent('brands and images (e2e)', () => {
       imageController,
       brandController,
     }) => {
-      const logo = (await uploadRandomImage(imageController)).body!;
-      const banner = (await uploadRandomImage(imageController)).body!;
+      const logo = (await imageController.upload()).body!;
+      const banner = (await imageController.upload()).body!;
 
       const honor = (await brandController.create({ name: 'Honor' })).body!;
       const attachFirstTimeSuccess = await brandController.attachImages(honor.id, [
@@ -165,9 +164,9 @@ describe.concurrent('brands and images (e2e)', () => {
       imageController,
       brandController,
     }) => {
-      const logo = (await uploadRandomImage(imageController)).body!;
-      const banner1 = (await uploadRandomImage(imageController)).body!;
-      const banner2 = (await uploadRandomImage(imageController)).body!;
+      const logo = (await imageController.upload()).body!;
+      const banner1 = (await imageController.upload()).body!;
+      const banner2 = (await imageController.upload()).body!;
       const honor = (await brandController.create({ name: 'Honor' })).body!;
       await brandController.attachImages(honor.id, [
         { imageId: logo.id, imageRole: 'logo' },
@@ -179,9 +178,9 @@ describe.concurrent('brands and images (e2e)', () => {
       expect(banners.some((b) => b.id === logo.id)).toBe(false);
     });
     it('should return empty banners when brand has no banners.', async ({ imageController, brandController }) => {
-      const logo = (await uploadRandomImage(imageController)).body!;
-      const banner1 = (await uploadRandomImage(imageController)).body!;
-      const banner2 = (await uploadRandomImage(imageController)).body!;
+      const logo = (await imageController.upload()).body!;
+      const banner1 = (await imageController.upload()).body!;
+      const banner2 = (await imageController.upload()).body!;
       const honor = (await brandController.create({ name: 'Honor' })).body!;
       const huawie = (await brandController.create({ name: 'Huawie' })).body!;
       await brandController.attachImages(honor.id, [
@@ -195,9 +194,9 @@ describe.concurrent('brands and images (e2e)', () => {
   });
   describe('POST /api/v1/brands/:id/images/detach detachImages', () => {
     it('should success detach images from brand', async ({ brandController, imageController }) => {
-      const logo = (await uploadRandomImage(imageController)).body!;
-      const banner1 = (await uploadRandomImage(imageController)).body!;
-      const banner2 = (await uploadRandomImage(imageController)).body!;
+      const logo = (await imageController.upload()).body!;
+      const banner1 = (await imageController.upload()).body!;
+      const banner2 = (await imageController.upload()).body!;
       const honor = (await brandController.create({ name: 'Honor' })).body!;
       await brandController.attachImages(honor.id, [
         { imageId: logo.id, imageRole: 'logo' },

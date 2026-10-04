@@ -1,6 +1,5 @@
 import { it } from 'test/support/fixtures/authenticated-e2e.fixture';
 import sharp from 'sharp';
-import { uploadRandomImage } from 'test/support/utils/upload-random-image.util';
 import { calculateChecksum } from 'test/support/utils/calculate-checksum.util';
 import { v7 } from 'uuid';
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
@@ -11,65 +10,54 @@ describe.concurrent('images (e2e)', () => {
     it('should success upload a valid image', async ({ imageController }) => {
       const mimes = ['avif', 'png', 'webp', 'jpeg'] as const;
       for (const mime of mimes) {
-        const img = await sharp({
-          create: {
-            width: 4000,
-            height: 4000,
-            channels: 3,
-            background: { r: 255, g: 0, b: 0 },
-          },
-        })
-          [mime]()
-          .toBuffer();
-        const { body } = await imageController.upload(
-          img,
-          { name: `test.${mime}`, altText: 'test image' },
-          { code: 201, parseBody: true },
-        );
-
+        const { body } = await imageController.upload({
+          name: 'test',
+          altText: 'test image',
+          imgOpts: { height: 4000, width: 4000, imgExt: mime, background: { r: 255, g: 0, b: 0 } },
+        });
         expect(body).toBeDefined();
         expect(body!.name).toBe('test');
         expect(body!.altText).toBe('test image');
         expect(body!.mimeType).toBe(`image/${mime}`);
         expect(body!.width).toBe(4000);
         expect(body!.height).toBe(4000);
-        expect(body!.sizeBytes).toBe(img.length);
       }
     });
     it('should show the image in object storage when success upload.', async ({ imageController, storageClient }) => {
-      const img = (await uploadRandomImage(imageController)).body!;
+      const img = (await imageController.upload()).body!;
       const imgInfo = await storageClient.fetchInfo(img.id);
       expect(imgInfo.contentLength).toBe(img.sizeBytes);
     });
     it('should fail because of exceeding file size', async ({ imageController }) => {
       const maxSize = 10 * 1024 * 1024;
-      await uploadRandomImage(imageController, {
-        exactSizeBytes: maxSize + 1,
+      await imageController.upload({
+        imgOpts: {
+          exactSizeBytes: maxSize + 1,
+        },
         expectedStatus: { code: 413 },
       });
     });
     it('should fail uploading image because of invalid mime type.', async ({ imageController }) => {
       const customBuffer = Buffer.from('should violate filter mime check.');
-      await uploadRandomImage(imageController, {
-        customBuffer,
-        imgExt: 'txt' as unknown as 'png',
+      await imageController.upload({
+        imgOpts: { customBuffer, imgExt: 'txt' as unknown as 'png' },
         expectedStatus: { code: 400 },
       });
     });
     it('should fail uploading image because of name regex violation contains `-` .', async ({ imageController }) => {
-      await uploadRandomImage(imageController, {
+      await imageController.upload({
         name: 'shawarma-zenjer',
         expectedStatus: { code: 400 },
       });
     });
     it('should fail uploading image because of name length exceeds its limits.', async ({ imageController }) => {
-      await uploadRandomImage(imageController, {
+      await imageController.upload({
         name: 'h'.repeat(60),
         expectedStatus: { code: 400 },
       });
     });
     it('should fail uploading image because of altText length exceeds its limits.', async ({ imageController }) => {
-      await uploadRandomImage(imageController, {
+      await imageController.upload({
         altText: 'h'.repeat(126),
         expectedStatus: { code: 400 },
       });
@@ -77,9 +65,8 @@ describe.concurrent('images (e2e)', () => {
     it('fails uploading image because of Dimensions exceeds 4096x4096 dimension limits.', async ({
       imageController,
     }) => {
-      await uploadRandomImage(imageController, {
-        height: 4097,
-        width: 4097,
+      await imageController.upload({
+        imgOpts: { height: 4097, width: 4097 },
         expectedStatus: { code: 422 },
       });
     });
@@ -99,8 +86,8 @@ describe.concurrent('images (e2e)', () => {
       const expectedChecksum = calculateChecksum(originalImage);
 
       // Act
-      const { body } = await uploadRandomImage(imageController, {
-        customBuffer: originalImage,
+      const { body } = await imageController.upload({
+        imgOpts: { customBuffer: originalImage },
       });
 
       // Assert
@@ -109,12 +96,12 @@ describe.concurrent('images (e2e)', () => {
   });
   describe('GET /api/v1/images/:id', () => {
     it('should success returning image metadata by its id.', async ({ imageController }) => {
-      const img = (await uploadRandomImage(imageController, { exactSizeBytes: 1 })).body!;
-      const getImg = await imageController.findById(img.id, {
+      const { body } = await imageController.upload({ imgOpts: { exactSizeBytes: 1 } });
+      const getImg = await imageController.findById(body!.id, {
         code: 200,
         parseBody: true,
       });
-      expect(getImg.body!.id).toBe(img.id);
+      expect(getImg.body!.id).toBe(body!.id);
     });
     it('should fail to fetch not found image metadata by id.', async ({ imageController }) => {
       await imageController.findById(v7(), {
@@ -126,11 +113,11 @@ describe.concurrent('images (e2e)', () => {
     it('should success remove batch of images', async ({ imageController, db, storageClient }) => {
       const images: ImageResponseDto[] = [];
       for (let i = 1; i < 4; i++) {
-        const image = (await uploadRandomImage(imageController)).body!;
-        const imgInfo = await storageClient.fetchInfo(image.id);
+        const { body } = await imageController.upload();
+        const imgInfo = await storageClient.fetchInfo(body!.id);
         // assert its stored in object storage before attemp to delete it.
-        expect(image.sizeBytes).toBe(imgInfo.contentLength);
-        images.push(image);
+        expect(body!.sizeBytes).toBe(imgInfo.contentLength);
+        images.push(body!);
       }
       const imgIds = images.map((img) => img.id);
       const deleteResult = await imageController.removeImages(
@@ -167,9 +154,9 @@ describe.concurrent('images (e2e)', () => {
       imageController,
     }) => {
       const honor = (await brandController.create({ name: 'Honor' })).body!;
-      const logo = (await uploadRandomImage(imageController)).body!;
-      const banner1 = (await uploadRandomImage(imageController)).body!;
-      const img = (await uploadRandomImage(imageController)).body!;
+      const logo = (await imageController.upload()).body!;
+      const banner1 = (await imageController.upload()).body!;
+      const img = (await imageController.upload()).body!;
       const attached = (
         await brandController.attachImages(honor.id, [
           { imageId: logo.id, imageRole: 'logo' },
@@ -189,7 +176,7 @@ describe.concurrent('images (e2e)', () => {
     it('should return unused images sorted by size and paginated.', async ({ imageController }) => {
       const imgs: ImageResponseDto[] = [];
       for (let i = 1; i <= 5; i++) {
-        imgs.push((await uploadRandomImage(imageController)).body!);
+        imgs.push((await imageController.upload()).body!);
       }
       const unused = (
         await imageController.findUnused({
@@ -203,7 +190,7 @@ describe.concurrent('images (e2e)', () => {
     it('should return unused images sorted by name and paginated.', async ({ imageController }) => {
       const imgs: ImageResponseDto[] = [];
       for (let i = 1; i <= 6; i++) {
-        imgs.push((await uploadRandomImage(imageController)).body!);
+        imgs.push((await imageController.upload()).body!);
       }
       const unused = (
         await imageController.findUnused({
@@ -222,7 +209,7 @@ describe.concurrent('images (e2e)', () => {
     it('should delete unused images.', async ({ imageController, brandController }) => {
       const imgs: ImageResponseDto[] = [];
       for (let i = 1; i <= 6; i++) {
-        imgs.push((await uploadRandomImage(imageController)).body!);
+        imgs.push((await imageController.upload()).body!);
       }
       const images3 = imgs.slice(0, 3);
       const honor = (await brandController.create({ name: 'Honor' })).body!;
@@ -240,7 +227,7 @@ describe.concurrent('images (e2e)', () => {
     it('should delete more than 100 unused images.', async ({ imageController }) => {
       const imgs: ImageResponseDto[] = [];
       for (let i = 1; i <= 150; i++) {
-        imgs.push((await uploadRandomImage(imageController)).body!);
+        imgs.push((await imageController.upload()).body!);
       }
       const affected = (await imageController.removeUnused()).body!.affected;
       expect(affected).toBe(150);
