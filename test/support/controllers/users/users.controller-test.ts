@@ -1,3 +1,4 @@
+import { AffectedDeletedResponseDto } from 'src/modules/shared/dto/affected-deleted-response.dto';
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
 import { UserResponseDto } from 'src/modules/users/dto/user-response.dto';
 import { UserAgent } from 'test/support/helpers/app-test.helper';
@@ -88,7 +89,7 @@ export class UsersControllerTest {
 
     const response = await this.agent.delete(`${this.urlPrefix}/me/profile-image`).expect(expectedStatus.code);
 
-    const body = parseResponseBody<ImageResponseDto>(response, statusCodesListNormalize(expectedStatus));
+    const body = parseResponseBody<AffectedDeletedResponseDto>(response, statusCodesListNormalize(expectedStatus));
     return { response, body };
   }
 }
