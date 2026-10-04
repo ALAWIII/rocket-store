@@ -1,7 +1,7 @@
 export async function waitStorageForAllDeletions(
   ids: string[],
   checkExistsFn: (id: string) => Promise<boolean>,
-  intervalMs = 1000,
+  intervalMs = 700,
 ) {
   const pendingIds = new Set(ids);
 

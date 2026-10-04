@@ -1,11 +1,6 @@
 import { DataSource } from 'typeorm';
 
-export async function waitJobUntilFinish(
-  dataSource: DataSource,
-  imgIds: string[],
-  state = 'completed',
-  waiting = 1000,
-) {
+export async function waitJobUntilFinish(dataSource: DataSource, imgIds: string[], state = 'completed', waiting = 700) {
   while (true) {
     const allCompleted = await dataSource.query<{ state: string; data: { Key: string } }[]>(
       `
