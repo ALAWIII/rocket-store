@@ -9,6 +9,8 @@ import {
 import { v7 } from 'uuid';
 
 import { UpdateUserTestDto } from 'test/support/types/user/update-user.dto.type';
+import { waitJobUntilFinish } from 'test/support/utils/wait-job-until-finish.util';
+import { waitStorageForAllDeletions } from 'test/support/utils/wait-storage-for-all-deletions.util';
 
 describe.concurrent('users (e2e)', () => {
   describe('GET /api/v1/users/me (findMe)', () => {
@@ -542,9 +544,22 @@ describe.concurrent('users profile-image (e2e)', () => {
     it('should success upload user profile image for the first time.', async ({ userController }) => {
       const img = (await userController.updateProfileImage()).body!;
       const userInfo = (await userController.findMe()).body!;
-      console.log(img);
-      console.log(userInfo.image);
       expect(img).toEqual(userInfo.image);
+    });
+    it('should success replace existed user profile image with new one.', async ({
+      adminUser,
+      userController,
+      db,
+      storageClient,
+    }) => {
+      const oldImg = (await userController.updateProfileImage()).body!;
+      const newImg = (await userController.updateProfileImage()).body!;
+      await waitJobUntilFinish(db.dataSource, [oldImg.id], 'completed');
+      await waitStorageForAllDeletions([oldImg.id], (id: string) => storageClient.exists(id));
+      const userInfo = (await userController.findById(adminUser.userDb.id)).body!;
+      expect(newImg).toEqual(userInfo.image);
+      expect(oldImg).not.toEqual(userInfo.image);
+      expect(oldImg.id).not.toEqual(userInfo.image?.id);
     });
     it('should fail upload user profile image exceeds 2mb in size.', async ({ userController }) => {
       await userController.updateProfileImage({
