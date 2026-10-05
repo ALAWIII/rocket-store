@@ -12,6 +12,7 @@ type CategoryProps = {
   path: CategoryId[];
   description?: DomainText | null;
   createdAt: Date;
+  updatedAt: Date;
 };
 type CategoryPrimitives = {
   id: string;
@@ -20,6 +21,7 @@ type CategoryPrimitives = {
   parentCategoryId: string | null;
   description?: string | null;
   createdAt: Date | string;
+  updatedAt: Date | string;
 };
 type CreateCategoryPrimitives = Omit<CategoryPrimitives, 'createdAt' | 'id'>;
 
@@ -43,6 +45,7 @@ export class Category {
           description: (data.description ? DomainText.create(data.description, 125) : Ok(null)).unwrap(),
           parentCategoryId: (data.parentCategoryId ? CategoryId.create(data.parentCategoryId) : Ok(null)).unwrap(),
           createdAt: new Date(data.createdAt),
+          updatedAt: new Date(data.updatedAt),
         }),
     );
   }
