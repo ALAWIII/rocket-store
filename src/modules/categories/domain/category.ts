@@ -8,7 +8,7 @@ import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.
 type CategoryProps = {
   id: CategoryId;
   name: Name;
-  parentCategoryId: CategoryId | null;
+  parentId: CategoryId | null;
   path: CategoryId[];
   description?: DomainText | null;
   createdAt: Date;
@@ -18,7 +18,7 @@ type CategoryPrimitives = {
   id: string;
   name: string;
   path: string[];
-  parentCategoryId: string | null;
+  parentId: string | null;
   description?: string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
@@ -43,13 +43,13 @@ export class Category {
           name: Name.create(data.name).unwrap(),
           path: data.path.map((p) => CategoryId.create(p).unwrap()),
           description: (data.description ? DomainText.create(data.description, 125) : Ok(null)).unwrap(),
-          parentCategoryId: (data.parentCategoryId ? CategoryId.create(data.parentCategoryId) : Ok(null)).unwrap(),
+          parentId: (data.parentId ? CategoryId.create(data.parentId) : Ok(null)).unwrap(),
           createdAt: new Date(data.createdAt),
           updatedAt: new Date(data.updatedAt),
         }),
     );
   }
   toJSON() {
-    return serializeProps(this.props);
+    return { ...serializeProps(this.props), path: this.props.path.map((p) => p.toJSON()) };
   }
 }
