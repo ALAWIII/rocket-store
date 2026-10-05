@@ -17,7 +17,7 @@ export class CategoryEntity {
     (c) => c.id,
     { onDelete: 'SET NULL' },
   )
-  parentCategoryId!: string | null;
+  parentId!: string | null;
   // remember to add GIN index as typeorm migration: https://github.com/typeorm/typeorm/issues/1519#issuecomment-2037274972
   @Column('uuid', { array: true, default: '{}' })
   path!: string[];
