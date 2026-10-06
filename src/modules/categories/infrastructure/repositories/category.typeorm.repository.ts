@@ -7,6 +7,7 @@ import { CategoryEntity } from '../entities/category.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryMapper } from '../mappers/category.mapper';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
+import { RecordNotFoundError } from 'src/modules/shared/errors/database.error';
 
 export class CategoryRepository implements ICategoryRepository {
   constructor(
@@ -27,6 +28,25 @@ export class CategoryRepository implements ICategoryRepository {
     `;
       const { id, name, description, parentId } = data.toJSON();
       return this.categRepo.query<CategoryEntity>(sql, [id, name, description ?? null, parentId]);
+    })
+      .andThen((c) => CategoryMapper.toDomain(c))
+      .mapErr(mapTypeOrmError);
+  }
+  updateDetails(id: string, data: { name?: string; description?: string | null }): DBResult<Category> {
+    return Result.wrapAsync(async () => {
+      const cat = await this.categRepo
+        .createQueryBuilder()
+        .update()
+        .set(data)
+        .where('id=:id', { id })
+        .returning('*')
+        .execute();
+
+      const [row] = cat.raw as CategoryEntity[];
+
+      if (!row) throw new RecordNotFoundError(`Update Category not found: ${id}`);
+
+      return row;
     })
       .andThen((c) => CategoryMapper.toDomain(c))
       .mapErr(mapTypeOrmError);

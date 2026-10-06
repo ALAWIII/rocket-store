@@ -8,7 +8,7 @@ export abstract class ICategoryRepository {
   abstract create(data: Category): DBResult<Category>;
 
   // Simple metadata update (no path logic)
-  abstract updateDetails(id: string, data: { name?: string; description?: string }): DBResult<Category>;
+  abstract updateDetails(id: string, data: { name?: string; description?: string | null }): DBResult<Category>;
 
   // Complex tree update (cycle checks + path array slicing), returns the new moved category
   abstract move(id: string, newParentId: string | null): DBResult<Category>;
