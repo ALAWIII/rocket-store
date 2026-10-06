@@ -16,12 +16,16 @@ export class CategoryRepository implements ICategoryRepository {
     @InjectRepository(CategoryEntity)
     private readonly categRepo: Repository<CategoryEntity>,
   ) {}
+  findAll(): DBResult<Category[]> {
+    return Result.wrapAsync(() => this.categRepo.find({ order: { path: 'ASC' } }))
+      .andThen((c) => CategoryMapper.toDomainList(c))
+      .mapErr(mapTypeOrmError);
+  }
   findById(id: string): DBResult<Category> {
     return Result.wrapAsync(() => this.categRepo.findOneByOrFail({ id }))
       .andThen((c) => CategoryMapper.toDomain(c))
       .mapErr(mapTypeOrmError);
   }
-
   create(data: Category): DBResult<Category> {
     return Result.wrapAsync(() => {
       const sql = `
