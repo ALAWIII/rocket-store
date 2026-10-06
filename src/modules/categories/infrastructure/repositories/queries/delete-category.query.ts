@@ -16,18 +16,19 @@
  *   { affected: number }[]
  */
 export const DELETE_CATEGORY_SQL = /*sql*/ `
-  WITH target AS (
+WITH target AS (
     SELECT id, path, "parentId" AS grandparent_id
     FROM categories
     WHERE id = $1
-  ),
-  is_valid AS (
+),
+is_valid AS (
     SELECT EXISTS (SELECT 1 FROM target) AS valid
-  ),
-  update_descendants AS (
+),
+update_descendants AS (
       UPDATE categories
       SET
         path = array_remove(path, $1::uuid),
+        "updatedAt" = now(),
         "parentId" = CASE
           WHEN "parentId" = $1 THEN (SELECT grandparent_id FROM target)
           ELSE "parentId"
@@ -40,9 +41,9 @@ export const DELETE_CATEGORY_SQL = /*sql*/ `
   delete_nodes AS (
     DELETE FROM categories
     WHERE CASE
-        WHEN $2::boolean THEN path @> ARRAY[$1]::uuid[]
-        ELSE id = $1
-      END
+            WHEN $2::boolean THEN path @> ARRAY[$1]::uuid[]
+            ELSE id = $1
+          END
       AND (SELECT valid FROM is_valid)
     RETURNING id
   )
