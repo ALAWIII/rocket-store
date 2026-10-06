@@ -15,7 +15,7 @@
  *   - Updates the category's parentId and path
  *
  * Returns:
- *   { category: {...} | null, status: 'OK' | 'CAT_NOT_FOUND' | 'PARENT_NOT_FOUND' | 'CYCLE_DETECTED' }
+ *   { category: {...} | null, status: 'OK' | 'CATEGORY_NOT_FOUND' | 'PARENT_NOT_FOUND' | 'CYCLE_DETECTED' }
  */
 export const MOVE_CATEGORY_SQL = /*sql*/ `
   WITH current_cat AS (
@@ -31,7 +31,7 @@ export const MOVE_CATEGORY_SQL = /*sql*/ `
   SELECT CASE WHEN NOT EXISTS (
       SELECT 1
       FROM current_cat) THEN
-      'CAT_NOT_FOUND'
+      'CATEGORY_NOT_FOUND'
     WHEN $2 IS NOT NULL
       AND NOT EXISTS (
         SELECT 1
@@ -88,3 +88,11 @@ export const MOVE_CATEGORY_SQL = /*sql*/ `
     FROM validation v
   LEFT JOIN update_cat u ON TRUE;
 `;
+
+export const MOVE_STATUS_CODES = {
+  CATEGORY_NOT_FOUND: 'Category not found.',
+  PARENT_NOT_FOUND: 'Parent category not found.',
+  CYCLE_DETECTED: 'Cannot move a category under its own descendant.',
+  OK: 'Operation completed successfully.',
+} as const;
+export type MOVE_STATUS = keyof typeof MOVE_STATUS_CODES;
