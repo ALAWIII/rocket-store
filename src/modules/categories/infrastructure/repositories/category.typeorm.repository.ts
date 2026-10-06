@@ -7,7 +7,8 @@ import { CategoryEntity } from '../entities/category.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryMapper } from '../mappers/category.mapper';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
-import { RecordNotFoundError } from 'src/modules/shared/errors/database.error';
+import { ConflictError, RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
+import { MOVE_CATEGORY_SQL, MOVE_STATUS, MOVE_STATUS_CODES } from './queries/move-category.query';
 
 export class CategoryRepository implements ICategoryRepository {
   constructor(
@@ -47,6 +48,31 @@ export class CategoryRepository implements ICategoryRepository {
       if (!row) throw new RecordNotFoundError(`Update Category not found: ${id}`);
 
       return row;
+    })
+      .andThen((c) => CategoryMapper.toDomain(c))
+      .mapErr(mapTypeOrmError);
+  }
+  move(id: string, newParentId: string | null): DBResult<Category> {
+    return Result.wrapAsync(async () => {
+      const [row] = await this.categRepo.manager.query<
+        {
+          category: CategoryEntity | null;
+          status: MOVE_STATUS;
+        }[]
+      >(MOVE_CATEGORY_SQL, [id, newParentId]);
+
+      if (!row) throw new UnknownDatabaseError('Database returned no results.');
+      switch (row.status) {
+        case 'CATEGORY_NOT_FOUND':
+          throw new RecordNotFoundError(`${MOVE_STATUS_CODES.CATEGORY_NOT_FOUND}: ${id}`);
+        case 'PARENT_NOT_FOUND':
+          throw new RecordNotFoundError(`${MOVE_STATUS_CODES.PARENT_NOT_FOUND}: ${newParentId}`);
+        case 'CYCLE_DETECTED':
+          throw new ConflictError(MOVE_STATUS_CODES.CYCLE_DETECTED);
+      }
+
+      // At this point, status is 'OK' and category is guaranteed non-null
+      return row.category!;
     })
       .andThen((c) => CategoryMapper.toDomain(c))
       .mapErr(mapTypeOrmError);
