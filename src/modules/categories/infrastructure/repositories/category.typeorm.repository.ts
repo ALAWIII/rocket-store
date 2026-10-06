@@ -26,6 +26,18 @@ export class CategoryRepository implements ICategoryRepository {
       .andThen((c) => CategoryMapper.toDomain(c))
       .mapErr(mapTypeOrmError);
   }
+  findSubtree(id: string): DBResult<Category[]> {
+    return Result.wrapAsync(() =>
+      this.categRepo
+        .createQueryBuilder('c')
+        .where('c.path @> :id::uuid[]', { id: [id] })
+        .orderBy('c.path', 'ASC')
+        .getMany(),
+    )
+      .andThen((c) => CategoryMapper.toDomainList(c))
+      .mapErr(mapTypeOrmError);
+  }
+
   create(data: Category): DBResult<Category> {
     return Result.wrapAsync(() => {
       const sql = `
