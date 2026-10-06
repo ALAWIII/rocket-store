@@ -9,6 +9,7 @@ import { CategoryMapper } from '../mappers/category.mapper';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { ConflictError, RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
 import { MOVE_CATEGORY_SQL, MOVE_STATUS, MOVE_STATUS_CODES } from './queries/move-category.query';
+import { DELETE_CATEGORY_SQL } from './queries/delete-category.query';
 
 export class CategoryRepository implements ICategoryRepository {
   constructor(
@@ -76,5 +77,16 @@ export class CategoryRepository implements ICategoryRepository {
     })
       .andThen((c) => CategoryMapper.toDomain(c))
       .mapErr(mapTypeOrmError);
+  }
+  delete(id: string, withSubtree: boolean): DBResult<number> {
+    return Result.wrapAsync(async () => {
+      const [row] = await this.categRepo.manager.query<{ affected: number }[]>(DELETE_CATEGORY_SQL, [id, withSubtree]);
+
+      if (!row || row.affected === 0) {
+        throw new RecordNotFoundError(`Category not found: ${id}`);
+      }
+
+      return row.affected;
+    }).mapErr(mapTypeOrmError);
   }
 }
