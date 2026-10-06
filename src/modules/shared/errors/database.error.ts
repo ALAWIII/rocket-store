@@ -25,3 +25,6 @@ export class CorruptedPersistenceDataError extends DatabaseError {
 export class ValueTooLongError extends DatabaseError {
   readonly code = 'VALUE_TOO_LONG';
 }
+export class ConflictError extends DatabaseError {
+  readonly code = 'CONFLICT';
+}
