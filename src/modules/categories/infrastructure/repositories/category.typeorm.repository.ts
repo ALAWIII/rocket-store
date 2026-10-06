@@ -60,7 +60,7 @@ export class CategoryRepository implements ICategoryRepository {
       const cat = await this.categRepo
         .createQueryBuilder()
         .update()
-        .set(data)
+        .set({ ...data, updatedAt: () => 'now()' })
         .where('id=:id', { id })
         .returning('*')
         .execute();
