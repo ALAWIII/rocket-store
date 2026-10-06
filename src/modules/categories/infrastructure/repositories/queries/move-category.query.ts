@@ -1,3 +1,22 @@
+/**
+ * move-category.query.ts
+ *
+ * Moves a category to a new parent (or to root) in a single, atomic database round trip.
+ *
+ * Parameters:
+ *   $1: UUID       - The ID of the category being moved
+ *   $2: UUID | NULL - The ID of the new parent (NULL to move to root)
+ *
+ * Operations:
+ *   - Validates existence of the target category and new parent
+ *   - Detects and prevents circular references (cycle detection)
+ *   - Computes the new materialized path for the moved category
+ *   - Updates the materialized path for ALL descendants in a single pass
+ *   - Updates the category's parentId and path
+ *
+ * Returns:
+ *   { category: {...} | null, status: 'OK' | 'CAT_NOT_FOUND' | 'PARENT_NOT_FOUND' | 'CYCLE_DETECTED' }
+ */
 export const MOVE_CATEGORY_SQL = /*sql*/ `
   WITH current_cat AS (
   SELECT id, path, array_length(path, 1) AS path_length
