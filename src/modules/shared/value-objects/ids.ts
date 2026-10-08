@@ -42,6 +42,7 @@ export class BrandId extends Id {}
 export class BrandImageId extends Id {}
 export class PageTemplateId extends Id {}
 export class CategoryId extends Id {}
+export class CategoryImageId extends Id {}
 export class CartItemId extends Id {}
 export class AddressId extends Id {}
 export class PaymentId extends Id {}
