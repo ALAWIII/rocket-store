@@ -12,11 +12,16 @@ import { MOVE_CATEGORY_SQL, MOVE_STATUS, MOVE_STATUS_CODES } from './queries/mov
 import { DELETE_CATEGORY_SQL } from './queries/delete-category.query';
 import { CategoryImagesEntity } from '../entities/category-images.entity';
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
+import { CategoryImage } from '../../domain/category-image';
+import { ImageMapper } from 'src/modules/images/infrastructure/mappers/images.mapper';
+import { Image } from 'src/modules/images/domain/image';
 
 export class CategoryRepository implements ICategoryRepository {
   constructor(
     @InjectRepository(CategoryEntity)
     private readonly categRepo: Repository<CategoryEntity>,
+    @InjectRepository(CategoryImagesEntity)
+    private readonly catImgRepo: Repository<CategoryEntity>,
   ) {}
   findAll(): DBResult<Category[]> {
     return Result.wrapAsync(() => this.categRepo.find({ order: { path: 'ASC' } }))
@@ -131,5 +136,22 @@ export class CategoryRepository implements ICategoryRepository {
 
       return row.affected;
     }).mapErr(mapTypeOrmError);
+  }
+  attachImages(imgs: CategoryImage[]): DBResult<Image[]> {
+    return Result.wrapAsync(() => {
+      const insertCte = this.catImgRepo
+        .createQueryBuilder()
+        .insert()
+        .into(CategoryImagesEntity)
+        .values(imgs.map((ci) => ci.toJSON()))
+        .returning('"imageId"');
+      return this.catImgRepo.manager
+        .createQueryBuilder(ImageEntity, 'images')
+        .addCommonTableExpression(insertCte, 'image_ids')
+        .where('images.id IN (SELECT "imageId" FROM image_ids)')
+        .getMany();
+    })
+      .andThen((imgs) => ImageMapper.toDomainList(imgs))
+      .mapErr(mapTypeOrmError);
   }
 }
