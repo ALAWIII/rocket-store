@@ -1,5 +1,7 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Category } from '../../domain/category';
+import { CategoryImage } from '../../domain/category-image';
+import { Image } from 'src/modules/images/domain/image';
 
 export abstract class ICategoryRepository {
   // --- 1. WRITE OPERATIONS ---
@@ -25,4 +27,7 @@ export abstract class ICategoryRepository {
   abstract findSubtree(id: string): DBResult<Category[]>;
 
   abstract findAll(): DBResult<Category[]>;
+  abstract findBanners(categoryId: string): DBResult<Image[]>;
+  abstract attachImages(imgs: CategoryImage[]): DBResult<Image[]>;
+  abstract detachImages(categoryId: string, imageIds: string[]): DBResult<void>;
 }
