@@ -1,7 +1,7 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Category } from '../../domain/category';
 import { ICategoryRepository } from './category.repository';
-import { Result } from '@allawiii/results-ts';
+import { Err, Result } from '@allawiii/results-ts';
 import { Repository } from 'typeorm';
 import { CategoryEntity } from '../entities/category.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,6 +10,8 @@ import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-erro
 import { ConflictError, RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
 import { MOVE_CATEGORY_SQL, MOVE_STATUS, MOVE_STATUS_CODES } from './queries/move-category.query';
 import { DELETE_CATEGORY_SQL } from './queries/delete-category.query';
+import { CategoryImagesEntity } from '../entities/category-images.entity';
+import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 
 export class CategoryRepository implements ICategoryRepository {
   constructor(
@@ -22,8 +24,28 @@ export class CategoryRepository implements ICategoryRepository {
       .mapErr(mapTypeOrmError);
   }
   findById(id: string): DBResult<Category> {
-    return Result.wrapAsync(() => this.categRepo.findOneByOrFail({ id }))
-      .andThen((c) => CategoryMapper.toDomain(c))
+    return Result.wrapAsync(() =>
+      this.categRepo
+        .createQueryBuilder('category')
+        .leftJoin(
+          CategoryImagesEntity,
+          'ci_icon',
+          `ci_icon."categoryId" = category.id AND ci_icon."imageRole" = 'icon'`,
+        )
+        .leftJoinAndMapOne('category.icon', ImageEntity, 'iconImg', `iconImg.id = ci_icon."imageId"`)
+        .leftJoin(
+          CategoryImagesEntity,
+          'ci_thumb',
+          `ci_thumb."categoryId" = category.id AND ci_thumb."imageRole" = 'thumbnail'`,
+        )
+        .leftJoinAndMapOne('category.thumbnail', ImageEntity, 'thumbImg', `thumbImg.id = ci_thumb."imageId"`)
+        .where('category.id = :id', { id })
+        .getOne(),
+    )
+      .andThen((c) => {
+        if (!c) return Err(new RecordNotFoundError(`Category not found: ${id}`));
+        return CategoryMapper.toDomain(c);
+      })
       .mapErr(mapTypeOrmError);
   }
   findSubtree(id: string): DBResult<Category[]> {
