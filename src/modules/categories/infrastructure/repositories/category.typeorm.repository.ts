@@ -159,4 +159,16 @@ export class CategoryRepository implements ICategoryRepository {
       .map((dr) => dr.affected ?? 0)
       .mapErr(mapTypeOrmError);
   }
+  findBanners(categoryId: string): DBResult<Image[]> {
+    return Result.wrapAsync(() =>
+      this.catImgRepo.manager
+        .createQueryBuilder(ImageEntity, 'images')
+        .innerJoin(CategoryImagesEntity, 'ci', 'ci."imageId" = images.id')
+        .where('ci."imageRole" = :role', { role: 'banner' })
+        .andWhere('ci."categoryId" = :categoryId', { categoryId })
+        .getMany(),
+    )
+      .andThen((imgs) => ImageMapper.toDomainList(imgs))
+      .mapErr(mapTypeOrmError);
+  }
 }
