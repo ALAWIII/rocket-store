@@ -2,7 +2,7 @@ import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Category } from '../../domain/category';
 import { ICategoryRepository } from './category.repository';
 import { Err, Result } from '@allawiii/results-ts';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { CategoryEntity } from '../entities/category.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CategoryMapper } from '../mappers/category.mapper';
@@ -21,7 +21,7 @@ export class CategoryRepository implements ICategoryRepository {
     @InjectRepository(CategoryEntity)
     private readonly categRepo: Repository<CategoryEntity>,
     @InjectRepository(CategoryImagesEntity)
-    private readonly catImgRepo: Repository<CategoryEntity>,
+    private readonly catImgRepo: Repository<CategoryImagesEntity>,
   ) {}
   findAll(): DBResult<Category[]> {
     return Result.wrapAsync(() => this.categRepo.find({ order: { path: 'ASC' } }))
@@ -152,6 +152,11 @@ export class CategoryRepository implements ICategoryRepository {
         .getMany();
     })
       .andThen((imgs) => ImageMapper.toDomainList(imgs))
+      .mapErr(mapTypeOrmError);
+  }
+  detachImages(categoryId: string, imageIds: string[]): DBResult<number> {
+    return Result.wrapAsync(() => this.catImgRepo.delete({ categoryId, imageId: In(imageIds) }))
+      .map((dr) => dr.affected ?? 0)
       .mapErr(mapTypeOrmError);
   }
 }

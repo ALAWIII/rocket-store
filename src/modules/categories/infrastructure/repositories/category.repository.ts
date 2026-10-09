@@ -29,5 +29,5 @@ export abstract class ICategoryRepository {
   abstract findAll(): DBResult<Category[]>;
   abstract findBanners(categoryId: string): DBResult<Image[]>;
   abstract attachImages(imgs: CategoryImage[]): DBResult<Image[]>;
-  abstract detachImages(categoryId: string, imageIds: string[]): DBResult<void>;
+  abstract detachImages(categoryId: string, imageIds: string[]): DBResult<number>;
 }
