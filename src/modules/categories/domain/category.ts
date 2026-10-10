@@ -29,7 +29,7 @@ type CategoryPrimitives = {
   createdAt: Date | string;
   updatedAt: Date | string;
 };
-type CreateCategoryPrimitives = Pick<CategoryPrimitives, 'name' | 'description' | 'parentId'>;
+type CreateCategoryPrimitives = Pick<CategoryPrimitives, 'name' | 'description'>;
 
 export class Category {
   private constructor(private props: CategoryProps) {}
@@ -40,6 +40,7 @@ export class Category {
       ...data,
       createdAt: createDate,
       updatedAt: createDate,
+      parentId: null,
       path: [],
       id: CategoryId.create().unwrap().toString(),
     });
