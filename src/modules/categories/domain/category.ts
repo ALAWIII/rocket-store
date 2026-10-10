@@ -28,13 +28,20 @@ type CategoryPrimitives = {
   createdAt: Date | string;
   updatedAt: Date | string;
 };
-type CreateCategoryPrimitives = Omit<CategoryPrimitives, 'createdAt' | 'id'>;
+type CreateCategoryPrimitives = Pick<CategoryPrimitives, 'name' | 'description' | 'parentId'>;
 
 export class Category {
   private constructor(private props: CategoryProps) {}
 
   static create(data: CreateCategoryPrimitives): Result<Category, ValueObjectError> {
-    return this.build({ ...data, createdAt: new Date(), id: CategoryId.create().unwrap().toString() });
+    const createDate = new Date();
+    return this.build({
+      ...data,
+      createdAt: createDate,
+      updatedAt: createDate,
+      path: [],
+      id: CategoryId.create().unwrap().toString(),
+    });
   }
 
   static restore(data: CategoryPrimitives): Result<Category, ValueObjectError> {
