@@ -1,5 +1,6 @@
 import { Ok, Result } from '@allawiii/results-ts';
 import { Image } from 'src/modules/images/domain/image';
+import { CATEGORY_REGEX } from 'src/modules/shared/regex/category.regex';
 import { serializeProps } from 'src/modules/shared/utils/serialize-props.util';
 import { DomainText } from 'src/modules/shared/value-objects/domain-text';
 import { CategoryId } from 'src/modules/shared/value-objects/ids';
@@ -52,7 +53,7 @@ export class Category {
       () =>
         new Category({
           id: CategoryId.create(data.id).unwrap(),
-          name: Name.create(data.name).unwrap(),
+          name: Name.create(data.name, 50, CATEGORY_REGEX).unwrap(),
           path: data.path.map((p) => CategoryId.create(p).unwrap()),
           description: (data.description ? DomainText.create(data.description, 125) : Ok(null)).unwrap(),
           parentId: (data.parentId ? CategoryId.create(data.parentId) : Ok(null)).unwrap(),
