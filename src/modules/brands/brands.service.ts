@@ -11,7 +11,7 @@ import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { AttachImagesToBrandDto } from './dto/attach-images-to-brand.dto';
 import { BrandImage } from './domain/brand-image';
 import { DetachBrandImagesDto } from './dto/detach-images-of-brand.dto';
-import { DetachImagesResponseDto } from './dto/detach-images.response.dto';
+import { DetachImagesResponseDto } from '../shared/dto/detach-images.response.dto';
 
 @Injectable()
 export class BrandsService {
