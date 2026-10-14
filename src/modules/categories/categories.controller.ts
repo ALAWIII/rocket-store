@@ -18,4 +18,9 @@ export class CategoriesController {
   findById(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string): Promise<CategoryResponseDto> {
     return this.catService.findById(id);
   }
+  @Get()
+  @RequirePermission(AllPermissions.category.CategoryReadAny)
+  findAll(): Promise<CategoryResponseDto[]> {
+    return this.catService.findAll();
+  }
 }
