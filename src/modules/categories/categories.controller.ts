@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
@@ -6,6 +6,8 @@ import { AllPermissions } from '../access-control/domain/permission';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { UpdateDetailsDto } from './dto/update-details.dto';
 import { MoveCategoryDto } from './dto/move-category.dto';
+import { RemoveCategoryDto } from './dto/remove-category.dto';
+import { AffectedDeletedResponseDto } from '../shared/dto/affected-deleted-response.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -43,5 +45,13 @@ export class CategoriesController {
   @RequirePermission(AllPermissions.category.CategoryUpdateAny)
   move(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string, @Body() parent: MoveCategoryDto) {
     this.catService.moveCategory(id, parent.parentId);
+  }
+  @Delete(':id')
+  @RequirePermission(AllPermissions.category.CategoryDeleteAny)
+  remove(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Query() query: RemoveCategoryDto,
+  ): Promise<AffectedDeletedResponseDto> {
+    return this.catService.delete(id, query.withSubtree);
   }
 }
