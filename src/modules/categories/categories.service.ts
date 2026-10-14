@@ -26,4 +26,10 @@ export class CategoriesService {
       .map((c) => c.toJSON())
       .unwrap();
   }
+  findSubtree(id: string): Promise<CategoryResponseDto[]> {
+    return this.catRepo
+      .findSubtree(id)
+      .map((cs) => cs.map((c) => c.toJSON()))
+      .unwrap();
+  }
 }
