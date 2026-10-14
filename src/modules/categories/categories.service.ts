@@ -9,6 +9,7 @@ import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { AttachImagesToCategoryDto } from './dto/attach-images-to-category.dto';
 import { CategoryImage } from './domain/category-image';
 import { DetachImagesDto } from '../shared/dto/detach-images.dto';
+import { DetachImagesResponseDto } from '../shared/dto/detach-images-response.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -71,9 +72,12 @@ export class CategoriesService {
       .map((cis) => cis.map((ci) => ci.toJSON()))
       .unwrap();
   }
-  detachImages(categoryId: string, imageIds: DetachImagesDto) {
-    this.catRepo.detachImages(categoryId, imageIds.imageIds).map((affected) => {
-      return { affected };
-    });
+  detachImages(categoryId: string, imageIds: DetachImagesDto): Promise<DetachImagesResponseDto> {
+    return this.catRepo
+      .detachImages(categoryId, imageIds.imageIds)
+      .map((affected) => {
+        return { affected };
+      })
+      .unwrap();
   }
 }
