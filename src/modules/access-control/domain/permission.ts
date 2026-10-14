@@ -48,6 +48,7 @@ const Matrix = {
     attach: ['any'],
   },
   brands: { create: ['any'], update: ['any'], delete: ['any'] },
+  category: { create: ['any'], update: ['any'], delete: ['any'] },
 } as const;
 //==================================
 
