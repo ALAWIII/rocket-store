@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
@@ -13,5 +13,9 @@ export class CategoriesController {
   @RequirePermission(AllPermissions.category.CategoryCreateAny)
   create(@Body() data: CreateCategoryDto): Promise<CategoryResponseDto> {
     return this.catService.createCategory(data);
+  }
+  @Get(':id')
+  findById(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string): Promise<CategoryResponseDto> {
+    return this.catService.findById(id);
   }
 }
