@@ -8,6 +8,8 @@ import { UpdateDetailsDto } from './dto/update-details.dto';
 import { MoveCategoryDto } from './dto/move-category.dto';
 import { RemoveCategoryDto } from './dto/remove-category.dto';
 import { AffectedDeletedResponseDto } from '../shared/dto/affected-deleted-response.dto';
+import { AttachImagesToCategoryDto } from './dto/attach-images-to-category.dto';
+import { ImageResponseDto } from '../shared/dto/image-response.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -53,5 +55,14 @@ export class CategoriesController {
     @Query() query: RemoveCategoryDto,
   ): Promise<AffectedDeletedResponseDto> {
     return this.catService.delete(id, query.withSubtree);
+  }
+
+  @Post(':id/images')
+  @RequirePermission(AllPermissions.images.ImagesAttachAny)
+  attachImages(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Body() images: AttachImagesToCategoryDto,
+  ): Promise<ImageResponseDto[]> {
+    return this.catService.attachImages(id, images);
   }
 }
