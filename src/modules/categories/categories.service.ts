@@ -4,6 +4,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { Category } from './domain/category';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { AffectedDeletedResponseDto } from '../shared/dto/affected-deleted-response.dto';
+import { UpdateDetailsDto } from './dto/update-details.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -31,6 +32,12 @@ export class CategoriesService {
     return this.catRepo
       .findSubtree(id)
       .map((cs) => cs.map((c) => c.toJSON()))
+      .unwrap();
+  }
+  updateDetails(id: string, data: UpdateDetailsDto): Promise<CategoryResponseDto> {
+    return this.catRepo
+      .updateDetails(id, data)
+      .map((c) => c.toJSON())
       .unwrap();
   }
   delete(id: string, withSubtree: boolean): Promise<AffectedDeletedResponseDto> {
