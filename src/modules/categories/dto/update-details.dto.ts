@@ -7,7 +7,7 @@ export class UpdateDetailsDto {
   @IsString()
   @Length(0, 50)
   @Matches(CATEGORY_REGEX, { message: 'Invalid category name' })
-  name!: string;
+  name?: string;
   @IsOptional()
   @IsString()
   @Length(0, 125)
