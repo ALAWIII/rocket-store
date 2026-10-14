@@ -23,4 +23,10 @@ export class CategoriesController {
   findAll(): Promise<CategoryResponseDto[]> {
     return this.catService.findAll();
   }
+
+  @Get(':id/subtree')
+  @RequirePermission(AllPermissions.category.CategoryReadAny)
+  findSubtree(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string): Promise<CategoryResponseDto[]> {
+    return this.catService.findSubtree(id);
+  }
 }
