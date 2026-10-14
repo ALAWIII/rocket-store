@@ -11,7 +11,7 @@ import { FindAllBrandsFilterDto } from './dto/find-all-brands-filter.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { AttachImagesToBrandDto } from './dto/attach-images-to-brand.dto';
 import { DetachBrandImagesDto } from './dto/detach-images-of-brand.dto';
-import { DetachImagesResponseDto } from '../shared/dto/detach-images.response.dto';
+import { DetachImagesResponseDto } from '../shared/dto/detach-images-response.dto';
 
 @Controller('brands')
 export class BrandsController {
