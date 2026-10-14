@@ -5,6 +5,7 @@ import { Category } from './domain/category';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { AffectedDeletedResponseDto } from '../shared/dto/affected-deleted-response.dto';
 import { UpdateDetailsDto } from './dto/update-details.dto';
+import { ImageResponseDto } from '../shared/dto/image-response.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -52,6 +53,12 @@ export class CategoriesService {
       .map((affected) => {
         return { affected };
       })
+      .unwrap();
+  }
+  findBanners(catId: string): Promise<ImageResponseDto[]> {
+    return this.catRepo
+      .findBanners(catId)
+      .map((imgs) => imgs.map((img) => img.toJSON()))
       .unwrap();
   }
 }
