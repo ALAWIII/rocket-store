@@ -5,6 +5,7 @@ import { RequirePermission } from '../shared/authorization/decorators/require-pe
 import { AllPermissions } from '../access-control/domain/permission';
 import { CategoryResponseDto } from './dto/category-response.dto';
 import { UpdateDetailsDto } from './dto/update-details.dto';
+import { MoveCategoryDto } from './dto/move-category.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -37,5 +38,10 @@ export class CategoriesController {
     @Body() data: UpdateDetailsDto,
   ): Promise<CategoryResponseDto> {
     return this.catService.updateDetails(id, data);
+  }
+  @Post(':id')
+  @RequirePermission(AllPermissions.category.CategoryUpdateAny)
+  move(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string, @Body() parent: MoveCategoryDto) {
+    this.catService.moveCategory(id, parent.parentId);
   }
 }
