@@ -14,4 +14,10 @@ export class CategoriesService {
       .map((cat) => cat.toJSON())
       .unwrap();
   }
+  findAll(): Promise<CategoryResponseDto[]> {
+    return this.catRepo
+      .findAll()
+      .map((cs) => cs.map((c) => c.toJSON()))
+      .unwrap();
+  }
 }
