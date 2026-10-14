@@ -10,6 +10,8 @@ import { RemoveCategoryDto } from './dto/remove-category.dto';
 import { AffectedDeletedResponseDto } from '../shared/dto/affected-deleted-response.dto';
 import { AttachImagesToCategoryDto } from './dto/attach-images-to-category.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
+import { DetachImagesDto } from '../shared/dto/detach-images.dto';
+import { DetachImagesResponseDto } from '../shared/dto/detach-images-response.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -64,5 +66,14 @@ export class CategoriesController {
     @Body() images: AttachImagesToCategoryDto,
   ): Promise<ImageResponseDto[]> {
     return this.catService.attachImages(id, images);
+  }
+
+  @Post(':id/images/detach')
+  @RequirePermission(AllPermissions.images.ImagesAttachAny)
+  detachImages(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Body() dto: DetachImagesDto,
+  ): Promise<DetachImagesResponseDto> {
+    return this.catService.detachImages(id, dto);
   }
 }
