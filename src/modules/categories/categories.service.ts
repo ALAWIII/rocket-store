@@ -8,7 +8,7 @@ import { UpdateDetailsDto } from './dto/update-details.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { AttachImagesToCategoryDto } from './dto/attach-images-to-category.dto';
 import { CategoryImage } from './domain/category-image';
-import { DetachImagesDto } from './dto/detach-images.dto';
+import { DetachImagesDto } from '../shared/dto/detach-images.dto';
 
 @Injectable()
 export class CategoriesService {
