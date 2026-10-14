@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
 import { AllPermissions } from '../access-control/domain/permission';
 import { CategoryResponseDto } from './dto/category-response.dto';
+import { UpdateDetailsDto } from './dto/update-details.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -28,5 +29,13 @@ export class CategoriesController {
   @RequirePermission(AllPermissions.category.CategoryReadAny)
   findSubtree(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string): Promise<CategoryResponseDto[]> {
     return this.catService.findSubtree(id);
+  }
+  @Patch(':id')
+  @RequirePermission(AllPermissions.category.CategoryUpdateAny)
+  update(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Body() data: UpdateDetailsDto,
+  ): Promise<CategoryResponseDto> {
+    return this.catService.updateDetails(id, data);
   }
 }
