@@ -63,9 +63,9 @@ export class CategoriesController {
   @RequirePermission(AllPermissions.images.ImagesAttachAny)
   attachImages(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
-    @Body() images: AttachImagesToCategoryDto,
+    @Body() dto: AttachImagesToCategoryDto,
   ): Promise<ImageResponseDto[]> {
-    return this.catService.attachImages(id, images);
+    return this.catService.attachImages(id, dto);
   }
 
   @Post(':id/images/detach')
