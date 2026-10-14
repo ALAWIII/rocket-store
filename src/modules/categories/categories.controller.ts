@@ -76,4 +76,10 @@ export class CategoriesController {
   ): Promise<DetachImagesResponseDto> {
     return this.catService.detachImages(id, dto);
   }
+
+  @Get(':id/images')
+  @RequirePermission(AllPermissions.images.ImagesReadAny)
+  findBanners(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string): Promise<ImageResponseDto[]> {
+    return this.catService.findBanners(id);
+  }
 }
