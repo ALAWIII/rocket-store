@@ -40,6 +40,12 @@ export class CategoriesService {
       .map((c) => c.toJSON())
       .unwrap();
   }
+  moveCategory(id: string, newParentId: string): Promise<CategoryResponseDto> {
+    return this.catRepo
+      .move(id, newParentId)
+      .map((c) => c.toJSON())
+      .unwrap();
+  }
   delete(id: string, withSubtree: boolean): Promise<AffectedDeletedResponseDto> {
     return this.catRepo
       .delete(id, withSubtree)
