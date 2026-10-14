@@ -20,4 +20,10 @@ export class CategoriesService {
       .map((cs) => cs.map((c) => c.toJSON()))
       .unwrap();
   }
+  findById(id: string): Promise<CategoryResponseDto> {
+    return this.catRepo
+      .findById(id)
+      .map((c) => c.toJSON())
+      .unwrap();
+  }
 }
