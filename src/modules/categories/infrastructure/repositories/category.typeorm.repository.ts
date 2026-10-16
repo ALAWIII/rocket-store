@@ -66,20 +66,19 @@ export class CategoryRepository implements ICategoryRepository {
   }
 
   create(data: Category): DBResult<Category> {
-    return Result.wrapAsync(() => {
-      const sql = `
-      INSERT INTO categories (id, name, description, "parentId", path)
-      SELECT $1, $2, $3, $4,
-        CASE
-          WHEN $4 IS NULL THEN ARRAY[$1]::uuid[]
-          ELSE (SELECT path FROM categories WHERE id = $4) || $1::uuid
-        END
-      RETURNING *;
-    `;
-      const { id, name, description, parentId } = data.toJSON();
-      return this.categRepo.query<CategoryEntity>(sql, [id, name, description ?? null, parentId]);
+    return Result.wrapAsync(async () => {
+      const catJson = data.toJSON();
+      const result = await this.categRepo
+        .createQueryBuilder('category')
+        .insert()
+        .values(catJson)
+        .returning('*')
+        .execute();
+      const row = result.raw?.[0] as CategoryEntity | undefined;
+      if (!row) throw new UnknownDatabaseError(`Inserting new category did not return it's fields: ${catJson.id}`);
+      return row;
     })
-      .andThen((c) => CategoryMapper.toDomain(c))
+      .andThen(CategoryMapper.toDomain)
       .mapErr(mapTypeOrmError);
   }
   updateDetails(id: string, data: { name?: string; description?: string | null }): DBResult<Category> {
