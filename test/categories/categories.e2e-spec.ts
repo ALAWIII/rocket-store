@@ -11,4 +11,12 @@ describe.concurrent('categories (e2e)', () => {
       expect(cat.body?.description).toBe('clothes products');
     });
   });
+  describe('GET /api/v1/categories/:id findById', () => {
+    it('should success find and return existing category by id.', async ({ categoryController }) => {
+      const cat = await categoryController.create();
+      const findCat = await categoryController.findById(cat.body!.id);
+      expect(cat.body).toEqual(findCat.body);
+      expect(cat.body?.id).toEqual(findCat.body?.id);
+    });
+  });
 });
