@@ -2,7 +2,7 @@ import { v7 } from 'uuid';
 import { it } from '../support/fixtures/authenticated-e2e.fixture';
 
 describe.concurrent('categories (e2e)', () => {
-  describe('POST /api/v1/categories', () => {
+  describe('POST /api/v1/categories create', () => {
     it('should success create new category', async ({ categoryController }) => {
       const cat = await categoryController.create(
         { name: 'clothes', description: 'clothes products' },
