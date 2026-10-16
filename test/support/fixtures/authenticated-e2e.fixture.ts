@@ -11,6 +11,7 @@ import { MyAddressesControllerTest, UserAddressesControllerTest } from '../contr
 import { ImagesControllerTest } from '../controllers/images.controller-test';
 import { ObjectStorageClientTest } from '../helpers/object-storage-client.helper';
 import { BrandsControllerTest } from '../controllers/brands.controller-test';
+import { CategoriesControllerTest } from '../controllers/categories.controller-test';
 
 export const test = baseTest
   .extend('mailClient', async () => {
@@ -57,20 +58,21 @@ export const test = baseTest
       .build();
     return adminUser;
   })
-  .extend('userController', async ({ adminUser }) => {
+  .extend('userController', ({ adminUser }) => {
     return new UsersControllerTest(adminUser.userAgent);
   })
-  .extend('roleController', async ({ adminUser }) => {
+  .extend('roleController', ({ adminUser }) => {
     return new RolesControllerTest(adminUser.userAgent);
   })
-  .extend('myAddressController', async ({ adminUser }) => {
+  .extend('myAddressController', ({ adminUser }) => {
     return new MyAddressesControllerTest(adminUser.userAgent);
   })
-  .extend('userAddressController', async ({ adminUser }) => {
+  .extend('userAddressController', ({ adminUser }) => {
     return new UserAddressesControllerTest(adminUser.userAgent);
   })
-  .extend('imageController', async ({ adminUser }) => {
+  .extend('imageController', ({ adminUser }) => {
     return new ImagesControllerTest(adminUser.userAgent);
   })
-  .extend('brandController', async ({ adminUser }) => new BrandsControllerTest(adminUser.userAgent));
+  .extend('brandController', ({ adminUser }) => new BrandsControllerTest(adminUser.userAgent))
+  .extend('categoryController', ({ adminUser }) => new CategoriesControllerTest(adminUser.userAgent));
 export const it = test;
