@@ -23,4 +23,14 @@ describe.concurrent('categories (e2e)', () => {
       await categoryController.findById(v7(), { code: 404 });
     });
   });
+  describe('PATCH /api/v1/categories/:id update', () => {
+    it('should success update details of existing category.', async ({ categoryController }) => {
+      const cat = (await categoryController.create()).body!;
+      const updatedCat = (await categoryController.update(cat.id, { name: 'ram', description: 'ram category' })).body!;
+      expect(updatedCat.id).toBe(cat.id);
+      expect(updatedCat.name).toBe('ram');
+      expect(updatedCat.name).not.toBe('clothes');
+      expect(updatedCat.description).toBe('ram category');
+    });
+  });
 });
