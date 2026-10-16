@@ -16,8 +16,8 @@ describe.concurrent('categories (e2e)', () => {
     it('should success find and return existing category by id.', async ({ categoryController }) => {
       const cat = await categoryController.create();
       const findCat = await categoryController.findById(cat.body!.id);
-      expect(cat.body).toEqual(findCat.body);
-      expect(cat.body?.id).toEqual(findCat.body?.id);
+      expect(findCat.body).toEqual(cat.body);
+      expect(findCat.body?.id).toEqual(cat.body?.id);
     });
     it('should fail finding non-existing category by id.', async ({ categoryController }) => {
       await categoryController.findById(v7(), { code: 404 });
