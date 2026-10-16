@@ -36,13 +36,14 @@ export class Category {
 
   static create(data: CreateCategoryPrimitives): Result<Category, ValueObjectError> {
     const createDate = new Date();
+    const id = CategoryId.create().unwrap().toString();
     return this.build({
       ...data,
       createdAt: createDate,
       updatedAt: createDate,
       parentId: null,
-      path: [],
-      id: CategoryId.create().unwrap().toString(),
+      path: [id],
+      id,
     });
   }
 
