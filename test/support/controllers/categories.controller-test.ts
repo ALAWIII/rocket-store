@@ -20,4 +20,9 @@ export class CategoriesControllerTest {
     const body = parseResponseBody<CategoryResponseDto>(response, statusCodesListNormalize(expectedStatus));
     return { response, body };
   }
+  async findById(id: string, statusCodes: ExpectedTestStatusCode = { code: 200, parseBody: true }) {
+    const response = await this.agent.get(`${this.urlPrefix}/${id}`).expect(statusCodes.code);
+    const body = parseResponseBody<CategoryResponseDto>(response, statusCodesListNormalize(statusCodes));
+    return { response, body };
+  }
 }
