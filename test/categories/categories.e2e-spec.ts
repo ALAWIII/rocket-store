@@ -1,5 +1,6 @@
 import { v7 } from 'uuid';
 import { it } from '../support/fixtures/authenticated-e2e.fixture';
+import { CategoryResponseDto } from 'src/modules/categories/dto/category-response.dto';
 
 describe.concurrent('categories (e2e)', () => {
   describe('POST /api/v1/categories create', () => {
@@ -21,6 +22,18 @@ describe.concurrent('categories (e2e)', () => {
     });
     it('should fail finding non-existing category by id.', async ({ categoryController }) => {
       await categoryController.findById(v7(), { code: 404 });
+    });
+  });
+  describe('GET /api/v1/categories findAll', () => {
+    it('should success return all categories', async ({ categoryController }) => {
+      const categories: CategoryResponseDto[] = [];
+      for (let i = 0; i < 5; i++) categories.push((await categoryController.create()).body!);
+
+      categories.sort((a, b) => a.id.localeCompare(b.id));
+      const allCategories = (await categoryController.findAll()).body!;
+      allCategories.sort((a, b) => a.id.localeCompare(b.id));
+      expect(allCategories).toEqual(categories);
+      expect(allCategories.length).toBe(5);
     });
   });
   describe('PATCH /api/v1/categories/:id update', () => {
