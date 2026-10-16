@@ -3,6 +3,7 @@ import { UserAgent } from '../helpers/app-test.helper';
 import { ExpectedTestStatusCode } from '../types/expected-test-status-code.type';
 import { CategoryResponseDto } from 'src/modules/categories/dto/category-response.dto';
 import { parseResponseBody, statusCodesListNormalize } from '../utils/parse-response-body.util';
+import { UpdateDetailsDto } from 'src/modules/categories/dto/update-details.dto';
 
 export class CategoriesControllerTest {
   readonly urlPrefix = '/api/v1/categories';
@@ -22,6 +23,15 @@ export class CategoriesControllerTest {
   }
   async findById(id: string, statusCodes: ExpectedTestStatusCode = { code: 200, parseBody: true }) {
     const response = await this.agent.get(`${this.urlPrefix}/${id}`).expect(statusCodes.code);
+    const body = parseResponseBody<CategoryResponseDto>(response, statusCodesListNormalize(statusCodes));
+    return { response, body };
+  }
+  async update(
+    id: string,
+    details: UpdateDetailsDto,
+    statusCodes: ExpectedTestStatusCode = { code: 200, parseBody: true },
+  ) {
+    const response = await this.agent.patch(`${this.urlPrefix}/${id}`).send(details).expect(statusCodes.code);
     const body = parseResponseBody<CategoryResponseDto>(response, statusCodesListNormalize(statusCodes));
     return { response, body };
   }
