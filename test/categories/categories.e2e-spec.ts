@@ -32,8 +32,14 @@ describe.concurrent('categories (e2e)', () => {
       expect(updatedCat.name).not.toBe('clothes');
       expect(updatedCat.description).toBe('ram category');
     });
-    it('should faile update details of non existing category.', async ({ categoryController }) => {
+    it('should fail update details of non existing category.', async ({ categoryController }) => {
       await categoryController.update(v7(), { name: 'ram', description: 'ram category' }, { code: 404 });
+    });
+    it('should fail update details of existing category because no field were provided.', async ({
+      categoryController,
+    }) => {
+      const cat = (await categoryController.create()).body!;
+      await categoryController.update(cat.id, {}, { code: 400 });
     });
   });
 });
