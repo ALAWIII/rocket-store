@@ -1,3 +1,4 @@
+import { v7 } from 'uuid';
 import { it } from '../support/fixtures/authenticated-e2e.fixture';
 
 describe.concurrent('categories (e2e)', () => {
@@ -17,6 +18,9 @@ describe.concurrent('categories (e2e)', () => {
       const findCat = await categoryController.findById(cat.body!.id);
       expect(cat.body).toEqual(findCat.body);
       expect(cat.body?.id).toEqual(findCat.body?.id);
+    });
+    it('should fail finding non-existing category by id.', async ({ categoryController }) => {
+      await categoryController.findById(v7(), { code: 404 });
     });
   });
 });
