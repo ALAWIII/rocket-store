@@ -13,6 +13,7 @@ import { ErrorMapperRegistry } from './error-mapper.registry';
 import {
   ConflictError,
   DatabaseError,
+  ForeignKeyViolationError,
   RecordNotFoundError,
   UniqueViolationError,
 } from 'src/modules/shared/errors/database.error';
@@ -34,6 +35,7 @@ export class ErrorMappingBootstrap implements OnModuleInit {
   onModuleInit() {
     this.registry
       .register(RecordNotFoundError, (e) => new NotFoundException(e.message))
+      .register(ForeignKeyViolationError, (e) => new NotFoundException(e.message))
       .register(UniqueViolationError, (e) => new ConflictException(e.message))
       .register(ConflictError, (e) => new ConflictException(e.message))
       .register(PermissionError, (e) => new BadRequestException(e.message))
