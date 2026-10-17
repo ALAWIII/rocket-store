@@ -87,4 +87,9 @@ export class CategoriesControllerTest {
     const body = parseResponseBody<DetachImagesResponseDto>(response, statusCodesListNormalize(statusCodes));
     return { response, body };
   }
+  async findBanners(id: string, statusCodes: ExpectedTestStatusCode = { code: 200, parseBody: true }) {
+    const response = await this.agent.get(`${this.urlPrefix}/${id}/images`).expect(statusCodes.code);
+    const body = parseResponseBody<ImageResponseDto[]>(response, statusCodesListNormalize(statusCodes));
+    return { response, body };
+  }
 }
