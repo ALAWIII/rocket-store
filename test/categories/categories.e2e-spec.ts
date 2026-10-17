@@ -73,5 +73,15 @@ describe.concurrent('categories (e2e)', () => {
       expect(newMove.parentId).toBe(lvl0Child2.id);
       expect(newMove.path).toEqual([root.id, lvl0Child2.id, newMove.id]);
     });
+    it('should success move category from level 1 to root and set its parent to null, update all children path recursively.', async ({
+      categoryController,
+    }) => {
+      const { lvl0Child1, lvl1C1Child1 } = await createRandomCategoryTree(categoryController);
+      const newMove01 = (await categoryController.move(lvl0Child1.id, { parentId: null })).body!;
+      const childOfMoved1 = (await categoryController.findById(lvl1C1Child1.id)).body!;
+      expect(newMove01.parentId).toBeNull();
+      expect(newMove01.path).toEqual([lvl0Child1.id]);
+      expect(childOfMoved1.path).toEqual([lvl0Child1.id, childOfMoved1.id]);
+    });
   });
 });
