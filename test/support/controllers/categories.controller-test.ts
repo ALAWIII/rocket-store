@@ -50,4 +50,9 @@ export class CategoriesControllerTest {
     const body = parseResponseBody<CategoryResponseDto>(response, statusCodesListNormalize(statusCodes));
     return { response, body };
   }
+  async findSubtree(id: string, statusCodes: ExpectedTestStatusCode = { code: 200, parseBody: true }) {
+    const response = await this.agent.get(`${this.urlPrefix}/${id}/subtree`).expect(statusCodes.code);
+    const body = parseResponseBody<CategoryResponseDto[]>(response, statusCodesListNormalize(statusCodes));
+    return { response, body };
+  }
 }
