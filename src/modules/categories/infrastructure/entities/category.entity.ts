@@ -5,7 +5,7 @@ import {
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { Column, Entity, ForeignKey } from 'typeorm';
 
-@Entity('categories')
+@Entity('categories', { synchronize: false })
 export class CategoryEntity {
   @UuidV7PrimaryColumn()
   id!: string;
