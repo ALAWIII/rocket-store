@@ -150,5 +150,12 @@ describe.concurrent('categories (e2e)', () => {
       expect(rootCat1?.path).toEqual([rootCat1!.id]);
       expect(lvl1?.path).toEqual([rootCat1!.id, lvl1!.id]);
     });
+    it('should success remove category with all its descendants.', async ({ categoryController }) => {
+      const { lvl0 } = await createRandomCategoryTree(categoryController);
+      const affected = (await categoryController.remove(lvl0.id, true)).body!;
+      expect(affected).toEqual({ affected: 4 });
+      const allCategories = (await categoryController.findAll()).body!.toSorted((a, b) => a.id.localeCompare(b.id));
+      expect(allCategories.length).toBe(0);
+    });
   });
 });
