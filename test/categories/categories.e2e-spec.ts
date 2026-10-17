@@ -37,6 +37,16 @@ describe.concurrent('categories (e2e)', () => {
       expect(allCategories.length).toBe(5);
     });
   });
+  describe('GET /api/v1/categories/:id/subtree findSubtree', () => {
+    it('should success find all category subtree descendant.', async ({ categoryController }) => {
+      const { lvl0Child1, lvl0Child2, lvl1C1Child1 } = await createRandomCategoryTree(categoryController);
+      const lvl0Child2Moved = (await categoryController.move(lvl0Child2.id, { parentId: lvl0Child1.id })).body!;
+      const catSubtree = (await categoryController.findSubtree(lvl0Child1.id)).body!;
+      const catIdList = [lvl0Child1.id, lvl0Child2Moved.id, lvl1C1Child1.id];
+      expect(catSubtree.length).toBe(3);
+      expect(catSubtree.every((c) => catIdList.includes(c.id))).toBe(true);
+    });
+  });
   describe('PATCH /api/v1/categories/:id update', () => {
     it('should success update details of existing category.', async ({ categoryController }) => {
       const cat = (await categoryController.create()).body!;
