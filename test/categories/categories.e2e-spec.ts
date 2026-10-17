@@ -215,6 +215,17 @@ describe.concurrent('category images (e2e)', () => {
         { code: 409 },
       );
     });
+    it('should fail attach image to not existed category.', async ({ categoryController, imageController }) => {
+      const icon1 = (await imageController.upload()).body!;
+
+      await categoryController.attachImages(
+        v7(),
+        {
+          images: [{ imageId: icon1.id, imageRole: 'icon' }],
+        },
+        { code: 404 },
+      );
+    });
   });
   describe('POST /api/v1/categories/:id/images/detach detachImages', () => {
     it('should success detach images from a given category.', async ({ categoryController, imageController }) => {
