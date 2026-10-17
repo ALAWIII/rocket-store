@@ -255,4 +255,24 @@ describe.concurrent('category images (e2e)', () => {
       expect(affected).toEqual({ affected: 0 });
     });
   });
+
+  describe('GET /api/v1/categories/:id/images findBanners', () => {
+    it('should success find All banners for a given category.', async ({ imageController, categoryController }) => {
+      const icon = (await imageController.upload()).body!;
+      const banner1 = (await imageController.upload()).body!;
+      const banner2 = (await imageController.upload()).body!;
+      const category = (await categoryController.create()).body!;
+      await categoryController.attachImages(category.id, {
+        images: [
+          { imageId: icon.id, imageRole: 'icon' },
+          { imageId: banner1.id, imageRole: 'banner' },
+          { imageId: banner2.id, imageRole: 'banner' },
+        ],
+      });
+      const images = [banner1.id, banner2.id];
+      const banners = (await categoryController.findBanners(category.id)).body!;
+      expect(banners.length).toBe(2);
+      expect(banners.every((c) => images.includes(c.id))).toBe(true);
+    });
+  });
 });
