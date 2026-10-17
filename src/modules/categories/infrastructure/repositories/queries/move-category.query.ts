@@ -60,7 +60,7 @@ new_path AS (
 update_descendants AS (
   UPDATE
     categories
-  SET path = ( SELECT path FROM new_path ) || path[(SELECT path_lengthFROM current_cat) + 1:],
+  SET path = ( SELECT path FROM new_path ) || path[(SELECT path_length FROM current_cat) + 1:],
       "updatedAt" = now()
   WHERE path @> ( SELECT path FROM current_cat)
     AND id != $1
