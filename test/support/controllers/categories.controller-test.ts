@@ -6,6 +6,8 @@ import { parseResponseBody, statusCodesListNormalize } from '../utils/parse-resp
 import { UpdateDetailsDto } from 'src/modules/categories/dto/update-details.dto';
 import { MoveCategoryDto } from 'src/modules/categories/dto/move-category.dto';
 import { AffectedDeletedResponseDto } from 'src/modules/shared/dto/affected-deleted-response.dto';
+import { AttachImagesToCategoryDto } from 'src/modules/categories/dto/attach-images-to-category.dto';
+import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
 
 export class CategoriesControllerTest {
   readonly urlPrefix = '/api/v1/categories';
@@ -63,6 +65,15 @@ export class CategoriesControllerTest {
   ) {
     const response = await this.agent.delete(`${this.urlPrefix}/${id}`).query({ withSubtree }).expect(statusCodes.code);
     const body = parseResponseBody<AffectedDeletedResponseDto>(response, statusCodesListNormalize(statusCodes));
+    return { response, body };
+  }
+  async attachImages(
+    id: string,
+    data: AttachImagesToCategoryDto,
+    statusCodes: ExpectedTestStatusCode = { code: 201, parseBody: true },
+  ) {
+    const response = await this.agent.post(`${this.urlPrefix}/${id}/images`).send(data).expect(statusCodes.code);
+    const body = parseResponseBody<ImageResponseDto[]>(response, statusCodesListNormalize(statusCodes));
     return { response, body };
   }
 }
