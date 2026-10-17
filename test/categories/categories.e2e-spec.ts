@@ -250,5 +250,9 @@ describe.concurrent('category images (e2e)', () => {
       expect(categoryAfterDetaching.icon).toBeUndefined();
       expect(categoryAfterDetaching.thumbnail).toBeUndefined();
     });
+    it('should success detach not existed images/category (idempotent).', async ({ categoryController }) => {
+      const affected = (await categoryController.detachImages(v7(), { imageIds: [v7()] })).body!;
+      expect(affected).toEqual({ affected: 0 });
+    });
   });
 });
