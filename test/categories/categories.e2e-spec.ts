@@ -46,6 +46,10 @@ describe.concurrent('categories (e2e)', () => {
       expect(catSubtree.length).toBe(3);
       expect(catSubtree.every((c) => catIdList.includes(c.id))).toBe(true);
     });
+    it('should success find all category subtree of not existed category.', async ({ categoryController }) => {
+      const cats = (await categoryController.findSubtree(v7())).body!;
+      expect(cats.length).toBe(0);
+    });
   });
   describe('PATCH /api/v1/categories/:id update', () => {
     it('should success update details of existing category.', async ({ categoryController }) => {
