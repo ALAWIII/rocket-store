@@ -83,5 +83,14 @@ describe.concurrent('categories (e2e)', () => {
       expect(newMove01.path).toEqual([lvl0Child1.id]);
       expect(childOfMoved1.path).toEqual([lvl0Child1.id, childOfMoved1.id]);
     });
+    it('should success move category from level 2 up to level 0 and set its parent to the lvl0.', async ({
+      categoryController,
+    }) => {
+      const { lvl0, lvl1C1Child1 } = await createRandomCategoryTree(categoryController);
+      const moved = (await categoryController.move(lvl1C1Child1.id, { parentId: lvl0.id })).body!;
+      expect(moved.id).toBe(lvl1C1Child1.id);
+      expect(moved.parentId).toBe(lvl0.id);
+      expect(moved.path).toEqual([lvl0.id, lvl1C1Child1.id]);
+    });
   });
 });
