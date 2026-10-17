@@ -161,7 +161,7 @@ describe.concurrent('categories (e2e)', () => {
 });
 
 describe.concurrent('category images (e2e)', () => {
-  describe('POST /api/v1/categories/:id/images', () => {
+  describe('POST /api/v1/categories/:id/images attachImages', () => {
     it('should success attach images to a category.', async ({ categoryController, imageController }) => {
       const icon = (await imageController.upload()).body!;
       const thumbnail = (await imageController.upload()).body!;
@@ -214,6 +214,30 @@ describe.concurrent('category images (e2e)', () => {
         },
         { code: 409 },
       );
+    });
+  });
+  describe('POST /api/v1/categories/:id/images/detach detachImages', () => {
+    it('should success detach images from a given category.', async ({ categoryController, imageController }) => {
+      const icon = (await imageController.upload()).body!;
+      const thumbnail = (await imageController.upload()).body!;
+      const banner1 = (await imageController.upload()).body!;
+      const banner2 = (await imageController.upload()).body!;
+      const images = [icon, thumbnail, banner1, banner2].toSorted((a, b) => a.id.localeCompare(b.id));
+      const category = (await categoryController.create()).body!;
+      await categoryController.attachImages(category.id, {
+        images: [
+          { imageId: icon.id, imageRole: 'icon' },
+          { imageId: thumbnail.id, imageRole: 'thumbnail' },
+          { imageId: banner1.id, imageRole: 'banner' },
+          { imageId: banner2.id, imageRole: 'banner' },
+        ],
+      });
+      const affected = (await categoryController.detachImages(category.id, { imageIds: images.map((img) => img.id) }))
+        .body!;
+      expect(affected).toEqual({ affected: 4 });
+      const categoryAfterDetaching = (await categoryController.findById(category.id)).body!;
+      expect(categoryAfterDetaching.icon).toBeUndefined();
+      expect(categoryAfterDetaching.thumbnail).toBeUndefined();
     });
   });
 });
