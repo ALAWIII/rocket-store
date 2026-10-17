@@ -113,5 +113,9 @@ describe.concurrent('categories (e2e)', () => {
       const newParent = (await categoryController.create()).body!;
       await categoryController.move(v7(), { parentId: newParent.id }, { code: 404 });
     });
+    it('should fail move category to parent that doesnt exist .', async ({ categoryController }) => {
+      const category = (await categoryController.create()).body!;
+      await categoryController.move(category.id, { parentId: v7() }, { code: 404 });
+    });
   });
 });
