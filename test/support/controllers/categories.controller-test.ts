@@ -5,6 +5,7 @@ import { CategoryResponseDto } from 'src/modules/categories/dto/category-respons
 import { parseResponseBody, statusCodesListNormalize } from '../utils/parse-response-body.util';
 import { UpdateDetailsDto } from 'src/modules/categories/dto/update-details.dto';
 import { MoveCategoryDto } from 'src/modules/categories/dto/move-category.dto';
+import { AffectedDeletedResponseDto } from 'src/modules/shared/dto/affected-deleted-response.dto';
 
 export class CategoriesControllerTest {
   readonly urlPrefix = '/api/v1/categories';
@@ -53,6 +54,15 @@ export class CategoriesControllerTest {
   async findSubtree(id: string, statusCodes: ExpectedTestStatusCode = { code: 200, parseBody: true }) {
     const response = await this.agent.get(`${this.urlPrefix}/${id}/subtree`).expect(statusCodes.code);
     const body = parseResponseBody<CategoryResponseDto[]>(response, statusCodesListNormalize(statusCodes));
+    return { response, body };
+  }
+  async remove(
+    id: string,
+    withSubtree: boolean = false,
+    statusCodes: ExpectedTestStatusCode = { code: 200, parseBody: true },
+  ) {
+    const response = await this.agent.delete(`${this.urlPrefix}/${id}`).query({ withSubtree }).expect(statusCodes.code);
+    const body = parseResponseBody<AffectedDeletedResponseDto>(response, statusCodesListNormalize(statusCodes));
     return { response, body };
   }
 }
