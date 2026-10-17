@@ -1,6 +1,7 @@
 import { v7 } from 'uuid';
 import { it } from '../support/fixtures/authenticated-e2e.fixture';
 import { CategoryResponseDto } from 'src/modules/categories/dto/category-response.dto';
+import { createRandomCategoryTree } from 'test/support/utils/create-category-tree.util';
 
 describe.concurrent('categories (e2e)', () => {
   describe('POST /api/v1/categories create', () => {
@@ -65,6 +66,12 @@ describe.concurrent('categories (e2e)', () => {
       expect(updatedCat.parentId).toBe(parentCat.id);
       expect(updatedCat.parentId).not.toBeNull();
       expect(updatedCat.path).toEqual([parentCat.id, childCat.id]);
+    });
+    it('should success move category to new parent of the same tree level.', async ({ categoryController }) => {
+      const { root, lvl0Child2, lvl1C1Child1 } = await createRandomCategoryTree(categoryController);
+      const newMove = (await categoryController.move(lvl1C1Child1.id, { parentId: lvl0Child2.id })).body!;
+      expect(newMove.parentId).toBe(lvl0Child2.id);
+      expect(newMove.path).toEqual([root.id, lvl0Child2.id, newMove.id]);
     });
   });
 });
