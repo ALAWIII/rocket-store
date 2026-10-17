@@ -185,5 +185,35 @@ describe.concurrent('category images (e2e)', () => {
       expect(categoryAfterAttaching.thumbnail).toEqual(thumbnail);
       expect(categoryAfterAttaching.icon).toEqual(icon);
     });
+    it('should fail attach more than one icon or thumbnail to a category.', async ({
+      categoryController,
+      imageController,
+    }) => {
+      const icon1 = (await imageController.upload()).body!;
+      const icon2 = (await imageController.upload()).body!;
+      const thumbnail1 = (await imageController.upload()).body!;
+      const thumbnail2 = (await imageController.upload()).body!;
+      const category = (await categoryController.create()).body!;
+      await categoryController.attachImages(
+        category.id,
+        {
+          images: [
+            { imageId: icon1.id, imageRole: 'icon' },
+            { imageId: icon2.id, imageRole: 'icon' },
+          ],
+        },
+        { code: 409 },
+      );
+      await categoryController.attachImages(
+        category.id,
+        {
+          images: [
+            { imageId: thumbnail1.id, imageRole: 'thumbnail' },
+            { imageId: thumbnail2.id, imageRole: 'thumbnail' },
+          ],
+        },
+        { code: 409 },
+      );
+    });
   });
 });
