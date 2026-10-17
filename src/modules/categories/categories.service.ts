@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { ICategoryRepository } from './infrastructure/repositories/category.repository';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { Category } from './domain/category';
@@ -47,6 +47,7 @@ export class CategoriesService {
       .unwrap();
   }
   moveCategory(id: string, data: MoveCategoryDto): Promise<CategoryResponseDto> {
+    if (id === data.parentId) throw new ConflictException('A category cannot be its own parent.');
     return this.catRepo
       .move(id, data.parentId)
       .map((c) => c.toJSON())
