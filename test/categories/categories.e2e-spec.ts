@@ -56,4 +56,15 @@ describe.concurrent('categories (e2e)', () => {
       await categoryController.update(cat.id, {}, { code: 400 });
     });
   });
+  describe('POST /api/v1/categories/:id move', () => {
+    it('should success set category parent.', async ({ categoryController }) => {
+      const parentCat = (await categoryController.create()).body!;
+      const childCat = (await categoryController.create()).body!;
+      const updatedCat = (await categoryController.move(childCat.id, { parentId: parentCat.id })).body!;
+      expect(updatedCat.id).toBe(childCat.id);
+      expect(updatedCat.parentId).toBe(parentCat.id);
+      expect(updatedCat.parentId).not.toBeNull();
+      expect(updatedCat.path).toEqual([parentCat.id, childCat.id]);
+    });
+  });
 });
