@@ -8,6 +8,8 @@ import { MoveCategoryDto } from 'src/modules/categories/dto/move-category.dto';
 import { AffectedDeletedResponseDto } from 'src/modules/shared/dto/affected-deleted-response.dto';
 import { AttachImagesToCategoryDto } from 'src/modules/categories/dto/attach-images-to-category.dto';
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
+import { DetachImagesDto } from 'src/modules/shared/dto/detach-images.dto';
+import { DetachImagesResponseDto } from 'src/modules/shared/dto/detach-images-response.dto';
 
 export class CategoriesControllerTest {
   readonly urlPrefix = '/api/v1/categories';
@@ -74,6 +76,15 @@ export class CategoriesControllerTest {
   ) {
     const response = await this.agent.post(`${this.urlPrefix}/${id}/images`).send(data).expect(statusCodes.code);
     const body = parseResponseBody<ImageResponseDto[]>(response, statusCodesListNormalize(statusCodes));
+    return { response, body };
+  }
+  async detachImages(
+    id: string,
+    data: DetachImagesDto,
+    statusCodes: ExpectedTestStatusCode = { code: 201, parseBody: true },
+  ) {
+    const response = await this.agent.post(`${this.urlPrefix}/${id}/images/detach`).send(data).expect(statusCodes.code);
+    const body = parseResponseBody<DetachImagesResponseDto>(response, statusCodesListNormalize(statusCodes));
     return { response, body };
   }
 }
