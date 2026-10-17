@@ -159,3 +159,31 @@ describe.concurrent('categories (e2e)', () => {
     });
   });
 });
+
+describe.concurrent('category images (e2e)', () => {
+  describe('POST /api/v1/categories/:id/images', () => {
+    it('should success attach images to a category.', async ({ categoryController, imageController }) => {
+      const icon = (await imageController.upload()).body!;
+      const thumbnail = (await imageController.upload()).body!;
+      const banner1 = (await imageController.upload()).body!;
+      const banner2 = (await imageController.upload()).body!;
+      const images = [icon, thumbnail, banner1, banner2].toSorted((a, b) => a.id.localeCompare(b.id));
+      const category = (await categoryController.create()).body!;
+      const attachedImages = (
+        await categoryController.attachImages(category.id, {
+          images: [
+            { imageId: icon.id, imageRole: 'icon' },
+            { imageId: thumbnail.id, imageRole: 'thumbnail' },
+            { imageId: banner1.id, imageRole: 'banner' },
+            { imageId: banner2.id, imageRole: 'banner' },
+          ],
+        })
+      ).body!.toSorted((a, b) => a.id.localeCompare(b.id));
+      const categoryAfterAttaching = (await categoryController.findById(category.id)).body!;
+      expect(attachedImages.length).toBe(4);
+      expect(attachedImages).toEqual(images);
+      expect(categoryAfterAttaching.thumbnail).toEqual(thumbnail);
+      expect(categoryAfterAttaching.icon).toEqual(icon);
+    });
+  });
+});
