@@ -5,7 +5,7 @@ Designed as a **single-tenant product: one independent deployment per customer**
 
 > **Status: under active development.** The first stable backend release is in progress. See [Project status](#project-status) for what works today.
 
----
+
 
 ## Highlights
 
