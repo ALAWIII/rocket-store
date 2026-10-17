@@ -1,98 +1,111 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 🚀 Rocket Store
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Headless e-commerce backend built with **NestJS, PostgreSQL and TypeORM**.
+Designed as a **single-tenant product: one independent deployment per customer**, so every store has fully isolated data and its own configuration.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+> **Status: under active development.** The first stable backend release is in progress. See [Project status](#project-status) for what works today.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Highlights
 
-## Project setup
+- **Modular architecture**: every business module is split into `domain` / `dto` / `infrastructure`, with repository interfaces and TypeORM implementations behind them.
+- **Fine-grained authorization**: Better-auth for authentication, Casbin for RBAC, a custom guard and a `@RequirePermission()` decorator. Anti privilege-escalation rule: a user can only grant permissions that are a subset of their own.
+- **Errors as values**: domain operations return `Result` types (`@allawiii/results-ts`). A central error-mapper registry and one exception filter translate domain errors into HTTP responses.
+- **Background jobs on Postgres** with `pg-boss`, so there is no extra queue infrastructure to run per customer.
+- **S3-compatible object storage** (RustFS) with presigned URLs for product and store images.
+- **Serious test setup**: unit specs next to the code, plus e2e suites on top of reusable fixtures, builders and helpers (see [Testing](#testing)).
+- **Strict tooling**: TypeScript, Biome (lint + format), Vitest with SWC, pnpm.
 
-```bash
-$ pnpm install
+## Architecture
+
+```mermaid
+flowchart LR
+  C[Controller + DTO validation] --> S[Service / application layer]
+  S --> D[Domain: entities, value objects, rules]
+  S --> R[Repository interface]
+  R --> T[TypeORM repository + mappers]
+  T --> P[(PostgreSQL)]
+  S --> J[pg-boss jobs]
+  S --> O[(S3-compatible storage)]
+  G[AccessControlGuard + Casbin] -.protects.-> C
 ```
 
-## Compile and run the project
-
-```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+```
+src/
+├── app-config/ app-logger/ database/ email/ jobs/ error/ object-storage/   # cross-cutting infrastructure
+└── modules/
+    ├── users/ access-control/ brands/ categories/ images/ ...
+    │   ├── domain/            # pure business types and rules
+    │   ├── dto/               # request/response contracts
+    │   └── infrastructure/    # entities, mappers, repositories
+    └── shared/                # value objects, decorators, validation, utils
 ```
 
-## Run tests
+## Key design decisions
+
+| Decision | Why | Trade-off |
+|---|---|---|
+| One deployment per customer (single-tenant) | Full data isolation, per-customer customization, one customer's load or failure never affects another | More instances to upgrade, so deploys and migrations must be automated and repeatable |
+| Repository interface + TypeORM implementation + mapper | Services and domain do not depend on the ORM; easy to unit test with fakes | More files per module |
+| Value objects (`Email`, `Phone`, `Sha256Checksum`, `ImageMimeType`, …) | Invalid data is rejected at the domain boundary instead of deep inside the app | Some boilerplate |
+| `Result` types instead of throwing for expected failures | Failure paths are explicit in the type signature | Needs discipline at the edges (handled by the error-mapper registry) |
+| Casbin with a permission-dependency table | Permissions and roles are data, not hard-coded checks, and escalation rules live in one place | Policy sync must be kept consistent (`access-control-sync.service`) |
+| `pg-boss` for jobs | Reuses PostgreSQL, so one less service per customer deployment | Not the right tool for very high-throughput queues |
+| Roles stored with a GIN index on permissions | Fast permission-containment queries | Extra index maintenance on writes |
+
+## Project status
+
+| Area | State |
+|---|---|
+| Auth, sessions, email flows | ✅ Implemented |
+| Users and addresses | ✅ Implemented |
+| Roles and permissions (access control) | ✅ Implemented |
+| Brands, categories | ✅ Implemented |
+| Images + storage + cleanup worker | ✅ Implemented |
+| Products and variants, carts, orders | 🚧 Data model done, API in progress |
+| Payments, shipping, promotions | 🚧 Data model done, API in progress |
+| Reviews, wishlist, audit log | 🚧 Data model done, API in progress |
+| Storefront (NextJS) + GrapesJS page builder | 🗓 Planned |
+
+<!-- TODO: adjust this table so it matches reality exactly. Only claim what actually works. -->
+
+## Getting started
+
+you need to start `RustFS`, `PostgreSQL` and `MailHog` (for testing) docker instances.
+
+take a look at all used [environment variables](test/support/constants/env-test-values.constant.ts) (you must offer them in `.env` file or inject them in process)
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+pnpm install
+pnpm start:dev
 ```
 
-## Deployment
+<!-- TODO: add docker-compose instructions for Postgres, Redis (if used), RustFS and MailHog. -->
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Testing
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm test          # unit tests (watch)
+pnpm test:run      # unit tests (single run)
+pnpm test:e2e      # end-to-end suites
+pnpm test:cov      # coverage
+pnpm lint:ci       # Biome in CI mode
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+Test support code lives in `test/support/`:
 
-## Resources
+- `fixtures/`: authenticated e2e fixture (ready-made logged-in user)
+- `builders/helpers`: user-flow builder, app/database/storage/mail helpers
+- `doubles/`: MailHog email service and config mocks
+- `utils/`: random data generators, `wait-job-until-finish`, response parsers
 
-Check out a few resources that may come in handy when working with NestJS:
+Goal: a new e2e test should be a few lines, with no setup boilerplate.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Tech stack
 
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+NestJS · TypeScript · PostgreSQL · TypeORM · Better-auth · Casbin · pg-boss · AWS S3 SDK (RustFS) · Zod / class-validator · Pino · Vitest · Biome · pnpm · Docker
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+UNLICENSED, private project.
