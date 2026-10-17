@@ -274,5 +274,9 @@ describe.concurrent('category images (e2e)', () => {
       expect(banners.length).toBe(2);
       expect(banners.every((c) => images.includes(c.id))).toBe(true);
     });
+    it('should success find no banner for a not exsited category.', async ({ categoryController }) => {
+      const banners = (await categoryController.findBanners(v7())).body!;
+      expect(banners.length).toBe(0);
+    });
   });
 });
