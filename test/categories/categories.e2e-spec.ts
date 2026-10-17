@@ -132,4 +132,23 @@ describe.concurrent('categories (e2e)', () => {
       await categoryController.move(category.id, { parentId: v7() }, { code: 404 });
     });
   });
+
+  describe('DELETE /api/v1/categories/:id remove', () => {
+    it('should success remove category without removing its descendants.', async ({ categoryController }) => {
+      const { lvl0, lvl0Child1, lvl0Child2, lvl1C1Child1 } = await createRandomCategoryTree(categoryController);
+      const affected = (await categoryController.remove(lvl0.id)).body!;
+      expect(affected).toEqual({ affected: 1 });
+      const allCategories = (await categoryController.findAll()).body!.toSorted((a, b) => a.id.localeCompare(b.id));
+      const catList = [lvl0Child1.id, lvl0Child2.id, lvl1C1Child1.id].toSorted((a, b) => a.localeCompare(b));
+      expect(allCategories.length).toBe(3);
+      expect(allCategories.every((c) => catList.includes(c.id))).toBe(true);
+      const rootCat1 = allCategories.find((c) => c.id === lvl0Child1.id);
+      const rootCat2 = allCategories.find((c) => c.id === lvl0Child2.id);
+      const lvl1 = allCategories.find((c) => lvl1C1Child1.id === c.id);
+      expect(rootCat1?.parentId).toBeNull();
+      expect(rootCat2?.parentId).toBeNull();
+      expect(rootCat1?.path).toEqual([rootCat1!.id]);
+      expect(lvl1?.path).toEqual([rootCat1!.id, lvl1!.id]);
+    });
+  });
 });
