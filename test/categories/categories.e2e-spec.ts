@@ -92,6 +92,15 @@ describe.concurrent('categories (e2e)', () => {
       expect(moved.parentId).toBe(lvl0.id);
       expect(moved.path).toEqual([lvl0.id, lvl1C1Child1.id]);
     });
+    it('should success move category from level 1 down to level 3 and set its parent to lvl1C1Child1.', async ({
+      categoryController,
+    }) => {
+      const { lvl0, lvl0Child1, lvl0Child2, lvl1C1Child1 } = await createRandomCategoryTree(categoryController);
+      const moved = (await categoryController.move(lvl0Child2.id, { parentId: lvl1C1Child1.id })).body!;
+      expect(moved.id).toBe(lvl0Child2.id);
+      expect(moved.parentId).toBe(lvl1C1Child1.id);
+      expect(moved.path).toEqual([lvl0.id, lvl0Child1.id, lvl1C1Child1.id, lvl0Child2.id]);
+    });
     it('should fail move category to be parent of itself.', async ({ categoryController }) => {
       const category = (await categoryController.create()).body!;
       await categoryController.move(category.id, { parentId: category.id }, { code: 409 });
