@@ -47,8 +47,11 @@ export class CategoriesController {
   }
   @Post(':id')
   @RequirePermission(AllPermissions.category.CategoryUpdateAny)
-  move(@Param('id', new ParseUUIDPipe({ version: '7' })) id: string, @Body() parent: MoveCategoryDto) {
-    this.catService.moveCategory(id, parent.parentId);
+  move(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Body() parent: MoveCategoryDto,
+  ): Promise<CategoryResponseDto> {
+    return this.catService.moveCategory(id, parent.parentId);
   }
   @Delete(':id')
   @RequirePermission(AllPermissions.category.CategoryDeleteAny)
