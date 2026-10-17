@@ -92,5 +92,9 @@ describe.concurrent('categories (e2e)', () => {
       expect(moved.parentId).toBe(lvl0.id);
       expect(moved.path).toEqual([lvl0.id, lvl1C1Child1.id]);
     });
+    it('should fail move category to be parent of itself.', async ({ categoryController }) => {
+      const category = (await categoryController.create()).body!;
+      await categoryController.move(category.id, { parentId: category.id }, { code: 409 });
+    });
   });
 });
