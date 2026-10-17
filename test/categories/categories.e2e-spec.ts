@@ -96,5 +96,9 @@ describe.concurrent('categories (e2e)', () => {
       const category = (await categoryController.create()).body!;
       await categoryController.move(category.id, { parentId: category.id }, { code: 409 });
     });
+    it('should fail move category under its own descendant.', async ({ categoryController }) => {
+      const { lvl0, lvl1C1Child1 } = await createRandomCategoryTree(categoryController);
+      await categoryController.move(lvl0.id, { parentId: lvl1C1Child1.id }, { code: 409 });
+    });
   });
 });
