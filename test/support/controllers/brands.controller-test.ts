@@ -1,7 +1,7 @@
 import { CreateBrandDto } from 'src/modules/brands/dto/create-brand.dto';
 import { UserAgent } from '../helpers/app-test.helper';
 import { ExpectedTestStatusCode } from '../types/expected-test-status-code.type';
-import { parseResponseBody, statusCodesListNormalize } from '../utils/parse-response-body.util';
+import { parseResponseBody } from '../utils/parse-response-body.util';
 import { BrandResponseDto } from 'src/modules/brands/dto/brand-response.dto';
 import { RenameBrandDto } from 'src/modules/brands/dto/rename-brand.dto';
 import { FindAllBrandsFilterDto } from 'src/modules/brands/dto/find-all-brands-filter.dto';
@@ -16,61 +16,62 @@ export class BrandsControllerTest {
   withAgent(agent: UserAgent): BrandsControllerTest {
     return new BrandsControllerTest(agent);
   }
-  async create(brand: CreateBrandDto, statusCodes?: ExpectedTestStatusCode) {
-    const expectedStatus = statusCodes ?? { code: 201, parseBody: true };
-    const response = await this.agent.post(this.urlPrefix).send(brand).expect(expectedStatus.code);
-    const body = parseResponseBody<BrandResponseDto>(response, statusCodesListNormalize(expectedStatus));
+  async create(brand: CreateBrandDto, statusCode: ExpectedTestStatusCode = { code: 201, parseBody: true }) {
+    const response = await this.agent.post(this.urlPrefix).send(brand).expect(statusCode.code);
+    const body = parseResponseBody<BrandResponseDto>(response, statusCode.parseBody);
     return { response, body };
   }
-  async findById(brandId: string, statusCodes?: ExpectedTestStatusCode) {
-    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
-    const response = await this.agent.get(`${this.urlPrefix}/${brandId}`).expect(expectedStatus.code);
-    const body = parseResponseBody<BrandResponseDto>(response, statusCodesListNormalize(expectedStatus));
+  async findById(brandId: string, statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true }) {
+    const response = await this.agent.get(`${this.urlPrefix}/${brandId}`).expect(statusCode.code);
+    const body = parseResponseBody<BrandResponseDto>(response, statusCode.parseBody);
     return { response, body };
   }
-  async findAll(payload: FindAllBrandsFilterDto, statusCodes?: ExpectedTestStatusCode) {
-    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
-    const response = await this.agent.get(this.urlPrefix).query(payload).expect(expectedStatus.code);
-    const body = parseResponseBody<BrandResponseDto[]>(response, statusCodesListNormalize(expectedStatus));
+  async findAll(payload: FindAllBrandsFilterDto, statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true }) {
+    const response = await this.agent.get(this.urlPrefix).query(payload).expect(statusCode.code);
+    const body = parseResponseBody<BrandResponseDto[]>(response, statusCode.parseBody);
     return { response, body };
   }
-  async rename(brandId: string, payload: RenameBrandDto, statusCodes?: ExpectedTestStatusCode) {
-    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
-    const response = await this.agent.patch(`${this.urlPrefix}/${brandId}`).send(payload).expect(expectedStatus.code);
-    const body = parseResponseBody<BrandResponseDto>(response, statusCodesListNormalize(expectedStatus));
+  async rename(
+    brandId: string,
+    payload: RenameBrandDto,
+    statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true },
+  ) {
+    const response = await this.agent.patch(`${this.urlPrefix}/${brandId}`).send(payload).expect(statusCode.code);
+    const body = parseResponseBody<BrandResponseDto>(response, statusCode.parseBody);
     return { response, body };
   }
-  async removeMany(brandIds: string[], statusCodes?: ExpectedTestStatusCode) {
-    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
-    const response = await this.agent
-      .post(`${this.urlPrefix}/batch-delete`)
-      .send({ brandIds })
-      .expect(expectedStatus.code);
-    const body = parseResponseBody<RemoveBrandsResponseDto>(response, statusCodesListNormalize(expectedStatus));
+  async removeMany(brandIds: string[], statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true }) {
+    const response = await this.agent.post(`${this.urlPrefix}/batch-delete`).send({ brandIds }).expect(statusCode.code);
+    const body = parseResponseBody<RemoveBrandsResponseDto>(response, statusCode.parseBody);
     return { response, body };
   }
-  async attachImages(brandId: string, images: AttachImagesToBrandDto['images'], statusCodes?: ExpectedTestStatusCode) {
-    const expectedStatus = statusCodes ?? { code: 201, parseBody: true };
+  async attachImages(
+    brandId: string,
+    images: AttachImagesToBrandDto['images'],
+    statusCode: ExpectedTestStatusCode = { code: 201, parseBody: true },
+  ) {
     const response = await this.agent
       .post(`${this.urlPrefix}/${brandId}/images`)
       .send({ images })
-      .expect(expectedStatus.code);
-    const body = parseResponseBody<ImageResponseDto[]>(response, statusCodesListNormalize(expectedStatus));
+      .expect(statusCode.code);
+    const body = parseResponseBody<ImageResponseDto[]>(response, statusCode.parseBody);
     return { response, body };
   }
-  async findBanners(brandId: string, statusCodes?: ExpectedTestStatusCode) {
-    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
-    const response = await this.agent.get(`${this.urlPrefix}/${brandId}/images`).expect(expectedStatus.code);
-    const body = parseResponseBody<ImageResponseDto[]>(response, statusCodesListNormalize(expectedStatus));
+  async findBanners(brandId: string, statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true }) {
+    const response = await this.agent.get(`${this.urlPrefix}/${brandId}/images`).expect(statusCode.code);
+    const body = parseResponseBody<ImageResponseDto[]>(response, statusCode.parseBody);
     return { response, body };
   }
-  async detachImages(brandId: string, imageIds: string[], statusCodes?: ExpectedTestStatusCode) {
-    const expectedStatus = statusCodes ?? { code: 200, parseBody: true };
+  async detachImages(
+    brandId: string,
+    imageIds: string[],
+    statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true },
+  ) {
     const response = await this.agent
       .post(`${this.urlPrefix}/${brandId}/images/detach`)
       .send({ imageIds })
-      .expect(expectedStatus.code);
-    const body = parseResponseBody<DetachImagesResponseDto>(response, statusCodesListNormalize(expectedStatus));
+      .expect(statusCode.code);
+    const body = parseResponseBody<DetachImagesResponseDto>(response, statusCode.parseBody);
     return { response, body };
   }
 }
