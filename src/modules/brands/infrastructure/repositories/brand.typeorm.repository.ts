@@ -12,6 +12,7 @@ import { BrandImage } from '../../domain/brand-image';
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 import { Image } from 'src/modules/images/domain/image';
 import { BrandMapper } from '../mappers/brand.mapper';
+import { ImageMapper } from 'src/modules/images/infrastructure/mappers/images.mapper';
 
 type Pagination = {
   page: number;
@@ -58,7 +59,7 @@ export class BrandRepository implements IBrandRepository {
         .getMany();
       return images;
     })
-      .andThen((imgs) => BrandMapper.toDomainBanners(imgs))
+      .andThen((imgs) => ImageMapper.toDomainList(imgs))
       .mapErr(mapTypeOrmError);
   }
 
@@ -167,7 +168,7 @@ export class BrandRepository implements IBrandRepository {
   }
 
   findBanners(brandId: string): DBResult<Image[]> {
-    return this.findImagesByRole(brandId, 'banner').andThen((images) => BrandMapper.toDomainBanners(images));
+    return this.findImagesByRole(brandId, 'banner').andThen((images) => ImageMapper.toDomainList(images));
   }
 
   // ============= helper methods ====

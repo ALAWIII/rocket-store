@@ -2,7 +2,6 @@ import { CorruptedPersistenceDataError, DatabaseError } from 'src/modules/shared
 import { Brand } from '../../domain/brand';
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 import { ImageMapper } from 'src/modules/images/infrastructure/mappers/images.mapper';
-import { Image } from 'src/modules/images/domain/image';
 import { BrandEntity } from '../entities/brand.entity';
 import { Ok, Result } from '@allawiii/results-ts';
 export type BrandWithLogo = BrandEntity & {
@@ -24,8 +23,5 @@ export class BrandMapper {
       domainBrands.push(result.unwrap());
     }
     return Ok(domainBrands);
-  }
-  static toDomainBanners(imgs: ImageEntity[]): Result<Image[], DatabaseError> {
-    return ImageMapper.toDomainList(imgs);
   }
 }
