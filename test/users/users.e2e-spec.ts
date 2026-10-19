@@ -8,9 +8,9 @@ import {
 } from 'src/modules/access-control/application/system-roles/system-roles.definition';
 import { v7 } from 'uuid';
 
-import { UpdateUserTestDto } from 'test/support/types/user/update-user.dto.type';
 import { waitJobUntilFinish } from 'test/support/utils/wait-job-until-finish.util';
 import { waitStorageForAllDeletions } from 'test/support/utils/wait-storage-for-all-deletions.util';
+import { UpdateMeDto } from 'src/modules/users/dto/update-user.dto';
 
 describe.concurrent('users (e2e)', () => {
   describe('GET /api/v1/users/me (findMe)', () => {
@@ -231,7 +231,7 @@ describe.concurrent('users (e2e)', () => {
 
   describe('PATCH /api/v1/users/me (updateMe)', () => {
     it('should successfully update user profile', async ({ userController, adminUser }) => {
-      const userProfile: UpdateUserTestDto = {
+      const userProfile: UpdateMeDto = {
         name: 'cat',
         givenName: 'lion',
         familyName: 'tigers',
@@ -251,7 +251,7 @@ describe.concurrent('users (e2e)', () => {
     });
 
     it('should fail update user profile because of malformed phone number', async ({ userController, adminUser }) => {
-      const userProfile: UpdateUserTestDto = {
+      const userProfile: UpdateMeDto = {
         phone: '9363463473',
       };
       const errorMessage = (
