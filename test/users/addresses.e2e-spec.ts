@@ -1,7 +1,7 @@
 import { pickSharedFields } from 'src/modules/shared/utils/pick-shared-fields.util';
+import { AddressResponseDto } from 'src/modules/users/dto/address-response.dto';
 import { it } from 'test/support/fixtures/authenticated-e2e.fixture';
 import { UserAuthFlowBuilder } from 'test/support/helpers/auth-user-flow.builder';
-import { AddressTestDto } from 'test/support/types/user/address.dto.type';
 import { createRandomAddress } from 'test/support/utils/create-random-address.util';
 
 describe.concurrent('addresses (e2e)', () => {
@@ -18,7 +18,7 @@ describe.concurrent('addresses (e2e)', () => {
   });
   describe(`GET ${apiPrefix} (findAll)`, () => {
     it('should successfully return all addresses for the requester user.', async ({ myAddressController }) => {
-      const addresses: AddressTestDto[] = [];
+      const addresses: AddressResponseDto[] = [];
 
       for (let i = 1; i <= 5; i++) {
         const response = await myAddressController.create(createRandomAddress(), {
@@ -36,7 +36,7 @@ describe.concurrent('addresses (e2e)', () => {
         })
       ).body!;
 
-      const sortById = (a: AddressTestDto, b: AddressTestDto) => a.id.localeCompare(b.id);
+      const sortById = (a: AddressResponseDto, b: AddressResponseDto) => a.id.localeCompare(b.id);
 
       expect(fetchedAddresses).toHaveLength(addresses.length);
       expect(fetchedAddresses).toHaveLength(5);
