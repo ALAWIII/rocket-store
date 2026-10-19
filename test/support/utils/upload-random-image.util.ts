@@ -12,7 +12,7 @@ export type UploadImageTestProps = {
   finfo: { name: string; altText: string };
   imgExt: 'png' | 'jpeg' | 'webp' | 'avif';
   nameWithExt: string;
-  statusCodes: ExpectedTestStatusCode;
+  statusCode: ExpectedTestStatusCode;
 };
 export class UploadImage {
   static async prepare(options: UploadImageOptions = {}): Promise<UploadImageTestProps> {
@@ -29,7 +29,7 @@ export class UploadImage {
       finfo: { name, altText },
       nameWithExt: `${name}.${imgResult.imgOptions.imgExt}`,
       imgExt: imgResult.imgOptions.imgExt,
-      statusCodes: expectedStatus,
+      statusCode: expectedStatus,
     };
   }
 }
