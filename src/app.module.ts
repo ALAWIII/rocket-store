@@ -21,6 +21,7 @@ import { CategoriesModule } from './modules/categories/categories.module';
 import { ObjectStorageModule } from './object-storage/object-storage.module';
 import { JobsModule } from './jobs/jobs.module';
 import { AppConfigModule } from './app-config/app-config.module';
+import { PagesModule } from './modules/pages/pages.module';
 @Module({
   imports: [
     AppLoggerModule,
@@ -45,6 +46,7 @@ import { AppConfigModule } from './app-config/app-config.module';
     ObjectStorageModule,
     JobsModule,
     AppConfigModule,
+    PagesModule,
   ],
 })
 export class AppModule {}
