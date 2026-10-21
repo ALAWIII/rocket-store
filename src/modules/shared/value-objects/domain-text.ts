@@ -4,11 +4,7 @@ import { ValueObjectError } from './value-object.error';
 export class DomainText {
   private constructor(private readonly _value: string) {}
 
-  static create(value?: string, maxLength = 500): Result<DomainText | undefined, ValueObjectError> {
-    if (value === undefined || value.trim() === '') {
-      return Ok(undefined);
-    }
-
+  static create(value: string, maxLength = 500): Result<DomainText, ValueObjectError> {
     const v = value.trim();
 
     if (v.length > maxLength) {
