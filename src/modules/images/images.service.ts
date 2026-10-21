@@ -61,7 +61,9 @@ export class ImagesService {
       const height = Dimension.create(imgInfo.height).unwrap().toJSON();
       const imgMime = ImageMimeType.create(imgInfo.mime).unwrap().toJSON();
       const name = Name.create(metadata.name).unwrap().toJSON();
-      const altText = DomainText.create(metadata.altText, 125).unwrap()?.toJSON();
+      const altText = DomainText.create(metadata.altText ?? '', 125)
+        .unwrap()
+        ?.toJSON();
       //===
 
       const upResult = await this.storageService
