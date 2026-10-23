@@ -5,8 +5,7 @@ import { ProductId, ProductVariantId } from 'src/modules/shared/value-objects/id
 import { Price } from 'src/modules/shared/value-objects/price';
 import { Quantity } from 'src/modules/shared/value-objects/quantity';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
-
-export type ProductVariantStatus = 'enabled' | 'disabled';
+import { ProductStatus } from './product-status';
 
 type ProductVariantProps = {
   readonly id: ProductVariantId;
@@ -15,7 +14,7 @@ type ProductVariantProps = {
   quantity: Quantity;
   description?: DomainText;
   info: Record<string, unknown>;
-  status: ProductVariantStatus;
+  status: ProductStatus;
   sortOrder: number;
   createdAt: Date;
   updatedAt: Date;
@@ -26,7 +25,7 @@ type ProductVariantPrimitives = {
   price: number;
   quantity: number;
   description?: string;
-  status: ProductVariantStatus;
+  status: ProductStatus;
   info: Record<string, unknown>;
   sortOrder: number;
   createdAt: Date | string;
@@ -40,7 +39,7 @@ export class ProductVariant {
     return this.build({
       ...data,
       id: ProductVariantId.create().unwrap().toString(),
-      status: 'enabled',
+      status: 'active',
       createdAt: date,
       updatedAt: date,
     });
