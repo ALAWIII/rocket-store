@@ -40,7 +40,7 @@ export class ImageId extends Id {}
 export class ImageAttachmentId extends Id {}
 export class BrandId extends Id {}
 export class BrandImageId extends Id {}
-export class PageTemplateId extends Id {}
+export class PageId extends Id {}
 export class CategoryId extends Id {}
 export class CategoryImageId extends Id {}
 export class CartItemId extends Id {}

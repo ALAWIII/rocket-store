@@ -1,4 +1,4 @@
-import { CategoryId, PageTemplateId, UserId } from 'src/modules/shared/value-objects/ids';
+import { CategoryId, PageId, UserId } from 'src/modules/shared/value-objects/ids';
 import { Name } from 'src/modules/shared/value-objects/name';
 
 // draft templates only allowed to be hard deleted!
@@ -10,8 +10,8 @@ import { Name } from 'src/modules/shared/value-objects/name';
 
 // how the editor state is structured (craft.js / grapesjs style)
 type EditorState = Record<string, unknown>; // craft.js uses node map, grapesjs uses component tree
-type PageTemplateProps = {
-  readonly id: PageTemplateId;
+type PageProps = {
+  readonly id: PageId;
   name: Name;
   editorState: EditorState; // craft.js uses node map, grapesjs uses component tree
   renderedHtml: string; // saved for customer → fast rendering
@@ -20,9 +20,9 @@ type PageTemplateProps = {
   createdAt: Date;
 };
 
-type CreatePageTemplateDraftProps = Omit<PageTemplateProps, 'createdAt'>;
-abstract class PageTemplate {
-  protected constructor(protected data: PageTemplateProps) {}
+type CreatePageDraftProps = Omit<PageProps, 'createdAt'>;
+abstract class Page {
+  protected constructor(protected data: PageProps) {}
 
   protected static validateHtml(html: string) {
     if (!html.trim()) throw new Error('Rendered HTML is required');
@@ -36,7 +36,7 @@ abstract class PageTemplate {
       this.data.categoryId = info.categoryId === null ? null : CategoryId.create(info.categoryId).unwrap(); // create new id for categoryId if not exist, will cause a bug later!
     }
   }
-  get id(): PageTemplateId {
+  get id(): PageId {
     return this.data.id;
   }
 
@@ -52,44 +52,44 @@ abstract class PageTemplate {
   get name(): Name {
     return this.data.name;
   }
-  toJSON(): PageTemplateProps {
+  toJSON(): PageProps {
     return { ...this.data };
   }
 }
-export class PageTemplateDraft extends PageTemplate {
-  private constructor(data: PageTemplateProps) {
+export class PageDraft extends Page {
+  private constructor(data: PageProps) {
     super(data);
   }
-  static create(props: CreatePageTemplateDraftProps): PageTemplateDraft {
-    PageTemplate.validateHtml(props.renderedHtml);
+  static create(props: CreatePageDraftProps): PageDraft {
+    Page.validateHtml(props.renderedHtml);
     const now = new Date();
-    return new PageTemplateDraft({
+    return new PageDraft({
       ...props,
       createdAt: now,
     });
   }
-  static restore(props: PageTemplateProps): PageTemplateDraft {
-    return new PageTemplateDraft(props);
+  static restore(props: PageProps): PageDraft {
+    return new PageDraft(props);
   }
   updateContent(props: { editorState: EditorState; renderedHtml: string }): void {
-    PageTemplate.validateHtml(props.renderedHtml);
+    Page.validateHtml(props.renderedHtml);
 
     this.data.editorState = props.editorState;
     this.data.renderedHtml = props.renderedHtml;
   }
-  publish(): PageTemplatePublished {
-    return PageTemplatePublished.createFromDraft(this);
+  publish(): PagePublished {
+    return PagePublished.createFromDraft(this);
   }
 }
 
-export class PageTemplatePublished extends PageTemplate {
-  private constructor(data: PageTemplateProps) {
+export class PagePublished extends Page {
+  private constructor(data: PageProps) {
     super(data);
   }
-  static createFromDraft(draft: PageTemplateDraft): PageTemplatePublished {
-    return new PageTemplatePublished(draft.toJSON());
+  static createFromDraft(draft: PageDraft): PagePublished {
+    return new PagePublished(draft.toJSON());
   }
-  static restore(props: PageTemplateProps): PageTemplatePublished {
-    return new PageTemplatePublished(props);
+  static restore(props: PageProps): PagePublished {
+    return new PagePublished(props);
   }
 }
