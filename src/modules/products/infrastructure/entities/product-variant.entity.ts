@@ -25,7 +25,7 @@ export class ProductVariantEntity {
   @Column('jsonb')
   info!: Record<string, unknown>;
   @Column('varchar', { length: 500, nullable: true })
-  description?: string | null;
+  description!: string | null;
 
   @Column('varchar', { length: 9 })
   status!: ProductStatus;
