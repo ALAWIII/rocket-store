@@ -2,7 +2,7 @@ import { Result } from '@allawiii/results-ts';
 import { Image, ImagePrimitives } from 'src/modules/images/domain/image';
 import { serializeProps } from 'src/modules/shared/utils/serialize-props.util';
 import { DomainText } from 'src/modules/shared/value-objects/domain-text';
-import { BrandId, PageId, ProductId } from 'src/modules/shared/value-objects/ids';
+import { BrandId, CategoryId, PageId, ProductId } from 'src/modules/shared/value-objects/ids';
 import { Title } from 'src/modules/shared/value-objects/title';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { ProductStatus } from './product-status';
@@ -15,6 +15,7 @@ type ProductProps = {
   pageId: PageId | null;
   coverImage?: Image;
   status: ProductStatus;
+  categories: CategoryId[];
   createdAt: Date;
   updatedAt: Date;
 };
@@ -26,10 +27,11 @@ type ProductPrimitives = {
   pageId: string | null;
   coverImage?: ImagePrimitives;
   status: ProductStatus;
+  categories: string[];
   createdAt: Date | string;
   updatedAt: Date | string;
 };
-type CreateProductPrimitives = Pick<ProductPrimitives, 'description' | 'title' | 'brandId' | 'pageId'>;
+type CreateProductPrimitives = Pick<ProductPrimitives, 'description' | 'title' | 'brandId' | 'pageId' | 'categories'>;
 export class Product {
   private constructor(private props: ProductProps) {}
   static create(data: CreateProductPrimitives): Result<Product, ValueObjectError> {
@@ -46,7 +48,7 @@ export class Product {
     return this.build(data);
   }
   private static build(data: ProductPrimitives): Result<Product, ValueObjectError> {
-    const { id, title, description, brandId, createdAt, updatedAt, pageId, coverImage, status } = data;
+    const { id, title, description, brandId, createdAt, updatedAt, pageId, coverImage, status, categories } = data;
     return Result.wrap(() => {
       return new Product({
         id: ProductId.create(id).unwrap(),
@@ -56,6 +58,7 @@ export class Product {
         pageId: pageId ? PageId.create(pageId).unwrap() : null,
         coverImage: coverImage ? Image.restore(coverImage).unwrap() : undefined,
         status,
+        categories: categories.map((cat) => CategoryId.create(cat).unwrap()),
         createdAt: new Date(createdAt),
         updatedAt: new Date(updatedAt),
       });
