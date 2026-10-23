@@ -33,6 +33,8 @@ export class UserId extends Id {}
 export class UserImageId extends Id {}
 export class RoleId extends Id {}
 export class ProductId extends Id {}
+export class ProductImageId extends Id {}
+export class ProductVariantImageId extends Id {}
 export class ProductVariantId extends Id {}
 export class OrderId extends Id {}
 export class OrderItemId extends Id {}
