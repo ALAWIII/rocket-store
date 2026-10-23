@@ -1,7 +1,12 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { Column, Entity, ForeignKey } from 'typeorm';
 import { BrandEntity } from '../../../brands/infrastructure/entities/brand.entity';
-import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
+import {
+  CreateDateColumnTz,
+  UpdateDateColumnTz,
+} from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
+import { PageEntity } from 'src/modules/pages/infrastructure/entities/page.entity';
+import { type ProductStatus } from '../../domain/product-status';
 
 @Entity('products')
 export class ProductEntity {
@@ -12,12 +17,25 @@ export class ProductEntity {
   @Column('varchar', { length: 500 })
   description!: string;
 
+  @Column('varchar', { length: 9 })
+  status!: ProductStatus;
   @Column('uuid', { nullable: true })
   @ForeignKey(
     () => BrandEntity,
     (b) => b.id,
+    { onDelete: 'SET NULL' },
   )
-  brandId?: string | null;
+  brandId!: string | null;
+
+  @Column('uuid', { nullable: true })
+  @ForeignKey(
+    () => PageEntity,
+    (p) => p.id,
+    { onDelete: 'SET NULL' },
+  )
+  pageId!: string | null;
   @CreateDateColumnTz()
   createdAt!: Date;
+  @UpdateDateColumnTz()
+  updatedAt!: Date;
 }
