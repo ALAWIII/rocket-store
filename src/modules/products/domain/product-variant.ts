@@ -1,89 +1,72 @@
+import { Result } from '@allawiii/results-ts';
+import { serializeProps } from 'src/modules/shared/utils/serialize-props.util';
+import { DomainText } from 'src/modules/shared/value-objects/domain-text';
 import { ProductId, ProductVariantId } from 'src/modules/shared/value-objects/ids';
+import { Price } from 'src/modules/shared/value-objects/price';
+import { Quantity } from 'src/modules/shared/value-objects/quantity';
+import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
+
+export type ProductVariantStatus = 'enabled' | 'disabled';
 
 type ProductVariantProps = {
   readonly id: ProductVariantId;
   readonly productId: ProductId;
+  price: Price;
+  quantity: Quantity;
+  description?: DomainText;
+  info: Record<string, unknown>;
+  status: ProductVariantStatus;
+  sortOrder: number;
+  createdAt: Date;
+  updatedAt: Date;
+};
+type ProductVariantPrimitives = {
+  readonly id: string;
+  readonly productId: string;
   price: number;
   quantity: number;
-  info: Record<string, unknown>;
   description?: string;
-  createdAt: Date;
+  status: ProductVariantStatus;
+  info: Record<string, unknown>;
+  sortOrder: number;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 };
-type UpdateProductVariantProps = Omit<ProductVariantProps, 'productId' | 'id' | 'createdAt'>;
-
-export class ProductVaraintList {
-  constructor(private _variants = new Map<ProductVariantId, ProductVariant>()) {}
-  static restore(variants: ProductVariantProps[]): ProductVaraintList {
-    const list = new ProductVaraintList();
-    for (const props of variants) {
-      const pv = ProductVariant.restore(props);
-      list.add(pv);
-    }
-    return list;
+type CreateProductVariantPrimitives = Omit<ProductVariantPrimitives, 'id' | 'createdAt' | 'status' | 'updatedAt'>;
+export class ProductVariant {
+  private constructor(private props: ProductVariantProps) {}
+  static create(data: CreateProductVariantPrimitives): Result<ProductVariant, ValueObjectError> {
+    const date = new Date();
+    return this.build({
+      ...data,
+      id: ProductVariantId.create().unwrap().toString(),
+      status: 'enabled',
+      createdAt: date,
+      updatedAt: date,
+    });
   }
-  add(variant: ProductVariant): void {
-    this._variants.set(variant.id, variant);
+  static restore(data: ProductVariantPrimitives): Result<ProductVariant, ValueObjectError> {
+    return this.build(data);
   }
-  remove(variantId: ProductVariantId): ProductVariant | undefined {
-    const v = this.getById(variantId);
-    this._variants.delete(variantId);
-    return v;
+  static build(data: ProductVariantPrimitives): Result<ProductVariant, ValueObjectError> {
+    const { id, description, price, productId, quantity, info, createdAt, status, updatedAt, sortOrder } = data;
+    return Result.wrap(
+      () =>
+        new ProductVariant({
+          id: ProductVariantId.create(id).unwrap(),
+          productId: ProductId.create(productId).unwrap(),
+          description: DomainText.create(description ?? '').unwrap(),
+          quantity: Quantity.create(quantity).unwrap(),
+          price: Price.create(price).unwrap(),
+          info,
+          sortOrder,
+          status,
+          createdAt: new Date(createdAt),
+          updatedAt: new Date(updatedAt),
+        }),
+    );
   }
-  update(variantId: ProductVariantId, vi: UpdateProductVariantProps) {
-    const v = this.getById(variantId);
-    v?.update(vi);
-  }
-  getById(variantId: ProductVariantId): ProductVariant | undefined {
-    return this._variants.get(variantId);
-  }
-  get variants(): ProductVariant[] {
-    return [...this._variants.values()];
-  }
-  toJSON(): ProductVariantProps[] {
-    return this.variants.map((v) => v.toJSON());
-  }
-}
-class ProductVariant {
-  private constructor(private data: ProductVariantProps) {
-    if (data.price < 0) throw new Error('Price cannot be negative');
-    if (data.quantity < 0) throw new Error('Quantity cannot be negative');
-  }
-  static create(props: ProductVariantProps): ProductVariant {
-    return new ProductVariant(props);
-  }
-  static restore(props: ProductVariantProps): ProductVariant {
-    return new ProductVariant(props);
-  }
-  update(input: UpdateProductVariantProps) {
-    this.data.description = input.description;
-    this.data.info = input.info;
-    this.data.price = input.price;
-    this.data.quantity = input.quantity;
-  }
-  get id(): ProductVariantId {
-    return this.data.id;
-  }
-
-  get productId(): ProductId {
-    return this.data.productId;
-  }
-
-  get price(): number {
-    return this.data.price;
-  }
-
-  get quantity(): number {
-    return this.data.quantity;
-  }
-
-  get description(): string | undefined {
-    return this.data.description;
-  }
-
-  get info(): Record<string, unknown> {
-    return { ...this.data.info };
-  }
-  toJSON(): ProductVariantProps {
-    return { ...this.data };
+  toJSON() {
+    return serializeProps(this.props);
   }
 }
