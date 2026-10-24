@@ -1,5 +1,5 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, Entity, ForeignKey } from 'typeorm';
+import { Column, Entity, ForeignKey, Index, Unique } from 'typeorm';
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 import { ProductVariantEntity } from './product-variant.entity';
 import {
@@ -8,6 +8,8 @@ import {
 } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
 @Entity('product_variant_images')
+@Unique('uq_product_variant_image', ['productVariantId', 'imageId'])
+@Index('idx_product_variant_images_image_id', ['imageId'])
 export class ProductVariantImageEntity {
   @UuidV7PrimaryColumn()
   id!: string;
@@ -26,7 +28,7 @@ export class ProductVariantImageEntity {
   )
   productVariantId!: string;
 
-  @Column('integer')
+  @Column('integer', { default: 1 })
   sortOrder!: number;
 
   @CreateDateColumnTz()
