@@ -1,5 +1,5 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, Entity, ForeignKey, Index, Unique } from 'typeorm';
+import { Column, Entity, ForeignKey, Unique } from 'typeorm';
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 import { ProductVariantEntity } from './product-variant.entity';
 import {
@@ -9,7 +9,6 @@ import {
 
 @Entity('product_variant_images')
 @Unique('uq_product_variant_image', ['productVariantId', 'imageId'])
-@Index('idx_product_variant_images_image_id', ['imageId'])
 export class ProductVariantImageEntity {
   @UuidV7PrimaryColumn()
   id!: string;
