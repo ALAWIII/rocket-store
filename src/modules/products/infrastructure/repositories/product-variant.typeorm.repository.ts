@@ -1,5 +1,5 @@
 import { Repository } from 'typeorm';
-import { IProductVariantRepository, UpdateVariant } from './product-variant.repository';
+import { IProductVariantRepository, UpdateVariant, VariantSortOrderUpdate } from './product-variant.repository';
 import { ProductVariantEntity } from '../entities/product-variant.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DBResult } from 'src/modules/shared/errors/error.types';
@@ -10,6 +10,7 @@ import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.en
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { ProductVariantMapper, ProductVariantWithImages } from '../mappers/product-variant.mapper';
 import { RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
+import { UPDATE_PRODUCT_VARIANT_SORT_ORDER_SQL } from './queries/update-product-variant-sort-order.query';
 
 export class ProductVariantRepository implements IProductVariantRepository {
   constructor(
@@ -81,5 +82,23 @@ export class ProductVariantRepository implements IProductVariantRepository {
     })
       .andThen((pvariant) => ProductVariantMapper.toDomain(pvariant))
       .mapErr(mapTypeOrmError);
+  }
+  updateSortOrders(productId: string, ordering: VariantSortOrderUpdate[]): DBResult<ProductVariant[]> {
+    return Result.wrapAsync(async () => {
+      const variantIds = ordering.map((x) => x.variantId);
+      const sortOrders = ordering.map((x) => x.sortOrder);
+
+      const rows = await this.productVariantRepo.query<ProductVariantEntity[]>(UPDATE_PRODUCT_VARIANT_SORT_ORDER_SQL, [
+        variantIds,
+        sortOrders,
+        productId,
+      ]);
+      if (rows.length !== ordering.length) {
+        throw new RecordNotFoundError('Some product variants were not found');
+      }
+      return rows;
+    })
+      .mapErr(mapTypeOrmError)
+      .andThen((pvariants) => ProductVariantMapper.toDomainList(pvariants));
   }
 }
