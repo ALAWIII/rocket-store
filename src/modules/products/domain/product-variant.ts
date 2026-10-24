@@ -7,6 +7,7 @@ import { Quantity } from 'src/modules/shared/value-objects/quantity';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { ProductStatus } from './product-status';
 import { Image } from 'src/modules/images/domain/image';
+import { type JsonObject } from 'src/modules/shared/value-objects/json-object';
 
 type ProductVariantProps = {
   readonly id: ProductVariantId;
@@ -14,7 +15,7 @@ type ProductVariantProps = {
   price: Price;
   quantity: Quantity;
   description: DomainText | null;
-  info: Record<string, unknown>;
+  info: JsonObject;
   status: ProductStatus;
   images?: Image[];
   sortOrder: number;
@@ -28,7 +29,7 @@ type ProductVariantPrimitives = {
   quantity: number;
   description: string | null;
   status: ProductStatus;
-  info: Record<string, unknown>;
+  info: JsonObject;
   images?: Image[];
   sortOrder: number;
   createdAt: Date | string;
