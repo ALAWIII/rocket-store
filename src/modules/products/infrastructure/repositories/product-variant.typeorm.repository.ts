@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { IProductVariantRepository, UpdateVariant, VariantSortOrderUpdate } from './product-variant.repository';
 import { ProductVariantEntity } from '../entities/product-variant.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -125,5 +125,11 @@ export class ProductVariantRepository implements IProductVariantRepository {
     })
       .mapErr(mapTypeOrmError)
       .andThen((imgs) => ImageMapper.toDomainList(imgs));
+  }
+
+  detachImages(productVariantId: string, imageIds: string[]): DBResult<number> {
+    return Result.wrapAsync(() => this.productVariantImageRepo.delete({ productVariantId, imageId: In(imageIds) }))
+      .map((dr) => dr.affected ?? 0)
+      .mapErr(mapTypeOrmError);
   }
 }

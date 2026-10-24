@@ -23,5 +23,5 @@ export abstract class IProductVariantRepository {
   abstract update(productId: string, variantId: string, data: UpdateVariant): DBResult<ProductVariant>;
   abstract updateSortOrders(productId: string, ordering: VariantSortOrderUpdate[]): DBResult<ProductVariant[]>;
   abstract attachImages(images: ProductVariantImage[]): DBResult<Image[]>;
-  abstract detachImages(imageIds: string[]): DBResult<number>;
+  abstract detachImages(variantId: string, imageIds: string[]): DBResult<number>;
 }
