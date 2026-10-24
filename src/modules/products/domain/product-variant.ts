@@ -6,15 +6,17 @@ import { Price } from 'src/modules/shared/value-objects/price';
 import { Quantity } from 'src/modules/shared/value-objects/quantity';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { ProductStatus } from './product-status';
+import { Image } from 'src/modules/images/domain/image';
 
 type ProductVariantProps = {
   readonly id: ProductVariantId;
   readonly productId: ProductId;
   price: Price;
   quantity: Quantity;
-  description?: DomainText;
+  description: DomainText | null;
   info: Record<string, unknown>;
   status: ProductStatus;
+  images?: Image[];
   sortOrder: number;
   createdAt: Date;
   updatedAt: Date;
@@ -24,9 +26,10 @@ type ProductVariantPrimitives = {
   readonly productId: string;
   price: number;
   quantity: number;
-  description?: string;
+  description: string | null;
   status: ProductStatus;
   info: Record<string, unknown>;
+  images?: Image[];
   sortOrder: number;
   createdAt: Date | string;
   updatedAt: Date | string;
@@ -48,7 +51,7 @@ export class ProductVariant {
     return this.build(data);
   }
   static build(data: ProductVariantPrimitives): Result<ProductVariant, ValueObjectError> {
-    const { id, description, price, productId, quantity, info, createdAt, status, updatedAt, sortOrder } = data;
+    const { id, description, price, productId, quantity, info, createdAt, status, updatedAt, sortOrder, images } = data;
     return Result.wrap(
       () =>
         new ProductVariant({
@@ -60,6 +63,7 @@ export class ProductVariant {
           info,
           sortOrder,
           status,
+          images,
           createdAt: new Date(createdAt),
           updatedAt: new Date(updatedAt),
         }),
