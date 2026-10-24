@@ -15,13 +15,20 @@ export type VariantSortOrderUpdate = {
   variantId: string;
   sortOrder: number;
 };
-
+export type VariantImageSortOrderUpdate = {
+  productVariantImageId: string;
+  sortOrder: number;
+};
 export abstract class IProductVariantRepository {
   abstract create(variant: ProductVariant): DBResult<ProductVariant>;
   abstract findAll(productId: string): DBResult<ProductVariant[]>;
   abstract findById(productId: string, variantId: string): DBResult<ProductVariant>;
   abstract update(productId: string, variantId: string, data: UpdateVariant): DBResult<ProductVariant>;
   abstract updateSortOrders(productId: string, ordering: VariantSortOrderUpdate[]): DBResult<ProductVariant[]>;
+  abstract updateVariantImageSortOrders(
+    productVariantId: string,
+    ordering: VariantImageSortOrderUpdate[],
+  ): DBResult<number>;
   abstract attachImages(images: ProductVariantImage[]): DBResult<Image[]>;
   abstract detachImages(variantId: string, imageIds: string[]): DBResult<number>;
 }

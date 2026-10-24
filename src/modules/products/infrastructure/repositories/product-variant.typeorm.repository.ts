@@ -1,5 +1,10 @@
 import { In, Repository } from 'typeorm';
-import { IProductVariantRepository, UpdateVariant, VariantSortOrderUpdate } from './product-variant.repository';
+import {
+  IProductVariantRepository,
+  UpdateVariant,
+  VariantImageSortOrderUpdate,
+  VariantSortOrderUpdate,
+} from './product-variant.repository';
 import { ProductVariantEntity } from '../entities/product-variant.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DBResult } from 'src/modules/shared/errors/error.types';
@@ -14,6 +19,7 @@ import { UPDATE_PRODUCT_VARIANT_SORT_ORDER_SQL } from './queries/update-product-
 import { Image } from 'src/modules/images/domain/image';
 import { ProductVariantImage } from '../../domain/product-variant-image';
 import { ImageMapper } from 'src/modules/images/infrastructure/mappers/images.mapper';
+import { UPDATE_VARIANT_IMAGE_SORT_ORDER_SQL } from './queries/update-product-variant-images-sort-order.query';
 
 export class ProductVariantRepository implements IProductVariantRepository {
   constructor(
@@ -131,5 +137,22 @@ export class ProductVariantRepository implements IProductVariantRepository {
     return Result.wrapAsync(() => this.productVariantImageRepo.delete({ productVariantId, imageId: In(imageIds) }))
       .map((dr) => dr.affected ?? 0)
       .mapErr(mapTypeOrmError);
+  }
+
+  updateVariantImageSortOrders(productVariantId: string, ordering: VariantImageSortOrderUpdate[]): DBResult<number> {
+    return Result.wrapAsync(async () => {
+      const ids = ordering.map((x) => x.productVariantImageId);
+      const sortOrders = ordering.map((x) => x.sortOrder);
+      const rows = await this.productVariantImageRepo.query<ProductVariantImageEntity[]>(
+        UPDATE_VARIANT_IMAGE_SORT_ORDER_SQL,
+        [ids, sortOrders, productVariantId],
+      );
+
+      if (rows.length !== ordering.length) {
+        throw new RecordNotFoundError('Some variant images were not found');
+      }
+
+      return rows.length;
+    }).mapErr(mapTypeOrmError);
   }
 }
