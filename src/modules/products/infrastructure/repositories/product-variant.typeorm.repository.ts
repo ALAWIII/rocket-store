@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { QueryDeepPartialEntity, Repository } from 'typeorm';
 import { IProductVariantRepository } from './product-variant.repository';
 import { ProductVariantEntity } from '../entities/product-variant.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,12 +9,30 @@ import { ProductVariantImageEntity } from '../entities/product-variant-image.ent
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { ProductVariantMapper, ProductVariantWithImages } from '../mappers/product-variant.mapper';
+import { UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
 
 export class ProductVariantRepository implements IProductVariantRepository {
   constructor(
     @InjectRepository(ProductVariantEntity)
     private readonly productVariantRepo: Repository<ProductVariantEntity>,
   ) {}
+  create(variant: ProductVariant): DBResult<ProductVariant> {
+    return Result.wrapAsync(async () => {
+      const { images, info, ...variantJson } = variant.toJSON();
+      const result = await this.productVariantRepo
+        .createQueryBuilder()
+        .insert()
+        .values({ ...variantJson, info: info as QueryDeepPartialEntity<ProductVariantEntity>['info'] })
+        .returning('*')
+        .execute();
+      const row = result.raw?.[0] as ProductVariantEntity | undefined;
+      if (!row)
+        throw new UnknownDatabaseError(`Inserting new product variant did not return it's fields: ${variantJson.id}`);
+      return row;
+    })
+      .mapErr(mapTypeOrmError)
+      .andThen((pvariant) => ProductVariantMapper.toDomain(pvariant));
+  }
   findAll(productId: string): DBResult<ProductVariant[]> {
     return Result.wrapAsync(() =>
       this.productVariantRepo
