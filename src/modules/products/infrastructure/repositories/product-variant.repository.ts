@@ -3,12 +3,13 @@ import { ProductVariant } from '../../domain/product-variant';
 import { ProductStatus } from '../../domain/product-status';
 import { Image } from 'src/modules/images/domain/image';
 import { ProductVariantImage } from '../../domain/product-variant-image';
+import { JsonObject } from 'src/modules/shared/value-objects/json-object';
 export type UpdateVariant = {
   price?: number;
   quantity?: number;
-  description?: string;
+  description?: string | null;
   status?: ProductStatus;
-  info?: Record<string, unknown>;
+  info?: JsonObject;
 };
 export type VariantSortOrderUpdate = {
   variantId: string;
