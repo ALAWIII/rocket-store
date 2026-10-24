@@ -70,6 +70,6 @@ export class ProductVariant {
     );
   }
   toJSON() {
-    return serializeProps(this.props);
+    return { ...serializeProps(this.props), images: this.props.images?.map((img) => img.toJSON()) };
   }
 }
