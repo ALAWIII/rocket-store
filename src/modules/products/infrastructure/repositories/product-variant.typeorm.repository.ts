@@ -24,7 +24,20 @@ export class ProductVariantRepository implements IProductVariantRepository {
         .where('pvariant."productId" = :productId', { productId })
         .getMany(),
     )
-      .andThen((pvariants: ProductVariantWithImages[]) => ProductVariantMapper.toDomainList(pvariants))
-      .mapErr(mapTypeOrmError);
+      .mapErr(mapTypeOrmError)
+      .andThen((pvariants: ProductVariantWithImages[]) => ProductVariantMapper.toDomainList(pvariants));
+  }
+  findById(productId: string, variantId: string): DBResult<ProductVariant> {
+    return Result.wrapAsync(() =>
+      this.productVariantRepo
+        .createQueryBuilder('pvariant')
+        .leftJoin(ProductVariantImageEntity, 'pvariant_images', 'pvariant_images."productVariantId" = pvariant.id')
+        .leftJoinAndMapMany('pvariant.images', ImageEntity, 'images', 'images.id = pvariant_images."imageId"')
+        .where('pvariant."productId" = :productId', { productId })
+        .andWhere('pvariant.id = :variantId', { variantId })
+        .getOneOrFail(),
+    )
+      .mapErr(mapTypeOrmError)
+      .andThen((pvariant: ProductVariantWithImages) => ProductVariantMapper.toDomain(pvariant));
   }
 }
