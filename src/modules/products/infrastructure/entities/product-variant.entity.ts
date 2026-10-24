@@ -6,7 +6,6 @@ import {
   UpdateDateColumnTz,
 } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 import { type ProductStatus } from '../../domain/product-status';
-import { type JsonObject } from 'src/modules/shared/value-objects/json-object';
 
 @Entity('product_variants')
 export class ProductVariantEntity {
@@ -24,7 +23,7 @@ export class ProductVariantEntity {
   @Column('integer')
   quantity!: number;
   @Column('jsonb', { default: () => `'{}'::jsonb` })
-  info!: JsonObject;
+  info!: unknown;
   @Column('varchar', { length: 500, nullable: true })
   description!: string | null;
 
