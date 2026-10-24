@@ -11,11 +11,16 @@ import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-erro
 import { ProductVariantMapper, ProductVariantWithImages } from '../mappers/product-variant.mapper';
 import { RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
 import { UPDATE_PRODUCT_VARIANT_SORT_ORDER_SQL } from './queries/update-product-variant-sort-order.query';
+import { Image } from 'src/modules/images/domain/image';
+import { ProductVariantImage } from '../../domain/product-variant-image';
+import { ImageMapper } from 'src/modules/images/infrastructure/mappers/images.mapper';
 
 export class ProductVariantRepository implements IProductVariantRepository {
   constructor(
     @InjectRepository(ProductVariantEntity)
     private readonly productVariantRepo: Repository<ProductVariantEntity>,
+    @InjectRepository(ProductVariantImageEntity)
+    private readonly productVariantImageRepo: Repository<ProductVariantImageEntity>,
   ) {}
   create(variant: ProductVariant): DBResult<ProductVariant> {
     return Result.wrapAsync(async () => {
@@ -100,5 +105,25 @@ export class ProductVariantRepository implements IProductVariantRepository {
     })
       .mapErr(mapTypeOrmError)
       .andThen((pvariants) => ProductVariantMapper.toDomainList(pvariants));
+  }
+
+  attachImages(images: ProductVariantImage[]): DBResult<Image[]> {
+    return Result.wrapAsync(() => {
+      const imagesJson = images.map((pimg) => pimg.toJSON());
+      const insertCte = this.productVariantImageRepo
+        .createQueryBuilder()
+        .insert()
+        .into(ProductVariantImageEntity)
+        .values(imagesJson)
+        .orIgnore()
+        .returning('"imageId"');
+      return this.productVariantImageRepo.manager
+        .createQueryBuilder(ImageEntity, 'images')
+        .addCommonTableExpression(insertCte, 'image_ids')
+        .where('images.id IN (SELECT "imageId" FROM image_ids)')
+        .getMany();
+    })
+      .mapErr(mapTypeOrmError)
+      .andThen((imgs) => ImageMapper.toDomainList(imgs));
   }
 }
