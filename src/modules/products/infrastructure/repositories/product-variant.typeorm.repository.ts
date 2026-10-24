@@ -1,5 +1,5 @@
-import { QueryDeepPartialEntity, Repository } from 'typeorm';
-import { IProductVariantRepository } from './product-variant.repository';
+import { Repository } from 'typeorm';
+import { IProductVariantRepository, UpdateVariant } from './product-variant.repository';
 import { ProductVariantEntity } from '../entities/product-variant.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DBResult } from 'src/modules/shared/errors/error.types';
@@ -9,7 +9,7 @@ import { ProductVariantImageEntity } from '../entities/product-variant-image.ent
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { ProductVariantMapper, ProductVariantWithImages } from '../mappers/product-variant.mapper';
-import { UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
+import { RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
 
 export class ProductVariantRepository implements IProductVariantRepository {
   constructor(
@@ -18,11 +18,11 @@ export class ProductVariantRepository implements IProductVariantRepository {
   ) {}
   create(variant: ProductVariant): DBResult<ProductVariant> {
     return Result.wrapAsync(async () => {
-      const { images, info, ...variantJson } = variant.toJSON();
+      const { images, ...variantJson } = variant.toJSON();
       const result = await this.productVariantRepo
         .createQueryBuilder()
         .insert()
-        .values({ ...variantJson, info: info as QueryDeepPartialEntity<ProductVariantEntity>['info'] })
+        .values(variantJson)
         .returning('*')
         .execute();
       const row = result.raw?.[0] as ProductVariantEntity | undefined;
@@ -57,5 +57,29 @@ export class ProductVariantRepository implements IProductVariantRepository {
     )
       .mapErr(mapTypeOrmError)
       .andThen((pvariant: ProductVariantWithImages) => ProductVariantMapper.toDomain(pvariant));
+  }
+  update(productId: string, variantId: string, data: UpdateVariant): DBResult<ProductVariant> {
+    return Result.wrapAsync(async () => {
+      const result = await this.productVariantRepo
+        .createQueryBuilder()
+        .update()
+        .set(data)
+        .where('id = :variantId', { variantId })
+        .andWhere('"productId" = :productId', { productId })
+        .returning('*')
+        .execute();
+      if (result.affected === 0)
+        throw new RecordNotFoundError(`ProductVariant not found, productId: ${productId}, variantId: ${variantId}`);
+
+      const row = result.raw?.[0] as ProductVariantEntity | undefined;
+
+      if (!row)
+        throw new UnknownDatabaseError(
+          `ProductVariant update did not return a row, productId: ${productId}, variantId: ${variantId}`,
+        );
+      return row;
+    })
+      .andThen((pvariant) => ProductVariantMapper.toDomain(pvariant))
+      .mapErr(mapTypeOrmError);
   }
 }
