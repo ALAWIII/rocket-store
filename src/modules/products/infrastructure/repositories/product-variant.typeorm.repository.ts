@@ -69,7 +69,7 @@ export class ProductVariantRepository implements IProductVariantRepository {
       const result = await this.productVariantRepo
         .createQueryBuilder()
         .update()
-        .set(data)
+        .set({ ...data, updatedAt: () => 'now()' })
         .where('id = :variantId', { variantId })
         .andWhere('"productId" = :productId', { productId })
         .returning('*')
