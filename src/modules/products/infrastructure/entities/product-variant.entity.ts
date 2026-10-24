@@ -22,7 +22,7 @@ export class ProductVariantEntity {
   price!: number;
   @Column('integer')
   quantity!: number;
-  @Column('jsonb')
+  @Column('jsonb', { default: () => `'{}'::jsonb` })
   info!: Record<string, unknown>;
   @Column('varchar', { length: 500, nullable: true })
   description!: string | null;
