@@ -2,10 +2,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { IProductRepository, ProductCategory, UpdateProduct } from './product.repository';
 import { ProductEntity } from '../entities/product.entity';
 import { ProductImageEntity } from '../entities/product-image.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Product } from '../../domain/product';
-import { Result } from '@allawiii/results-ts';
+import { Ok, Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
 import { ProductMapper } from '../mappers/product.mapper';
@@ -56,6 +56,12 @@ export class ProductRepository implements IProductRepository {
       this.productCategoryRepo.createQueryBuilder().insert().values(data).returning('*').execute(),
     )
       .map((pc) => pc.raw as ProductCategory[])
+      .mapErr(mapTypeOrmError);
+  }
+  detachCategories(productId: string, categoryIds: string[]): DBResult<number> {
+    if (!categoryIds.length) return Ok(0).toAsyncResult();
+    return Result.wrapAsync(() => this.productCategoryRepo.delete({ productId, categoryId: In(categoryIds) }))
+      .map((result) => result.affected ?? 0)
       .mapErr(mapTypeOrmError);
   }
 }
