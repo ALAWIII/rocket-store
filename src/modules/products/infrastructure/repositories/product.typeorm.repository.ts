@@ -87,4 +87,9 @@ export class ProductRepository implements IProductRepository {
       .mapErr(mapTypeOrmError)
       .andThen((images) => ImageMapper.toDomainList(images));
   }
+  detachImages(productId: string, imageIds: string[]): DBResult<number> {
+    return Result.wrapAsync(() => this.productImageRepo.delete({ productId, imageId: In(imageIds) }))
+      .map((result) => result.affected ?? 0)
+      .mapErr(mapTypeOrmError);
+  }
 }
