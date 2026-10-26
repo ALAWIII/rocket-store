@@ -10,6 +10,10 @@ import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-erro
 import { RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
 import { ProductMapper } from '../mappers/product.mapper';
 import { ProductCategoryEntity } from '../entities/product-category.entity';
+import { Image } from 'src/modules/images/domain/image';
+import { ProductImage } from '../../domain/product-image';
+import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
+import { ImageMapper } from 'src/modules/images/infrastructure/mappers/images.mapper';
 
 export class ProductRepository implements IProductRepository {
   constructor(
@@ -63,5 +67,24 @@ export class ProductRepository implements IProductRepository {
     return Result.wrapAsync(() => this.productCategoryRepo.delete({ productId, categoryId: In(categoryIds) }))
       .map((result) => result.affected ?? 0)
       .mapErr(mapTypeOrmError);
+  }
+  attachImages(images: ProductImage[]): DBResult<Image[]> {
+    return Result.wrapAsync(() => {
+      const imagesJson = images.map((img) => img.toJSON());
+      const insertCte = this.productImageRepo
+        .createQueryBuilder()
+        .insert()
+        .into(ProductImageEntity)
+        .values(imagesJson)
+        .orIgnore()
+        .returning('"imageId"');
+      return this.productImageRepo.manager
+        .createQueryBuilder(ImageEntity, 'images')
+        .addCommonTableExpression(insertCte, 'image_ids')
+        .where('images.id IN (SELECT "imageId" FROM image_ids)')
+        .getMany();
+    })
+      .mapErr(mapTypeOrmError)
+      .andThen((images) => ImageMapper.toDomainList(images));
   }
 }
