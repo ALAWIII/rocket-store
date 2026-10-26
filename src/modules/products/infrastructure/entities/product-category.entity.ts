@@ -1,10 +1,24 @@
-import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Entity } from 'typeorm';
+import { CategoryEntity } from 'src/modules/categories/infrastructure/entities/category.entity';
+import { Entity, ForeignKey, Index, PrimaryColumn } from 'typeorm';
+import { ProductEntity } from './product.entity';
 
 @Entity('product_categories')
+@Index('idx_pc_cat', ['categoryId'])
+@Index('idx_pc_prod', ['productId'])
 export class ProductCategoryEntity {
-  @UuidV7PrimaryColumn()
+  @PrimaryColumn('uuid')
+  @ForeignKey(
+    () => CategoryEntity,
+    (cat) => cat.id,
+    { onDelete: 'CASCADE' },
+  )
   categoryId!: string;
-  @UuidV7PrimaryColumn()
+
+  @PrimaryColumn('uuid')
+  @ForeignKey(
+    () => ProductEntity,
+    (p) => p.id,
+    { onDelete: 'CASCADE' },
+  )
   productId!: string;
 }
