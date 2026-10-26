@@ -1,5 +1,5 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, Entity, ForeignKey } from 'typeorm';
+import { Column, Entity, ForeignKey, Index } from 'typeorm';
 import { BrandEntity } from '../../../brands/infrastructure/entities/brand.entity';
 import {
   CreateDateColumnTz,
@@ -9,6 +9,9 @@ import { PageEntity } from 'src/modules/pages/infrastructure/entities/page.entit
 import { type ProductStatus } from '../../domain/product-status';
 
 @Entity('products')
+@Index('idx_products_page', ['pageId'])
+@Index('idx_products_brand', ['brandId'])
+@Index('idx_products_status', ['status'])
 export class ProductEntity {
   @UuidV7PrimaryColumn()
   id!: string;
