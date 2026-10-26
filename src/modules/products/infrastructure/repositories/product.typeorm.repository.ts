@@ -1,5 +1,5 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { IProductRepository, UpdateProduct } from './product.repository';
+import { IProductRepository, ProductCategory, UpdateProduct } from './product.repository';
 import { ProductEntity } from '../entities/product.entity';
 import { ProductImageEntity } from '../entities/product-image.entity';
 import { Repository } from 'typeorm';
@@ -9,6 +9,7 @@ import { Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
 import { ProductMapper } from '../mappers/product.mapper';
+import { ProductCategoryEntity } from '../entities/product-category.entity';
 
 export class ProductRepository implements IProductRepository {
   constructor(
@@ -16,6 +17,8 @@ export class ProductRepository implements IProductRepository {
     private readonly productRepo: Repository<ProductEntity>,
     @InjectRepository(ProductImageEntity)
     private readonly productImageRepo: Repository<ProductImageEntity>,
+    @InjectRepository(ProductCategoryEntity)
+    private readonly productCategoryRepo: Repository<ProductCategoryEntity>,
   ) {}
 
   create(product: Product): DBResult<Product> {
@@ -47,5 +50,12 @@ export class ProductRepository implements IProductRepository {
     })
       .mapErr(mapTypeOrmError)
       .andThen((product) => ProductMapper.toDomain(product));
+  }
+  attachCategories(data: ProductCategory[]): DBResult<ProductCategory[]> {
+    return Result.wrapAsync(async () =>
+      this.productCategoryRepo.createQueryBuilder().insert().values(data).returning('*').execute(),
+    )
+      .map((pc) => pc.raw as ProductCategory[])
+      .mapErr(mapTypeOrmError);
   }
 }
