@@ -1,5 +1,11 @@
 import { InjectRepository } from '@nestjs/typeorm';
-import { IProductRepository, ProductCategory, UpdateProduct } from './product.repository';
+import {
+  FindProductByIdQueryFlags,
+  IProductRepository,
+  ProductCategory,
+  ProductDetailsResult,
+  UpdateProduct,
+} from './product.repository';
 import { ProductEntity } from '../entities/product.entity';
 import { ProductImageEntity } from '../entities/product-image.entity';
 import { In, Repository } from 'typeorm';
@@ -14,6 +20,11 @@ import { Image } from 'src/modules/images/domain/image';
 import { ProductImage } from '../../domain/product-image';
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 import { ImageMapper } from 'src/modules/images/infrastructure/mappers/images.mapper';
+import { FIND_PRODUCT_BY_ID_SQL } from './queries/find-product-by-id.query';
+import { ProductVariantMapper } from '../mappers/product-variant.mapper';
+import { BrandMapper } from 'src/modules/brands/infrastructure/mappers/brand.mapper';
+import { CategoryMapper } from 'src/modules/categories/infrastructure/mappers/category.mapper';
+import { ProductDetails } from '../../domain/product-details';
 
 export class ProductRepository implements IProductRepository {
   constructor(
@@ -26,7 +37,7 @@ export class ProductRepository implements IProductRepository {
   ) {}
 
   create(product: Product): DBResult<Product> {
-    const { categoryIds: categories, coverImage, ...productJson } = product.toJSON();
+    const { coverImage, ...productJson } = product.toJSON();
     return Result.wrapAsync(async () => {
       const result = await this.productRepo.createQueryBuilder().insert().values(productJson).returning('*').execute();
       const row = result.raw?.[0] as ProductEntity | undefined;
@@ -91,5 +102,33 @@ export class ProductRepository implements IProductRepository {
     return Result.wrapAsync(() => this.productImageRepo.delete({ productId, imageId: In(imageIds) }))
       .map((result) => result.affected ?? 0)
       .mapErr(mapTypeOrmError);
+  }
+  findById(
+    productId: string,
+    include: FindProductByIdQueryFlags = { variants: false, brand: false, categories: false },
+  ): DBResult<ProductDetails> {
+    const { variants, brand, categories } = include;
+    return Result.wrapAsync(async () => {
+      const result = await this.productRepo.manager.query<ProductDetailsResult[]>(FIND_PRODUCT_BY_ID_SQL, [
+        productId,
+        variants,
+        brand,
+        categories,
+      ]);
+      const row = result[0];
+      if (!row?.product) throw new RecordNotFoundError(`Product not found, productId: ${productId}`);
+      return row;
+    })
+      .mapErr(mapTypeOrmError)
+      .andThen(({ product, brand, categories, variants }) =>
+        Result.wrap(() => {
+          return {
+            product: ProductMapper.toDomain(product).unwrap(),
+            brand: brand ? BrandMapper.toDomain(brand).unwrap() : null,
+            variants: variants.map((v) => ProductVariantMapper.toDomain(v).unwrap()),
+            categories: categories.map((cat) => CategoryMapper.toDomain(cat).unwrap()),
+          };
+        }),
+      );
   }
 }
