@@ -7,7 +7,6 @@ import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.en
 
 export type ProductQueryResult = ProductEntity & {
   coverImage?: ImageEntity;
-  categoryIds?: string[];
 };
 
 export class ProductMapper {
