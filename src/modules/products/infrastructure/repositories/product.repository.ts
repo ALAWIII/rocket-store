@@ -8,6 +8,7 @@ import { ProductVariantWithImages } from '../mappers/product-variant.mapper';
 import { BrandWithLogo } from 'src/modules/brands/infrastructure/mappers/brand.mapper';
 import { CategoryEntity } from 'src/modules/categories/infrastructure/entities/category.entity';
 import { ProductDetails } from '../../domain/product-details';
+import { Pagination } from 'src/modules/shared/types/pagination';
 
 export type ProductDetailsResult = {
   product: ProductEntity;
@@ -21,12 +22,7 @@ export type ProductCategory = {
   productId: string;
   categoryId: string;
 };
-export type Paginated<T> = {
-  items: T[];
-  total: number;
-  page: number;
-  limit: number;
-};
+
 export type UpdateProduct = {
   title?: string;
   description?: string;
@@ -45,9 +41,11 @@ export type FindAllProductsSearchOptions = {
   page?: number;
   limit?: number;
 };
+export type FindAllProductsQueryResult = { products: Product[]; pagination: Pagination };
+
 export abstract class IProductRepository {
   abstract create(product: Product): DBResult<Product>;
-  abstract findAll(options: FindAllProductsSearchOptions): DBResult<Paginated<Product>>;
+  abstract findAll(options: FindAllProductsSearchOptions): DBResult<FindAllProductsQueryResult>;
   abstract findById(productId: string, include: FindProductByIdQueryFlags): DBResult<ProductDetails>;
   abstract update(productId: string, data: UpdateProduct): DBResult<Product>;
   abstract attachImages(images: ProductImage[]): DBResult<Image[]>;
