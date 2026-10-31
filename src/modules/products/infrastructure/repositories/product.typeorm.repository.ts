@@ -1,5 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  FindAllProductsQueryResult,
+  FindAllProductsSearchOptions,
   FindProductByIdQueryFlags,
   IProductRepository,
   ProductCategory,
@@ -14,7 +16,7 @@ import { Product } from '../../domain/product';
 import { Ok, Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
-import { ProductMapper } from '../mappers/product.mapper';
+import { ProductMapper, ProductQueryResult } from '../mappers/product.mapper';
 import { ProductCategoryEntity } from '../entities/product-category.entity';
 import { Image } from 'src/modules/images/domain/image';
 import { ProductImage } from '../../domain/product-image';
@@ -25,6 +27,7 @@ import { ProductVariantMapper } from '../mappers/product-variant.mapper';
 import { BrandMapper } from 'src/modules/brands/infrastructure/mappers/brand.mapper';
 import { CategoryMapper } from 'src/modules/categories/infrastructure/mappers/category.mapper';
 import { ProductDetails } from '../../domain/product-details';
+import { FindAllProductsQueryBuilder } from './queries/find-all-products-builder.query';
 
 export class ProductRepository implements IProductRepository {
   constructor(
@@ -130,5 +133,21 @@ export class ProductRepository implements IProductRepository {
           };
         }),
       );
+  }
+  findAll(options: FindAllProductsSearchOptions): DBResult<FindAllProductsQueryResult> {
+    return Result.wrapAsync(async () => {
+      const builder = new FindAllProductsQueryBuilder(options).build();
+      const { query, values, pagination } = builder;
+
+      const { products, total } = await this.productRepo.manager.query<{
+        products: ProductQueryResult[];
+        total: number;
+      }>(query, values);
+
+      return {
+        products: ProductMapper.toDomainList(products).unwrap(),
+        pagination: { total: Number(total ?? 0), ...pagination },
+      };
+    }).mapErr(mapTypeOrmError);
   }
 }
