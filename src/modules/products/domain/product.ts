@@ -50,8 +50,8 @@ export class Product {
     return Result.wrap(() => {
       return new Product({
         id: ProductId.create(id).unwrap(),
-        title: Title.create(title).unwrap(),
-        description: DomainText.create(description, 500).unwrap(),
+        title: Title.create(title, 200).unwrap(),
+        description: DomainText.create(description, 10000).unwrap(),
         brandId: brandId ? BrandId.create(brandId).unwrap() : null,
         pageId: pageId ? PageId.create(pageId).unwrap() : null,
         coverImage,
