@@ -9,7 +9,15 @@ export const FIND_PRODUCT_BY_ID_SQL =
   /*sql*/
   `
   WITH find_product AS (
-    SELECT * FROM products WHERE id = $1
+    SELECT
+      p.*,
+      row_to_json(img) AS "coverImage"
+    FROM products p
+    LEFT JOIN product_images pi
+      ON pi."productId" = p.id
+    LEFT JOIN images img
+      ON img.id = pi."imageId"
+    WHERE p.id = $1;
   ),
 
   find_variants AS (
