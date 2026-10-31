@@ -34,18 +34,20 @@ export type UpdateProduct = {
   pageId?: string | null;
   status?: ProductStatus;
 };
-export type FindAllProductsQuery = {
+export type FindAllProductsSearchOptions = {
   search?: string;
   status?: ProductStatus;
   brandId?: string;
-  categoryIds?: string[];
-  includeCategoryDescendants?: boolean;
+  category?: {
+    categoryIds: string[];
+    includeCategoryDescendants?: boolean;
+  };
   page?: number;
   limit?: number;
 };
 export abstract class IProductRepository {
   abstract create(product: Product): DBResult<Product>;
-  abstract findAll(options: FindAllProductsQuery): DBResult<Paginated<Product>>;
+  abstract findAll(options: FindAllProductsSearchOptions): DBResult<Paginated<Product>>;
   abstract findById(productId: string, include: FindProductByIdQueryFlags): DBResult<ProductDetails>;
   abstract update(productId: string, data: UpdateProduct): DBResult<Product>;
   abstract attachImages(images: ProductImage[]): DBResult<Image[]>;
