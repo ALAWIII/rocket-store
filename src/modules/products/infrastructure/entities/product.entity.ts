@@ -8,16 +8,18 @@ import {
 import { PageEntity } from 'src/modules/pages/infrastructure/entities/page.entity';
 import { type ProductStatus } from '../../domain/product-status';
 
-@Entity('products')
+@Entity('products', { synchronize: false })
 @Index('idx_products_page', ['pageId'])
 @Index('idx_products_brand', ['brandId'])
 @Index('idx_products_status', ['status'])
 export class ProductEntity {
   @UuidV7PrimaryColumn()
   id!: string;
-  @Column('varchar', { length: 100 })
+
+  @Column('varchar', { length: 200 })
   title!: string;
-  @Column('varchar', { length: 500 })
+
+  @Column('text', { default: '' })
   description!: string;
 
   @Column('varchar', { length: 9 })
