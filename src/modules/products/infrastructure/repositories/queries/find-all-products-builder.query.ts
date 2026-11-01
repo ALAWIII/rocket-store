@@ -269,8 +269,8 @@ function generateQuery(combination: Combination): string {
       SELECT *
       FROM filtered
       ${ordering.pageOrdering}
-      LIMIT ${limit}
-      OFFSET ${offset}
+      LIMIT $${limit}
+      OFFSET $${offset}
     )
     SELECT
       COALESCE(
