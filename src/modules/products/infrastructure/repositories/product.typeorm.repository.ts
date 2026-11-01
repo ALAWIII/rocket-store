@@ -137,12 +137,12 @@ export class ProductRepository implements IProductRepository {
   findAll(options: FindAllProductsSearchOptions): DBResult<FindAllProductsQueryResult> {
     return Result.wrapAsync(async () => {
       const builder = new FindAllProductsQueryBuilder(options).build();
-      const { query, values, pagination } = builder;
+      const { sql, parameters, pagination } = builder;
 
       const { products, total } = await this.productRepo.manager.query<{
         products: ProductQueryResult[];
         total: number;
-      }>(query, values);
+      }>(sql, parameters);
 
       return {
         products: ProductMapper.toDomainList(products).unwrap(),
