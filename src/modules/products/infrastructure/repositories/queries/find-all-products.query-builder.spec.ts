@@ -115,10 +115,16 @@ describe('QUERIES', () => {
 
     expect(new Set(queries).size).toBe(24);
   });
+});
 
-  it.each(combinations)('generates valid query output for %#', (combination) => {
+/* -------------------------------------------------------------------------- */
+/*                         Query builder tests                                */
+/* -------------------------------------------------------------------------- */
+
+describe('FindAllProductsQueryBuilder', () => {
+  it.each(combinations)('selects the correct query and parameters for %#', (combination) => {
     const options: FindAllProductsSearchOptions = {
-      ...(combination.search ? { search: '  laptop  ' } : {}),
+      ...(combination.search ? { search: `  ${SEARCH_VALUE}  ` } : {}),
       ...(combination.status ? { status: STATUS_VALUE } : {}),
       ...(combination.brand ? { brandId: BRAND_ID } : {}),
       ...(combination.category !== 'none'
@@ -221,7 +227,7 @@ describe('QUERIES', () => {
     if (combination.category !== 'none') {
       expectedParameters.push(CATEGORY_IDS);
     }
-
+    // LIMIT and OFFSET are always the final parameters.
     expectedParameters.push(10, 20);
 
     expect(parameters).toEqual(expectedParameters);
@@ -235,65 +241,6 @@ describe('QUERIES', () => {
     const parameterIndexes = getParameterIndexes(rawSql);
 
     expect(parameterIndexes).toEqual(Array.from({ length: activeFilterCount + 2 }, (_, index) => index + 1));
-  });
-});
-
-/* -------------------------------------------------------------------------- */
-/*                         Query builder tests                                */
-/* -------------------------------------------------------------------------- */
-
-describe('FindAllProductsQueryBuilder', () => {
-  it.each(combinations)('selects the correct query and parameters for %#', (combination) => {
-    const options: FindAllProductsSearchOptions = {
-      ...(combination.search ? { search: `  ${SEARCH_VALUE}  ` } : {}),
-
-      ...(combination.status ? { status: STATUS_VALUE } : {}),
-
-      ...(combination.brand ? { brandId: BRAND_ID } : {}),
-
-      ...(combination.category !== 'none'
-        ? {
-            category: {
-              categoryIds: CATEGORY_IDS,
-              includeCategoryDescendants: combination.category === 'descendants',
-            },
-          }
-        : {}),
-
-      page: 3,
-      limit: 10,
-    };
-
-    const result = new FindAllProductsQueryBuilder(options).build();
-
-    const key = getExpectedQueryKey(combination);
-
-    // The builder must select the corresponding pre-generated query.
-    expect(result.sql).toBe(QUERIES[key]);
-
-    // Parameters must follow the same order as the SQL placeholders.
-    const expectedParameters: unknown[] = [];
-
-    if (combination.search) {
-      expectedParameters.push(SEARCH_VALUE);
-    }
-
-    if (combination.status) {
-      expectedParameters.push(STATUS_VALUE);
-    }
-
-    if (combination.brand) {
-      expectedParameters.push(BRAND_ID);
-    }
-
-    if (combination.category !== 'none') {
-      expectedParameters.push(CATEGORY_IDS);
-    }
-
-    // LIMIT and OFFSET are always the final parameters.
-    expectedParameters.push(10, 20);
-
-    expect(result.parameters).toEqual(expectedParameters);
   });
 
   it('uses the default query when no filters are provided', () => {
