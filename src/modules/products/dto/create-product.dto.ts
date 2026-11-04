@@ -8,9 +8,9 @@ export class CreateProductDto {
   @MaxLength(10000)
   description!: string;
   @IsOptional()
-  @IsUUID()
+  @IsUUID('7')
   brandId: string | null = null;
   @IsOptional()
-  @IsUUID()
+  @IsUUID('7')
   pageId: string | null = null;
 }

@@ -12,10 +12,10 @@ export class UpdateProductDto {
   description?: string;
 
   @IsOptional()
-  @IsUUID()
+  @IsUUID('7')
   brandId?: string | null;
   @IsOptional()
-  @IsUUID()
+  @IsUUID('7')
   pageId?: string | null;
 
   @IsOptional()
