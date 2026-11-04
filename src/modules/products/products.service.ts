@@ -5,6 +5,7 @@ import { Product } from './domain/product';
 import { ProductResponseDto } from './dto/product-response.dto';
 import { FindByIdQuery } from './dto/find-by-id-query.dto';
 import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -23,6 +24,12 @@ export class ProductsService {
         categories: query.include.includes('categories'),
         variants: query.include.includes('variants'),
       })
+      .map((p) => p.toJSON())
+      .unwrap();
+  }
+  update(productId: string, data: UpdateProductDto): Promise<ProductResponseDto> {
+    return this.productRepo
+      .update(productId, data)
       .map((p) => p.toJSON())
       .unwrap();
   }
