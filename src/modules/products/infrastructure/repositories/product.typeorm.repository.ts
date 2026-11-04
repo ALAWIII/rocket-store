@@ -106,10 +106,7 @@ export class ProductRepository implements IProductRepository {
       .map((result) => result.affected ?? 0)
       .mapErr(mapTypeOrmError);
   }
-  findById(
-    productId: string,
-    include: FindProductByIdQueryFlags = { variants: false, brand: false, categories: false },
-  ): DBResult<ProductDetails> {
+  findById(productId: string, include: FindProductByIdQueryFlags): DBResult<ProductDetails> {
     const { variants, brand, categories } = include;
     return Result.wrapAsync(async () => {
       const result = await this.productRepo.manager.query<ProductDetailsResult[]>(FIND_PRODUCT_BY_ID_SQL, [
@@ -124,14 +121,15 @@ export class ProductRepository implements IProductRepository {
     })
       .mapErr(mapTypeOrmError)
       .andThen(({ product, brand, categories, variants }) =>
-        Result.wrap(() => {
-          return {
-            product: ProductMapper.toDomain(product).unwrap(),
-            brand: brand ? BrandMapper.toDomain(brand).unwrap() : null,
-            variants: variants.map((v) => ProductVariantMapper.toDomain(v).unwrap()),
-            categories: categories.map((cat) => CategoryMapper.toDomain(cat).unwrap()),
-          };
-        }),
+        Result.wrap(
+          () =>
+            new ProductDetails({
+              product: ProductMapper.toDomain(product).unwrap(),
+              brand: brand ? BrandMapper.toDomain(brand).unwrap() : null,
+              variants: variants.map((v) => ProductVariantMapper.toDomain(v).unwrap()),
+              categories: categories.map((cat) => CategoryMapper.toDomain(cat).unwrap()),
+            }),
+        ),
       );
   }
   findAll(options: FindAllProductsSearchOptions): DBResult<FindAllProductsQueryResult> {
