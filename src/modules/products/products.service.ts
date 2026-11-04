@@ -6,6 +6,7 @@ import { ProductResponseDto } from './dto/product-response.dto';
 import { FindByIdQuery } from './dto/find-by-id-query.dto';
 import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductCategoriesResponseDto } from './dto/product-categories-response.dto';
 
 @Injectable()
 export class ProductsService {
@@ -31,6 +32,14 @@ export class ProductsService {
     return this.productRepo
       .update(productId, data)
       .map((p) => p.toJSON())
+      .unwrap();
+  }
+  attachCategories(productId: string, categoryIds: string[]): Promise<ProductCategoriesResponseDto> {
+    const productCategories = [...new Set(categoryIds)].map((categoryId) => ({ productId, categoryId }));
+
+    return this.productRepo
+      .attachCategories(productCategories)
+      .map((pcs) => ({ categoryIds: pcs.map((pc) => pc.categoryId) }))
       .unwrap();
   }
 }
