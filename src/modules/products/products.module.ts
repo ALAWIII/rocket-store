@@ -10,7 +10,6 @@ import { IProductRepository } from './infrastructure/repositories/product.reposi
 import { ProductRepository } from './infrastructure/repositories/product.typeorm.repository';
 import { IProductVariantRepository } from './infrastructure/repositories/product-variant.repository';
 import { ProductVariantRepository } from './infrastructure/repositories/product-variant.typeorm.repository';
-import { ImagesModule } from '../images/images.module';
 
 @Module({
   imports: [
@@ -21,7 +20,6 @@ import { ImagesModule } from '../images/images.module';
       ProductImageEntity,
       ProductVariantImageEntity,
     ]),
-    ImagesModule,
   ],
   providers: [
     ProductsService,
