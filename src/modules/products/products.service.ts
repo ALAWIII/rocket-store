@@ -58,4 +58,10 @@ export class ProductsService {
       .map((imgs) => imgs.map((img) => img.toJSON()))
       .unwrap();
   }
+  detachImages(productId: string, imageIds: string[]): Promise<DetachObjectResponseDto> {
+    return this.productRepo
+      .detachImages(productId, imageIds)
+      .map((affected) => ({ affected }))
+      .unwrap();
+  }
 }
