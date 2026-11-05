@@ -7,6 +7,7 @@ import { FindByIdQuery } from './dto/find-by-id-query.dto';
 import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductCategoriesResponseDto } from './dto/product-categories-response.dto';
+import { DetachObjectResponseDto } from '../shared/dto/detach-object-response.dto';
 
 @Injectable()
 export class ProductsService {
@@ -40,6 +41,12 @@ export class ProductsService {
     return this.productRepo
       .attachCategories(productCategories)
       .map((pcs) => ({ categoryIds: pcs.map((pc) => pc.categoryId) }))
+      .unwrap();
+  }
+  detachCategories(productId: string, categoryIds: string[]): Promise<DetachObjectResponseDto> {
+    return this.productRepo
+      .detachCategories(productId, categoryIds)
+      .map((affected) => ({ affected }))
       .unwrap();
   }
 }
