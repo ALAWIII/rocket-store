@@ -8,6 +8,8 @@ import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductCategoriesResponseDto } from './dto/product-categories-response.dto';
 import { DetachObjectResponseDto } from '../shared/dto/detach-object-response.dto';
+import { ProductImage } from './domain/product-image';
+import { ImageResponseDto } from '../shared/dto/image-response.dto';
 
 @Injectable()
 export class ProductsService {
@@ -47,6 +49,13 @@ export class ProductsService {
     return this.productRepo
       .detachCategories(productId, categoryIds)
       .map((affected) => ({ affected }))
+      .unwrap();
+  }
+  attachImages(productId: string, imageIds: string[]): Promise<ImageResponseDto[]> {
+    const productImages = [...new Set(imageIds)].map((imageId) => ProductImage.create({ productId, imageId }).unwrap());
+    return this.productRepo
+      .attachImages(productImages)
+      .map((imgs) => imgs.map((img) => img.toJSON()))
       .unwrap();
   }
 }
