@@ -10,8 +10,8 @@ import { RemoveBrandsResponseDto } from './dto/remove-brands-response.dto';
 import { FindAllBrandsFilterDto } from './dto/find-all-brands-filter.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { AttachImagesToBrandDto } from './dto/attach-images-to-brand.dto';
-import { DetachBrandImagesDto } from './dto/detach-images-of-brand.dto';
-import { DetachImagesResponseDto } from '../shared/dto/detach-images-response.dto';
+import { DetachObjectResponseDto } from '../shared/dto/detach-object-response.dto';
+import { DetachImagesDto } from '../shared/dto/detach-images.dto';
 
 @Controller('brands')
 export class BrandsController {
@@ -62,8 +62,8 @@ export class BrandsController {
   @RequirePermission(AllPermissions.images.ImagesAttachAny)
   detachImages(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
-    @Body() dto: DetachBrandImagesDto,
-  ): Promise<DetachImagesResponseDto> {
+    @Body() dto: DetachImagesDto,
+  ): Promise<DetachObjectResponseDto> {
     return this.brandService.detachImages(id, dto);
   }
 }

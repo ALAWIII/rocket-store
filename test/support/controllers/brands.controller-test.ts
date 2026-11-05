@@ -8,7 +8,7 @@ import { FindAllBrandsFilterDto } from 'src/modules/brands/dto/find-all-brands-f
 import { RemoveBrandsResponseDto } from 'src/modules/brands/dto/remove-brands-response.dto';
 import { AttachImagesToBrandDto } from 'src/modules/brands/dto/attach-images-to-brand.dto';
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
-import { DetachImagesResponseDto } from 'src/modules/shared/dto/detach-images-response.dto';
+import { DetachObjectResponseDto } from 'src/modules/shared/dto/detach-object-response.dto';
 
 export class BrandsControllerTest {
   readonly urlPrefix = '/api/v1/brands';
@@ -71,7 +71,7 @@ export class BrandsControllerTest {
       .post(`${this.urlPrefix}/${brandId}/images/detach`)
       .send({ imageIds })
       .expect(statusCode.code);
-    const body = parseResponseBody<DetachImagesResponseDto>(response, statusCode.parseBody);
+    const body = parseResponseBody<DetachObjectResponseDto>(response, statusCode.parseBody);
     return { response, body };
   }
 }

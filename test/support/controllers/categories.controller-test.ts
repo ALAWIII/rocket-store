@@ -9,7 +9,7 @@ import { AffectedDeletedResponseDto } from 'src/modules/shared/dto/affected-dele
 import { AttachImagesToCategoryDto } from 'src/modules/categories/dto/attach-images-to-category.dto';
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
 import { DetachImagesDto } from 'src/modules/shared/dto/detach-images.dto';
-import { DetachImagesResponseDto } from 'src/modules/shared/dto/detach-images-response.dto';
+import { DetachObjectResponseDto } from 'src/modules/shared/dto/detach-object-response.dto';
 
 export class CategoriesControllerTest {
   readonly urlPrefix = '/api/v1/categories';
@@ -83,7 +83,7 @@ export class CategoriesControllerTest {
     statusCode: ExpectedTestStatusCode = { code: 201, parseBody: true },
   ) {
     const response = await this.agent.post(`${this.urlPrefix}/${id}/images/detach`).send(data).expect(statusCode.code);
-    const body = parseResponseBody<DetachImagesResponseDto>(response, statusCode.parseBody);
+    const body = parseResponseBody<DetachObjectResponseDto>(response, statusCode.parseBody);
     return { response, body };
   }
   async findBanners(id: string, statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true }) {

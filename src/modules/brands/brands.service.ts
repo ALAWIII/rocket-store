@@ -10,8 +10,8 @@ import { FindAllBrandsFilterDto } from './dto/find-all-brands-filter.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { AttachImagesToBrandDto } from './dto/attach-images-to-brand.dto';
 import { BrandImage } from './domain/brand-image';
-import { DetachBrandImagesDto } from './dto/detach-images-of-brand.dto';
-import { DetachImagesResponseDto } from '../shared/dto/detach-images-response.dto';
+import { DetachObjectResponseDto } from '../shared/dto/detach-object-response.dto';
+import { DetachImagesDto } from '../shared/dto/detach-images.dto';
 
 @Injectable()
 export class BrandsService {
@@ -64,7 +64,7 @@ export class BrandsService {
       .map((bimgs) => bimgs.map((b) => b.toJSON()))
       .unwrap();
   }
-  detachImages(brandId: string, imageIds: DetachBrandImagesDto): Promise<DetachImagesResponseDto> {
+  detachImages(brandId: string, imageIds: DetachImagesDto): Promise<DetachObjectResponseDto> {
     return this.brandRepo
       .detachImages(brandId, imageIds.imageIds)
       .map((v) => {

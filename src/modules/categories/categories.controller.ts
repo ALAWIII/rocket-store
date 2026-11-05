@@ -11,7 +11,7 @@ import { AffectedDeletedResponseDto } from '../shared/dto/affected-deleted-respo
 import { AttachImagesToCategoryDto } from './dto/attach-images-to-category.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { DetachImagesDto } from '../shared/dto/detach-images.dto';
-import { DetachImagesResponseDto } from '../shared/dto/detach-images-response.dto';
+import { DetachObjectResponseDto } from '../shared/dto/detach-object-response.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -76,7 +76,7 @@ export class CategoriesController {
   detachImages(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Body() dto: DetachImagesDto,
-  ): Promise<DetachImagesResponseDto> {
+  ): Promise<DetachObjectResponseDto> {
     return this.catService.detachImages(id, dto);
   }
 
