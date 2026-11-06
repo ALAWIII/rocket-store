@@ -9,7 +9,7 @@ class ProductVariantImageDto {
   sortOrder!: number;
 }
 
-export class AttachProductVariantImagesDto {
+export class ProductVariantImagesDto {
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
