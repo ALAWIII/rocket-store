@@ -5,6 +5,9 @@ import { ProductVariant } from './domain/product-variant';
 import { ProductVariantResponseDto } from './dto/product-variant-response.dto';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 import { UpdateVariantsSortOrderDto } from './dto/update-variant-sort-order.dto';
+import { AttachProductVariantImagesDto } from './dto/attach-images-to-product-variant.dto';
+import { ProductVariantImage } from './domain/product-variant-image';
+import { ImageResponseDto } from '../shared/dto/image-response.dto';
 
 @Injectable()
 export class ProductsVariantsService {
@@ -38,6 +41,13 @@ export class ProductsVariantsService {
     return this.pvariantRepo
       .updateSortOrders(productId, orders.orders)
       .map((pvs) => pvs.map((pv) => pv.toJSON()))
+      .unwrap();
+  }
+  attachImages(productVaraintId: string, data: AttachProductVariantImagesDto): Promise<ImageResponseDto[]> {
+    const images = data.images.map((img) => ProductVariantImage.create({ ...img, productVaraintId }).unwrap());
+    return this.pvariantRepo
+      .attachImages(images)
+      .map((imgs) => imgs.map((img) => img.toJSON()))
       .unwrap();
   }
 }
