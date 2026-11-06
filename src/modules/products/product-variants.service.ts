@@ -8,6 +8,7 @@ import { UpdateVariantsSortOrderDto } from './dto/update-variant-sort-order.dto'
 import { AttachProductVariantImagesDto } from './dto/attach-images-to-product-variant.dto';
 import { ProductVariantImage } from './domain/product-variant-image';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
+import { DetachObjectResponseDto } from '../shared/dto/detach-object-response.dto';
 
 @Injectable()
 export class ProductsVariantsService {
@@ -43,11 +44,19 @@ export class ProductsVariantsService {
       .map((pvs) => pvs.map((pv) => pv.toJSON()))
       .unwrap();
   }
-  attachImages(productVaraintId: string, data: AttachProductVariantImagesDto): Promise<ImageResponseDto[]> {
-    const images = data.images.map((img) => ProductVariantImage.create({ ...img, productVaraintId }).unwrap());
+  attachImages(variantId: string, data: AttachProductVariantImagesDto): Promise<ImageResponseDto[]> {
+    const images = data.images.map((img) =>
+      ProductVariantImage.create({ ...img, productVaraintId: variantId }).unwrap(),
+    );
     return this.pvariantRepo
       .attachImages(images)
       .map((imgs) => imgs.map((img) => img.toJSON()))
+      .unwrap();
+  }
+  detachImages(variantId: string, imageIds: string[]): Promise<DetachObjectResponseDto> {
+    return this.pvariantRepo
+      .detachImages(variantId, imageIds)
+      .map((affected) => ({ affected }))
       .unwrap();
   }
 }
