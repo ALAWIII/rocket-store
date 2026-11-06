@@ -24,7 +24,7 @@ export class ProductVariantEntity {
   quantity!: number;
   @Column('jsonb', { default: () => `'{}'::jsonb` })
   info!: unknown;
-  @Column('varchar', { length: 500, nullable: true })
+  @Column('varchar', { length: 2000, nullable: true })
   description!: string | null;
 
   @Column('varchar', { length: 9 })

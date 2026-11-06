@@ -35,7 +35,10 @@ type ProductVariantPrimitives = {
   createdAt: Date | string;
   updatedAt: Date | string;
 };
-type CreateProductVariantPrimitives = Omit<ProductVariantPrimitives, 'id' | 'createdAt' | 'status' | 'updatedAt'>;
+type CreateProductVariantPrimitives = Omit<
+  ProductVariantPrimitives,
+  'id' | 'createdAt' | 'status' | 'updatedAt' | 'images'
+>;
 export class ProductVariant {
   private constructor(private props: ProductVariantProps) {}
   static create(data: CreateProductVariantPrimitives): Result<ProductVariant, ValueObjectError> {
@@ -58,7 +61,7 @@ export class ProductVariant {
         new ProductVariant({
           id: ProductVariantId.create(id).unwrap(),
           productId: ProductId.create(productId).unwrap(),
-          description: DomainText.create(description ?? '').unwrap(),
+          description: DomainText.create(description ?? '', 2000).unwrap(),
           quantity: Quantity.create(quantity).unwrap(),
           price: Price.create(price).unwrap(),
           info,
