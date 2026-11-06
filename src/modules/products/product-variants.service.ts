@@ -5,10 +5,11 @@ import { ProductVariant } from './domain/product-variant';
 import { ProductVariantResponseDto } from './dto/product-variant-response.dto';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 import { UpdateVariantsSortOrderDto } from './dto/update-variant-sort-order.dto';
-import { AttachProductVariantImagesDto } from './dto/attach-images-to-product-variant.dto';
+import { ProductVariantImagesDto } from './dto/product-variant-images.dto';
 import { ProductVariantImage } from './domain/product-variant-image';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { DetachObjectResponseDto } from '../shared/dto/detach-object-response.dto';
+import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
 
 @Injectable()
 export class ProductsVariantsService {
@@ -44,7 +45,7 @@ export class ProductsVariantsService {
       .map((pvs) => pvs.map((pv) => pv.toJSON()))
       .unwrap();
   }
-  attachImages(variantId: string, data: AttachProductVariantImagesDto): Promise<ImageResponseDto[]> {
+  attachImages(variantId: string, data: ProductVariantImagesDto): Promise<ImageResponseDto[]> {
     const images = data.images.map((img) =>
       ProductVariantImage.create({ ...img, productVaraintId: variantId }).unwrap(),
     );
@@ -56,6 +57,12 @@ export class ProductsVariantsService {
   detachImages(variantId: string, imageIds: string[]): Promise<DetachObjectResponseDto> {
     return this.pvariantRepo
       .detachImages(variantId, imageIds)
+      .map((affected) => ({ affected }))
+      .unwrap();
+  }
+  updateVariantImageSortOrders(variantId: string, images: ProductVariantImagesDto): Promise<AffectedResponseDto> {
+    return this.pvariantRepo
+      .updateVariantImageSortOrders(variantId, images.images)
       .map((affected) => ({ affected }))
       .unwrap();
   }
