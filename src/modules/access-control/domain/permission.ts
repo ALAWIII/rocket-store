@@ -24,8 +24,8 @@ const Matrix = {
     read: ['any'],
     update: ['any'],
     delete: ['any'],
-    attachImage: ['any'],
-    attachCategory: ['any'],
+    manageImage: ['any'],
+    manageCategory: ['any'],
   },
   order: {
     create: ['own', 'any'],
