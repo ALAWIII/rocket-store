@@ -3,6 +3,7 @@ import { IProductVariantRepository } from './infrastructure/repositories/product
 import { CreateProductVariantDto } from './dto/create-product-variant.dto';
 import { ProductVariant } from './domain/product-variant';
 import { ProductVariantResponseDto } from './dto/product-variant-response.dto';
+import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 
 @Injectable()
 export class ProductsVariantsService {
@@ -11,6 +12,12 @@ export class ProductsVariantsService {
     const variant = ProductVariant.create(data).unwrap();
     return this.pvariantRepo
       .create(variant)
+      .map((pv) => pv.toJSON())
+      .unwrap();
+  }
+  update(productId: string, variantId: string, data: UpdateProductVariantDto): Promise<ProductVariantResponseDto> {
+    return this.pvariantRepo
+      .update(productId, variantId, data)
       .map((pv) => pv.toJSON())
       .unwrap();
   }
