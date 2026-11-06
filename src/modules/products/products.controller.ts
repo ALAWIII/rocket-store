@@ -1,10 +1,12 @@
-import { Body, Controller, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductResponseDto } from './dto/product-response.dto';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
 import { AllPermissions } from '../access-control/domain/permission';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { FindByIdQuery } from './dto/find-by-id-query.dto';
+import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -21,5 +23,14 @@ export class ProductsController {
     @Body() data: UpdateProductDto,
   ): Promise<ProductResponseDto> {
     return this.productService.update(id, data);
+  }
+
+  @Get(':id')
+  @RequirePermission(AllPermissions.product.ProductReadAny)
+  findById(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Query() query: FindByIdQuery,
+  ): Promise<ProductDetailsResponseDto> {
+    return this.productService.findById(id, query);
   }
 }
