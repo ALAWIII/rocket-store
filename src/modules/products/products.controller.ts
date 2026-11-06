@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { ProductResponseDto } from './dto/product-response.dto';
@@ -11,6 +11,8 @@ import { FindAllProductsQueryDto } from './dto/find-all-products-query.dto';
 import { FindAllProductsResponseDto } from './dto/find-all-products-response.dto';
 import { AttachImagesDto } from '../shared/dto/attach-images.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
+import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
+import { DetachImagesDto } from '../shared/dto/detach-images.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -49,5 +51,14 @@ export class ProductsController {
     @Body() data: AttachImagesDto,
   ): Promise<ImageResponseDto[]> {
     return this.productService.attachImages(id, data.imageIds);
+  }
+  @Post(':id/images/detach')
+  @HttpCode(HttpStatus.OK)
+  @RequirePermission(AllPermissions.product.ProductAttachImageAny)
+  detachImages(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Body() data: DetachImagesDto,
+  ): Promise<AffectedResponseDto> {
+    return this.productService.detachImages(id, data.imageIds);
   }
 }
