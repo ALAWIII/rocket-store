@@ -48,7 +48,7 @@ export class ProductsController {
     return this.productService.findAll(query);
   }
   @Post(':id/images')
-  @RequirePermission(AllPermissions.product.ProductAttachImageAny)
+  @RequirePermission(AllPermissions.product.ProductManageImageAny)
   attachImages(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Body() data: AttachImagesDto,
@@ -57,7 +57,7 @@ export class ProductsController {
   }
   @Post(':id/images/detach')
   @HttpCode(HttpStatus.OK)
-  @RequirePermission(AllPermissions.product.ProductAttachImageAny)
+  @RequirePermission(AllPermissions.product.ProductManageImageAny)
   detachImages(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Body() data: DetachImagesDto,
@@ -66,7 +66,7 @@ export class ProductsController {
   }
 
   @Post(':id/categories')
-  @RequirePermission(AllPermissions.product.ProductAttachCategoryAny)
+  @RequirePermission(AllPermissions.product.ProductManageCategoryAny)
   attachCategories(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Body() data: AttachCategoriesDto,
@@ -75,7 +75,7 @@ export class ProductsController {
   }
   @Post(':id/categories/detach')
   @HttpCode(HttpStatus.OK)
-  @RequirePermission(AllPermissions.product.ProductAttachCategoryAny)
+  @RequirePermission(AllPermissions.product.ProductManageCategoryAny)
   detachCategories(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Body() data: DetachCategoriesDto,
