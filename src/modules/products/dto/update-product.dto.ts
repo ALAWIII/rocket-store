@@ -1,5 +1,5 @@
 import { IsIn, IsOptional, IsString, IsUUID, Length, MaxLength } from 'class-validator';
-import { type ProductStatus } from '../domain/product-status';
+import { PRODUCT_STATUS, type ProductStatus } from '../domain/product-status';
 export class UpdateProductDto {
   @IsOptional()
   @IsString()
@@ -19,6 +19,6 @@ export class UpdateProductDto {
   pageId?: string | null;
 
   @IsOptional()
-  @IsIn(['active', 'archived'])
+  @IsIn(PRODUCT_STATUS)
   status?: ProductStatus;
 }
