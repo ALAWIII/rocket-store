@@ -9,6 +9,8 @@ import { FindByIdQuery } from './dto/find-by-id-query.dto';
 import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
 import { FindAllProductsQueryDto } from './dto/find-all-products-query.dto';
 import { FindAllProductsResponseDto } from './dto/find-all-products-response.dto';
+import { AttachImagesDto } from '../shared/dto/attach-images.dto';
+import { ImageResponseDto } from '../shared/dto/image-response.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -39,5 +41,13 @@ export class ProductsController {
   @Get()
   findAll(@Query() query: FindAllProductsQueryDto): Promise<FindAllProductsResponseDto> {
     return this.productService.findAll(query);
+  }
+  @Post(':id/images')
+  @RequirePermission(AllPermissions.product.ProductAttachImageAny)
+  attachImages(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Body() data: AttachImagesDto,
+  ): Promise<ImageResponseDto[]> {
+    return this.productService.attachImages(id, data.imageIds);
   }
 }
