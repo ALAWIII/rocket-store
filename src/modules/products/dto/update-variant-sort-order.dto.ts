@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { ArrayMinSize, IsArray, IsInt, IsUUID, Min, ValidateNested } from 'class-validator';
 
-class VariantOrder {
+class VariantOrderDto {
   @IsUUID('7')
   variantId!: string;
 
@@ -10,10 +10,10 @@ class VariantOrder {
   sortOrder!: number;
 }
 
-export class UpdateVariantsSortOrder {
+export class UpdateVariantsSortOrderDto {
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
-  @Type(() => VariantOrder)
-  orders!: VariantOrder[];
+  @Type(() => VariantOrderDto)
+  orders!: VariantOrderDto[];
 }
