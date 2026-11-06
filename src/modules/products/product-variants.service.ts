@@ -4,6 +4,7 @@ import { CreateProductVariantDto } from './dto/create-product-variant.dto';
 import { ProductVariant } from './domain/product-variant';
 import { ProductVariantResponseDto } from './dto/product-variant-response.dto';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
+import { UpdateVariantsSortOrderDto } from './dto/update-variant-sort-order.dto';
 
 @Injectable()
 export class ProductsVariantsService {
@@ -19,6 +20,12 @@ export class ProductsVariantsService {
     return this.pvariantRepo
       .update(productId, variantId, data)
       .map((pv) => pv.toJSON())
+      .unwrap();
+  }
+  updateSortOrder(productId: string, orders: UpdateVariantsSortOrderDto): Promise<ProductVariantResponseDto[]> {
+    return this.pvariantRepo
+      .updateSortOrders(productId, orders.orders)
+      .map((pvs) => pvs.map((pv) => pv.toJSON()))
       .unwrap();
   }
 }
