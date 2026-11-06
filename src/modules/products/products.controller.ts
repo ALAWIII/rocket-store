@@ -7,6 +7,8 @@ import { AllPermissions } from '../access-control/domain/permission';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FindByIdQuery } from './dto/find-by-id-query.dto';
 import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
+import { FindAllProductsQueryDto } from './dto/find-all-products-query.dto';
+import { FindAllProductsResponseDto } from './dto/find-all-products-response.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -32,5 +34,10 @@ export class ProductsController {
     @Query() query: FindByIdQuery,
   ): Promise<ProductDetailsResponseDto> {
     return this.productService.findById(id, query);
+  }
+
+  @Get()
+  findAll(@Query() query: FindAllProductsQueryDto): Promise<FindAllProductsResponseDto> {
+    return this.productService.findAll(query);
   }
 }
