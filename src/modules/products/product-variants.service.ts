@@ -13,8 +13,8 @@ import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
 @Injectable()
 export class ProductsVariantsService {
   constructor(private readonly pvariantRepo: IProductVariantRepository) {}
-  create(data: CreateProductVariantDto): Promise<ProductVariantResponseDto> {
-    const variant = ProductVariant.create(data).unwrap();
+  create(productId: string, data: CreateProductVariantDto): Promise<ProductVariantResponseDto> {
+    const variant = ProductVariant.create({ ...data, productId }).unwrap();
     return this.pvariantRepo
       .create(variant)
       .map((pv) => pv.toJSON())
