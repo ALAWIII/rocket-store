@@ -8,7 +8,6 @@ import { UpdateVariantsSortOrderDto } from './dto/update-variant-sort-order.dto'
 import { ProductVariantImagesDto } from './dto/product-variant-images.dto';
 import { ProductVariantImage } from './domain/product-variant-image';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
-import { DetachObjectResponseDto } from '../shared/dto/detach-object-response.dto';
 import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
 
 @Injectable()
@@ -54,7 +53,7 @@ export class ProductsVariantsService {
       .map((imgs) => imgs.map((img) => img.toJSON()))
       .unwrap();
   }
-  detachImages(variantId: string, imageIds: string[]): Promise<DetachObjectResponseDto> {
+  detachImages(variantId: string, imageIds: string[]): Promise<AffectedResponseDto> {
     return this.pvariantRepo
       .detachImages(variantId, imageIds)
       .map((affected) => ({ affected }))

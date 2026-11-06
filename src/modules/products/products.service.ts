@@ -7,11 +7,11 @@ import { FindByIdQuery } from './dto/find-by-id-query.dto';
 import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductCategoriesResponseDto } from './dto/product-categories-response.dto';
-import { DetachObjectResponseDto } from '../shared/dto/detach-object-response.dto';
 import { ProductImage } from './domain/product-image';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { FindAllProductsQueryDto } from './dto/find-all-products-query.dto';
 import { FindAllProductsResponseDto } from './dto/find-all-products-response.dto';
+import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
 
 @Injectable()
 export class ProductsService {
@@ -55,7 +55,7 @@ export class ProductsService {
       .map((pcs) => ({ categoryIds: pcs.map((pc) => pc.categoryId) }))
       .unwrap();
   }
-  detachCategories(productId: string, categoryIds: string[]): Promise<DetachObjectResponseDto> {
+  detachCategories(productId: string, categoryIds: string[]): Promise<AffectedResponseDto> {
     return this.productRepo
       .detachCategories(productId, categoryIds)
       .map((affected) => ({ affected }))
@@ -68,7 +68,7 @@ export class ProductsService {
       .map((imgs) => imgs.map((img) => img.toJSON()))
       .unwrap();
   }
-  detachImages(productId: string, imageIds: string[]): Promise<DetachObjectResponseDto> {
+  detachImages(productId: string, imageIds: string[]): Promise<AffectedResponseDto> {
     return this.productRepo
       .detachImages(productId, imageIds)
       .map((affected) => ({ affected }))
