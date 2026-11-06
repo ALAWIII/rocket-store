@@ -15,6 +15,7 @@ import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
 import { DetachImagesDto } from '../shared/dto/detach-images.dto';
 import { AttachCategoriesDto } from './dto/attach-categories.dto';
 import { ProductCategoriesResponseDto } from './dto/product-categories-response.dto';
+import { DetachCategoriesDto } from './dto/detach-categories.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -71,5 +72,14 @@ export class ProductsController {
     @Body() data: AttachCategoriesDto,
   ): Promise<ProductCategoriesResponseDto> {
     return this.productService.attachCategories(id, data.categoryIds);
+  }
+  @Post(':id/categories/detach')
+  @HttpCode(HttpStatus.OK)
+  @RequirePermission(AllPermissions.product.ProductAttachCategoryAny)
+  detachCategories(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Body() data: DetachCategoriesDto,
+  ): Promise<AffectedResponseDto> {
+    return this.productService.detachCategories(id, data.categoryIds);
   }
 }
