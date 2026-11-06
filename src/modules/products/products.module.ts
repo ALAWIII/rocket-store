@@ -10,6 +10,7 @@ import { IProductRepository } from './infrastructure/repositories/product.reposi
 import { ProductRepository } from './infrastructure/repositories/product.typeorm.repository';
 import { IProductVariantRepository } from './infrastructure/repositories/product-variant.repository';
 import { ProductVariantRepository } from './infrastructure/repositories/product-variant.typeorm.repository';
+import { ProductsController } from './products.controller';
 
 @Module({
   imports: [
@@ -26,5 +27,6 @@ import { ProductVariantRepository } from './infrastructure/repositories/product-
     { provide: IProductRepository, useClass: ProductRepository },
     { provide: IProductVariantRepository, useClass: ProductVariantRepository },
   ],
+  controllers: [ProductsController],
 })
 export class ProductsModule {}
