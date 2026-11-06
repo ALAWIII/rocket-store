@@ -16,6 +16,12 @@ export class ProductsVariantsService {
       .map((pv) => pv.toJSON())
       .unwrap();
   }
+  findById(productId: string, variantId: string): Promise<ProductVariantResponseDto> {
+    return this.pvariantRepo
+      .findById(productId, variantId)
+      .map((pv) => pv.toJSON())
+      .unwrap();
+  }
   update(productId: string, variantId: string, data: UpdateProductVariantDto): Promise<ProductVariantResponseDto> {
     return this.pvariantRepo
       .update(productId, variantId, data)
