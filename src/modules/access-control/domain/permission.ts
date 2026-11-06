@@ -20,10 +20,12 @@ const Matrix = {
     reload: ['all'],
   },
   product: {
-    create: ['own', 'any'],
-    read: ['own', 'any'],
-    update: ['own', 'any'],
-    delete: ['own', 'any'],
+    create: ['any'],
+    read: ['any'],
+    update: ['any'],
+    delete: ['any'],
+    attachImage: ['any'],
+    attachCategory: ['any'],
   },
   order: {
     create: ['own', 'any'],
