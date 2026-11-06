@@ -141,7 +141,7 @@ export class ProductVariantRepository implements IProductVariantRepository {
 
   updateVariantImageSortOrders(productVariantId: string, ordering: VariantImageSortOrderUpdate[]): DBResult<number> {
     return Result.wrapAsync(async () => {
-      const ids = ordering.map((x) => x.productVariantImageId);
+      const ids = ordering.map((x) => x.imageId);
       const sortOrders = ordering.map((x) => x.sortOrder);
       const rows = await this.productVariantImageRepo.query<ProductVariantImageEntity[]>(
         UPDATE_VARIANT_IMAGE_SORT_ORDER_SQL,

@@ -16,7 +16,7 @@ export type VariantSortOrderUpdate = {
   sortOrder: number;
 };
 export type VariantImageSortOrderUpdate = {
-  productVariantImageId: string;
+  imageId: string;
   sortOrder: number;
 };
 export abstract class IProductVariantRepository {
