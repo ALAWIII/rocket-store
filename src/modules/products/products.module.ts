@@ -11,6 +11,8 @@ import { ProductRepository } from './infrastructure/repositories/product.typeorm
 import { IProductVariantRepository } from './infrastructure/repositories/product-variant.repository';
 import { ProductVariantRepository } from './infrastructure/repositories/product-variant.typeorm.repository';
 import { ProductsController } from './products.controller';
+import { ProductsVariantsService } from './product-variants.service';
+import { ProductVariantImagesController, ProductVariantsController } from './product-variants.controller';
 
 @Module({
   imports: [
@@ -24,9 +26,10 @@ import { ProductsController } from './products.controller';
   ],
   providers: [
     ProductsService,
+    ProductsVariantsService,
     { provide: IProductRepository, useClass: ProductRepository },
     { provide: IProductVariantRepository, useClass: ProductVariantRepository },
   ],
-  controllers: [ProductsController],
+  controllers: [ProductsController, ProductVariantsController, ProductVariantImagesController],
 })
 export class ProductsModule {}
