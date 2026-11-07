@@ -58,7 +58,7 @@ export class ProductVariantsController {
 }
 
 @Controller('product-variants/:variantId/images')
-export class ProductVariantController {
+export class ProductVariantImagesController {
   constructor(private readonly pvariantService: ProductsVariantsService) {}
 
   @Post()
