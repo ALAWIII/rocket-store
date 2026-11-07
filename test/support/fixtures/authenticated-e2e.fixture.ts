@@ -12,6 +12,11 @@ import { ImagesControllerTest } from '../controllers/images.controller-test';
 import { ObjectStorageClientTest } from '../helpers/object-storage-client.helper';
 import { BrandsControllerTest } from '../controllers/brands.controller-test';
 import { CategoriesControllerTest } from '../controllers/categories.controller-test';
+import { ProductsControllerTest } from '../controllers/products/products.controller-test';
+import {
+  ProductVariantImagesControllerTest,
+  ProductVariantsControllerTest,
+} from '../controllers/products/product-variants.controller-test';
 
 export const test = baseTest
   .extend('mailClient', async () => {
@@ -58,21 +63,17 @@ export const test = baseTest
       .build();
     return adminUser;
   })
-  .extend('userController', ({ adminUser }) => {
-    return new UsersControllerTest(adminUser.userAgent);
-  })
-  .extend('roleController', ({ adminUser }) => {
-    return new RolesControllerTest(adminUser.userAgent);
-  })
-  .extend('myAddressController', ({ adminUser }) => {
-    return new MyAddressesControllerTest(adminUser.userAgent);
-  })
-  .extend('userAddressController', ({ adminUser }) => {
-    return new UserAddressesControllerTest(adminUser.userAgent);
-  })
-  .extend('imageController', ({ adminUser }) => {
-    return new ImagesControllerTest(adminUser.userAgent);
-  })
+  .extend('userController', ({ adminUser }) => new UsersControllerTest(adminUser.userAgent))
+  .extend('roleController', ({ adminUser }) => new RolesControllerTest(adminUser.userAgent))
+  .extend('myAddressController', ({ adminUser }) => new MyAddressesControllerTest(adminUser.userAgent))
+  .extend('userAddressController', ({ adminUser }) => new UserAddressesControllerTest(adminUser.userAgent))
+  .extend('imageController', ({ adminUser }) => new ImagesControllerTest(adminUser.userAgent))
   .extend('brandController', ({ adminUser }) => new BrandsControllerTest(adminUser.userAgent))
-  .extend('categoryController', ({ adminUser }) => new CategoriesControllerTest(adminUser.userAgent));
+  .extend('categoryController', ({ adminUser }) => new CategoriesControllerTest(adminUser.userAgent))
+  .extend('productController', ({ adminUser }) => new ProductsControllerTest(adminUser.userAgent))
+  .extend('productVariantsController', ({ adminUser }) => new ProductVariantsControllerTest(adminUser.userAgent))
+  .extend(
+    'productVariantImagesController',
+    ({ adminUser }) => new ProductVariantImagesControllerTest(adminUser.userAgent),
+  );
 export const it = test;
