@@ -1,3 +1,4 @@
+import { v7 } from 'uuid';
 import { it } from '../support/fixtures/authenticated-e2e.fixture';
 
 describe.concurrent('products (e2e)', () => {
@@ -21,6 +22,21 @@ describe.concurrent('products (e2e)', () => {
       expect(playstation.description).toBe(description);
       expect(playstation.brandId).toBe(brandId);
       expect(playstation.pageId).toBe(pageId);
+    });
+    it('should fail create product because of invalid brandId.', async ({ productController }) => {
+      const title = 'playstation';
+      const description = 'a console to play bloodborne';
+      const brandId = v7();
+      const pageId = null;
+      await productController.create(
+        {
+          title,
+          description,
+          brandId,
+          pageId,
+        },
+        { code: 404 },
+      );
     });
   });
 });
