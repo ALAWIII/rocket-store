@@ -45,7 +45,7 @@ export class AddressEntity {
   @DeleteDateColumnTz()
   deletedAt?: Date;
 
-  @Column({ type: 'uuid', name: 'user_id' })
+  @Column({ type: 'uuid' })
   @ForeignKey(
     () => UserEntity,
     (u) => u.id,
