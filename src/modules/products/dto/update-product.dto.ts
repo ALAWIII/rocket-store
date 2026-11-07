@@ -1,5 +1,9 @@
 import { IsIn, IsOptional, IsString, IsUUID, Length, MaxLength } from 'class-validator';
 import { PRODUCT_STATUS, type ProductStatus } from '../domain/product-status';
+import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-least-one-defined.decorator';
+const productFieldsList = ['title', 'description', 'brandId', 'pageId', 'status'];
+const productFields = productFieldsList.join(', ');
+
 export class UpdateProductDto {
   @IsOptional()
   @IsString()
@@ -21,4 +25,8 @@ export class UpdateProductDto {
   @IsOptional()
   @IsIn(PRODUCT_STATUS)
   status?: ProductStatus;
+  @AtLeastOneDefined(productFieldsList, {
+    message: `At least one field must be provided: (${productFields}).`,
+  })
+  private readonly __atLeastOneDefined?: never;
 }
