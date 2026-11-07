@@ -7,7 +7,7 @@ import {
 } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 import { type ProductStatus } from '../../domain/product-status';
 
-@Entity('product_variants')
+@Entity('product_variants', { synchronize: false })
 export class ProductVariantEntity {
   @UuidV7PrimaryColumn()
   id!: string;

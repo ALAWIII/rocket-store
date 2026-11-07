@@ -2,7 +2,7 @@ import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/times
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { Column, Entity } from 'typeorm';
 
-@Entity('brands')
+@Entity('brands', { synchronize: false })
 export class BrandEntity {
   @UuidV7PrimaryColumn()
   id!: string;

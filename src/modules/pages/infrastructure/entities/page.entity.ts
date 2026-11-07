@@ -4,7 +4,7 @@ import { CategoryEntity } from '../../../categories/infrastructure/entities/cate
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
-@Entity('pages')
+@Entity('pages', { synchronize: false })
 export class PageEntity {
   @UuidV7PrimaryColumn()
   id!: string;

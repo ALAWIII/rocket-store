@@ -5,7 +5,7 @@ import { type CategoryImageRole } from '../../domain/category-image';
 import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.entity';
 import { CategoryEntity } from './category.entity';
 
-@Entity('category_images')
+@Entity('category_images', { synchronize: false })
 @Index('uq_category_icon', ['categoryId'], {
   unique: true,
   where: `"imageRole" = 'icon'`,

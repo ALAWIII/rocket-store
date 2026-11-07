@@ -1,7 +1,7 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
 import { Column, Entity, Index, PrimaryColumn } from 'typeorm';
 
-@Entity('verifications')
+@Entity('verifications',{synchronize:false})
 export class Verification {
   @UuidV7PrimaryColumn()
   id!: string;

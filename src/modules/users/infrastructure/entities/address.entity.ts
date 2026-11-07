@@ -7,7 +7,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
-@Entity('addresses')
+@Entity('addresses', { synchronize: false })
 export class AddressEntity {
   @UuidV7PrimaryColumn()
   id!: string;

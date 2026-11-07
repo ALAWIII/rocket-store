@@ -2,7 +2,7 @@ import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuid
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
 
-@Entity('sessions')
+@Entity('sessions' ,{synchronize:false})
 export class Session {
   @UuidV7PrimaryColumn()
   id!: string;

@@ -7,7 +7,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
-@Entity('product_variant_images')
+@Entity('product_variant_images', { synchronize: false })
 @Unique('uq_product_variant_image', ['productVariantId', 'imageId'])
 export class ProductVariantImageEntity {
   @UuidV7PrimaryColumn()

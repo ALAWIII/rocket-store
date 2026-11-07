@@ -4,7 +4,7 @@ import { type ImageMimeTypes } from 'src/modules/shared/value-objects/image-mime
 import { UserEntity } from 'src/modules/users/infrastructure/entities/user.entity';
 import { Column, Entity, ForeignKey } from 'typeorm';
 
-@Entity('images')
+@Entity('images', { synchronize: false })
 export class ImageEntity {
   @UuidV7PrimaryColumn()
   id!: string;

@@ -4,7 +4,7 @@ import { ImageEntity } from 'src/modules/images/infrastructure/entities/image.en
 import { ProductEntity } from './product.entity';
 import { CreateDateColumnTz } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 
-@Entity('product_images')
+@Entity('product_images', { synchronize: false })
 export class ProductImageEntity {
   @UuidV7PrimaryColumn()
   id!: string;

@@ -4,7 +4,7 @@ import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuid
 import { Column, Entity, ForeignKey, Index } from 'typeorm';
 import { UserEntity } from './user.entity';
 
-@Entity('user_images')
+@Entity('user_images', { synchronize: false })
 @Index('uq_user_image', ['userId'], {
   unique: true,
 })

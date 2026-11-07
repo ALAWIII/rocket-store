@@ -2,7 +2,7 @@ import { CategoryEntity } from 'src/modules/categories/infrastructure/entities/c
 import { Entity, ForeignKey, Index, PrimaryColumn } from 'typeorm';
 import { ProductEntity } from './product.entity';
 
-@Entity('product_categories')
+@Entity('product_categories', { synchronize: false })
 @Index('idx_pc_cat', ['categoryId'])
 @Index('idx_pc_prod', ['productId'])
 export class ProductCategoryEntity {

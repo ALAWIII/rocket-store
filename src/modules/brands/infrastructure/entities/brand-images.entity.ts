@@ -7,7 +7,7 @@ import { type BrandImageRole } from '../../domain/brand-image';
 
 // allow one optional logo, and multiple banners.
 // an image is only attached once per brand, no same imageId can be attached on same brand.
-@Entity('brand_images')
+@Entity('brand_images', { synchronize: false })
 @Index('uq_brand_logo', ['brandId'], {
   unique: true,
   where: `"imageRole" = 'logo'`,
