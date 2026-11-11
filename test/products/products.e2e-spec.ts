@@ -39,4 +39,14 @@ describe.concurrent('products (e2e)', () => {
       );
     });
   });
+  describe('PATCH /api/v1/products (update)', () => {
+    it('should success update details for existing product', async ({ productController }) => {
+      const product = (await productController.create()).body!;
+      const description = 'a console that you can modify';
+      const updatedProduct = (await productController.update(product.id, { description })).body!;
+      expect(updatedProduct.id).toBe(product.id);
+      expect(updatedProduct.description).toBe(description);
+      expect(updatedProduct.updatedAt).not.toBe(product.updatedAt);
+    });
+  });
 });
