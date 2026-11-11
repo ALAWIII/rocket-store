@@ -8,7 +8,6 @@ export class CreateProductVariantsTable1794056052964 implements MigrationInterfa
         "id" uuid NOT NULL,
         "productId" uuid NOT NULL,
         "price" integer NOT NULL,
-        "quantity" integer NOT NULL,
         "info" jsonb NOT NULL DEFAULT '{}'::jsonb,
         "description" varchar(2000),
         "status" varchar(9) NOT NULL,
