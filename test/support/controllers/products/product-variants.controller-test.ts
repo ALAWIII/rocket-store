@@ -21,7 +21,7 @@ export class ProductVariantsControllerTest {
 
   async create(
     productId: string,
-    data: CreateProductVariantDto = { description: 'variant', info: {}, price: 49.99, quantity: 1, sortOrder: 1 },
+    data: CreateProductVariantDto = { description: 'variant', info: {}, price: 49.99, sortOrder: 1 },
     statusCode: ExpectedTestStatusCode = { code: 201, parseBody: true },
   ) {
     const response = await this.agent

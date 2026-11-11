@@ -3,7 +3,6 @@ import { serializeProps } from 'src/modules/shared/utils/serialize-props.util';
 import { DomainText } from 'src/modules/shared/value-objects/domain-text';
 import { ProductId, ProductVariantId } from 'src/modules/shared/value-objects/ids';
 import { Price } from 'src/modules/shared/value-objects/price';
-import { Quantity } from 'src/modules/shared/value-objects/quantity';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
 import { ProductStatus } from './product-status';
 import { Image } from 'src/modules/images/domain/image';
@@ -13,7 +12,6 @@ type ProductVariantProps = {
   readonly id: ProductVariantId;
   readonly productId: ProductId;
   price: Price;
-  quantity: Quantity;
   description: DomainText | null;
   info: JsonObject;
   status: ProductStatus;
@@ -26,7 +24,6 @@ type ProductVariantPrimitives = {
   readonly id: string;
   readonly productId: string;
   price: number;
-  quantity: number;
   description: string | null;
   status: ProductStatus;
   info: JsonObject;
@@ -55,14 +52,13 @@ export class ProductVariant {
     return this.build(data);
   }
   static build(data: ProductVariantPrimitives): Result<ProductVariant, ValueObjectError> {
-    const { id, description, price, productId, quantity, info, createdAt, status, updatedAt, sortOrder, images } = data;
+    const { id, description, price, productId, info, createdAt, status, updatedAt, sortOrder, images } = data;
     return Result.wrap(
       () =>
         new ProductVariant({
           id: ProductVariantId.create(id).unwrap(),
           productId: ProductId.create(productId).unwrap(),
           description: DomainText.create(description ?? '', 2000).unwrap(),
-          quantity: Quantity.create(quantity).unwrap(),
           price: Price.create(price).unwrap(),
           info,
           sortOrder,

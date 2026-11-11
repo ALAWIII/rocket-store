@@ -6,7 +6,6 @@ import { ProductVariantImage } from '../../domain/product-variant-image';
 import { JsonObject } from 'src/modules/shared/value-objects/json-object';
 export type UpdateVariant = {
   price?: number;
-  quantity?: number;
   description?: string | null;
   status?: ProductStatus;
   info?: JsonObject;

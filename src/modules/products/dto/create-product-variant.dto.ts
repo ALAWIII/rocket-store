@@ -6,10 +6,6 @@ export class CreateProductVariantDto {
   @Min(0)
   price!: number;
 
-  @IsInt()
-  @Min(0)
-  quantity!: number;
-
   @IsOptional()
   @IsString()
   @MaxLength(2000)

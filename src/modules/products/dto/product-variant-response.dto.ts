@@ -6,7 +6,6 @@ export class ProductVariantResponseDto {
   id!: string;
   productId!: string;
   price!: number;
-  quantity!: number;
   description!: string | null;
   status!: ProductStatus;
   info!: JsonObject;

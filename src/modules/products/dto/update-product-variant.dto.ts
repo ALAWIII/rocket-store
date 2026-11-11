@@ -1,4 +1,4 @@
-import { IsIn, IsInt, IsNumber, IsObject, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { IsIn, IsNumber, IsObject, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-least-one-defined.decorator';
 import { type JsonObject } from 'src/modules/shared/value-objects/json-object';
 import { PRODUCT_STATUS, type ProductStatus } from '../domain/product-status';
@@ -9,11 +9,6 @@ export class UpdateProductVariantDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   price?: number;
-
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  quantity?: number;
 
   @IsOptional()
   @IsString()
