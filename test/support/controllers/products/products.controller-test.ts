@@ -34,7 +34,7 @@ export class ProductsControllerTest {
 
   async update(
     id: string,
-    data: UpdateProductDto = { title: 'updated' },
+    data: Omit<UpdateProductDto, '__atLeastOneDefined'> = { title: 'updated' },
     statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true },
   ) {
     const response = await this.agent.patch(`${this.urlPrefix}/${id}`).send(data).expect(statusCode.code);
