@@ -35,7 +35,6 @@ export class ProductsController {
   }
 
   @Get(':id')
-  @RequirePermission(AllPermissions.product.ProductReadAny)
   findById(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Query() query: FindByIdQueryDto,
