@@ -3,7 +3,7 @@ import { CreateProductDto } from 'src/modules/products/dto/create-product.dto';
 import { DetachCategoriesDto } from 'src/modules/products/dto/detach-categories.dto';
 import { FindAllProductsQueryDto } from 'src/modules/products/dto/find-all-products-query.dto';
 import { FindAllProductsResponseDto } from 'src/modules/products/dto/find-all-products-response.dto';
-import { FindByIdQuery } from 'src/modules/products/dto/find-by-id-query.dto';
+import { FindByIdQueryDto } from 'src/modules/products/dto/find-by-id-query.dto';
 import { ProductCategoriesResponseDto } from 'src/modules/products/dto/product-categories-response.dto';
 import { ProductDetailsResponseDto } from 'src/modules/products/dto/product-details-response.dto';
 import { ProductResponseDto } from 'src/modules/products/dto/product-response.dto';
@@ -43,7 +43,7 @@ export class ProductsControllerTest {
 
   async findById(
     id: string,
-    query: FindByIdQuery = { include: [] },
+    query: FindByIdQueryDto = { include: [] },
     statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true },
   ) {
     const response = await this.agent.get(`${this.urlPrefix}/${id}`).query(query).expect(statusCode.code);

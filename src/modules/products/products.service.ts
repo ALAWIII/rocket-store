@@ -3,7 +3,7 @@ import { IProductRepository } from './infrastructure/repositories/product.reposi
 import { CreateProductDto } from './dto/create-product.dto';
 import { Product } from './domain/product';
 import { ProductResponseDto } from './dto/product-response.dto';
-import { FindByIdQuery } from './dto/find-by-id-query.dto';
+import { FindByIdQueryDto } from './dto/find-by-id-query.dto';
 import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductCategoriesResponseDto } from './dto/product-categories-response.dto';
@@ -23,7 +23,7 @@ export class ProductsService {
       .map((p) => p.toJSON())
       .unwrap();
   }
-  findById(productId: string, query: FindByIdQuery): Promise<ProductDetailsResponseDto> {
+  findById(productId: string, query: FindByIdQueryDto): Promise<ProductDetailsResponseDto> {
     const include = query?.include ?? [];
     return this.productRepo
       .findById(productId, {
