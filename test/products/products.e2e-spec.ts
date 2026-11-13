@@ -46,6 +46,23 @@ describe.concurrent('products (e2e)', () => {
       expect(findP.id).toEqual(p.id);
       expect(findP).toEqual(p);
     });
+    it('should success find existing product with all details by its id.', async ({
+      productController,
+      brandController,
+      //     categoryController,
+    }) => {
+      const sony = (await brandController.create({ name: 'sony' })).body!;
+      //  const entertainment = (await categoryController.create({ name: 'entertainment' })).body!;
+      // const console = (await categoryController.create({ name: 'console' })).body!;
+      const p = (
+        await productController.create({ brandId: sony.id, title: 'playstation', description: '', pageId: null })
+      ).body!;
+      const findP = (await productController.findById(p.id, { include: ['brand', 'categories'] })).body!;
+      expect(findP.product.id).toEqual(p.id);
+
+      // must test attaching categories and variants first.
+      // expect(findP).toEqual({ product: p, brand: sony, categories: [entertainment, console], variants: [] });
+    });
     it('should success return 404 code for finding not existing product by an id.', async ({ productController }) => {
       await productController.findById(v7(), { include: [] }, { code: 404 });
     });
