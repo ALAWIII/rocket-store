@@ -144,5 +144,11 @@ describe.concurrent('products (e2e)', () => {
       expect(cats.length).toBe(2);
       expect(productCats.length).toBe(2);
     });
+    it('should success return 404 code when attempt attach non existing category to a product.', async ({
+      productController,
+    }) => {
+      const p = (await productController.create()).body!;
+      await productController.attachCategories(p.id, { categoryIds: [v7()] }, { code: 404 });
+    });
   });
 });
