@@ -127,4 +127,22 @@ describe.concurrent('products (e2e)', () => {
       expect(findProductAfterDetach.coverImage).toBeUndefined();
     });
   });
+  describe('POST /api/v1/products/:id/categories (attachCategories)', () => {
+    it('should success attach category to a product.', async ({ productController, categoryController }) => {
+      const p = (await productController.create()).body!;
+      const entertainment = (await categoryController.create({ name: 'entertainment' })).body!;
+      const gaming = (await categoryController.create({ name: 'gaming' })).body!;
+      const cats = (
+        await productController.attachCategories(p.id, { categoryIds: [entertainment.id, gaming.id] })
+      ).body!.categoryIds.toSorted((a, b) => a.localeCompare(b));
+      const productCats = (await productController.findById(p.id, { include: ['categories'] }))
+        .body!.categories.map((cat) => cat.id)
+        .toSorted((a, b) => a.localeCompare(b));
+      expect(cats).toContain(entertainment.id);
+      expect(cats).toContain(gaming.id);
+      expect(productCats).toEqual(cats);
+      expect(cats.length).toBe(2);
+      expect(productCats.length).toBe(2);
+    });
+  });
 });
