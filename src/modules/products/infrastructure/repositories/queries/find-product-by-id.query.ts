@@ -17,7 +17,7 @@ export const FIND_PRODUCT_BY_ID_SQL =
       ON pi."productId" = p.id
     LEFT JOIN images img
       ON img.id = pi."imageId"
-    WHERE p.id = $1;
+    WHERE p.id = $1
   ),
 
   find_variants AS (
