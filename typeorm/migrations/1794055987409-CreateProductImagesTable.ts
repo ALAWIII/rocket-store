@@ -26,9 +26,15 @@ export class CreateProductImagesTable1794055987409 implements MigrationInterface
           ON UPDATE NO ACTION
       );
     `);
+
+    await queryRunner.query(/*sql*/`
+      CREATE UNIQUE INDEX IF NOT EXISTS "uq_product_id_image"
+      ON "product_images" ("productId");
+    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP INDEX IF EXISTS "uq_product_id_image";`);
     await queryRunner.query(`DROP TABLE IF EXISTS "product_images";`);
   }
 
