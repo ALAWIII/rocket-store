@@ -76,5 +76,8 @@ describe.concurrent('products (e2e)', () => {
       expect(updatedProduct.description).toBe(description);
       expect(updatedProduct.updatedAt).not.toBe(product.updatedAt);
     });
+    it('should success return 404 code when attempt to update non existing product.', async ({ productController }) => {
+      await productController.update(v7(), { description: 'nothing to update.' }, { code: 404 });
+    });
   });
 });
