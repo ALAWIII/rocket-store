@@ -90,5 +90,11 @@ describe.concurrent('products (e2e)', () => {
       expect(attachedImage).toEqual(img);
       expect(coverImage).toEqual({ ...img, createdAt: coverImage?.createdAt });
     });
+    it('should success return 404 when attempt to attach non-existing image to the product.', async ({
+      productController,
+    }) => {
+      const p = (await productController.create()).body!;
+      await productController.attachImages(p.id, { imageIds: [v7()] }, { code: 404 });
+    });
   });
 });
