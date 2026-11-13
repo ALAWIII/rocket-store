@@ -90,7 +90,6 @@ export class ProductRepository implements IProductRepository {
         .insert()
         .into(ProductImageEntity)
         .values(imagesJson)
-        .orIgnore()
         .returning('"imageId"');
       return this.productImageRepo.manager
         .createQueryBuilder(ImageEntity, 'images')
