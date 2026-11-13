@@ -39,6 +39,14 @@ describe.concurrent('products (e2e)', () => {
       );
     });
   });
+  describe('GET /api/v1/products (findById)', () => {
+    it('should success find existing product by its id.', async ({ productController }) => {
+      const p = (await productController.create()).body!;
+      const findP = (await productController.findById(p.id)).body!.product;
+      expect(findP.id).toEqual(p.id);
+      expect(findP).toEqual(p);
+    });
+  });
   describe('PATCH /api/v1/products (update)', () => {
     it('should success update details for existing product', async ({ productController }) => {
       const product = (await productController.create()).body!;
