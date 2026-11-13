@@ -96,5 +96,15 @@ describe.concurrent('products (e2e)', () => {
       const p = (await productController.create()).body!;
       await productController.attachImages(p.id, { imageIds: [v7()] }, { code: 404 });
     });
+    it('should success return 409 code when attempt to attach more than one cover image to product.', async ({
+      productController,
+      imageController,
+    }) => {
+      const img = (await imageController.upload()).body!;
+      const img2 = (await imageController.upload()).body!;
+      const p = (await productController.create()).body!;
+
+      await productController.attachImages(p.id, { imageIds: [img.id, img2.id] }, { code: 409 });
+    });
   });
 });
