@@ -151,4 +151,16 @@ describe.concurrent('products (e2e)', () => {
       await productController.attachCategories(p.id, { categoryIds: [v7()] }, { code: 404 });
     });
   });
+  describe('POST /api/v1/products/:id/categories/detach (detachCategories)', () => {
+    it('should success detach categories from product', async ({ productController, categoryController }) => {
+      const p = (await productController.create()).body!;
+      const entertainment = (await categoryController.create({ name: 'entertainment' })).body!;
+      const gaming = (await categoryController.create({ name: 'gaming' })).body!;
+      const cats = (
+        await productController.attachCategories(p.id, { categoryIds: [entertainment.id, gaming.id] })
+      ).body!.categoryIds.toSorted((a, b) => a.localeCompare(b));
+      const detached = (await productController.detachCategories(p.id, { categoryIds: cats })).body!;
+      expect(detached).toEqual({ affected: 2 });
+    });
+  });
 });
