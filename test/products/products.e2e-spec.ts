@@ -107,4 +107,15 @@ describe.concurrent('products (e2e)', () => {
       await productController.attachImages(p.id, { imageIds: [img.id, img2.id] }, { code: 409 });
     });
   });
+  describe('POST /api/v1/products/:id/images/detach (detachImages)', () => {
+    it('should success detach cover image from product.', async ({ productController, imageController }) => {
+      const p = (await productController.create()).body!;
+      const img = (await imageController.upload()).body!;
+      const attachImage = (await productController.attachImages(p.id, { imageIds: [img.id] })).body!;
+      const detachImage = (await productController.detachImages(p.id, { imageIds: [img.id] })).body;
+      const findProductAfterDetach = (await productController.findById(p.id)).body!.product;
+      expect(detachImage).toEqual({ affected: 1 });
+      expect(findProductAfterDetach.coverImage).toBeUndefined();
+    });
+  });
 });
