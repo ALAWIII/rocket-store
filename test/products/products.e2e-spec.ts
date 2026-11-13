@@ -46,6 +46,9 @@ describe.concurrent('products (e2e)', () => {
       expect(findP.id).toEqual(p.id);
       expect(findP).toEqual(p);
     });
+    it('should success return 404 code for finding not existing product by an id.', async ({ productController }) => {
+      await productController.findById(v7(), { include: [] }, { code: 404 });
+    });
   });
   describe('PATCH /api/v1/products (update)', () => {
     it('should success update details for existing product', async ({ productController }) => {
