@@ -24,11 +24,12 @@ export class ProductsService {
       .unwrap();
   }
   findById(productId: string, query: FindByIdQuery): Promise<ProductDetailsResponseDto> {
+    const include = query?.include ?? [];
     return this.productRepo
       .findById(productId, {
-        brand: query.include.includes('brand'),
-        categories: query.include.includes('categories'),
-        variants: query.include.includes('variants'),
+        brand: include.includes('brand'),
+        categories: include.includes('categories'),
+        variants: include.includes('variants'),
       })
       .map((p) => p.toJSON())
       .unwrap();
