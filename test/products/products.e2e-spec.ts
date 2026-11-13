@@ -80,4 +80,15 @@ describe.concurrent('products (e2e)', () => {
       await productController.update(v7(), { description: 'nothing to update.' }, { code: 404 });
     });
   });
+  describe('POST /api/v1/products/:id/images (attachImages)', () => {
+    it('should success attach one cover image to the product.', async ({ productController, imageController }) => {
+      const img = (await imageController.upload()).body!;
+      const p = (await productController.create()).body!;
+      const attachedImage = (await productController.attachImages(p.id, { imageIds: [img.id] })).body![0];
+      const { coverImage, ...product } = (await productController.findById(p.id)).body!.product;
+      expect(product.id).toBe(p.id);
+      expect(attachedImage).toEqual(img);
+      expect(coverImage).toEqual({ ...img, createdAt: coverImage?.createdAt });
+    });
+  });
 });
