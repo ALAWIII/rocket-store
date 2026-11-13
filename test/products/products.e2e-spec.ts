@@ -117,5 +117,14 @@ describe.concurrent('products (e2e)', () => {
       expect(detachImage).toEqual({ affected: 1 });
       expect(findProductAfterDetach.coverImage).toBeUndefined();
     });
+    it('should success detach non-existing image from product and return 0 affected.', async ({
+      productController,
+    }) => {
+      const p = (await productController.create()).body!;
+      const detachImage = (await productController.detachImages(p.id, { imageIds: [v7()] })).body;
+      const findProductAfterDetach = (await productController.findById(p.id)).body!.product;
+      expect(detachImage).toEqual({ affected: 0 });
+      expect(findProductAfterDetach.coverImage).toBeUndefined();
+    });
   });
 });
