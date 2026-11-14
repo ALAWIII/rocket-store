@@ -5,6 +5,7 @@ import { Image } from 'src/modules/images/domain/image';
 import { ProductVariantImage } from '../../domain/product-variant-image';
 import { JsonObject } from 'src/modules/shared/value-objects/json-object';
 export type UpdateVariant = {
+  title?: string;
   price?: number;
   description?: string | null;
   status?: ProductStatus;

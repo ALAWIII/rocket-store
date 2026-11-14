@@ -9,7 +9,10 @@ export class UpdateProductVariantDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   price?: number;
-
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  title?: string;
   @IsOptional()
   @IsString()
   @MaxLength(2000)

@@ -5,6 +5,7 @@ import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
 export class ProductVariantResponseDto {
   id!: string;
   productId!: string;
+  title!: string;
   price!: number;
   description!: string | null;
   status!: ProductStatus;

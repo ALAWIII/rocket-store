@@ -1,5 +1,5 @@
 import { UuidV7PrimaryColumn } from 'src/modules/shared/database/decorators/uuidv7-primary-column.decorator';
-import { Column, Entity, ForeignKey } from 'typeorm';
+import { Column, Entity, ForeignKey, Unique } from 'typeorm';
 import { ProductEntity } from './product.entity';
 import {
   CreateDateColumnTz,
@@ -8,6 +8,7 @@ import {
 import { type ProductStatus } from '../../domain/product-status';
 
 @Entity('product_variants', { synchronize: false })
+@Unique('uq_title_product_id', ['productId', 'title'])
 export class ProductVariantEntity {
   @UuidV7PrimaryColumn()
   id!: string;
@@ -18,6 +19,8 @@ export class ProductVariantEntity {
     { onDelete: 'NO ACTION' },
   )
   productId!: string;
+  @Column('varchar', { length: 50 })
+  title!: string;
   @Column('integer')
   price!: number;
 

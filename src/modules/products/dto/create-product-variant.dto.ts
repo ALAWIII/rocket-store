@@ -5,7 +5,9 @@ export class CreateProductVariantDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @Min(0)
   price!: number;
-
+  @IsString()
+  @MaxLength(50)
+  title!: string;
   @IsOptional()
   @IsString()
   @MaxLength(2000)

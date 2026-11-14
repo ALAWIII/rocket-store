@@ -7,6 +7,7 @@ export class CreateProductVariantsTable1794056052964 implements MigrationInterfa
       CREATE TABLE IF NOT EXISTS "product_variants" (
         "id" uuid NOT NULL,
         "productId" uuid NOT NULL,
+        "title" varchar(50) NOT NULL,
         "price" integer NOT NULL,
         "info" jsonb NOT NULL DEFAULT '{}'::jsonb,
         "description" varchar(2000),
@@ -25,9 +26,14 @@ export class CreateProductVariantsTable1794056052964 implements MigrationInterfa
           ON UPDATE NO ACTION
       );
     `);
+    await queryRunner.query(/*sql*/`
+      CREATE UNIQUE INDEX IF NOT EXISTS "uq_title_product_id"
+      ON "product_variants" ("productId","title");
+      `)
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DROP INDEX IF EXISTS "uq_title_product_id";`);
     await queryRunner.query(`DROP TABLE IF EXISTS "product_variants";`);
   }
 

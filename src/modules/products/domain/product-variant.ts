@@ -7,10 +7,12 @@ import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.
 import { ProductStatus } from './product-status';
 import { Image } from 'src/modules/images/domain/image';
 import { type JsonObject } from 'src/modules/shared/value-objects/json-object';
+import { Title } from 'src/modules/shared/value-objects/title';
 
 type ProductVariantProps = {
   readonly id: ProductVariantId;
   readonly productId: ProductId;
+  title: Title;
   price: Price;
   description: DomainText | null;
   info: JsonObject;
@@ -23,6 +25,7 @@ type ProductVariantProps = {
 type ProductVariantPrimitives = {
   readonly id: string;
   readonly productId: string;
+  title: string;
   price: number;
   description: string | null;
   status: ProductStatus;
@@ -52,12 +55,13 @@ export class ProductVariant {
     return this.build(data);
   }
   static build(data: ProductVariantPrimitives): Result<ProductVariant, ValueObjectError> {
-    const { id, description, price, productId, info, createdAt, status, updatedAt, sortOrder, images } = data;
+    const { id, description, title, price, productId, info, createdAt, status, updatedAt, sortOrder, images } = data;
     return Result.wrap(
       () =>
         new ProductVariant({
           id: ProductVariantId.create(id).unwrap(),
           productId: ProductId.create(productId).unwrap(),
+          title: Title.create(title, 50).unwrap(),
           description: DomainText.create(description ?? '', 2000).unwrap(),
           price: Price.create(price).unwrap(),
           info,
