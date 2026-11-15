@@ -9,7 +9,7 @@ export class CreateProductsTable1794055871067 implements MigrationInterface {
            id uuid PRIMARY KEY,
            title varchar(200) NOT NULL,
            description text NOT NULL DEFAULT '',
-           status varchar(9) NOT NULL,
+           visibility varchar(9) NOT NULL,
            "brandId" uuid NULL,
            "pageId" uuid NULL,
            "createdAt" timestamptz NOT NULL DEFAULT now(),
@@ -26,24 +26,19 @@ export class CreateProductsTable1794055871067 implements MigrationInterface {
              ON DELETE SET NULL
          );
        `);
-    await queryRunner.query(`
-      CREATE INDEX IF NOT EXISTS idx_products_page
+    await queryRunner.query(/*sql*/`
+      CREATE INDEX IF NOT EXISTS "idx_products_page"
       ON products ("pageId");
     `);
 
-    await queryRunner.query(`
-      CREATE INDEX IF NOT EXISTS idx_products_brand
+    await queryRunner.query(/*sql*/`
+      CREATE INDEX IF NOT EXISTS "idx_products_brand"
       ON products ("brandId");
     `);
 
-    await queryRunner.query(`
-      CREATE INDEX IF NOT EXISTS idx_products_status
-      ON products ("status");
-    `);
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP INDEX IF EXISTS idx_products_status;`);
     await queryRunner.query(`DROP INDEX IF EXISTS idx_products_brand;`);
     await queryRunner.query(`DROP INDEX IF EXISTS idx_products_page;`);
     await queryRunner.query(`DROP TABLE IF EXISTS products;`);

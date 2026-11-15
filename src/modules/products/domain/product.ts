@@ -5,7 +5,7 @@ import { DomainText } from 'src/modules/shared/value-objects/domain-text';
 import { BrandId, PageId, ProductId } from 'src/modules/shared/value-objects/ids';
 import { Title } from 'src/modules/shared/value-objects/title';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
-import { ProductStatus } from './product-status';
+import { ProductVisibility } from './product-visibility';
 
 type ProductProps = {
   readonly id: ProductId;
@@ -14,7 +14,7 @@ type ProductProps = {
   brandId: BrandId | null;
   pageId: PageId | null;
   coverImage?: Image;
-  status: ProductStatus;
+  visibility: ProductVisibility;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -25,7 +25,7 @@ type ProductPrimitives = {
   brandId: string | null;
   pageId: string | null;
   coverImage?: Image;
-  status: ProductStatus;
+  visibility: ProductVisibility;
   createdAt: Date | string;
   updatedAt: Date | string;
 };
@@ -39,14 +39,14 @@ export class Product {
       id: ProductId.create().unwrap().toString(),
       createdAt: date,
       updatedAt: date,
-      status: 'active',
+      visibility: 'public',
     });
   }
   static restore(data: ProductPrimitives): Result<Product, ValueObjectError> {
     return this.build(data);
   }
   private static build(data: ProductPrimitives): Result<Product, ValueObjectError> {
-    const { id, title, description, brandId, createdAt, updatedAt, pageId, coverImage, status } = data;
+    const { id, title, description, brandId, createdAt, updatedAt, pageId, coverImage, visibility } = data;
     return Result.wrap(() => {
       return new Product({
         id: ProductId.create(id).unwrap(),
@@ -55,7 +55,7 @@ export class Product {
         brandId: brandId ? BrandId.create(brandId).unwrap() : null,
         pageId: pageId ? PageId.create(pageId).unwrap() : null,
         coverImage,
-        status,
+        visibility,
         createdAt: new Date(createdAt),
         updatedAt: new Date(updatedAt),
       });

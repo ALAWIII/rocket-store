@@ -1,4 +1,4 @@
-import { PRODUCT_STATUS, type ProductStatus } from '../domain/product-status';
+import { PRODUCT_STATUS, type ProductVisibility } from '../domain/product-visibility';
 
 import { Type } from 'class-transformer';
 import { IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
@@ -11,7 +11,7 @@ export class FindAllProductsQueryDto {
 
   @IsOptional()
   @IsIn(PRODUCT_STATUS)
-  status?: ProductStatus;
+  visibility?: ProductVisibility;
 
   @IsOptional()
   @IsUUID('7')

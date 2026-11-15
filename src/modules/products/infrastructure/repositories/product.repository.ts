@@ -1,6 +1,6 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { Product } from '../../domain/product';
-import { ProductStatus } from '../../domain/product-status';
+import { ProductVisibility } from '../../domain/product-visibility';
 import { ProductImage } from '../../domain/product-image';
 import { Image } from 'src/modules/images/domain/image';
 import { ProductEntity } from '../entities/product.entity';
@@ -28,11 +28,11 @@ export type UpdateProduct = {
   description?: string;
   brandId?: string | null;
   pageId?: string | null;
-  status?: ProductStatus;
+  visibility?: ProductVisibility;
 };
 export type FindAllProductsSearchOptions = {
   search?: string;
-  status?: ProductStatus;
+  visibility?: ProductVisibility;
   brandId?: string;
   category?: {
     categoryIds: string[];

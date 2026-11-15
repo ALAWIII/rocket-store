@@ -1,5 +1,5 @@
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
-import { ProductStatus } from '../domain/product-status';
+import { ProductVisibility } from '../domain/product-visibility';
 
 export class ProductResponseDto {
   id!: string;
@@ -8,7 +8,7 @@ export class ProductResponseDto {
   brandId!: string | null;
   pageId!: string | null;
   coverImage?: ImageResponseDto;
-  status!: ProductStatus;
+  visibility!: ProductVisibility;
   createdAt!: Date | string;
   updatedAt!: Date | string;
 }

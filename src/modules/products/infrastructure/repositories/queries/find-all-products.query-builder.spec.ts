@@ -14,7 +14,7 @@ import {
 /* -------------------------------------------------------------------------- */
 
 const SEARCH_VALUE = 'laptop';
-const STATUS_VALUE = 'active' as NonNullable<FindAllProductsSearchOptions['status']>;
+const STATUS_VALUE = 'active' as NonNullable<FindAllProductsSearchOptions['visibility']>;
 
 const BRAND_ID = '00000000-0000-7000-8000-000000000001';
 
@@ -31,12 +31,12 @@ function generateTestCombinations(): Combination[] {
   const combinations: Combination[] = [];
 
   for (const search of [false, true]) {
-    for (const status of [false, true]) {
+    for (const visibility of [false, true]) {
       for (const brand of [false, true]) {
         for (const category of ['none', 'direct', 'descendants'] as const) {
           combinations.push({
             search,
-            status,
+            visibility,
             brand,
             category,
           });
@@ -55,7 +55,7 @@ function getExpectedQueryKey(combination: Combination): QueryKey {
   const parts: string[] = [];
 
   if (combination.search) parts.push('SEARCH');
-  if (combination.status) parts.push('STATUS');
+  if (combination.visibility) parts.push('VISIBILITY');
   if (combination.brand) parts.push('BRAND');
 
   if (combination.category === 'direct') {
@@ -80,7 +80,7 @@ function normalizeSql(sql: string): string {
  * Extracts unique PostgreSQL parameter indexes from a query.
  *
  * For example:
- *   WHERE title = $1 OR description = $1 AND status = $2
+ *   WHERE title = $1 OR description = $1 AND visibility = $2
  *
  * Returns:
  *   [1, 2]
@@ -125,7 +125,7 @@ describe('FindAllProductsQueryBuilder', () => {
   it.each(combinations)('selects the correct query and parameters for %#', (combination) => {
     const options: FindAllProductsSearchOptions = {
       ...(combination.search ? { search: `  ${SEARCH_VALUE}  ` } : {}),
-      ...(combination.status ? { status: STATUS_VALUE } : {}),
+      ...(combination.visibility ? { visibility: STATUS_VALUE } : {}),
       ...(combination.brand ? { brandId: BRAND_ID } : {}),
       ...(combination.category !== 'none'
         ? {
@@ -167,7 +167,7 @@ describe('FindAllProductsQueryBuilder', () => {
 
     expect(sql.includes('p.title &@')).toBe(combination.search);
     expect(sql.includes('p.description &@')).toBe(combination.search);
-    expect(sql.includes('p.status =')).toBe(combination.status);
+    expect(sql.includes('p.visibility =')).toBe(combination.visibility);
     expect(sql.includes('p."brandid" =')).toBe(combination.brand);
 
     if (combination.category === 'direct') {
@@ -221,7 +221,7 @@ describe('FindAllProductsQueryBuilder', () => {
     const expectedParameters: unknown[] = [];
 
     if (combination.search) expectedParameters.push('laptop');
-    if (combination.status) expectedParameters.push(STATUS_VALUE);
+    if (combination.visibility) expectedParameters.push(STATUS_VALUE);
     if (combination.brand) expectedParameters.push(BRAND_ID);
 
     if (combination.category !== 'none') {
@@ -234,7 +234,7 @@ describe('FindAllProductsQueryBuilder', () => {
 
     const activeFilterCount =
       Number(combination.search) +
-      Number(combination.status) +
+      Number(combination.visibility) +
       Number(combination.brand) +
       Number(combination.category !== 'none');
 

@@ -1,5 +1,5 @@
 import { JsonObject } from 'src/modules/shared/value-objects/json-object';
-import { ProductStatus } from '../domain/product-status';
+import { ProductVisibility } from '../domain/product-visibility';
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
 
 export class ProductVariantResponseDto {
@@ -8,7 +8,7 @@ export class ProductVariantResponseDto {
   title!: string;
   price!: number;
   description!: string | null;
-  status!: ProductStatus;
+  visibility!: ProductVisibility;
   info!: JsonObject;
   images?: ImageResponseDto[];
   sortOrder!: number;

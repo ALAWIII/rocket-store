@@ -34,11 +34,11 @@ type ToBoolean<B extends BooleanKey> = B extends 'true' ? true : false;
  */
 export type Combination = {
   [Search in BooleanKey]: {
-    [Status in BooleanKey]: {
+    [Visibility in BooleanKey]: {
       [Brand in BooleanKey]: {
         [Category in CategoryMode]: {
           search: ToBoolean<Search>;
-          status: ToBoolean<Status>;
+          visibility: ToBoolean<Visibility>;
           brand: ToBoolean<Brand>;
           category: Category;
         };
@@ -63,17 +63,17 @@ type AppendKey<Current extends string, Next extends string> = Next extends ''
  * Derives the query key corresponding to a filter combination.
  *
  * Examples:
- * - { search: false, status: false, brand: false, category: 'none' }
+ * - { search: false, visibility: false, brand: false, category: 'none' }
  *   -> 'DEFAULT'
- * - { search: true, status: false, brand: false, category: 'none' }
+ * - { search: true, visibility: false, brand: false, category: 'none' }
  *   -> 'SEARCH'
- * - { search: true, status: true, brand: false, category: 'direct' }
+ * - { search: true, visibility: true, brand: false, category: 'direct' }
  *   -> 'SEARCH_STATUS_CATEGORY'
  */
 export type CombinationKey<C extends Combination> = C extends Combination
   ? AppendKey<
       AppendKey<
-        AppendKey<C['search'] extends true ? 'SEARCH' : '', C['status'] extends true ? 'STATUS' : ''>,
+        AppendKey<C['search'] extends true ? 'SEARCH' : '', C['visibility'] extends true ? 'VISIBILITY' : ''>,
         C['brand'] extends true ? 'BRAND' : ''
       >,
       C['category'] extends 'direct' ? 'CATEGORY' : C['category'] extends 'descendants' ? 'INCLUDE_CATEGORY' : ''
@@ -126,9 +126,9 @@ const CONDITIONS = {
   search: (index: number) => `(p.title &@ $${index} OR p.description &@ $${index})`,
 
   /**
-   * Filters products by their status.
+   * Filters products by their visibility.
    */
-  status: (index: number) => `p.status = $${index}`,
+  visibility: (index: number) => `p.visibility = $${index}`,
 
   /**
    * Filters products by their brand.
@@ -208,7 +208,7 @@ const ORDERING = {
  * 6. Returns the total number of matching products.
  *
  * Parameter allocation order:
- * search -> status -> brand -> categoryIds -> limit -> offset
+ * search -> visibility -> brand -> categoryIds -> limit -> offset
  *
  * This order must remain synchronized with the builder's parameter array.
  */
@@ -228,7 +228,7 @@ function generateQuery(combination: Combination): string {
   // Add the applicable conditions in a fixed parameter order.
   if (combination.search) conditions.push(CONDITIONS.search(nextParameter()));
 
-  if (combination.status) conditions.push(CONDITIONS.status(nextParameter()));
+  if (combination.visibility) conditions.push(CONDITIONS.visibility(nextParameter()));
 
   if (combination.brand) conditions.push(CONDITIONS.brand(nextParameter()));
 
@@ -311,12 +311,12 @@ const CATEGORY_VALUES = ['none', 'direct', 'descendants'] as const;
  */
 function* generateCombinations(): Generator<Combination> {
   for (const search of BOOLEAN_VALUES) {
-    for (const status of BOOLEAN_VALUES) {
+    for (const visibility of BOOLEAN_VALUES) {
       for (const brand of BOOLEAN_VALUES) {
         for (const category of CATEGORY_VALUES) {
           yield {
             search,
-            status,
+            visibility,
             brand,
             category,
           };
@@ -340,7 +340,7 @@ function getCombinationKey(combination: Combination): QueryKey {
 
   if (combination.search) parts.push('SEARCH');
 
-  if (combination.status) parts.push('STATUS');
+  if (combination.visibility) parts.push('VISIBILITY');
 
   if (combination.brand) parts.push('BRAND');
 
@@ -386,10 +386,10 @@ export class FindAllProductsQueryBuilder {
    * Builds the SQL query and its parameter array.
    *
    * Parameter ordering must match generateQuery():
-   * search -> status -> brand -> categoryIds -> limit -> offset.
+   * search -> visibility -> brand -> categoryIds -> limit -> offset.
    */
   build(): BuiltProductQuery {
-    const { search: rawSearch, status, brandId, category } = this.options;
+    const { search: rawSearch, visibility, brandId, category } = this.options;
 
     /**
      * Normalize the search string.
@@ -401,7 +401,7 @@ export class FindAllProductsQueryBuilder {
      * Determine which optional filters are active.
      */
     const hasSearch = Boolean(search);
-    const hasStatus = status !== undefined;
+    const hasVisibility = visibility !== undefined;
     const hasBrand = brandId !== undefined;
 
     /**
@@ -418,7 +418,7 @@ export class FindAllProductsQueryBuilder {
      */
     const combination: Combination = {
       search: hasSearch,
-      status: hasStatus,
+      visibility: hasVisibility,
       brand: hasBrand,
       category: categoryMode,
     };
@@ -442,7 +442,7 @@ export class FindAllProductsQueryBuilder {
 
     if (hasSearch) parameters.push(search);
 
-    if (hasStatus) parameters.push(status);
+    if (hasVisibility) parameters.push(visibility);
 
     if (hasBrand) parameters.push(brandId);
 

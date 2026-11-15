@@ -1,6 +1,6 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
 import { ProductVariant } from '../../domain/product-variant';
-import { ProductStatus } from '../../domain/product-status';
+import { ProductVisibility } from '../../domain/product-visibility';
 import { Image } from 'src/modules/images/domain/image';
 import { ProductVariantImage } from '../../domain/product-variant-image';
 import { JsonObject } from 'src/modules/shared/value-objects/json-object';
@@ -8,7 +8,7 @@ export type UpdateVariant = {
   title?: string;
   price?: number;
   description?: string | null;
-  status?: ProductStatus;
+  visibility?: ProductVisibility;
   info?: JsonObject;
 };
 export type VariantSortOrderUpdate = {

@@ -4,7 +4,7 @@ import { DomainText } from 'src/modules/shared/value-objects/domain-text';
 import { ProductId, ProductVariantId } from 'src/modules/shared/value-objects/ids';
 import { Price } from 'src/modules/shared/value-objects/price';
 import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.error';
-import { ProductStatus } from './product-status';
+import { ProductVisibility } from './product-visibility';
 import { Image } from 'src/modules/images/domain/image';
 import { type JsonObject } from 'src/modules/shared/value-objects/json-object';
 import { Title } from 'src/modules/shared/value-objects/title';
@@ -16,7 +16,7 @@ type ProductVariantProps = {
   price: Price;
   description: DomainText | null;
   info: JsonObject;
-  status: ProductStatus;
+  visibility: ProductVisibility;
   images?: Image[];
   sortOrder: number;
   createdAt: Date;
@@ -28,7 +28,7 @@ type ProductVariantPrimitives = {
   title: string;
   price: number;
   description: string | null;
-  status: ProductStatus;
+  visibility: ProductVisibility;
   info: JsonObject;
   images?: Image[];
   sortOrder: number;
@@ -37,7 +37,7 @@ type ProductVariantPrimitives = {
 };
 type CreateProductVariantPrimitives = Omit<
   ProductVariantPrimitives,
-  'id' | 'createdAt' | 'status' | 'updatedAt' | 'images'
+  'id' | 'createdAt' | 'visibility' | 'updatedAt' | 'images'
 >;
 export class ProductVariant {
   private constructor(private props: ProductVariantProps) {}
@@ -46,7 +46,7 @@ export class ProductVariant {
     return this.build({
       ...data,
       id: ProductVariantId.create().unwrap().toString(),
-      status: 'active',
+      visibility: 'public',
       createdAt: date,
       updatedAt: date,
     });
@@ -55,7 +55,8 @@ export class ProductVariant {
     return this.build(data);
   }
   static build(data: ProductVariantPrimitives): Result<ProductVariant, ValueObjectError> {
-    const { id, description, title, price, productId, info, createdAt, status, updatedAt, sortOrder, images } = data;
+    const { id, description, title, price, productId, info, createdAt, visibility, updatedAt, sortOrder, images } =
+      data;
     return Result.wrap(
       () =>
         new ProductVariant({
@@ -66,7 +67,7 @@ export class ProductVariant {
           price: Price.create(price).unwrap(),
           info,
           sortOrder,
-          status,
+          visibility,
           images,
           createdAt: new Date(createdAt),
           updatedAt: new Date(updatedAt),

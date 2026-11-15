@@ -6,12 +6,11 @@ import {
   UpdateDateColumnTz,
 } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 import { PageEntity } from 'src/modules/pages/infrastructure/entities/page.entity';
-import { type ProductStatus } from '../../domain/product-status';
+import { type ProductVisibility } from '../../domain/product-visibility';
 
 @Entity('products', { synchronize: false })
 @Index('idx_products_page', ['pageId'])
 @Index('idx_products_brand', ['brandId'])
-@Index('idx_products_status', ['status'])
 export class ProductEntity {
   @UuidV7PrimaryColumn()
   id!: string;
@@ -23,7 +22,7 @@ export class ProductEntity {
   description!: string;
 
   @Column('varchar', { length: 9 })
-  status!: ProductStatus;
+  visibility!: ProductVisibility;
   @Column('uuid', { nullable: true })
   @ForeignKey(
     () => BrandEntity,
