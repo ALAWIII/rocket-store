@@ -1,7 +1,7 @@
 import { AttachCategoriesDto } from 'src/modules/products/dto/attach-categories.dto';
 import { CreateProductDto } from 'src/modules/products/dto/create-product.dto';
 import { DetachCategoriesDto } from 'src/modules/products/dto/detach-categories.dto';
-import { FindAllProductsQueryDto } from 'src/modules/products/dto/find-all-products-query.dto';
+import { FindAllCustomerProductsQueryDto } from 'src/modules/products/dto/find-all-products-query.dto';
 import { FindAllProductsResponseDto } from 'src/modules/products/dto/find-all-products-response.dto';
 import { FindByIdQueryDto } from 'src/modules/products/dto/find-by-id-query.dto';
 import { ProductCategoriesResponseDto } from 'src/modules/products/dto/product-categories-response.dto';
@@ -51,7 +51,7 @@ export class ProductsControllerTest {
   }
 
   async findAll(
-    query: FindAllProductsQueryDto = {},
+    query: FindAllCustomerProductsQueryDto = {},
     statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true },
   ) {
     const response = await this.agent.get(this.urlPrefix).query(query).expect(statusCode.code);
