@@ -1,17 +1,15 @@
+import { Transform, Type } from 'class-transformer';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
+import { SORT_BY_OPTIONS, type SortByOptions } from 'src/modules/products/application/models/sort-by-options';
+import { SORT_DIRECTION, type SortDirection } from 'src/modules/shared/types/sort-direction';
+import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product-sales-status';
 import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
 
-import { Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
-
-export class FindAllProductsQueryDto {
+class FindAllProductsQueryDto {
   @IsOptional()
   @IsString()
   @MaxLength(200)
   search?: string;
-
-  @IsOptional()
-  @IsIn(PRODUCT_VISIBILITY)
-  visibility?: ProductVisibility;
 
   @IsOptional()
   @IsUUID('7')
@@ -22,8 +20,34 @@ export class FindAllProductsQueryDto {
   categoryIds?: string[];
 
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) => {
+    if (typeof value === 'boolean') return value;
+    if (value === 'true' || value === '1') return true;
+    if (value === 'false' || value === '0') return false;
+    return value;
+  })
+  @IsBoolean()
   includeCategoryDescendants?: boolean;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  maxPrice?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  minPrice?: number;
+
+  @IsOptional()
+  @IsIn(SORT_BY_OPTIONS)
+  sortBy?: SortByOptions;
+
+  @IsOptional()
+  @IsIn(SORT_DIRECTION)
+  sortDirection?: SortDirection;
 
   @IsOptional()
   @Type(() => Number)
@@ -37,4 +61,13 @@ export class FindAllProductsQueryDto {
   @Min(1)
   @Max(100)
   limit?: number = 20;
+}
+export class FindAllCustomerProductsQueryDto extends FindAllProductsQueryDto {}
+export class FindAllAdminProductsQueryDto extends FindAllProductsQueryDto {
+  @IsOptional()
+  @IsIn(PRODUCT_VISIBILITY)
+  visibility?: ProductVisibility;
+  @IsOptional()
+  @IsIn(PRODUCT_SALES_STATUS)
+  salesStatus?: ProductSalesStatus;
 }
