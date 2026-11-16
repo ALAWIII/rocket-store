@@ -1,2 +1,2 @@
-export const PRODUCT_STATUS = ['public', 'private'] as const;
-export type ProductVisibility = (typeof PRODUCT_STATUS)[number];
+export const PRODUCT_VISIBILITY = ['public', 'private'] as const;
+export type ProductVisibility = (typeof PRODUCT_VISIBILITY)[number];
