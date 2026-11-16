@@ -9,9 +9,9 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductCategoriesResponseDto } from './dto/product-categories-response.dto';
 import { ProductImage } from './domain/product-image';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
-import { FindAllProductsQueryDto } from './dto/find-all-products-query.dto';
 import { FindAllProductsResponseDto } from './dto/find-all-products-response.dto';
 import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
+import { FindAllAdminProductsQueryDto } from './dto/find-all-products-query.dto';
 
 @Injectable()
 export class ProductsService {
@@ -34,7 +34,7 @@ export class ProductsService {
       .map((p) => p.toJSON())
       .unwrap();
   }
-  findAll(searchOptions: FindAllProductsQueryDto): Promise<FindAllProductsResponseDto> {
+  findAll(searchOptions: FindAllAdminProductsQueryDto): Promise<FindAllProductsResponseDto> {
     const { categoryIds, includeCategoryDescendants, ...options } = searchOptions;
     const category = categoryIds?.length ? { categoryIds, includeCategoryDescendants } : undefined;
     return this.productRepo
