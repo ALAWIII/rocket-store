@@ -20,7 +20,7 @@ type ProductProps = {
   createdAt: Date;
   updatedAt: Date;
 };
-type ProductPrimitives = {
+export type ProductPrimitives = {
   readonly id: string;
   title: string;
   description: string;

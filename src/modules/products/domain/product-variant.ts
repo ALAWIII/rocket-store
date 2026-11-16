@@ -24,7 +24,7 @@ type ProductVariantProps = {
   createdAt: Date;
   updatedAt: Date;
 };
-type ProductVariantPrimitives = {
+export type ProductVariantPrimitives = {
   readonly id: string;
   readonly productId: string;
   title: string;
