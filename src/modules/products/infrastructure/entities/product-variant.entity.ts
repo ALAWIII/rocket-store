@@ -6,6 +6,7 @@ import {
   UpdateDateColumnTz,
 } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 import { type ProductVisibility } from '../../domain/product-visibility';
+import { type ProductSalesStatus } from '../../domain/product-sales-status';
 
 @Entity('product_variants', { synchronize: false })
 @Unique('uq_title_product_id', ['productId', 'title'])
@@ -31,7 +32,8 @@ export class ProductVariantEntity {
 
   @Column('varchar', { length: 9 })
   visibility!: ProductVisibility;
-
+  @Column('varchar', { length: 7 })
+  salesStatus!: ProductSalesStatus;
   @Column('integer')
   sortOrder!: number;
   @CreateDateColumnTz()

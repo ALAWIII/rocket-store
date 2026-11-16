@@ -7,6 +7,7 @@ import {
 } from 'src/modules/shared/database/decorators/timestamptz-data-column.decorator';
 import { PageEntity } from 'src/modules/pages/infrastructure/entities/page.entity';
 import { type ProductVisibility } from '../../domain/product-visibility';
+import { type ProductSalesStatus } from '../../domain/product-sales-status';
 
 @Entity('products', { synchronize: false })
 @Index('idx_products_page', ['pageId'])
@@ -23,6 +24,8 @@ export class ProductEntity {
 
   @Column('varchar', { length: 9 })
   visibility!: ProductVisibility;
+  @Column('varchar', { length: 7 })
+  salesStatus!: ProductSalesStatus;
   @Column('uuid', { nullable: true })
   @ForeignKey(
     () => BrandEntity,

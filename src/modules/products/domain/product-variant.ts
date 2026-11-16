@@ -8,6 +8,7 @@ import { ProductVisibility } from './product-visibility';
 import { Image } from 'src/modules/images/domain/image';
 import { type JsonObject } from 'src/modules/shared/value-objects/json-object';
 import { Title } from 'src/modules/shared/value-objects/title';
+import { ProductSalesStatus } from './product-sales-status';
 
 type ProductVariantProps = {
   readonly id: ProductVariantId;
@@ -17,6 +18,7 @@ type ProductVariantProps = {
   description: DomainText | null;
   info: JsonObject;
   visibility: ProductVisibility;
+  salesStatus: ProductSalesStatus;
   images?: Image[];
   sortOrder: number;
   createdAt: Date;
@@ -29,6 +31,7 @@ type ProductVariantPrimitives = {
   price: number;
   description: string | null;
   visibility: ProductVisibility;
+  salesStatus: ProductSalesStatus;
   info: JsonObject;
   images?: Image[];
   sortOrder: number;
@@ -37,7 +40,7 @@ type ProductVariantPrimitives = {
 };
 type CreateProductVariantPrimitives = Omit<
   ProductVariantPrimitives,
-  'id' | 'createdAt' | 'visibility' | 'updatedAt' | 'images'
+  'id' | 'createdAt' | 'visibility' | 'updatedAt' | 'images' | 'salesStatus'
 >;
 export class ProductVariant {
   private constructor(private props: ProductVariantProps) {}
@@ -47,6 +50,7 @@ export class ProductVariant {
       ...data,
       id: ProductVariantId.create().unwrap().toString(),
       visibility: 'public',
+      salesStatus: 'active',
       createdAt: date,
       updatedAt: date,
     });
@@ -55,8 +59,20 @@ export class ProductVariant {
     return this.build(data);
   }
   static build(data: ProductVariantPrimitives): Result<ProductVariant, ValueObjectError> {
-    const { id, description, title, price, productId, info, createdAt, visibility, updatedAt, sortOrder, images } =
-      data;
+    const {
+      id,
+      description,
+      title,
+      price,
+      productId,
+      info,
+      createdAt,
+      visibility,
+      updatedAt,
+      sortOrder,
+      images,
+      salesStatus,
+    } = data;
     return Result.wrap(
       () =>
         new ProductVariant({
@@ -69,6 +85,7 @@ export class ProductVariant {
           sortOrder,
           visibility,
           images,
+          salesStatus,
           createdAt: new Date(createdAt),
           updatedAt: new Date(updatedAt),
         }),

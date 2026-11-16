@@ -10,6 +10,7 @@ export class CreateProductsTable1794055871067 implements MigrationInterface {
            title varchar(200) NOT NULL,
            description text NOT NULL DEFAULT '',
            visibility varchar(9) NOT NULL,
+           "salesStatus" varchar(7) NOT NULL,
            "brandId" uuid NULL,
            "pageId" uuid NULL,
            "createdAt" timestamptz NOT NULL DEFAULT now(),

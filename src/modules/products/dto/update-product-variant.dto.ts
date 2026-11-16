@@ -2,6 +2,7 @@ import { IsIn, IsNumber, IsObject, IsOptional, IsString, MaxLength, Min } from '
 import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-least-one-defined.decorator';
 import { type JsonObject } from 'src/modules/shared/value-objects/json-object';
 import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
+import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product-sales-status';
 const productVariantFieldsList = ['price', 'quantity', 'description', 'info', 'status'];
 const productVariantFields = productVariantFieldsList.join(', ');
 export class UpdateProductVariantDto {
@@ -26,6 +27,9 @@ export class UpdateProductVariantDto {
   @IsIn(PRODUCT_VISIBILITY)
   visibility?: ProductVisibility;
 
+  @IsOptional()
+  @IsIn(PRODUCT_SALES_STATUS)
+  salesStatus?: ProductSalesStatus;
   @AtLeastOneDefined(productVariantFieldsList, {
     message: `At least one field must be provided: (${productVariantFields}).`,
   })

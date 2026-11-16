@@ -2,6 +2,7 @@ import { IsIn, IsOptional, IsString, IsUUID, Length, MaxLength } from 'class-val
 import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
 import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-least-one-defined.decorator';
 import { Exclude } from 'class-transformer';
+import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product-sales-status';
 const productFieldsList = ['title', 'description', 'brandId', 'pageId', 'status'];
 const productFields = productFieldsList.join(', ');
 
@@ -26,6 +27,9 @@ export class UpdateProductDto {
   @IsOptional()
   @IsIn(PRODUCT_VISIBILITY)
   visibility?: ProductVisibility;
+  @IsOptional()
+  @IsIn(PRODUCT_SALES_STATUS)
+  salesStatus?: ProductSalesStatus;
   @AtLeastOneDefined(productFieldsList, {
     message: `At least one field must be provided: (${productFields}).`,
   })

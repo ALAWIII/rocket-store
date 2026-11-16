@@ -12,6 +12,7 @@ export class CreateProductVariantsTable1794056052964 implements MigrationInterfa
         "info" jsonb NOT NULL DEFAULT '{}'::jsonb,
         "description" varchar(2000),
         "visibility" varchar(9) NOT NULL,
+        "salesStatus" varchar(7) NOT NULL,
         "sortOrder" integer NOT NULL,
         "createdAt" timestamptz NOT NULL DEFAULT now(),
         "updatedAt" timestamptz NOT NULL DEFAULT now(),
