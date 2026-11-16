@@ -7,7 +7,6 @@ import { AllPermissions } from '../access-control/domain/permission';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FindByIdQueryDto } from './dto/find-by-id-query.dto';
 import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
-import { FindAllProductsQueryDto } from './dto/find-all-products-query.dto';
 import { FindAllProductsResponseDto } from './dto/find-all-products-response.dto';
 import { AttachImagesDto } from '../shared/dto/attach-images.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
@@ -16,6 +15,7 @@ import { DetachImagesDto } from '../shared/dto/detach-images.dto';
 import { AttachCategoriesDto } from './dto/attach-categories.dto';
 import { ProductCategoriesResponseDto } from './dto/product-categories-response.dto';
 import { DetachCategoriesDto } from './dto/detach-categories.dto';
+import { FindAllCustomerProductsQueryDto } from './dto/find-all-products-query.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -43,7 +43,7 @@ export class ProductsController {
   }
 
   @Get()
-  findAll(@Query() query: FindAllProductsQueryDto): Promise<FindAllProductsResponseDto> {
+  findAll(@Query() query: FindAllCustomerProductsQueryDto): Promise<FindAllProductsResponseDto> {
     return this.productService.findAll(query);
   }
   @Post(':id/images')
