@@ -31,6 +31,7 @@ export type UpdateProduct = {
   description?: string;
   brandId?: string | null;
   pageId?: string | null;
+  salesStatus?: ProductSalesStatus;
   visibility?: ProductVisibility;
 };
 export type FindAllProductsSearchOptions = {
