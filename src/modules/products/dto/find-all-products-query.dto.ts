@@ -43,11 +43,11 @@ class FindAllProductsQueryDto {
 
   @IsOptional()
   @IsIn(SORT_BY_OPTIONS)
-  sortBy?: SortByOptions;
+  sortBy: SortByOptions = 'created';
 
   @IsOptional()
   @IsIn(SORT_DIRECTION)
-  sortDirection?: SortDirection;
+  sortDirection: SortDirection = 'DESC';
 
   @IsOptional()
   @Type(() => Number)
