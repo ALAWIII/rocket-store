@@ -9,6 +9,9 @@ import { BrandWithLogo } from 'src/modules/brands/infrastructure/mappers/brand.m
 import { CategoryEntity } from 'src/modules/categories/infrastructure/entities/category.entity';
 import { ProductDetails } from '../../domain/product-details';
 import { Pagination } from 'src/modules/shared/types/pagination';
+import { SortDirection } from 'src/modules/shared/types/sort-direction';
+import { ProductSalesStatus } from '../../domain/product-sales-status';
+import { SortByOptions } from '../../application/models/sort-by-options';
 
 export type ProductDetailsResult = {
   product: ProductEntity;
@@ -33,11 +36,21 @@ export type UpdateProduct = {
 export type FindAllProductsSearchOptions = {
   search?: string;
   visibility?: ProductVisibility;
+  salesStatus?: ProductSalesStatus;
   brandId?: string;
   category?: {
     categoryIds: string[];
     includeCategoryDescendants?: boolean;
   };
+
+  minPrice?: number;
+  maxPrice?: number;
+
+  sort?: {
+    field: SortByOptions;
+    direction: SortDirection;
+  };
+
   page?: number;
   limit?: number;
 };
