@@ -35,10 +35,14 @@ export class ProductsService {
       .unwrap();
   }
   findAll(searchOptions: FindAllAdminProductsQueryDto): Promise<FindAllProductsResponseDto> {
-    const { categoryIds, includeCategoryDescendants, ...options } = searchOptions;
+    const { categoryIds, includeCategoryDescendants, sortBy, sortDirection, ...options } = searchOptions;
     const category = categoryIds?.length ? { categoryIds, includeCategoryDescendants } : undefined;
     return this.productRepo
-      .findAll({ ...options, category })
+      .findAll({
+        ...options,
+        category,
+        sort: { field: sortBy, direction: sortDirection },
+      })
       .map(({ products, pagination }) => ({ products: products.map((p) => p.toJSON()), pagination }))
       .unwrap();
   }
