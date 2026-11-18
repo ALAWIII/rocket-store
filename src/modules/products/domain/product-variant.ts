@@ -46,7 +46,6 @@ export const PRODUCT_VARIANT_FIELDS = [
   'salesStatus',
   'info',
   'sortOrder',
-  'updatedAt',
 ] as const;
 export type ProductVariantFields = (typeof PRODUCT_VARIANT_FIELDS)[number];
 type CreateProductVariantPrimitives = Omit<
