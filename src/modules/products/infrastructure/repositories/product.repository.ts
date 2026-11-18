@@ -1,5 +1,5 @@
 import { DBResult } from 'src/modules/shared/errors/error.types';
-import { Product } from '../../domain/product';
+import { Product, ProductFields } from '../../domain/product';
 import { ProductVisibility } from '../../domain/product-visibility';
 import { ProductImage } from '../../domain/product-image';
 import { Image } from 'src/modules/images/domain/image';
@@ -44,6 +44,7 @@ export type FindAllProductsSearchOptions = {
     categoryIds: string[];
     includeCategoryDescendants?: boolean;
   };
+  product?: ProductFields[];
   variant?: ProductVariantFields[];
   minPrice?: number;
   maxPrice?: number;

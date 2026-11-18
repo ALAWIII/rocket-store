@@ -1,10 +1,24 @@
 import { Transform, Type } from 'class-transformer';
-import { IsBoolean, IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayUnique,
+  IsArray,
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { SORT_BY_OPTIONS, type SortByOptions } from 'src/modules/products/application/models/sort-by-options';
 import { SORT_DIRECTION, type SortDirection } from 'src/modules/shared/types/sort-direction';
 import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product-sales-status';
 import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
 import { PRODUCT_VARIANT_FIELDS, ProductVariantFields } from '../domain/product-variant';
+import { PRODUCT_FIELDS, ProductFields } from '../domain/product';
 
 class FindAllProductsQueryDto {
   @IsOptional()
@@ -30,7 +44,16 @@ class FindAllProductsQueryDto {
   @IsBoolean()
   includeCategoryDescendants?: boolean;
   @IsOptional()
-  @IsIn(PRODUCT_VARIANT_FIELDS)
+  @IsArray()
+  @ArrayMaxSize(PRODUCT_FIELDS.length)
+  @ArrayUnique()
+  @IsIn(PRODUCT_FIELDS, { each: true })
+  product?: ProductFields[];
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(PRODUCT_VARIANT_FIELDS.length)
+  @ArrayUnique()
+  @IsIn(PRODUCT_VARIANT_FIELDS, { each: true })
   variant?: ProductVariantFields[];
   @IsOptional()
   @Type(() => Number)
