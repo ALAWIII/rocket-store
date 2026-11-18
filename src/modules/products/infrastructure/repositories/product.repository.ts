@@ -12,6 +12,7 @@ import { Pagination } from 'src/modules/shared/types/pagination';
 import { SortDirection } from 'src/modules/shared/types/sort-direction';
 import { ProductSalesStatus } from '../../domain/product-sales-status';
 import { SortByOptions } from '../../application/models/sort-by-options';
+import { ProductVariantFields } from '../../domain/product-variant';
 
 export type ProductDetailsResult = {
   product: ProductEntity;
@@ -43,7 +44,7 @@ export type FindAllProductsSearchOptions = {
     categoryIds: string[];
     includeCategoryDescendants?: boolean;
   };
-
+  variant?: ProductVariantFields[];
   minPrice?: number;
   maxPrice?: number;
 

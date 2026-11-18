@@ -38,6 +38,17 @@ export type ProductVariantPrimitives = {
   createdAt: Date | string;
   updatedAt: Date | string;
 };
+export const PRODUCT_VARIANT_FIELDS = [
+  'title',
+  'price',
+  'description',
+  'visibility',
+  'salesStatus',
+  'info',
+  'sortOrder',
+  'updatedAt',
+] as const;
+export type ProductVariantFields = (typeof PRODUCT_VARIANT_FIELDS)[number];
 type CreateProductVariantPrimitives = Omit<
   ProductVariantPrimitives,
   'id' | 'createdAt' | 'visibility' | 'updatedAt' | 'images' | 'salesStatus'

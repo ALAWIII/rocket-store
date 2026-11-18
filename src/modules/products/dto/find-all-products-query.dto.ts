@@ -4,6 +4,7 @@ import { SORT_BY_OPTIONS, type SortByOptions } from 'src/modules/products/applic
 import { SORT_DIRECTION, type SortDirection } from 'src/modules/shared/types/sort-direction';
 import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product-sales-status';
 import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
+import { PRODUCT_VARIANT_FIELDS, ProductVariantFields } from '../domain/product-variant';
 
 class FindAllProductsQueryDto {
   @IsOptional()
@@ -28,7 +29,9 @@ class FindAllProductsQueryDto {
   })
   @IsBoolean()
   includeCategoryDescendants?: boolean;
-
+  @IsOptional()
+  @IsIn(PRODUCT_VARIANT_FIELDS)
+  variant?: ProductVariantFields[];
   @IsOptional()
   @Type(() => Number)
   @IsInt()
