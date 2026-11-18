@@ -36,6 +36,7 @@ export type UpdateProduct = {
   visibility?: ProductVisibility;
 };
 export type FindAllProductsSearchOptions = {
+  // filters and conditions
   search?: string;
   visibility?: ProductVisibility;
   salesStatus?: ProductSalesStatus;
@@ -44,16 +45,17 @@ export type FindAllProductsSearchOptions = {
     categoryIds: string[];
     includeCategoryDescendants?: boolean;
   };
-  product?: ProductFields[];
-  variant?: ProductVariantFields[];
   minPrice?: number;
   maxPrice?: number;
-
+  // fields to include.
+  product?: ProductFields[];
+  variant?: ProductVariantFields[];
+  // ordering and sorting
   sort?: {
     field: SortByOptions;
     direction: SortDirection;
   };
-
+  // pagination
   page?: number;
   limit?: number;
 };
