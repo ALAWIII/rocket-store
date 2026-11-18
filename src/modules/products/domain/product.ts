@@ -32,6 +32,8 @@ export type ProductPrimitives = {
   createdAt: Date | string;
   updatedAt: Date | string;
 };
+export const PRODUCT_FIELDS = ['description', 'visibility', 'salesStatus', 'updatedAt'] as const;
+export type ProductFields = (typeof PRODUCT_FIELDS)[number];
 type CreateProductPrimitives = Pick<ProductPrimitives, 'description' | 'title' | 'brandId' | 'pageId'>;
 export class Product {
   private constructor(private props: ProductProps) {}
