@@ -45,10 +45,10 @@ export type FindAllProductsSearchOptions = {
     categoryIds: string[];
     includeCategoryDescendants?: boolean;
   };
-  price?: {
-    min?: number;
-    max?: number;
-  };
+
+  minPrice?: number;
+  maxPrice?: number;
+
   // fields to include.
   product?: ProductFields[];
   variant?: ProductVariantFields[];

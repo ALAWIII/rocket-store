@@ -35,15 +35,12 @@ export class ProductsService {
       .unwrap();
   }
   findAll(searchOptions: FindAllAdminProductsQueryDto): Promise<FindAllProductsResponseDto> {
-    const { categoryIds, includeCategoryDescendants, sortBy, sortDirection, minPrice, maxPrice, ...options } =
-      searchOptions;
+    const { categoryIds, includeCategoryDescendants, sortBy, sortDirection, ...options } = searchOptions;
     const category = categoryIds?.length ? { categoryIds, includeCategoryDescendants } : undefined;
-    const price = minPrice !== undefined || maxPrice !== undefined ? { min: minPrice, max: maxPrice } : undefined;
     return this.productRepo
       .findAll({
         ...options,
         category,
-        price,
         sort: { field: sortBy, direction: sortDirection },
       })
       .map(({ products, pagination }) => ({ products: products.map((p) => p.toJSON()), pagination }))
