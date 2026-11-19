@@ -38,12 +38,18 @@ export type Combination = {
       [SalesStatus in BooleanKey]: {
         [Brand in BooleanKey]: {
           [Category in CategoryMode]: {
-            search: ToBoolean<Search>;
-            visibility: ToBoolean<Visibility>;
-            salesStatus: ToBoolean<SalesStatus>;
-            brand: ToBoolean<Brand>;
-            category: Category;
-          };
+            [Min in BooleanKey]: {
+              [Max in BooleanKey]: {
+                search: ToBoolean<Search>;
+                visibility: ToBoolean<Visibility>;
+                salesStatus: ToBoolean<SalesStatus>;
+                brand: ToBoolean<Brand>;
+                category: Category;
+                minPrice: ToBoolean<Min>;
+                maxPrice: ToBoolean<Max>;
+              };
+            }[BooleanKey];
+          }[BooleanKey];
         }[CategoryMode];
       }[BooleanKey];
     }[BooleanKey];
@@ -77,12 +83,18 @@ export type CombinationKey<C extends Combination> = C extends Combination
   ? AppendKey<
       AppendKey<
         AppendKey<
-          AppendKey<C['search'] extends true ? 'SEARCH' : '', C['visibility'] extends true ? 'VISIBILITY' : ''>,
-          C['salesStatus'] extends true ? 'SALES_STATUS' : ''
+          AppendKey<
+            AppendKey<
+              AppendKey<C['search'] extends true ? 'SEARCH' : '', C['visibility'] extends true ? 'VISIBILITY' : ''>,
+              C['salesStatus'] extends true ? 'SALES_STATUS' : ''
+            >,
+            C['brand'] extends true ? 'BRAND' : ''
+          >,
+          C['category'] extends 'direct' ? 'CATEGORY' : C['category'] extends 'descendants' ? 'INCLUDE_CATEGORY' : ''
         >,
-        C['brand'] extends true ? 'BRAND' : ''
+        C['minPrice'] extends true ? 'MIN' : ''
       >,
-      C['category'] extends 'direct' ? 'CATEGORY' : C['category'] extends 'descendants' ? 'INCLUDE_CATEGORY' : ''
+      C['maxPrice'] extends true ? 'MAX' : ''
     >
   : never;
 
@@ -144,6 +156,15 @@ const CONDITIONS = {
    */
   brand: (index: number) => `p."brandId" = $${index}`,
 
+  /**
+   * Filters products by min price.
+   */
+  minPrice: (index: number) => `p.price <= $${index}`,
+
+  /**
+   * Filters products by max price.
+   */
+  maxPrice: (index: number) => `p.price >= $${index}`,
   /**
    * Matches products assigned directly to any specified category.
    */
@@ -247,6 +268,9 @@ function generateQuery(combination: Combination): string {
 
   if (combination.category === 'descendants') conditions.push(CONDITIONS.includeCategories(nextParameter()));
 
+  if (combination.minPrice) conditions.push(CONDITIONS.minPrice(nextParameter()));
+
+  if (combination.maxPrice) conditions.push(CONDITIONS.maxPrice(nextParameter()));
   /**
    * Builds the WHERE clause.
    *
@@ -326,13 +350,19 @@ function* generateCombinations(): Generator<Combination> {
       for (const salesStatus of BOOLEAN_VALUES) {
         for (const brand of BOOLEAN_VALUES) {
           for (const category of CATEGORY_VALUES) {
-            yield {
-              search,
-              visibility,
-              salesStatus,
-              brand,
-              category,
-            } as Combination;
+            for (const minPrice of BOOLEAN_VALUES) {
+              for (const maxPrice of BOOLEAN_VALUES) {
+                yield {
+                  search,
+                  visibility,
+                  salesStatus,
+                  brand,
+                  category,
+                  minPrice,
+                  maxPrice,
+                } as Combination;
+              }
+            }
           }
         }
       }
@@ -363,6 +393,10 @@ function getCombinationKey(combination: Combination): QueryKey {
   if (combination.category === 'direct') parts.push('CATEGORY');
 
   if (combination.category === 'descendants') parts.push('INCLUDE_CATEGORY');
+
+  if (combination.minPrice) parts.push('MIN');
+
+  if (combination.maxPrice) parts.push('MAX');
 
   return (parts.join('_') || 'DEFAULT') as QueryKey;
 }
@@ -405,7 +439,7 @@ export class FindAllProductsQueryBuilder {
    * search -> visibility -> brand -> categoryIds -> limit -> offset.
    */
   build(): BuiltProductQuery {
-    const { search: rawSearch, visibility, salesStatus, brandId, category } = this.options;
+    const { search: rawSearch, visibility, salesStatus, brandId, category, minPrice, maxPrice } = this.options;
 
     /**
      * Normalize the search string.
@@ -430,6 +464,8 @@ export class FindAllProductsQueryBuilder {
         ? 'descendants'
         : 'direct';
 
+    const hasMinPrice = minPrice !== undefined;
+    const hasMaxPrice = maxPrice !== undefined;
     /**
      * Build the combination used to select the SQL template.
      */
@@ -439,6 +475,8 @@ export class FindAllProductsQueryBuilder {
       salesStatus: hasSalesStatus,
       brand: hasBrand,
       category: categoryMode,
+      minPrice: hasMinPrice,
+      maxPrice: hasMaxPrice,
     } as Combination;
 
     /**
@@ -467,6 +505,8 @@ export class FindAllProductsQueryBuilder {
 
     if (category) parameters.push(category.categoryIds);
 
+    if (hasMinPrice) parameters.push(minPrice);
+    if (hasMaxPrice) parameters.push(maxPrice);
     // Pagination parameters are always last.
     parameters.push(limit, (page - 1) * limit);
 
