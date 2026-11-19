@@ -35,14 +35,17 @@ type ToBoolean<B extends BooleanKey> = B extends 'true' ? true : false;
 export type Combination = {
   [Search in BooleanKey]: {
     [Visibility in BooleanKey]: {
-      [Brand in BooleanKey]: {
-        [Category in CategoryMode]: {
-          search: ToBoolean<Search>;
-          visibility: ToBoolean<Visibility>;
-          brand: ToBoolean<Brand>;
-          category: Category;
-        };
-      }[CategoryMode];
+      [SalesStatus in BooleanKey]: {
+        [Brand in BooleanKey]: {
+          [Category in CategoryMode]: {
+            search: ToBoolean<Search>;
+            visibility: ToBoolean<Visibility>;
+            salesStatus: ToBoolean<SalesStatus>;
+            brand: ToBoolean<Brand>;
+            category: Category;
+          };
+        }[CategoryMode];
+      }[BooleanKey];
     }[BooleanKey];
   }[BooleanKey];
 }[BooleanKey];
@@ -73,7 +76,10 @@ type AppendKey<Current extends string, Next extends string> = Next extends ''
 export type CombinationKey<C extends Combination> = C extends Combination
   ? AppendKey<
       AppendKey<
-        AppendKey<C['search'] extends true ? 'SEARCH' : '', C['visibility'] extends true ? 'VISIBILITY' : ''>,
+        AppendKey<
+          AppendKey<C['search'] extends true ? 'SEARCH' : '', C['visibility'] extends true ? 'VISIBILITY' : ''>,
+          C['salesStatus'] extends true ? 'SALES_STATUS' : ''
+        >,
         C['brand'] extends true ? 'BRAND' : ''
       >,
       C['category'] extends 'direct' ? 'CATEGORY' : C['category'] extends 'descendants' ? 'INCLUDE_CATEGORY' : ''
@@ -129,7 +135,10 @@ const CONDITIONS = {
    * Filters products by their visibility.
    */
   visibility: (index: number) => `p.visibility = $${index}`,
-
+  /**
+   * Filters products by their salesStatus.
+   */
+  salesStatus: (index: number) => `p."salesStatus" = $${index}`,
   /**
    * Filters products by their brand.
    */
@@ -230,6 +239,8 @@ function generateQuery(combination: Combination): string {
 
   if (combination.visibility) conditions.push(CONDITIONS.visibility(nextParameter()));
 
+  if (combination.salesStatus) conditions.push(CONDITIONS.salesStatus(nextParameter()));
+
   if (combination.brand) conditions.push(CONDITIONS.brand(nextParameter()));
 
   if (combination.category === 'direct') conditions.push(CONDITIONS.category(nextParameter()));
@@ -312,14 +323,17 @@ const CATEGORY_VALUES = ['none', 'direct', 'descendants'] as const;
 function* generateCombinations(): Generator<Combination> {
   for (const search of BOOLEAN_VALUES) {
     for (const visibility of BOOLEAN_VALUES) {
-      for (const brand of BOOLEAN_VALUES) {
-        for (const category of CATEGORY_VALUES) {
-          yield {
-            search,
-            visibility,
-            brand,
-            category,
-          };
+      for (const salesStatus of BOOLEAN_VALUES) {
+        for (const brand of BOOLEAN_VALUES) {
+          for (const category of CATEGORY_VALUES) {
+            yield {
+              search,
+              visibility,
+              salesStatus,
+              brand,
+              category,
+            } as Combination;
+          }
         }
       }
     }
@@ -341,6 +355,8 @@ function getCombinationKey(combination: Combination): QueryKey {
   if (combination.search) parts.push('SEARCH');
 
   if (combination.visibility) parts.push('VISIBILITY');
+
+  if (combination.salesStatus) parts.push('SALES_STATUS');
 
   if (combination.brand) parts.push('BRAND');
 
@@ -389,7 +405,7 @@ export class FindAllProductsQueryBuilder {
    * search -> visibility -> brand -> categoryIds -> limit -> offset.
    */
   build(): BuiltProductQuery {
-    const { search: rawSearch, visibility, brandId, category } = this.options;
+    const { search: rawSearch, visibility, salesStatus, brandId, category } = this.options;
 
     /**
      * Normalize the search string.
@@ -402,6 +418,7 @@ export class FindAllProductsQueryBuilder {
      */
     const hasSearch = Boolean(search);
     const hasVisibility = visibility !== undefined;
+    const hasSalesStatus = salesStatus !== undefined;
     const hasBrand = brandId !== undefined;
 
     /**
@@ -419,9 +436,10 @@ export class FindAllProductsQueryBuilder {
     const combination: Combination = {
       search: hasSearch,
       visibility: hasVisibility,
+      salesStatus: hasSalesStatus,
       brand: hasBrand,
       category: categoryMode,
-    };
+    } as Combination;
 
     /**
      * Resolve the matching pre-generated SQL query.
@@ -443,6 +461,7 @@ export class FindAllProductsQueryBuilder {
     if (hasSearch) parameters.push(search);
 
     if (hasVisibility) parameters.push(visibility);
+    if (hasSalesStatus) parameters.push(salesStatus);
 
     if (hasBrand) parameters.push(brandId);
 
