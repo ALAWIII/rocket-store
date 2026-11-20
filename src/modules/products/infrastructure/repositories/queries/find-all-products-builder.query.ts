@@ -1,6 +1,6 @@
-import { SortDirection } from 'src/modules/shared/types/sort-direction';
-import { SortByOptionsMap } from '../../mappers/sort-by-options.mapper';
+import { SORT_DIRECTION, SortDirection } from 'src/modules/shared/types/sort-direction';
 import type { FindAllProductsSearchOptions } from '../product.repository';
+import { SORT_BY_OPTIONS, SortByOptions } from 'src/modules/products/application/models/sort-by-options';
 
 /* -------------------------------------------------------------------------- */
 /*                                Query types                                 */
@@ -33,7 +33,7 @@ type SalesStatusComb = BooleanCombination<'salesStatus'>;
 type BrandComb = BooleanCombination<'brand'>;
 type CategoryComb = CombinationOf<'category', CategoryMode>;
 type Price = JoinFields<[BooleanCombination<'minPrice'>, BooleanCombination<'maxPrice'>]>;
-type Ordering = JoinFields<[CombinationOf<'sortBy', SortByOptionsMap>, CombinationOf<'sortDirection', SortDirection>]>;
+type Ordering = JoinFields<[CombinationOf<'sortBy', SortByOptions>, CombinationOf<'sortDirection', SortDirection>]>;
 /**
  * Represents every valid combination of optional product filters.
  *
@@ -86,8 +86,10 @@ export type CombinationKey<C extends Combination> = C extends Combination
         Flag<C['salesStatus'], 'SALES_STATUS'>,
         Flag<C['brand'], 'BRAND'>,
         CategoryFlag<C['category']>,
-        // Flag<C['minPrice'], 'MIN'>,
-        // Flag<C['maxPrice'], 'MAX'>,
+        Flag<C['minPrice'], 'MIN'>,
+        Flag<C['maxPrice'], 'MAX'>,
+        Uppercase<C['sortBy']>,
+        Uppercase<C['sortDirection']>,
       ]
     >
   : never;
@@ -207,13 +209,13 @@ const ORDERING = {
     aggregateOrdering: 'ORDER BY pg.score DESC, pg."createdAt" DESC, pg.id DESC',
   },
 
-  DEFAULT: {
+  byField: (f: SortByOptions, direction: SortDirection) => ({
     selection: '',
 
-    pageOrdering: 'ORDER BY "createdAt" DESC, id DESC',
+    pageOrdering: `ORDER BY "${f}" ${direction}, id ${direction}`,
 
-    aggregateOrdering: 'ORDER BY pg."createdAt" DESC, pg.id DESC',
-  },
+    aggregateOrdering: `ORDER BY pg."${f}" ${direction}, pg.id ${direction}`,
+  }),
 } as const;
 
 /* -------------------------------------------------------------------------- */
@@ -237,6 +239,7 @@ const ORDERING = {
  * This order must remain synchronized with the builder's parameter array.
  */
 function generateQuery(combination: Combination): string {
+  const { sortBy, sortDirection } = combination;
   const conditions: string[] = [];
 
   /**
@@ -265,6 +268,7 @@ function generateQuery(combination: Combination): string {
   if (combination.minPrice) conditions.push(CONDITIONS.minPrice(nextParameter()));
 
   if (combination.maxPrice) conditions.push(CONDITIONS.maxPrice(nextParameter()));
+
   /**
    * Builds the WHERE clause.
    *
@@ -275,7 +279,7 @@ function generateQuery(combination: Combination): string {
   /**
    * Selects the appropriate sorting configuration.
    */
-  const ordering = combination.search ? ORDERING.SEARCH : ORDERING.DEFAULT;
+  const ordering = combination.search ? ORDERING.SEARCH : ORDERING.byField(sortBy, sortDirection);
 
   /**
    * Pagination parameters are always allocated last.
@@ -346,15 +350,21 @@ function* generateCombinations(): Generator<Combination> {
           for (const category of CATEGORY_VALUES) {
             for (const minPrice of BOOLEAN_VALUES) {
               for (const maxPrice of BOOLEAN_VALUES) {
-                yield {
-                  search,
-                  visibility,
-                  salesStatus,
-                  brand,
-                  category,
-                  minPrice,
-                  maxPrice,
-                } as Combination;
+                for (const sortBy of SORT_BY_OPTIONS) {
+                  for (const sortDirection of SORT_DIRECTION) {
+                    yield {
+                      search,
+                      visibility,
+                      salesStatus,
+                      brand,
+                      category,
+                      minPrice,
+                      maxPrice,
+                      sortBy,
+                      sortDirection,
+                    } as Combination;
+                  }
+                }
               }
             }
           }
@@ -392,7 +402,10 @@ function getCombinationKey(combination: Combination): QueryKey {
 
   if (combination.maxPrice) parts.push('MAX');
 
-  return (parts.join('_') || 'DEFAULT') as QueryKey;
+  parts.push(combination.sortBy);
+  parts.push(combination.sortDirection);
+
+  return parts.join('_') as QueryKey;
 }
 
 /**
@@ -433,7 +446,8 @@ export class FindAllProductsQueryBuilder {
    * search -> visibility -> brand -> categoryIds -> limit -> offset.
    */
   build(): BuiltProductQuery {
-    const { search: rawSearch, visibility, salesStatus, brandId, category, minPrice, maxPrice } = this.options;
+    const { search: rawSearch, visibility, salesStatus, brandId, category, minPrice, maxPrice, sort } = this.options;
+    const { field: sortBy = 'createdAt', direction: sortDirection = 'DESC' } = sort!;
 
     /**
      * Normalize the search string.
@@ -471,6 +485,8 @@ export class FindAllProductsQueryBuilder {
       category: categoryMode,
       minPrice: hasMinPrice,
       maxPrice: hasMaxPrice,
+      sortBy,
+      sortDirection,
     } as Combination;
 
     /**
