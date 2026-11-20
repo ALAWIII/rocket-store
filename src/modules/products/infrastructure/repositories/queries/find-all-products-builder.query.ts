@@ -1,16 +1,10 @@
+import { SortDirection } from 'src/modules/shared/types/sort-direction';
+import { SortByOptionsMap } from '../../mappers/sort-by-options.mapper';
 import type { FindAllProductsSearchOptions } from '../product.repository';
 
 /* -------------------------------------------------------------------------- */
 /*                                Query types                                 */
 /* -------------------------------------------------------------------------- */
-
-/**
- * String representations of boolean values.
- *
- * These are used as mapped-type keys because TypeScript mapped types
- * require string, number, or symbol keys.
- */
-type BooleanKey = 'true' | 'false';
 
 /**
  * The supported category filtering modes.
@@ -21,40 +15,34 @@ type BooleanKey = 'true' | 'false';
  */
 type CategoryMode = 'none' | 'direct' | 'descendants';
 
-/**
- * Converts a string boolean literal into its corresponding boolean type.
- */
-type ToBoolean<B extends BooleanKey> = B extends 'true' ? true : false;
+type JoinFields<T extends readonly unknown[]> = T extends readonly [infer H, ...infer R]
+  ? H extends unknown
+    ? JoinFields<R> extends infer Rest
+      ? Rest extends unknown
+        ? H & Rest
+        : never
+      : never
+    : never
+  : unknown;
+type CombinationOf<Key extends PropertyKey, Value> = Value extends unknown ? Record<Key, Value> : never;
+type BooleanCombination<Key extends PropertyKey> = CombinationOf<Key, boolean>;
 
+type SearchComb = BooleanCombination<'search'>;
+type VisibilityComb = BooleanCombination<'visibility'>;
+type SalesStatusComb = BooleanCombination<'salesStatus'>;
+type BrandComb = BooleanCombination<'brand'>;
+type CategoryComb = CombinationOf<'category', CategoryMode>;
+type Price = JoinFields<[BooleanCombination<'minPrice'>, BooleanCombination<'maxPrice'>]>;
+type Ordering = JoinFields<[CombinationOf<'sortBy', SortByOptionsMap>, CombinationOf<'sortDirection', SortDirection>]>;
 /**
  * Represents every valid combination of optional product filters.
  *
  * There are three independent boolean filters and three category modes,
  * resulting in 2 × 2 × 2 × 3 = 24 possible combinations.
  */
-export type Combination = {
-  [Search in BooleanKey]: {
-    [Visibility in BooleanKey]: {
-      [SalesStatus in BooleanKey]: {
-        [Brand in BooleanKey]: {
-          [Category in CategoryMode]: {
-            [Min in BooleanKey]: {
-              [Max in BooleanKey]: {
-                search: ToBoolean<Search>;
-                visibility: ToBoolean<Visibility>;
-                salesStatus: ToBoolean<SalesStatus>;
-                brand: ToBoolean<Brand>;
-                category: Category;
-                minPrice: ToBoolean<Min>;
-                maxPrice: ToBoolean<Max>;
-              };
-            }[BooleanKey];
-          }[BooleanKey];
-        }[CategoryMode];
-      }[BooleanKey];
-    }[BooleanKey];
-  }[BooleanKey];
-}[BooleanKey];
+export type Combination = JoinFields<
+  [SearchComb, VisibilityComb, SalesStatusComb, BrandComb, CategoryComb, Price, Ordering]
+>;
 
 /**
  * Appends a query-key segment to an existing key.
@@ -79,22 +67,28 @@ type AppendKey<Current extends string, Next extends string> = Next extends ''
  * - { search: true, visibility: true, brand: false, category: 'direct' }
  *   -> 'SEARCH_STATUS_CATEGORY'
  */
+type AppendKeys<T extends readonly string[], Acc extends string = ''> = T extends readonly [
+  infer H extends string,
+  ...infer R extends string[],
+]
+  ? AppendKeys<R, AppendKey<Acc, H>>
+  : Acc;
+
+type Flag<V, Label extends string> = V extends true ? Label : '';
+
+type CategoryFlag<M> = M extends 'direct' ? 'CATEGORY' : M extends 'descendants' ? 'INCLUDE_CATEGORY' : '';
+
 export type CombinationKey<C extends Combination> = C extends Combination
-  ? AppendKey<
-      AppendKey<
-        AppendKey<
-          AppendKey<
-            AppendKey<
-              AppendKey<C['search'] extends true ? 'SEARCH' : '', C['visibility'] extends true ? 'VISIBILITY' : ''>,
-              C['salesStatus'] extends true ? 'SALES_STATUS' : ''
-            >,
-            C['brand'] extends true ? 'BRAND' : ''
-          >,
-          C['category'] extends 'direct' ? 'CATEGORY' : C['category'] extends 'descendants' ? 'INCLUDE_CATEGORY' : ''
-        >,
-        C['minPrice'] extends true ? 'MIN' : ''
-      >,
-      C['maxPrice'] extends true ? 'MAX' : ''
+  ? AppendKeys<
+      [
+        Flag<C['search'], 'SEARCH'>,
+        Flag<C['visibility'], 'VISIBILITY'>,
+        Flag<C['salesStatus'], 'SALES_STATUS'>,
+        Flag<C['brand'], 'BRAND'>,
+        CategoryFlag<C['category']>,
+        // Flag<C['minPrice'], 'MIN'>,
+        // Flag<C['maxPrice'], 'MAX'>,
+      ]
     >
   : never;
 
