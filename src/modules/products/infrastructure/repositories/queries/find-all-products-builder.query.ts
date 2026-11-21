@@ -1,4 +1,5 @@
 import { SORT_DIRECTION, SortDirection } from 'src/modules/shared/types/sort-direction';
+import { normalizePagination } from 'src/modules/shared/utils/normalize-pagination.util';
 import type { FindAllProductsSearchOptions } from '../product.repository';
 import { SORT_BY_OPTIONS, SortByOptions } from 'src/modules/products/application/models/sort-by-options';
 
@@ -498,7 +499,7 @@ export class FindAllProductsQueryBuilder {
     /**
      * Normalize pagination values.
      */
-    const { page, limit } = FindAllProductsQueryBuilder.normalizePagination(this.options);
+    const { page, limit } = normalizePagination(this.options);
 
     /**
      * Prepare parameter values in exactly the same order
@@ -525,31 +526,5 @@ export class FindAllProductsQueryBuilder {
       parameters,
       pagination: { page, limit },
     };
-  }
-
-  /**
-   * Normalizes pagination options.
-   *
-   * Defaults:
-   * - page: 1
-   * - limit: 25
-   *
-   * Constraints:
-   * - Page must be a positive integer.
-   * - Limit must be a positive integer.
-   * - Maximum limit is 100.
-   */
-  private static normalizePagination(pagination: { page?: number; limit?: number }) {
-    const rawPage = Number(pagination.page ?? 1);
-    const rawLimit = Number(pagination.limit ?? 25);
-
-    const pageValue = Math.floor(rawPage);
-    const limitValue = Math.floor(rawLimit);
-
-    const page = Number.isFinite(rawPage) && pageValue >= 1 ? pageValue : 1;
-
-    const limit = Number.isFinite(rawLimit) && limitValue >= 1 ? Math.min(limitValue, 100) : 25;
-
-    return { page, limit };
   }
 }
