@@ -19,9 +19,12 @@ import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product
 import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
 import { PRODUCT_VARIANT_FIELDS, ProductVariantFields } from '../domain/product-variant';
 import { PRODUCT_FIELDS, ProductFields } from '../domain/product';
+import { normalizeArray } from 'src/modules/shared/utils/array-normalizer.util';
+import { trimToUndefined } from 'src/modules/shared/utils/trim-string-or-undefiend.util';
 
 class FindAllProductsQueryDto {
   @IsOptional()
+  @Transform(({ value }) => trimToUndefined(value))
   @IsString()
   @MaxLength(200)
   search?: string;
@@ -31,6 +34,10 @@ class FindAllProductsQueryDto {
   brandId?: string;
 
   @IsOptional()
+  @Transform(({ value }) => normalizeArray(value))
+  @IsArray()
+  @ArrayMaxSize(20)
+  @ArrayUnique()
   @IsUUID('7', { each: true })
   categoryIds?: string[];
 
@@ -43,18 +50,23 @@ class FindAllProductsQueryDto {
   })
   @IsBoolean()
   includeCategoryDescendants?: boolean;
+
   @IsOptional()
+  @Transform(({ value }) => normalizeArray(value))
   @IsArray()
   @ArrayMaxSize(PRODUCT_FIELDS.length)
   @ArrayUnique()
   @IsIn(PRODUCT_FIELDS, { each: true })
   product?: ProductFields[];
+
   @IsOptional()
+  @Transform(({ value }) => normalizeArray(value))
   @IsArray()
   @ArrayMaxSize(PRODUCT_VARIANT_FIELDS.length)
   @ArrayUnique()
   @IsIn(PRODUCT_VARIANT_FIELDS, { each: true })
   variant?: ProductVariantFields[];
+
   @IsOptional()
   @Type(() => Number)
   @IsInt()
@@ -69,11 +81,11 @@ class FindAllProductsQueryDto {
 
   @IsOptional()
   @IsIn(SORT_BY_OPTIONS)
-  sortBy: SortByOptions = 'created';
+  sortBy?: SortByOptions;
 
   @IsOptional()
   @IsIn(SORT_DIRECTION)
-  sortDirection: SortDirection = 'DESC';
+  sortDirection?: SortDirection;
 
   @IsOptional()
   @Type(() => Number)
