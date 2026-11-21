@@ -41,7 +41,7 @@ export class ProductsService {
       .findAll({
         ...options,
         category,
-        sort: { field: sortBy, direction: sortDirection },
+        sort: { field: sortBy ?? 'createdAt', direction: sortDirection ?? 'DESC' },
       })
       .map(({ products, pagination }) => ({ products: products.map((p) => p.toJSON()), pagination }))
       .unwrap();
