@@ -1,14 +1,16 @@
-import { IsIn, IsNumber, IsObject, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import { IsIn, IsInt, IsObject, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-least-one-defined.decorator';
 import { type JsonObject } from 'src/modules/shared/value-objects/json-object';
 import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
 import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product-sales-status';
+import { MAX_PRICE } from 'src/modules/shared/value-objects/price';
 const productVariantFieldsList = ['price', 'quantity', 'description', 'info', 'status'];
 const productVariantFields = productVariantFieldsList.join(', ');
 export class UpdateProductVariantDto {
   @IsOptional()
-  @IsNumber({ maxDecimalPlaces: 2 })
+  @IsInt()
   @Min(0)
+  @Max(MAX_PRICE) //$10,000,000.00 (10 million dollars).
   price?: number;
   @IsOptional()
   @IsString()
