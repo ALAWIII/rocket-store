@@ -8,7 +8,7 @@ import { ProductVariantWithImages } from '../mappers/product-variant.mapper';
 import { BrandWithLogo } from 'src/modules/brands/infrastructure/mappers/brand.mapper';
 import { CategoryEntity } from 'src/modules/categories/infrastructure/entities/category.entity';
 import { ProductDetails } from '../../domain/product-details';
-import { Pagination } from 'src/modules/shared/types/pagination';
+import { OutputPagination } from 'src/modules/shared/types/pagination';
 import { SortDirection } from 'src/modules/shared/types/sort-direction';
 import { ProductSalesStatus } from '../../domain/product-sales-status';
 import { SortByOptions } from '../../application/models/sort-by-options';
@@ -39,6 +39,7 @@ export type FindAllProductsSearchOptions = {
   // filters and conditions
   search?: string;
   visibility?: ProductVisibility;
+  variantVisibility?: ProductVisibility;
   salesStatus?: ProductSalesStatus;
   brandId?: string;
   category?: {
@@ -61,7 +62,7 @@ export type FindAllProductsSearchOptions = {
   page?: number;
   limit?: number;
 };
-export type FindAllProductsQueryResult = { products: Product[]; pagination: Pagination };
+export type FindAllProductsQueryResult = { products: Product[]; pagination: OutputPagination };
 
 export abstract class IProductRepository {
   abstract create(product: Product): DBResult<Product>;
