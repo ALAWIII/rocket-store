@@ -62,13 +62,6 @@ const VARIANT_BASE_FIELDS = ['id', 'productId', 'createdAt', 'updatedAt'] as con
 /*                                Public types                                */
 /* -------------------------------------------------------------------------- */
 
-export class InvalidProductQueryError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'InvalidProductQueryError';
-  }
-}
-
 export type BuiltProductQuery = {
   sql: string;
   parameters: unknown[];
