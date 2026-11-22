@@ -98,6 +98,7 @@ class FindAllProductsQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(0)
+  @Max(MAX_PRICE)
   minPrice?: number;
 
   @IsOptional()
