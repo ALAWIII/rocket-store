@@ -1,123 +1,77 @@
-import { SORT_DIRECTION, SortDirection } from 'src/modules/shared/types/sort-direction';
-import { normalizePagination } from 'src/modules/shared/utils/normalize-pagination.util';
+import { type SortDirection } from 'src/modules/shared/types/sort-direction';
+import { type SortByOptions } from 'src/modules/products/application/models/sort-by-options';
+import { type ProductFields } from 'src/modules/products/domain/product';
+import { type ProductVariantFields } from 'src/modules/products/domain/product-variant';
+import { type ProductVisibility } from 'src/modules/products/domain/product-visibility';
+import { type ProductSalesStatus } from 'src/modules/products/domain/product-sales-status';
 import type { FindAllProductsSearchOptions } from '../product.repository';
-import { SORT_BY_OPTIONS, SortByOptions } from 'src/modules/products/application/models/sort-by-options';
+import { PlanCache } from './plan-cache';
+import { normalizePagination } from 'src/modules/shared/utils/normalize-pagintation.util';
+
+/**
+ * FIND ALL PRODUCTS: runtime SQL generator
+ * ========================================
+ *
+ * The generated statement has five logical steps:
+ *
+ * 1. JOIN      Only the joins needed to filter or sort (e.g. the lowest visible
+ *              variant price when sorting by price). Every join here yields at
+ *              most ONE row per product, so products are never multiplied.
+ * 2. FILTER    WHERE conditions over products (and EXISTS over variants,
+ *              categories). Result: CTE `matched` (one row per product).
+ * 3. SORT      Order by the requested key(s) with `id` as a stable tie-breaker.
+ * 4. PAGINATE  LIMIT/OFFSET over bare product ids (CTE `page`), so the page size
+ *              and the total count are always in products, never in joined rows.
+ * 5. SELECT    Attach the cover image id and (optionally) the variants to the
+ *              ids of the page only, project the requested fields at the
+ *              database level and aggregate everything into one JSON array.
+ *
+ * The statement is compiled at runtime from small registries (filters, sorts,
+ * joins, projections), validated strictly, and cached per request *shape*
+ * (never per value) in a bounded LRU. Values are always bound parameters; SQL
+ * text is only ever assembled from whitelisted identifiers.
+ *
+ * Result row (one row per query):
+ *   products : [{ product: {...}, variants?: [{...}] }]   (page order)
+ *   total    : number of matching products (ignores pagination)
+ *
+ * `variants` is present only when at least one variant field was requested.
+ *
+ * How to extend:
+ * - New filter: add an entry to FILTERS (and an option to the repository type).
+ * - New sort (rating, quantity...): add the key to SORT_BY_OPTIONS; the
+ *   exhaustive `Record<SortByOptions, SortDef>` fails to compile until a SORTS
+ *   entry exists. If the sort needs a join, add it to JOINS and list it in
+ *   `requires`.
+ * - New projected column: add it to PRODUCT_FIELDS / PRODUCT_VARIANT_FIELDS.
+ *   The column name must equal the field name.
+ */
 
 /* -------------------------------------------------------------------------- */
-/*                                Query types                                 */
+/*                                  Constants                                 */
 /* -------------------------------------------------------------------------- */
 
-/**
- * The supported category filtering modes.
- *
- * - none: no category filtering.
- * - direct: match only the specified categories.
- * - descendants: also match products belonging to descendant categories.
- */
-type CategoryMode = 'none' | 'direct' | 'descendants';
+/** Upper bound of cached request shapes. Normal traffic never reaches it. */
+const PLAN_CACHE_MAX_ENTRIES = 2000;
 
-type JoinFields<T extends readonly unknown[]> = T extends readonly [infer H, ...infer R]
-  ? H extends unknown
-    ? JoinFields<R> extends infer Rest
-      ? Rest extends unknown
-        ? H & Rest
-        : never
-      : never
-    : never
-  : unknown;
-type CombinationOf<Key extends PropertyKey, Value> = Value extends unknown ? Record<Key, Value> : never;
-type BooleanCombination<Key extends PropertyKey> = CombinationOf<Key, boolean>;
+const IDENTIFIER_PATTERN = /^[A-Za-z][A-Za-z0-9_]*$/;
 
-type SearchComb = BooleanCombination<'search'>;
-type VisibilityComb = BooleanCombination<'visibility'>;
-type SalesStatusComb = BooleanCombination<'salesStatus'>;
-type BrandComb = BooleanCombination<'brand'>;
-type CategoryComb = CombinationOf<'category', CategoryMode>;
-type Price = JoinFields<[BooleanCombination<'minPrice'>, BooleanCombination<'maxPrice'>]>;
-type Ordering = JoinFields<[CombinationOf<'sortBy', SortByOptions>, CombinationOf<'sortDirection', SortDirection>]>;
-/**
- * Represents every valid combination of optional product filters.
- *
- * There are three independent boolean filters and three category modes,
- * resulting in 2 × 2 × 2 × 3 = 24 possible combinations.
- */
-export type Combination = JoinFields<
-  [SearchComb, VisibilityComb, SalesStatusComb, BrandComb, CategoryComb, Price, Ordering]
->;
+/** Fields that are always returned for a product. */
+const PRODUCT_BASE_FIELDS = ['id', 'title', 'createdAt', 'updatedAt'] as const;
+/** Fields that are always returned for a variant once any variant field is requested. */
+const VARIANT_BASE_FIELDS = ['id', 'productId', 'createdAt', 'updatedAt'] as const;
 
-/**
- * Appends a query-key segment to an existing key.
- *
- * Empty segments are ignored, and underscores are inserted only
- * when both segments contain a value.
- */
-type AppendKey<Current extends string, Next extends string> = Next extends ''
-  ? Current
-  : Current extends ''
-    ? Next
-    : `${Current}_${Next}`;
+/* -------------------------------------------------------------------------- */
+/*                                Public types                                */
+/* -------------------------------------------------------------------------- */
 
-/**
- * Derives the query key corresponding to a filter combination.
- *
- * Examples:
- * - { search: false, visibility: false, brand: false, category: 'none' }
- *   -> 'DEFAULT'
- * - { search: true, visibility: false, brand: false, category: 'none' }
- *   -> 'SEARCH'
- * - { search: true, visibility: true, brand: false, category: 'direct' }
- *   -> 'SEARCH_STATUS_CATEGORY'
- */
-type AppendKeys<T extends readonly string[], Acc extends string = ''> = T extends readonly [
-  infer H extends string,
-  ...infer R extends string[],
-]
-  ? AppendKeys<R, AppendKey<Acc, H>>
-  : Acc;
+export class InvalidProductQueryError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidProductQueryError';
+  }
+}
 
-type Flag<V, Label extends string> = V extends true ? Label : '';
-
-type CategoryFlag<M> = M extends 'direct' ? 'CATEGORY' : M extends 'descendants' ? 'INCLUDE_CATEGORY' : '';
-
-export type CombinationKey<C extends Combination> = C extends Combination
-  ? AppendKeys<
-      [
-        Flag<C['search'], 'SEARCH'>,
-        Flag<C['visibility'], 'VISIBILITY'>,
-        Flag<C['salesStatus'], 'SALES_STATUS'>,
-        Flag<C['brand'], 'BRAND'>,
-        CategoryFlag<C['category']>,
-        Flag<C['minPrice'], 'MIN'>,
-        Flag<C['maxPrice'], 'MAX'>,
-        Uppercase<C['sortBy']>,
-        Uppercase<C['sortDirection']>,
-      ]
-    >
-  : never;
-
-/**
- * Replaces the empty combination key with DEFAULT.
- */
-type NormalizeQueryKey<Key extends string> = Key extends '' ? 'DEFAULT' : Key;
-
-/**
- * Maps every valid filter combination to its corresponding SQL query.
- *
- * The mapped type guarantees that every valid combination has a key
- * and that invalid query keys are rejected by TypeScript.
- */
-export type QueryMap = {
-  [C in Combination as NormalizeQueryKey<CombinationKey<C>>]: string;
-};
-
-/**
- * Union of all supported query keys.
- */
-export type QueryKey = keyof QueryMap;
-
-/**
- * Result returned by the query builder.
- */
 export type BuiltProductQuery = {
   sql: string;
   parameters: unknown[];
@@ -125,406 +79,503 @@ export type BuiltProductQuery = {
 };
 
 /* -------------------------------------------------------------------------- */
-/*                              SQL definitions                               */
+/*                         Normalized (validated) options                      */
 /* -------------------------------------------------------------------------- */
 
-/**
- * SQL conditions used by the generated query variants.
- *
- * Each function receives the PostgreSQL parameter index to use.
- * Values themselves are always passed separately as query parameters.
- */
-const CONDITIONS = {
-  /**
-   * Searches product titles and descriptions using PGroonga.
-   */
-  search: (index: number) => `(p.title &@ $${index} OR p.description &@ $${index})`,
+type ResolvedSort = { kind: 'relevance' } | { kind: 'field'; field: SortByOptions; direction: SortDirection };
 
-  /**
-   * Filters products by their visibility.
-   */
-  visibility: (index: number) => `p.visibility = $${index}`,
-  /**
-   * Filters products by their salesStatus.
-   */
-  salesStatus: (index: number) => `p."salesStatus" = $${index}`,
-  /**
-   * Filters products by their brand.
-   */
-  brand: (index: number) => `p."brandId" = $${index}`,
-
-  /**
-   * Filters products by min price.
-   */
-  minPrice: (index: number) => `p.price <= $${index}`,
-
-  /**
-   * Filters products by max price.
-   */
-  maxPrice: (index: number) => `p.price >= $${index}`,
-  /**
-   * Matches products assigned directly to any specified category.
-   */
-  category: (index: number) => /*sql*/ `
-    EXISTS (
-      SELECT 1
-      FROM product_categories pc
-      WHERE pc."productId" = p.id
-        AND pc."categoryId" = ANY($${index}::uuid[])
-    )
-  `,
-
-  /**
-   * Matches products assigned to the specified categories
-   * or to any of their descendants.
-   */
-  includeCategories: (index: number) => /*sql*/ `
-    EXISTS (
-      SELECT 1
-      FROM product_categories pc
-      JOIN categories c ON c.id = pc."categoryId"
-      WHERE pc."productId" = p.id
-        AND (
-          c.id = ANY($${index}::uuid[])
-          OR c.path && $${index}::uuid[]
-        )
-    )
-  `,
-} as const;
-
-/**
- * Sorting configuration for the generated queries.
- *
- * Search queries sort by PGroonga relevance first.
- * Queries without search sort by creation date.
- *
- * Aggregate ordering is specified separately because ordering
- * in a paginated CTE alone does not guarantee aggregate input order.
- */
-const ORDERING = {
-  SEARCH: {
-    selection: ', pgroonga_score(p.tableoid, p.ctid) AS score',
-
-    pageOrdering: 'ORDER BY score DESC, "createdAt" DESC, id DESC',
-
-    aggregateOrdering: 'ORDER BY pg.score DESC, pg."createdAt" DESC, pg.id DESC',
-  },
-
-  byField: (f: SortByOptions, direction: SortDirection) => ({
-    selection: '',
-
-    pageOrdering: `ORDER BY "${f}" ${direction}, id ${direction}`,
-
-    aggregateOrdering: `ORDER BY pg."${f}" ${direction}, pg.id ${direction}`,
-  }),
-} as const;
+type NormalizedOptions = {
+  readonly search?: string;
+  readonly visibility?: ProductVisibility;
+  readonly variantVisibility?: ProductVisibility;
+  readonly salesStatus?: ProductSalesStatus;
+  readonly brandId?: string;
+  readonly category?: { readonly ids: readonly string[]; readonly includeDescendants: boolean };
+  readonly minPrice?: number;
+  readonly maxPrice?: number;
+  /** Optional product fields in canonical order, de-duplicated. */
+  readonly productFields: readonly ProductFields[];
+  /** Requested variant fields in canonical order, de-duplicated. Empty = no variants. */
+  readonly variantFields: readonly ProductVariantFields[];
+  readonly sort: ResolvedSort;
+  readonly page: number;
+  readonly limit: number;
+};
 
 /* -------------------------------------------------------------------------- */
-/*                           SQL query generation                             */
+/*                                 Validation                                 */
 /* -------------------------------------------------------------------------- */
 
+function normalizeOptions(raw: FindAllProductsSearchOptions): NormalizedOptions {
+  const {
+    search,
+    visibility,
+    variantVisibility,
+    salesStatus,
+    brandId,
+    category: cat,
+    minPrice,
+    maxPrice,
+    page,
+    limit,
+  } = raw;
+
+  // category: an empty id list means "no category filter".
+  let category: NormalizedOptions['category'] = cat
+    ? {
+        ids: cat?.categoryIds,
+        includeDescendants: cat.includeCategoryDescendants === true,
+      }
+    : undefined;
+
+  // Sorting: explicit sort wins; otherwise relevance when searching, else newest first.
+  const sort: ResolvedSort =
+    raw.sort != null
+      ? { kind: 'field', field: raw.sort.field, direction: raw.sort.direction }
+      : search != null
+        ? { kind: 'relevance' }
+        : { kind: 'field', field: 'createdAt', direction: 'DESC' };
+
+  return {
+    search,
+    visibility,
+    variantVisibility,
+    salesStatus,
+    brandId,
+    category,
+    minPrice,
+    maxPrice,
+    productFields: raw.product ?? [],
+    variantFields: raw.variant ?? [],
+    sort,
+    ...normalizePagination(page, limit), // returns { page, limit } object
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/*                       SQL helpers and parameter binding                    */
+/* -------------------------------------------------------------------------- */
+
+type Extractor = (options: NormalizedOptions) => unknown;
+
 /**
- * Generates a SQL query for one specific filter combination.
- *
- * The generated query:
- * 1. Selects matching products and their cover images.
- * 2. Applies the requested filters.
- * 3. Calculates relevance scores when searching.
- * 4. Applies sorting and pagination.
- * 5. Aggregates the products into a JSON array.
- * 6. Returns the total number of matching products.
- *
- * Parameter allocation order:
- * search -> visibility -> brand -> categoryIds -> limit -> offset
- *
- * This order must remain synchronized with the builder's parameter array.
+ * Allocates `$n` placeholders and records, at the same moment, how to read the
+ * matching value from a request. SQL text and parameter array therefore cannot
+ * drift apart, which removes the "keep the order in sync by hand" problem.
  */
-function generateQuery(combination: Combination): string {
-  const { sortBy, sortDirection } = combination;
-  const conditions: string[] = [];
+class SqlParams {
+  private readonly extractors: Extractor[] = [];
+  private readonly shared = new Map<string, string>();
+
+  /** Binds a new value and returns its placeholder. */
+  add(extract: Extractor): string {
+    this.extractors.push(extract);
+    return `$${this.extractors.length}`;
+  }
 
   /**
-   * Tracks the next PostgreSQL parameter index.
-   */
-  let parameterIndex = 0;
-
-  /**
-   * Allocates and returns the next parameter index.
-   */
-  const nextParameter = () => ++parameterIndex;
-
-  // Add the applicable conditions in a fixed parameter order.
-  if (combination.search) conditions.push(CONDITIONS.search(nextParameter()));
-
-  if (combination.visibility) conditions.push(CONDITIONS.visibility(nextParameter()));
-
-  if (combination.salesStatus) conditions.push(CONDITIONS.salesStatus(nextParameter()));
-
-  if (combination.brand) conditions.push(CONDITIONS.brand(nextParameter()));
-
-  if (combination.category === 'direct') conditions.push(CONDITIONS.category(nextParameter()));
-
-  if (combination.category === 'descendants') conditions.push(CONDITIONS.includeCategories(nextParameter()));
-
-  if (combination.minPrice) conditions.push(CONDITIONS.minPrice(nextParameter()));
-
-  if (combination.maxPrice) conditions.push(CONDITIONS.maxPrice(nextParameter()));
-
-  /**
-   * Builds the WHERE clause.
+   *  Binds a value once and reuses the same placeholder for every later use.
+   *  a query may needs to use same placeholder for example $1 in many query fragments.
    *
-   * An empty condition list means no filters are applied.
    */
-  const where = conditions.length ? `WHERE ${conditions.join('\nAND ')}` : '';
+  addShared(name: string, extract: Extractor): string {
+    let placeholder = this.shared.get(name);
+    if (placeholder === undefined) {
+      placeholder = this.add(extract);
+      this.shared.set(name, placeholder);
+    }
+    return placeholder;
+  }
 
-  /**
-   * Selects the appropriate sorting configuration.
-   */
-  const ordering = combination.search ? ORDERING.SEARCH : ORDERING.byField(sortBy, sortDirection);
+  build(): readonly Extractor[] {
+    return [...this.extractors];
+  }
+}
 
-  /**
-   * Pagination parameters are always allocated last.
-   */
-  const limit = nextParameter();
-  const offset = nextParameter();
+/** Defense in depth: identifiers come from whitelists, but are verified anyway. */
+function quote(identifier: string): string {
+  if (!IDENTIFIER_PATTERN.test(identifier)) throw new Error(`Unsafe SQL identifier: ${identifier}`);
+  return `"${identifier}"`;
+}
 
-  return /*sql*/ `
-    WITH filtered AS (
-      SELECT
-        p.*,
-        row_to_json(img) AS "coverImage"
-        ${ordering.selection}
+/** `'field', alias."field"` pair for jsonb_build_object. */
+function jsonPair(alias: string, field: string): string {
+  return `'${field}', ${alias}.${quote(field)}`;
+}
+
+/** `AND v."visibility" = $n` when variants must be restricted, else ''. */
+function variantVisibilityPredicate(params: SqlParams, options: NormalizedOptions): string {
+  if (options.variantVisibility === undefined) return '';
+  const placeholder = params.addShared('variantVisibility', (o) => o.variantVisibility);
+  return `AND v."visibility" = ${placeholder}`;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                         Step 1: joins (filter / sort)                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Joins that filters or sorts may require. Each one must produce at most one
+ * row per product (LATERAL aggregate), so pagination stays product-based.
+ * Future modules (ratings, stock...) add their join here.
+ */
+type JoinKey = 'priceAgg';
+
+const JOIN_ORDER: readonly JoinKey[] = ['priceAgg'];
+
+const JOINS: Record<JoinKey, (params: SqlParams, options: NormalizedOptions) => string> = {
+  /** Lowest price among the variants the viewer is allowed to see. */
+  priceAgg: (params, options) => `LEFT JOIN LATERAL (
+      SELECT MIN(v."price") AS min_price
+      FROM product_variants v
+      WHERE v."productId" = p.id ${variantVisibilityPredicate(params, options)}
+    ) pa ON TRUE`,
+};
+
+/* -------------------------------------------------------------------------- */
+/*                              Step 2: filters                               */
+/* -------------------------------------------------------------------------- */
+
+type FilterDef = {
+  readonly name: string;
+  readonly requires?: readonly JoinKey[];
+  /** True when the request activates this filter. */
+  active(options: NormalizedOptions): boolean;
+  /** Contribution to the cache key: everything that changes the SQL text, never values. */
+  shape(options: NormalizedOptions): string;
+  where(params: SqlParams, options: NormalizedOptions): string;
+};
+
+const FILTERS: readonly FilterDef[] = [
+  {
+    name: 'search',
+    active: (o) => o.search !== undefined,
+    shape: () => 'search',
+    where: (params) => {
+      const term = params.add((o) => o.search);
+      return `(p."title" &@ ${term} OR p."description" &@ ${term})`;
+    },
+  },
+  {
+    name: 'visibility',
+    active: (o) => o.visibility !== undefined,
+    shape: () => 'visibility',
+    where: (params) => `p."visibility" = ${params.add((o) => o.visibility)}`,
+  },
+  {
+    /**
+     * Restricts which variants the viewer may see, and hides products that
+     * have no such variant (e.g. customers never see products whose variants
+     * are all private). Also applied to variant aggregates and the variant
+     * projection, so price filtering, price sorting and the returned variants
+     * are consistent.
+     */
+    name: 'variantVisibility',
+    active: (o) => o.variantVisibility !== undefined,
+    shape: () => 'variantVisibility',
+    where: (params, options) => `EXISTS (
+        SELECT 1 FROM product_variants v
+        WHERE v."productId" = p.id ${variantVisibilityPredicate(params, options)}
+      )`,
+  },
+  {
+    name: 'salesStatus',
+    active: (o) => o.salesStatus !== undefined,
+    shape: () => 'salesStatus',
+    where: (params) => `p."salesStatus" = ${params.add((o) => o.salesStatus)}`,
+  },
+  {
+    name: 'brand',
+    active: (o) => o.brandId !== undefined,
+    shape: () => 'brand',
+    where: (params) => `p."brandId" = ${params.add((o) => o.brandId)}`,
+  },
+  {
+    name: 'category',
+    active: (o) => o.category !== undefined,
+    shape: (o) => (o.category?.includeDescendants ? 'category:descendants' : 'category:direct'),
+    where: (params, options) => {
+      const ids = params.add((o) => o.category?.ids);
+
+      if (options.category?.includeDescendants) {
+        return /*sql*/ `
+        EXISTS (
+          SELECT 1
+          FROM product_categories pc
+          JOIN categories c ON c.id = pc."categoryId"
+          WHERE pc."productId" = p.id
+            AND (c.id = ANY(${ids}::uuid[]) OR c.path && ${ids}::uuid[])
+      )`;
+      }
+
+      return /*sql*/ `
+      EXISTS (
+        SELECT 1
+        FROM product_categories pc
+        WHERE pc."productId" = p.id
+          AND pc."categoryId" = ANY(${ids}::uuid[])
+      )`;
+    },
+  },
+  {
+    /**
+     * A product matches when at least one variant the viewer may see has a
+     * price inside the requested range. Min and max apply to the SAME variant.
+     */
+    name: 'price',
+    active: (o) => o.minPrice !== undefined || o.maxPrice !== undefined,
+    shape: (o) => `price:${o.minPrice !== undefined ? 'min' : ''}${o.maxPrice !== undefined ? 'max' : ''}`,
+    where: (params, options) => {
+      const conditions: string[] = [];
+      if (options.minPrice !== undefined) conditions.push(`v."price" >= ${params.add((o) => o.minPrice)}`);
+      if (options.maxPrice !== undefined) conditions.push(`v."price" <= ${params.add((o) => o.maxPrice)}`);
+
+      return /*sql*/ `
+      EXISTS (
+        SELECT 1 FROM product_variants v
+        WHERE v."productId" = p.id ${variantVisibilityPredicate(params, options)}
+          AND ${conditions.join(' AND ')}
+      )`;
+    },
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*                               Step 3: sorting                              */
+/* -------------------------------------------------------------------------- */
+
+type SortKey = { expr: string; direction: SortDirection; nullsLast?: boolean };
+
+type SortDef = {
+  readonly requires: readonly JoinKey[];
+  keys(direction: SortDirection): SortKey[];
+};
+
+/**
+ * Exhaustive over SORT_BY_OPTIONS: adding an option without an entry here is a
+ * compile error. (`rating` / `quantity` will be added with their modules.)
+ */
+const SORTS: Record<SortByOptions, SortDef> = {
+  createdAt: { requires: [], keys: (direction) => [{ expr: 'p."createdAt"', direction }] },
+  updatedAt: { requires: [], keys: (direction) => [{ expr: 'p."updatedAt"', direction }] },
+  title: { requires: [], keys: (direction) => [{ expr: 'p."title"', direction }] },
+  price: {
+    requires: ['priceAgg'],
+    // Products without a visible variant price sort last in both directions.
+    keys: (direction) => [{ expr: 'pa.min_price', direction, nullsLast: true }],
+  },
+};
+
+type CompiledSort = {
+  shape: string;
+  requires: readonly JoinKey[];
+  keys: SortKey[];
+  tieBreaker: SortDirection;
+};
+
+function compileSort(sort: ResolvedSort): CompiledSort {
+  if (sort.kind === 'relevance') {
+    return {
+      shape: 'sort:relevance',
+      requires: [],
+      keys: [
+        { expr: 'pgroonga_score(p.tableoid, p.ctid)', direction: 'DESC' },
+        { expr: 'p."createdAt"', direction: 'DESC' },
+      ],
+      tieBreaker: 'DESC',
+    };
+  }
+  // `def.requires` will be empty array for any field that isnt `JoinKey` element
+  const def = SORTS[sort.field];
+  return {
+    shape: `sort:${sort.field}:${sort.direction}`,
+    requires: def.requires,
+    keys: def.keys(sort.direction),
+    tieBreaker: sort.direction,
+  };
+}
+
+/** ORDER BY over the sort columns exposed by the `matched` CTE (k0, k1, ..., id). */
+function orderBy(alias: string, sort: CompiledSort): string {
+  const parts = sort.keys.map((key, i) => `${alias}.k${i} ${key.direction}${key.nullsLast ? ' NULLS LAST' : ''}`);
+  parts.push(`${alias}.id ${sort.tieBreaker}`);
+  return `ORDER BY ${parts.join(', ')}`;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                      Step 5: projection and aggregation                    */
+/* -------------------------------------------------------------------------- */
+
+/**
+ *  used to construct products fields
+ */
+function productObject(options: NormalizedOptions): string {
+  const pairs = [
+    ...PRODUCT_BASE_FIELDS.map((field) => jsonPair('p', field)),
+    // `product_images.productId` is unique, so this is a 1:1 relation.
+    `'coverImageId', cover."imageId"`,
+    ...options.productFields.map((field) => jsonPair('p', field)),
+  ];
+  return `jsonb_build_object(${pairs.join(', ')})`;
+}
+
+/**
+ *  used to construct product variants fields
+ */
+function variantObject(options: NormalizedOptions): string {
+  const pairs = [...VARIANT_BASE_FIELDS, ...options.variantFields].map((field) => jsonPair('v', field));
+  return `jsonb_build_object(${pairs.join(', ')})`;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 Compilation                                */
+/* -------------------------------------------------------------------------- */
+
+type CompiledPlan = {
+  readonly sql: string;
+  readonly extractors: readonly Extractor[];
+};
+
+/**
+ * Cache key: every dimension that changes the SQL text, none of the values.
+ * Built from the same registries as the SQL, so key and SQL cannot disagree.
+ */
+function shapeKey(options: NormalizedOptions, sort: CompiledSort): string {
+  const filters = FILTERS.filter((f) => f.active(options)).map((f) => f.shape(options));
+  return [
+    `f=${filters.join(',')}`,
+    sort.shape,
+    `p=${options.productFields.join(',')}`,
+    `v=${options.variantFields.join(',')}`,
+  ].join('|');
+}
+
+function compile(options: NormalizedOptions, sort: CompiledSort): CompiledPlan {
+  const params = new SqlParams();
+  // collect active or provided filters.
+  const activeFilters = FILTERS.filter((f) => f.active(options));
+
+  // Step 1: joins required by the active filters and the sort.
+  const required = new Set<JoinKey>(sort.requires);
+  for (const filter of activeFilters) filter.requires?.forEach((key) => required.add(key));
+  // iterates over conditions that requires joins in order to be checked, then if the input `required` includes any of the join keys, it then takes care of calling the appropriate join query and provide it the `params` and `options` values.
+  const joins = JOIN_ORDER.filter((key) => required.has(key)).map((key) => JOINS[key](params, options));
+
+  // Step 2: filters.
+  const conditions = activeFilters.map((filter) => filter.where(params, options));
+  const where = conditions.length ? `WHERE ${conditions.join('\n      AND ')}` : '';
+
+  // Step 3: sort columns exposed by the matched set.
+  const sortColumns = sort.keys.map((key, i) => `, ${key.expr} AS k${i}`).join('');
+
+  // Step 4: pagination.
+  const limit = params.add((o) => o.limit);
+  const offset = params.add((o) => (o.page - 1) * o.limit);
+
+  // Step 5: projection and aggregation.
+  const withVariants = options.variantFields.length > 0;
+  const item = withVariants
+    ? `jsonb_build_object(
+          'product', ${productObject(options)},
+          'variants', COALESCE(vs.variants, '[]'::jsonb)
+        )`
+    : `jsonb_build_object('product', ${productObject(options)})`;
+
+  // Variants are returned in a stable (creation) order; `sortOrder` is a UI concern.
+  const variantJoin = withVariants
+    ? `LEFT JOIN LATERAL (
+        SELECT jsonb_agg(${variantObject(options)} ORDER BY v.id) AS variants
+        FROM product_variants v
+        WHERE v."productId" = p.id ${variantVisibilityPredicate(params, options)}
+      ) vs ON TRUE`
+    : '';
+
+  const sql = /*sql*/ `
+    WITH matched AS (
+      SELECT p.id${sortColumns}
       FROM products p
-      LEFT JOIN product_images pi ON pi."productId" = p.id
-      LEFT JOIN images img ON img.id = pi."imageId"
+      ${joins.join('\n      ')}
       ${where}
     ),
-    paginated AS (
-      SELECT *
-      FROM filtered
-      ${ordering.pageOrdering}
-      LIMIT $${limit}
-      OFFSET $${offset}
+    page AS (
+      SELECT m.*
+      FROM matched m
+      ${orderBy('m', sort)}
+      LIMIT ${limit} OFFSET ${offset}
     )
     SELECT
       COALESCE(
         (
-          SELECT json_agg(
-            to_jsonb(pg) - 'score'
-            ${ordering.aggregateOrdering}
+          SELECT jsonb_agg(
+            ${item}
+            ${orderBy('pg', sort)}
           )
-          FROM paginated pg
+          FROM page pg
+          JOIN products p ON p.id = pg.id
+          LEFT JOIN product_images cover ON cover."productId" = p.id
+          ${variantJoin}
         ),
-        '[]'::json
+        '[]'::jsonb
       ) AS products,
-      (SELECT COUNT(*) FROM filtered) AS total;
+      (SELECT COUNT(*) FROM matched)::int AS total
   `;
+
+  return Object.freeze({ sql, extractors: Object.freeze(params.build()) });
 }
 
 /* -------------------------------------------------------------------------- */
-/*                         Query combination registry                         */
+/*                                 Plan cache                                 */
 /* -------------------------------------------------------------------------- */
 
 /**
- * Runtime boolean values used when enumerating filter combinations.
- */
-const BOOLEAN_VALUES = [false, true] as const;
-
-/**
- * Runtime category modes used when enumerating filter combinations.
- */
-const CATEGORY_VALUES = ['none', 'direct', 'descendants'] as const;
-
-/**
- * Generates every supported filter combination.
+ * Compiled plans live until the process restarts. Only validated and
+ * canonicalized shapes can enter the cache; the LRU cap is purely a safeguard
+ * against clients enumerating valid combinations to exhaust memory.
  *
- * The generated combinations must cover the same possibilities
- * represented by the Combination type.
- *
- * Total combinations: 2 × 2 × 2 × 3 = 24.
+ * `get -> compile -> set` is fully synchronous (no `await`), so it is safe
+ * under Node's single-threaded execution model.
  */
-function* generateCombinations(): Generator<Combination> {
-  for (const search of BOOLEAN_VALUES) {
-    for (const visibility of BOOLEAN_VALUES) {
-      for (const salesStatus of BOOLEAN_VALUES) {
-        for (const brand of BOOLEAN_VALUES) {
-          for (const category of CATEGORY_VALUES) {
-            for (const minPrice of BOOLEAN_VALUES) {
-              for (const maxPrice of BOOLEAN_VALUES) {
-                for (const sortBy of SORT_BY_OPTIONS) {
-                  for (const sortDirection of SORT_DIRECTION) {
-                    yield {
-                      search,
-                      visibility,
-                      salesStatus,
-                      brand,
-                      category,
-                      minPrice,
-                      maxPrice,
-                      sortBy,
-                      sortDirection,
-                    } as Combination;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+const PLAN_CACHE = new PlanCache<CompiledPlan>(PLAN_CACHE_MAX_ENTRIES);
+
+function getPlan(options: NormalizedOptions): CompiledPlan {
+  const sort = compileSort(options.sort);
+  const key = shapeKey(options, sort);
+
+  let plan = PLAN_CACHE.get(key);
+  if (plan === undefined) {
+    plan = compile(options, sort);
+    PLAN_CACHE.set(key, plan);
   }
+  return plan;
 }
-
-/**
- * Generates the runtime query key for a filter combination.
- *
- * The segment order must match the CombinationKey type.
- *
- * The returned key is asserted as QueryKey because TypeScript
- * cannot infer the relationship between the dynamically assembled
- * string and the type-level conditional mapping.
- */
-function getCombinationKey(combination: Combination): QueryKey {
-  const parts: string[] = [];
-
-  if (combination.search) parts.push('SEARCH');
-
-  if (combination.visibility) parts.push('VISIBILITY');
-
-  if (combination.salesStatus) parts.push('SALES_STATUS');
-
-  if (combination.brand) parts.push('BRAND');
-
-  if (combination.category === 'direct') parts.push('CATEGORY');
-
-  if (combination.category === 'descendants') parts.push('INCLUDE_CATEGORY');
-
-  if (combination.minPrice) parts.push('MIN');
-
-  if (combination.maxPrice) parts.push('MAX');
-
-  parts.push(combination.sortBy);
-  parts.push(combination.sortDirection);
-
-  return parts.join('_') as QueryKey;
-}
-
-/**
- * Generates and stores all SQL query variants once when this module
- * is initialized.
- *
- * The query templates are reused by every builder instance.
- * No SQL condition construction is needed for individual requests.
- *
- * Query values remain parameterized; user input is never interpolated
- * into the generated SQL.
- */
-export const QUERIES = Object.fromEntries(
-  [...generateCombinations()].map(
-    (combination) => [getCombinationKey(combination), generateQuery(combination)] as const,
-  ),
-) as QueryMap;
 
 /* -------------------------------------------------------------------------- */
-/*                        Product query builder                               */
+/*                            Product query builder                           */
 /* -------------------------------------------------------------------------- */
 
 /**
- * Builds a product query by selecting an existing SQL template
- * and supplying the corresponding parameter values.
+ * Validates the search options, selects (or compiles) the SQL plan for their
+ * shape and binds the request's values.
  *
- * SQL templates are generated once at module initialization.
- * Each builder instance only determines the appropriate template
- * and prepares its parameter array.
+ * `build()` throws `InvalidProductQueryError` for invalid options.
+ *
+ * Visibility is enforced by the caller through two independent options:
+ * - `visibility`        filters products;
+ * - `variantVisibility` restricts the variants that are aggregated, priced and
+ *                       returned, and hides products left with no such variant.
+ * The customer endpoint's service must force both to 'public'.
  */
 export class FindAllProductsQueryBuilder {
   constructor(private readonly options: FindAllProductsSearchOptions) {}
 
-  /**
-   * Builds the SQL query and its parameter array.
-   *
-   * Parameter ordering must match generateQuery():
-   * search -> visibility -> brand -> categoryIds -> limit -> offset.
-   */
   build(): BuiltProductQuery {
-    const { search: rawSearch, visibility, salesStatus, brandId, category, minPrice, maxPrice, sort } = this.options;
-    const { field: sortBy = 'createdAt', direction: sortDirection = 'DESC' } = sort!;
-
-    /**
-     * Normalize the search string.
-     * Empty or whitespace-only strings do not activate search filtering.
-     */
-    const search = rawSearch?.trim();
-
-    /**
-     * Determine which optional filters are active.
-     */
-    const hasSearch = Boolean(search);
-    const hasVisibility = visibility !== undefined;
-    const hasSalesStatus = salesStatus !== undefined;
-    const hasBrand = brandId !== undefined;
-
-    /**
-     * Determine the category filtering mode.
-     */
-    const categoryMode: CategoryMode = !category
-      ? 'none'
-      : category.includeCategoryDescendants
-        ? 'descendants'
-        : 'direct';
-
-    const hasMinPrice = minPrice !== undefined;
-    const hasMaxPrice = maxPrice !== undefined;
-    /**
-     * Build the combination used to select the SQL template.
-     */
-    const combination: Combination = {
-      search: hasSearch,
-      visibility: hasVisibility,
-      salesStatus: hasSalesStatus,
-      brand: hasBrand,
-      category: categoryMode,
-      minPrice: hasMinPrice,
-      maxPrice: hasMaxPrice,
-      sortBy,
-      sortDirection,
-    } as Combination;
-
-    /**
-     * Resolve the matching pre-generated SQL query.
-     */
-    const queryKey = getCombinationKey(combination);
-    const sql = QUERIES[queryKey];
-
-    /**
-     * Normalize pagination values.
-     */
-    const { page, limit } = normalizePagination(this.options);
-
-    /**
-     * Prepare parameter values in exactly the same order
-     * used when generating the SQL placeholders.
-     */
-    const parameters: unknown[] = [];
-
-    if (hasSearch) parameters.push(search);
-
-    if (hasVisibility) parameters.push(visibility);
-    if (hasSalesStatus) parameters.push(salesStatus);
-
-    if (hasBrand) parameters.push(brandId);
-
-    if (category) parameters.push(category.categoryIds);
-
-    if (hasMinPrice) parameters.push(minPrice);
-    if (hasMaxPrice) parameters.push(maxPrice);
-    // Pagination parameters are always last.
-    parameters.push(limit, (page - 1) * limit);
+    const normalized = normalizeOptions(this.options);
+    const plan = getPlan(normalized);
 
     return {
-      sql,
-      parameters,
-      pagination: { page, limit },
+      sql: plan.sql,
+      parameters: plan.extractors.map((extract) => extract(normalized)),
+      pagination: { page: normalized.page, limit: normalized.limit },
     };
   }
 }
