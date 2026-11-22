@@ -5,13 +5,13 @@ import {
   IsArray,
   IsBoolean,
   IsIn,
-  IsInt,
-  IsOptional,
   IsString,
   IsUUID,
+  Length,
   Max,
-  MaxLength,
   Min,
+  Validate,
+  ValidationArguments,
 } from 'class-validator';
 import { SORT_BY_OPTIONS, type SortByOptions } from 'src/modules/products/application/models/sort-by-options';
 import { SORT_DIRECTION, type SortDirection } from 'src/modules/shared/types/sort-direction';
@@ -21,12 +21,31 @@ import { PRODUCT_VARIANT_FIELDS, ProductVariantFields } from '../domain/product-
 import { PRODUCT_FIELDS, ProductFields } from '../domain/product';
 import { normalizeArray } from 'src/modules/shared/utils/array-normalizer.util';
 import { trimToUndefined } from 'src/modules/shared/utils/trim-string-or-undefiend.util';
+import { MAX_PRICE } from 'src/modules/shared/value-objects/price';
+import { IsOptional, IsInt, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
 
+@ValidatorConstraint({ name: 'minLessThanMax', async: false })
+export class MinLessThanMax implements ValidatorConstraintInterface {
+  validate(maxPrice: number | undefined, args: ValidationArguments) {
+    const dto = args.object as { minPrice?: number; maxPrice?: number };
+
+    // If either is missing, the comparison doesn't apply (it's valid)
+    if (dto.minPrice == null || maxPrice == null) {
+      return true;
+    }
+
+    return dto.minPrice <= maxPrice;
+  }
+
+  defaultMessage() {
+    return 'minPrice must be less than or equal to maxPrice';
+  }
+}
 class FindAllProductsQueryDto {
   @IsOptional()
   @Transform(({ value }) => trimToUndefined(value))
   @IsString()
-  @MaxLength(200)
+  @Length(3, 200)
   search?: string;
 
   @IsOptional()
@@ -71,6 +90,8 @@ class FindAllProductsQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(0)
+  @Max(MAX_PRICE) //$10,000,000.00 (10 million dollars).
+  @Validate(MinLessThanMax)
   maxPrice?: number;
 
   @IsOptional()
