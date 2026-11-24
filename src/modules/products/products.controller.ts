@@ -1,21 +1,24 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductDto } from './dto/create-product.dto';
-import { ProductResponseDto } from './dto/product-response.dto';
+import { CreateProductDto } from './dto/request/write/create-product.dto';
+import { ProductResponseDto } from './dto/response/product-response.dto';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
 import { AllPermissions } from '../access-control/domain/permission';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { FindByIdQueryAdminDto, FindByIdQueryDto } from './dto/find-by-id-query.dto';
-import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
-import { FindAllProductsResponseDto } from './dto/find-all-products-response.dto';
+import { UpdateProductDto } from './dto/request/write/update-product.dto';
+import { FindByIdQueryAdminDto, FindByIdQueryDto } from './dto/request/read/find-by-id-query.dto';
+import { ProductDetailsResponseDto } from './dto/response/product-details-response.dto';
+import { FindAllProductsResponseDto } from './dto/response/find-all-products-response.dto';
 import { AttachImagesDto } from '../shared/dto/attach-images.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
 import { DetachImagesDto } from '../shared/dto/detach-images.dto';
-import { AttachCategoriesDto } from './dto/attach-categories.dto';
-import { ProductCategoriesResponseDto } from './dto/product-categories-response.dto';
-import { DetachCategoriesDto } from './dto/detach-categories.dto';
-import { FindAllAdminProductsQueryDto, FindAllCustomerProductsQueryDto } from './dto/find-all-products-query.dto';
+import { AttachCategoriesDto } from './dto/request/write/attach-categories.dto';
+import { ProductCategoriesResponseDto } from './dto/response/product-categories-response.dto';
+import { DetachCategoriesDto } from './dto/request/write/detach-categories.dto';
+import {
+  FindAllAdminProductsQueryDto,
+  FindAllCustomerProductsQueryDto,
+} from './dto/request/read/find-all-products-query.dto';
 
 @Controller('products')
 export class ProductsController {

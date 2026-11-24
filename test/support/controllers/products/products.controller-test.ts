@@ -1,13 +1,15 @@
-import { AttachCategoriesDto } from 'src/modules/products/dto/attach-categories.dto';
-import { CreateProductDto } from 'src/modules/products/dto/create-product.dto';
-import { DetachCategoriesDto } from 'src/modules/products/dto/detach-categories.dto';
-import { FindAllCustomerProductsQueryDto } from 'src/modules/products/dto/find-all-products-query.dto';
-import { FindAllProductsResponseDto } from 'src/modules/products/dto/find-all-products-response.dto';
-import { FindByIdQueryDto } from 'src/modules/products/dto/find-by-id-query.dto';
-import { ProductCategoriesResponseDto } from 'src/modules/products/dto/product-categories-response.dto';
-import { ProductDetailsResponseDto } from 'src/modules/products/dto/product-details-response.dto';
-import { ProductResponseDto } from 'src/modules/products/dto/product-response.dto';
-import { UpdateProductDto } from 'src/modules/products/dto/update-product.dto';
+import { FindAllCustomerProductsQueryDto } from 'src/modules/products/dto/request/read/find-all-products-query.dto';
+import { FindByIdQueryDto } from 'src/modules/products/dto/request/read/find-by-id-query.dto';
+import { AttachCategoriesDto } from 'src/modules/products/dto/request/write/attach-categories.dto';
+import { CreateProductDto } from 'src/modules/products/dto/request/write/create-product.dto';
+import { DetachCategoriesDto } from 'src/modules/products/dto/request/write/detach-categories.dto';
+import { UpdateProductDto } from 'src/modules/products/dto/request/write/update-product.dto';
+
+import { FindAllProductsResponseDto } from 'src/modules/products/dto/response/find-all-products-response.dto';
+import { ProductCategoriesResponseDto } from 'src/modules/products/dto/response/product-categories-response.dto';
+
+import { ProductDetailsResponseDto } from 'src/modules/products/dto/response/product-details-response.dto';
+import { ProductResponseDto } from 'src/modules/products/dto/response/product-response.dto';
 import { AffectedResponseDto } from 'src/modules/shared/dto/affected-response.dto';
 import { AttachImagesDto } from 'src/modules/shared/dto/attach-images.dto';
 import { DetachImagesDto } from 'src/modules/shared/dto/detach-images.dto';

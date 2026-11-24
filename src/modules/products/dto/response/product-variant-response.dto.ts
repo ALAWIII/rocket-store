@@ -1,7 +1,7 @@
 import { JsonObject } from 'src/modules/shared/value-objects/json-object';
-import { ProductVisibility } from '../domain/product-visibility';
+import { ProductVisibility } from '../../domain/product-visibility';
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
-import { ProductSalesStatus } from '../domain/product-sales-status';
+import { ProductSalesStatus } from '../../domain/product-sales-status';
 
 export class ProductVariantResponseDto {
   id!: string;

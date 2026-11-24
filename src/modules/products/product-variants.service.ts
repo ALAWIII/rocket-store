@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { IProductVariantRepository } from './infrastructure/repositories/product-variant.repository';
-import { CreateProductVariantDto } from './dto/create-product-variant.dto';
+import { CreateProductVariantDto } from './dto/request/write/create-product-variant.dto';
 import { ProductVariant } from './domain/product-variant';
-import { ProductVariantResponseDto } from './dto/product-variant-response.dto';
-import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
-import { UpdateVariantsSortOrderDto } from './dto/update-variant-sort-order.dto';
-import { ProductVariantImagesDto } from './dto/product-variant-images.dto';
+import { ProductVariantResponseDto } from './dto/response/product-variant-response.dto';
+import { UpdateProductVariantDto } from './dto/request/write/update-product-variant.dto';
+import { UpdateVariantsSortOrderDto } from './dto/request/write/update-variant-sort-order.dto';
+import { ProductVariantImagesDto } from './dto/request/write/product-variant-images.dto';
 import { ProductVariantImage } from './domain/product-variant-image';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { AffectedResponseDto } from '../shared/dto/affected-response.dto';

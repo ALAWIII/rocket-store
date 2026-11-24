@@ -2,15 +2,15 @@ import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patc
 import { ProductsVariantsService } from './product-variants.service';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
 import { AllPermissions } from '../access-control/domain/permission';
-import { CreateProductVariantDto } from './dto/create-product-variant.dto';
-import { ProductVariantResponseDto } from './dto/product-variant-response.dto';
-import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
-import { UpdateVariantsSortOrderDto } from './dto/update-variant-sort-order.dto';
-import { ProductVariantImagesDto } from './dto/product-variant-images.dto';
+import { CreateProductVariantDto } from './dto/request/write/create-product-variant.dto';
+import { ProductVariantResponseDto } from './dto/response/product-variant-response.dto';
+import { UpdateProductVariantDto } from './dto/request/write/update-product-variant.dto';
+import { UpdateVariantsSortOrderDto } from './dto/request/write/update-variant-sort-order.dto';
+import { ProductVariantImagesDto } from './dto/request/write/product-variant-images.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { DetachImagesDto } from '../shared/dto/detach-images.dto';
 import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
-import { FindVariantByIdQueryDto } from './dto/find-variant-by-id-query.dto';
+import { FindVariantByIdQueryDto } from './dto/request/read/find-variant-by-id-query.dto';
 
 @Controller('products/:id/variants')
 export class ProductVariantsController {

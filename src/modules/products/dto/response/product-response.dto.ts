@@ -1,6 +1,6 @@
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
-import { ProductVisibility } from '../domain/product-visibility';
-import { ProductSalesStatus } from '../domain/product-sales-status';
+import { ProductVisibility } from '../../domain/product-visibility';
+import { ProductSalesStatus } from '../../domain/product-sales-status';
 
 export class ProductResponseDto {
   id!: string;

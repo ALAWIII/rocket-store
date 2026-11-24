@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { IProductRepository } from './infrastructure/repositories/product.repository';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto } from './dto/request/write/create-product.dto';
 import { Product } from './domain/product';
-import { ProductResponseDto } from './dto/product-response.dto';
-import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductCategoriesResponseDto } from './dto/product-categories-response.dto';
+import { ProductResponseDto } from './dto/response/product-response.dto';
+import { ProductDetailsResponseDto } from './dto/response/product-details-response.dto';
+import { UpdateProductDto } from './dto/request/write/update-product.dto';
+import { ProductCategoriesResponseDto } from './dto/response/product-categories-response.dto';
 import { ProductImage } from './domain/product-image';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
-import { FindAllProductsResponseDto } from './dto/find-all-products-response.dto';
+import { FindAllProductsResponseDto } from './dto/response/find-all-products-response.dto';
 import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
-import { FindAllAdminProductsQueryDto } from './dto/find-all-products-query.dto';
-import { FindByIdQueryAdminDto } from './dto/find-by-id-query.dto';
+import { FindAllAdminProductsQueryDto } from './dto/request/read/find-all-products-query.dto';
+import { FindByIdQueryAdminDto } from './dto/request/read/find-by-id-query.dto';
 
 @Injectable()
 export class ProductsService {

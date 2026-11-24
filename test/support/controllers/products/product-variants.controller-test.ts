@@ -1,8 +1,9 @@
-import { CreateProductVariantDto } from 'src/modules/products/dto/create-product-variant.dto';
-import { ProductVariantImagesDto } from 'src/modules/products/dto/product-variant-images.dto';
-import { ProductVariantResponseDto } from 'src/modules/products/dto/product-variant-response.dto';
-import { UpdateProductVariantDto } from 'src/modules/products/dto/update-product-variant.dto';
-import { UpdateVariantsSortOrderDto } from 'src/modules/products/dto/update-variant-sort-order.dto';
+import { CreateProductVariantDto } from 'src/modules/products/dto/request/write/create-product-variant.dto';
+import { ProductVariantImagesDto } from 'src/modules/products/dto/request/write/product-variant-images.dto';
+import { UpdateProductVariantDto } from 'src/modules/products/dto/request/write/update-product-variant.dto';
+import { UpdateVariantsSortOrderDto } from 'src/modules/products/dto/request/write/update-variant-sort-order.dto';
+import { ProductVariantResponseDto } from 'src/modules/products/dto/response/product-variant-response.dto';
+
 import { AffectedResponseDto } from 'src/modules/shared/dto/affected-response.dto';
 import { DetachImagesDto } from 'src/modules/shared/dto/detach-images.dto';
 import { ImageResponseDto } from 'src/modules/shared/dto/image-response.dto';
