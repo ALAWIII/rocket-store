@@ -20,6 +20,7 @@ import { Image } from 'src/modules/images/domain/image';
 import { ProductVariantImage } from '../../domain/product-variant-image';
 import { ImageMapper } from 'src/modules/images/infrastructure/mappers/images.mapper';
 import { UPDATE_VARIANT_IMAGE_SORT_ORDER_SQL } from './queries/update-product-variant-images-sort-order.query';
+import { ProductVisibility } from '../../domain/product-visibility';
 
 export class ProductVariantRepository implements IProductVariantRepository {
   constructor(
@@ -45,28 +46,30 @@ export class ProductVariantRepository implements IProductVariantRepository {
       .mapErr(mapTypeOrmError)
       .andThen((pvariant) => ProductVariantMapper.toDomain(pvariant));
   }
-  findAll(productId: string): DBResult<ProductVariant[]> {
-    return Result.wrapAsync(() =>
-      this.productVariantRepo
+  findAll(productId: string, visibility?: ProductVisibility): DBResult<ProductVariant[]> {
+    return Result.wrapAsync(() => {
+      const q = this.productVariantRepo
         .createQueryBuilder('pvariant')
         .leftJoin(ProductVariantImageEntity, 'pvariant_images', 'pvariant_images."productVariantId" = pvariant.id')
         .leftJoinAndMapMany('pvariant.images', ImageEntity, 'images', 'images.id = pvariant_images."imageId"')
-        .where('pvariant."productId" = :productId', { productId })
-        .getMany(),
-    )
+        .where('pvariant."productId" = :productId', { productId });
+      if (visibility) q.andWhere('pvariant."visibility" = :visibility', { visibility });
+      return q.getMany();
+    })
       .mapErr(mapTypeOrmError)
       .andThen((pvariants: ProductVariantWithImages[]) => ProductVariantMapper.toDomainList(pvariants));
   }
-  findById(productId: string, variantId: string): DBResult<ProductVariant> {
-    return Result.wrapAsync(() =>
-      this.productVariantRepo
+  findById(productId: string, variantId: string, visibility?: ProductVisibility): DBResult<ProductVariant> {
+    return Result.wrapAsync(() => {
+      const q = this.productVariantRepo
         .createQueryBuilder('pvariant')
         .leftJoin(ProductVariantImageEntity, 'pvariant_images', 'pvariant_images."productVariantId" = pvariant.id')
         .leftJoinAndMapMany('pvariant.images', ImageEntity, 'images', 'images.id = pvariant_images."imageId"')
         .where('pvariant."productId" = :productId', { productId })
-        .andWhere('pvariant.id = :variantId', { variantId })
-        .getOneOrFail(),
-    )
+        .andWhere('pvariant.id = :variantId', { variantId });
+      if (visibility) q.andWhere('pvariant."visibility" = :visibility', { visibility });
+      return q.getOneOrFail();
+    })
       .mapErr(mapTypeOrmError)
       .andThen((pvariant: ProductVariantWithImages) => ProductVariantMapper.toDomain(pvariant));
   }
