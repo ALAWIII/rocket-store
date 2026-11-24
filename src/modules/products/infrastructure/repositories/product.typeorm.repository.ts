@@ -5,7 +5,7 @@ import {
   FindProductByIdQueryFlags,
   IProductRepository,
   ProductCategory,
-  ProductDetailsResult,
+  FindByIdProductDetailsResult,
   UpdateProduct,
 } from './product.repository';
 import { ProductEntity } from '../entities/product.entity';
@@ -26,7 +26,7 @@ import { FIND_PRODUCT_BY_ID_SQL } from './queries/find-product-by-id.query';
 import { ProductVariantMapper } from '../mappers/product-variant.mapper';
 import { BrandMapper } from 'src/modules/brands/infrastructure/mappers/brand.mapper';
 import { CategoryMapper } from 'src/modules/categories/infrastructure/mappers/category.mapper';
-import { ProductDetails } from '../../application/models/product-details';
+import { FindByIdProductDetails } from '../../application/models/find-by-id-product-details';
 import { FindAllProductsQueryBuilder } from './queries/find-all-products-builder.query';
 
 export class ProductRepository implements IProductRepository {
@@ -105,7 +105,7 @@ export class ProductRepository implements IProductRepository {
       .map((result) => result.affected ?? 0)
       .mapErr(mapTypeOrmError);
   }
-  findById(productId: string, include: FindProductByIdQueryFlags): DBResult<ProductDetails> {
+  findById(productId: string, include: FindProductByIdQueryFlags): DBResult<FindByIdProductDetails> {
     const {
       variants: includeVariants,
       brand: includeBrand,
@@ -114,7 +114,7 @@ export class ProductRepository implements IProductRepository {
       variantVisibility,
     } = include;
     return Result.wrapAsync(async () => {
-      const result = await this.productRepo.manager.query<ProductDetailsResult[]>(FIND_PRODUCT_BY_ID_SQL, [
+      const result = await this.productRepo.manager.query<FindByIdProductDetailsResult[]>(FIND_PRODUCT_BY_ID_SQL, [
         productId,
         includeVariants,
         includeBrand,
@@ -130,7 +130,7 @@ export class ProductRepository implements IProductRepository {
       .andThen(({ product, brand, categories, variants }) =>
         Result.wrap(
           () =>
-            new ProductDetails({
+            new FindByIdProductDetails({
               product: ProductMapper.toDomain(product).unwrap(),
               brand: brand ? BrandMapper.toDomain(brand).unwrap() : null,
               variants: variants.map((v) => ProductVariantMapper.toDomain(v).unwrap()),
