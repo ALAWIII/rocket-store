@@ -128,6 +128,9 @@ export class FindAllAdminProductsQueryDto extends FindAllProductsQueryDto {
   @IsIn(PRODUCT_VISIBILITY)
   visibility?: ProductVisibility;
   @IsOptional()
+  @IsIn(PRODUCT_VISIBILITY)
+  variantVisibility?: ProductVisibility;
+  @IsOptional()
   @IsIn(PRODUCT_SALES_STATUS)
   salesStatus?: ProductSalesStatus;
 }
