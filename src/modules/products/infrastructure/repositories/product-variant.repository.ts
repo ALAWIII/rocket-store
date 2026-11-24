@@ -23,8 +23,8 @@ export type VariantImageSortOrderUpdate = {
 };
 export abstract class IProductVariantRepository {
   abstract create(variant: ProductVariant): DBResult<ProductVariant>;
-  abstract findAll(productId: string): DBResult<ProductVariant[]>;
-  abstract findById(productId: string, variantId: string): DBResult<ProductVariant>;
+  abstract findAll(productId: string, visibility?: ProductVisibility): DBResult<ProductVariant[]>;
+  abstract findById(productId: string, variantId: string, visibility?: ProductVisibility): DBResult<ProductVariant>;
   abstract update(productId: string, variantId: string, data: UpdateVariant): DBResult<ProductVariant>;
   abstract updateSortOrders(productId: string, ordering: VariantSortOrderUpdate[]): DBResult<ProductVariant[]>;
   abstract updateVariantImageSortOrders(
