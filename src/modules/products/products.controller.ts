@@ -5,7 +5,7 @@ import { ProductResponseDto } from './dto/product-response.dto';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
 import { AllPermissions } from '../access-control/domain/permission';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { FindByIdQueryDto } from './dto/find-by-id-query.dto';
+import { FindByIdQueryAdminDto, FindByIdQueryDto } from './dto/find-by-id-query.dto';
 import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
 import { FindAllProductsResponseDto } from './dto/find-all-products-response.dto';
 import { AttachImagesDto } from '../shared/dto/attach-images.dto';
@@ -40,6 +40,14 @@ export class ProductsController {
     @Query() query: FindByIdQueryDto,
   ): Promise<ProductDetailsResponseDto> {
     return this.productService.findById(id, { ...query, visibility: 'public', variantVisibility: 'public' });
+  }
+  @Get(':id/admin')
+  @RequirePermission(AllPermissions.product.ProductReadAny)
+  findByIdAdmin(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
+    @Query() query: FindByIdQueryAdminDto,
+  ): Promise<ProductDetailsResponseDto> {
+    return this.productService.findById(id, query);
   }
 
   @Get()
