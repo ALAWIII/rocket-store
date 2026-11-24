@@ -26,7 +26,7 @@ export class ProductVariantsController {
 
   @Get()
   findAll(@Param('id', new ParseUUIDPipe({ version: '7' })) productId: string): Promise<ProductVariantResponseDto[]> {
-    return this.pvariantService.findAll(productId);
+    return this.pvariantService.findAll(productId, 'public');
   }
 
   @Get(':variantId')
@@ -34,7 +34,7 @@ export class ProductVariantsController {
     @Param('id', new ParseUUIDPipe({ version: '7' })) productId: string,
     @Param('variantId', new ParseUUIDPipe({ version: '7' })) variantId: string,
   ): Promise<ProductVariantResponseDto> {
-    return this.pvariantService.findById(productId, variantId);
+    return this.pvariantService.findById(productId, variantId, 'public');
   }
 
   @Patch(':variantId')

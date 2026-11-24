@@ -9,6 +9,7 @@ import { ProductVariantImagesDto } from './dto/product-variant-images.dto';
 import { ProductVariantImage } from './domain/product-variant-image';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
+import { ProductVisibility } from './domain/product-visibility';
 
 @Injectable()
 export class ProductsVariantsService {
@@ -20,15 +21,15 @@ export class ProductsVariantsService {
       .map((pv) => pv.toJSON())
       .unwrap();
   }
-  findById(productId: string, variantId: string): Promise<ProductVariantResponseDto> {
+  findById(productId: string, variantId: string, visibility?: ProductVisibility): Promise<ProductVariantResponseDto> {
     return this.pvariantRepo
-      .findById(productId, variantId)
+      .findById(productId, variantId, visibility)
       .map((pv) => pv.toJSON())
       .unwrap();
   }
-  findAll(productId: string): Promise<ProductVariantResponseDto[]> {
+  findAll(productId: string, visibility?: ProductVisibility): Promise<ProductVariantResponseDto[]> {
     return this.pvariantRepo
-      .findAll(productId)
+      .findAll(productId, visibility)
       .map((pvs) => pvs.map((pv) => pv.toJSON()))
       .unwrap();
   }
