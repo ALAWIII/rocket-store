@@ -3,7 +3,7 @@ import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-vi
 import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-least-one-defined.decorator';
 import { Exclude } from 'class-transformer';
 import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product-sales-status';
-const productFieldsList = ['title', 'description', 'brandId', 'pageId', 'status'];
+const productFieldsList = ['title', 'description', 'brandId', 'pageId', 'salesStatus', 'visibility'];
 const productFields = productFieldsList.join(', ');
 
 export class UpdateProductDto {
