@@ -4,6 +4,7 @@ import { type JsonObject } from 'src/modules/shared/value-objects/json-object';
 import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
 import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product-sales-status';
 import { MAX_PRICE } from 'src/modules/shared/value-objects/price';
+import { Exclude } from 'class-transformer';
 const productVariantFieldsList = ['price', 'title', 'description', 'info', 'salesStatus', 'visibility'];
 const productVariantFields = productVariantFieldsList.join(', ');
 export class UpdateProductVariantDto {
@@ -35,5 +36,6 @@ export class UpdateProductVariantDto {
   @AtLeastOneDefined(productVariantFieldsList, {
     message: `At least one field must be provided: (${productVariantFields}).`,
   })
-  private readonly __atLeastOneDefined?: never;
+  @Exclude()
+  readonly __atLeastOneDefined?: never;
 }
