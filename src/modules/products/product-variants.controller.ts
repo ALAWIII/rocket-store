@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ProductsVariantsService } from './product-variants.service';
 import { RequirePermission } from '../shared/authorization/decorators/require-permission.decorator';
 import { AllPermissions } from '../access-control/domain/permission';
@@ -10,6 +10,7 @@ import { ProductVariantImagesDto } from './dto/product-variant-images.dto';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { DetachImagesDto } from '../shared/dto/detach-images.dto';
 import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
+import { FindVariantByIdQueryDto } from './dto/find-variant-by-id-query.dto';
 
 @Controller('products/:id/variants')
 export class ProductVariantsController {
@@ -27,6 +28,14 @@ export class ProductVariantsController {
   @Get()
   findAll(@Param('id', new ParseUUIDPipe({ version: '7' })) productId: string): Promise<ProductVariantResponseDto[]> {
     return this.pvariantService.findAll(productId, 'public');
+  }
+  @Get('admin')
+  @RequirePermission(AllPermissions.product.ProductReadAny)
+  findAllAdmin(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) productId: string,
+    @Query() query: FindVariantByIdQueryDto,
+  ): Promise<ProductVariantResponseDto[]> {
+    return this.pvariantService.findAll(productId, query.visibility);
   }
 
   @Get(':variantId')
