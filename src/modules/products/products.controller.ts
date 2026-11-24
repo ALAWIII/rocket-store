@@ -15,7 +15,7 @@ import { DetachImagesDto } from '../shared/dto/detach-images.dto';
 import { AttachCategoriesDto } from './dto/attach-categories.dto';
 import { ProductCategoriesResponseDto } from './dto/product-categories-response.dto';
 import { DetachCategoriesDto } from './dto/detach-categories.dto';
-import { FindAllCustomerProductsQueryDto } from './dto/find-all-products-query.dto';
+import { FindAllAdminProductsQueryDto, FindAllCustomerProductsQueryDto } from './dto/find-all-products-query.dto';
 
 @Controller('products')
 export class ProductsController {
@@ -45,6 +45,11 @@ export class ProductsController {
   @Get()
   findAll(@Query() query: FindAllCustomerProductsQueryDto): Promise<FindAllProductsResponseDto> {
     return this.productService.findAll({ ...query, visibility: 'public', variantVisibility: 'public' });
+  }
+  @Get('admin')
+  @RequirePermission(AllPermissions.product.ProductReadAny)
+  findAllAdmin(@Query() query: FindAllAdminProductsQueryDto): Promise<FindAllProductsResponseDto> {
+    return this.productService.findAll(query);
   }
   @Post(':id/images')
   @RequirePermission(AllPermissions.product.ProductManageImageAny)
