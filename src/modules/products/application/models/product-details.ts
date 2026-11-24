@@ -3,15 +3,15 @@ import { Category } from 'src/modules/categories/domain/category';
 import { Product } from '../../domain/product';
 import { ProductVariant } from '../../domain/product-variant';
 
-type FindByIdProductDetailsProps = {
+type ProductDetailsProps = {
   product: Product;
   brand: Brand | null;
   variants: ProductVariant[];
   categories: Category[];
 };
 
-export class FindByIdProductDetails {
-  constructor(private readonly props: FindByIdProductDetailsProps) {}
+export class ProductDetails {
+  constructor(private readonly props: ProductDetailsProps) {}
   toJSON() {
     const { product, brand, categories, variants } = this.props;
 
