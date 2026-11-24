@@ -106,13 +106,21 @@ export class ProductRepository implements IProductRepository {
       .mapErr(mapTypeOrmError);
   }
   findById(productId: string, include: FindProductByIdQueryFlags): DBResult<ProductDetails> {
-    const { variants, brand, categories } = include;
+    const {
+      variants: includeVariants,
+      brand: includeBrand,
+      categories: includeCategories,
+      visibility,
+      variantVisibility,
+    } = include;
     return Result.wrapAsync(async () => {
       const result = await this.productRepo.manager.query<ProductDetailsResult[]>(FIND_PRODUCT_BY_ID_SQL, [
         productId,
-        variants,
-        brand,
-        categories,
+        includeVariants,
+        includeBrand,
+        includeCategories,
+        visibility ?? null,
+        variantVisibility ?? null,
       ]);
       const row = result[0];
       if (!row?.product) throw new RecordNotFoundError(`Product not found, productId: ${productId}`);

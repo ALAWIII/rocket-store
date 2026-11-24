@@ -20,7 +20,13 @@ export type ProductDetailsResult = {
   brand: BrandWithLogo | null;
   categories: CategoryEntity[];
 };
-export type FindProductByIdQueryFlags = { variants: boolean; brand: boolean; categories: boolean };
+export type FindProductByIdQueryFlags = {
+  variants: boolean;
+  brand: boolean;
+  categories: boolean;
+  visibility?: ProductVisibility;
+  variantVisibility?: ProductVisibility;
+};
 
 export type ProductCategory = {
   productId: string;
