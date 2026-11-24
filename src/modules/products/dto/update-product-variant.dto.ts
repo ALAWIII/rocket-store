@@ -4,7 +4,7 @@ import { type JsonObject } from 'src/modules/shared/value-objects/json-object';
 import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
 import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product-sales-status';
 import { MAX_PRICE } from 'src/modules/shared/value-objects/price';
-const productVariantFieldsList = ['price', 'quantity', 'description', 'info', 'status'];
+const productVariantFieldsList = ['price', 'title', 'description', 'info', 'salesStatus', 'visibility'];
 const productVariantFields = productVariantFieldsList.join(', ');
 export class UpdateProductVariantDto {
   @IsOptional()
