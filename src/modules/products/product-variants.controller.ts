@@ -45,6 +45,15 @@ export class ProductVariantsController {
   ): Promise<ProductVariantResponseDto> {
     return this.pvariantService.findById(productId, variantId, 'public');
   }
+  @Get(':variantId/admin')
+  @RequirePermission(AllPermissions.product.ProductReadAny)
+  findByIdAdmin(
+    @Param('id', new ParseUUIDPipe({ version: '7' })) productId: string,
+    @Param('variantId', new ParseUUIDPipe({ version: '7' })) variantId: string,
+    @Query() query: FindVariantByIdQueryDto,
+  ): Promise<ProductVariantResponseDto> {
+    return this.pvariantService.findById(productId, variantId, query.visibility);
+  }
 
   @Patch(':variantId')
   @RequirePermission(AllPermissions.product.ProductUpdateAny)
