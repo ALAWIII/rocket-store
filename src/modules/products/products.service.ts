@@ -3,7 +3,6 @@ import { IProductRepository } from './infrastructure/repositories/product.reposi
 import { CreateProductDto } from './dto/create-product.dto';
 import { Product } from './domain/product';
 import { ProductResponseDto } from './dto/product-response.dto';
-import { FindByIdQueryDto } from './dto/find-by-id-query.dto';
 import { ProductDetailsResponseDto } from './dto/product-details-response.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductCategoriesResponseDto } from './dto/product-categories-response.dto';
@@ -12,6 +11,7 @@ import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { FindAllProductsResponseDto } from './dto/find-all-products-response.dto';
 import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
 import { FindAllAdminProductsQueryDto } from './dto/find-all-products-query.dto';
+import { FindByIdQueryAdminDto } from './dto/find-by-id-query.dto';
 
 @Injectable()
 export class ProductsService {
@@ -23,13 +23,16 @@ export class ProductsService {
       .map((p) => p.toJSON())
       .unwrap();
   }
-  findById(productId: string, query: FindByIdQueryDto): Promise<ProductDetailsResponseDto> {
-    const include = query?.include ?? [];
+  findById(productId: string, query: FindByIdQueryAdminDto): Promise<ProductDetailsResponseDto> {
+    const { include = [], visibility, variantVisibility } = query;
+
     return this.productRepo
       .findById(productId, {
         brand: include.includes('brand'),
         categories: include.includes('categories'),
         variants: include.includes('variants'),
+        visibility,
+        variantVisibility,
       })
       .map((p) => p.toJSON())
       .unwrap();
