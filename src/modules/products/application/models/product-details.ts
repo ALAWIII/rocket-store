@@ -1,7 +1,7 @@
 import { Brand } from 'src/modules/brands/domain/brand';
-import { Product } from './product';
-import { ProductVariant } from './product-variant';
 import { Category } from 'src/modules/categories/domain/category';
+import { Product } from '../../domain/product';
+import { ProductVariant } from '../../domain/product-variant';
 
 type ProductDetailsProps = {
   product: Product;

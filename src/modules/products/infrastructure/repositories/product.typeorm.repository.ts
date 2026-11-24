@@ -26,7 +26,7 @@ import { FIND_PRODUCT_BY_ID_SQL } from './queries/find-product-by-id.query';
 import { ProductVariantMapper } from '../mappers/product-variant.mapper';
 import { BrandMapper } from 'src/modules/brands/infrastructure/mappers/brand.mapper';
 import { CategoryMapper } from 'src/modules/categories/infrastructure/mappers/category.mapper';
-import { ProductDetails } from '../../domain/product-details';
+import { ProductDetails } from '../../application/models/product-details';
 import { FindAllProductsQueryBuilder } from './queries/find-all-products-builder.query';
 
 export class ProductRepository implements IProductRepository {
