@@ -39,7 +39,7 @@ export class ProductsController {
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
     @Query() query: FindByIdQueryDto,
   ): Promise<ProductDetailsResponseDto> {
-    return this.productService.findById(id, query);
+    return this.productService.findById(id, { ...query, visibility: 'public', variantVisibility: 'public' });
   }
 
   @Get()
