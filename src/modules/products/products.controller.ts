@@ -44,7 +44,7 @@ export class ProductsController {
 
   @Get()
   findAll(@Query() query: FindAllCustomerProductsQueryDto): Promise<FindAllProductsResponseDto> {
-    return this.productService.findAll(query);
+    return this.productService.findAll({ ...query, visibility: 'public', variantVisibility: 'public' });
   }
   @Post(':id/images')
   @RequirePermission(AllPermissions.product.ProductManageImageAny)
