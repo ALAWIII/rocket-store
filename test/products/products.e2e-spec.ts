@@ -55,7 +55,7 @@ describe.concurrent('products (e2e)', () => {
       const p = (
         await productController.create({ brandId: sony.id, title: 'playstation', description: '', pageId: null })
       ).body!;
-      const findP = (await productController.findById(p.id, { include: ['brand', 'categories'] })).body!;
+      const findP = (await productController.findByIdAdmin(p.id, { include: ['brand', 'categories'] })).body!;
       expect(findP.product.id).toEqual(p.id);
 
       // must test attaching categories and variants first.
@@ -83,7 +83,7 @@ describe.concurrent('products (e2e)', () => {
       const img = (await imageController.upload()).body!;
       const p = (await productController.create()).body!;
       const attachedImage = (await productController.attachImages(p.id, { imageIds: [img.id] })).body![0];
-      const { coverImage, ...product } = (await productController.findById(p.id)).body!.product;
+      const { coverImage, ...product } = (await productController.findByIdAdmin(p.id)).body!.product;
       expect(product.id).toBe(p.id);
       expect(attachedImage).toEqual(img);
       expect(coverImage).toEqual({ ...img, createdAt: coverImage?.createdAt });
@@ -111,7 +111,7 @@ describe.concurrent('products (e2e)', () => {
       const img = (await imageController.upload()).body!;
       const attachImage = (await productController.attachImages(p.id, { imageIds: [img.id] })).body!;
       const detachImage = (await productController.detachImages(p.id, { imageIds: [img.id] })).body;
-      const findProductAfterDetach = (await productController.findById(p.id)).body!.product;
+      const findProductAfterDetach = (await productController.findByIdAdmin(p.id)).body!.product;
       expect(detachImage).toEqual({ affected: 1 });
       expect(findProductAfterDetach.coverImage).toBeUndefined();
     });
@@ -120,7 +120,7 @@ describe.concurrent('products (e2e)', () => {
     }) => {
       const p = (await productController.create()).body!;
       const detachImage = (await productController.detachImages(p.id, { imageIds: [v7()] })).body;
-      const findProductAfterDetach = (await productController.findById(p.id)).body!.product;
+      const findProductAfterDetach = (await productController.findByIdAdmin(p.id)).body!.product;
       expect(detachImage).toEqual({ affected: 0 });
       expect(findProductAfterDetach.coverImage).toBeUndefined();
     });
@@ -133,7 +133,7 @@ describe.concurrent('products (e2e)', () => {
       const cats = (
         await productController.attachCategories(p.id, { categoryIds: [entertainment.id, gaming.id] })
       ).body!.categoryIds.toSorted((a, b) => a.localeCompare(b));
-      const productCats = (await productController.findById(p.id, { include: ['categories'] }))
+      const productCats = (await productController.findByIdAdmin(p.id, { include: ['categories'] }))
         .body!.categories.map((cat) => cat.id)
         .toSorted((a, b) => a.localeCompare(b));
       expect(cats).toContain(entertainment.id);
