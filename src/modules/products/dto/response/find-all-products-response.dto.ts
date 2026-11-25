@@ -1,7 +1,7 @@
 import { PaginationResponseDto } from 'src/modules/shared/dto/pagination-response.dto';
-import { ProductResponseDto } from './product-response.dto';
+import { ProductListItem } from '../../application/models/product-list-item';
 
 export class FindAllProductsResponseDto {
-  products!: ProductResponseDto[];
+  products!: ProductListItem[];
   pagination!: PaginationResponseDto;
 }
