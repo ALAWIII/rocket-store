@@ -6,6 +6,9 @@
  * @param $5 `visibility`        : optional product visibility filter
  * @param $6 `variantVisibility` : optional variant visibility filter
  *
+ * $6 non-null ⇒ customer view: product must have ≥1 variant with that visibility.
+ * Variant-less products are incomplete (not sellable) and intentionally excluded.
+ *
  * Pass NULL to disable either visibility filter.
  */
 export const FIND_PRODUCT_BY_ID_SQL =
@@ -70,12 +73,10 @@ export const FIND_PRODUCT_BY_ID_SQL =
   find_categories AS (
     SELECT c.*
     FROM product_categories pc
-    JOIN categories c
-      ON c.id = pc."categoryId"
-    WHERE pc."productId" = $1
-      AND $4
+    JOIN find_product fp ON fp.id = pc."productId"
+    JOIN categories c   ON c.id = pc."categoryId"
+    WHERE $4
   )
-
   SELECT
     (SELECT row_to_json(fp) FROM find_product fp) AS product,
     (SELECT row_to_json(b) FROM find_brand b) AS brand,
