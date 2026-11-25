@@ -40,11 +40,9 @@ describe.concurrent('products (e2e)', () => {
     });
   });
   describe('GET /api/v1/products (findById)', () => {
-    it('should success find existing product by its id.', async ({ productController }) => {
+    it('should fail find existing product by its id because it has no variants.', async ({ productController }) => {
       const p = (await productController.create()).body!;
-      const findP = (await productController.findById(p.id)).body!.product;
-      expect(findP.id).toEqual(p.id);
-      expect(findP).toEqual(p);
+      await productController.findById(p.id, undefined, { code: 404 });
     });
     it('should success find existing product with all details by its id.', async ({
       productController,
