@@ -1,8 +1,8 @@
 import { IsIn, IsInt, IsObject, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-least-one-defined.decorator';
 import { type JsonObject } from 'src/modules/shared/value-objects/json-object';
-import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
-import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product-sales-status';
+import { PRODUCT_VISIBILITY, type ProductVisibility } from 'src/modules/products/domain/product-visibility';
+import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from 'src/modules/products/domain/product-sales-status';
 import { MAX_PRICE } from 'src/modules/shared/value-objects/price';
 import { Exclude } from 'class-transformer';
 const productVariantFieldsList = ['price', 'title', 'description', 'info', 'salesStatus', 'visibility'];

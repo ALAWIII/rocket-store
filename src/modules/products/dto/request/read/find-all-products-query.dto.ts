@@ -15,14 +15,15 @@ import {
 } from 'class-validator';
 import { SORT_BY_OPTIONS, type SortByOptions } from 'src/modules/products/application/models/sort-by-options';
 import { SORT_DIRECTION, type SortDirection } from 'src/modules/shared/types/sort-direction';
-import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product-sales-status';
-import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
-import { PRODUCT_VARIANT_FIELDS, ProductVariantFields } from '../domain/product-variant';
-import { PRODUCT_FIELDS, ProductFields } from '../domain/product';
+
 import { normalizeArray } from 'src/modules/shared/utils/array-normalizer.util';
 import { trimToUndefined } from 'src/modules/shared/utils/trim-string-or-undefiend.util';
 import { MAX_PRICE } from 'src/modules/shared/value-objects/price';
 import { IsOptional, IsInt, ValidatorConstraint, ValidatorConstraintInterface } from 'class-validator';
+import { PRODUCT_FIELDS, ProductFields } from 'src/modules/products/domain/product';
+import { PRODUCT_VARIANT_FIELDS, ProductVariantFields } from 'src/modules/products/domain/product-variant';
+import { PRODUCT_VISIBILITY, type ProductVisibility } from 'src/modules/products/domain/product-visibility';
+import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from 'src/modules/products/domain/product-sales-status';
 
 @ValidatorConstraint({ name: 'minLessThanMax', async: false })
 export class MinLessThanMax implements ValidatorConstraintInterface {

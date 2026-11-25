@@ -1,8 +1,8 @@
 import { IsIn, IsOptional, IsString, IsUUID, Length, MaxLength } from 'class-validator';
-import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
 import { AtLeastOneDefined } from 'src/modules/shared/validation/decorators/at-least-one-defined.decorator';
 import { Exclude } from 'class-transformer';
-import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from '../domain/product-sales-status';
+import { PRODUCT_VISIBILITY, type ProductVisibility } from 'src/modules/products/domain/product-visibility';
+import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from 'src/modules/products/domain/product-sales-status';
 const productFieldsList = ['title', 'description', 'brandId', 'pageId', 'salesStatus', 'visibility'];
 const productFields = productFieldsList.join(', ');
 

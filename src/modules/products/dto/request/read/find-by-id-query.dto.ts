@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
 import { ArrayMaxSize, IsArray, IsIn, IsOptional, IsString } from 'class-validator';
-import { PRODUCT_VISIBILITY, type ProductVisibility } from '../domain/product-visibility';
+import { PRODUCT_VISIBILITY, type ProductVisibility } from 'src/modules/products/domain/product-visibility';
 
 export class FindByIdQueryDto {
   @IsOptional()
