@@ -16,7 +16,7 @@ import { Product } from '../../domain/product';
 import { Ok, Result } from '@allawiii/results-ts';
 import { mapTypeOrmError } from 'src/modules/shared/errors/mappers/database-error.mapper';
 import { RecordNotFoundError, UnknownDatabaseError } from 'src/modules/shared/errors/database.error';
-import { ProductMapper, ProductQueryResult } from '../mappers/product.mapper';
+import { ProductMapper } from '../mappers/product.mapper';
 import { ProductCategoryEntity } from '../entities/product-category.entity';
 import { Image } from 'src/modules/images/domain/image';
 import { ProductImage } from '../../domain/product-image';
@@ -28,6 +28,7 @@ import { BrandMapper } from 'src/modules/brands/infrastructure/mappers/brand.map
 import { CategoryMapper } from 'src/modules/categories/infrastructure/mappers/category.mapper';
 import { FindAllProductsQueryBuilder } from './queries/find-all-products-builder.query';
 import { ProductDetails } from '../../application/models/product-details';
+import { ProductListItem } from '../../application/models/product-list-item';
 
 export class ProductRepository implements IProductRepository {
   constructor(
@@ -141,16 +142,14 @@ export class ProductRepository implements IProductRepository {
   }
   findAll(options: FindAllProductsSearchOptions): DBResult<FindAllProductsQueryResult> {
     return Result.wrapAsync(async () => {
-      const builder = new FindAllProductsQueryBuilder(options).build();
-      const { sql, parameters, pagination } = builder;
-
+      const { sql, parameters, pagination } = new FindAllProductsQueryBuilder(options).build();
       const { products, total } = await this.productRepo.manager.query<{
-        products: ProductQueryResult[];
+        products: ProductListItem[];
         total: number;
       }>(sql, parameters);
 
       return {
-        products: ProductMapper.toDomainList(products).unwrap(),
+        products,
         pagination: { total: Number(total ?? 0), ...pagination },
       };
     }).mapErr(mapTypeOrmError);
