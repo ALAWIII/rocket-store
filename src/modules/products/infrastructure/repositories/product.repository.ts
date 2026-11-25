@@ -13,6 +13,7 @@ import { ProductSalesStatus } from '../../domain/product-sales-status';
 import { SortByOptions } from '../../application/models/sort-by-options';
 import { ProductVariantFields } from '../../domain/product-variant';
 import { ProductDetails } from '../../application/models/product-details';
+import { ProductListItem } from '../../application/models/product-list-item';
 
 export type ProductDetailsResult = {
   product: ProductEntity;
@@ -68,7 +69,7 @@ export type FindAllProductsSearchOptions = {
   page?: number;
   limit?: number;
 };
-export type FindAllProductsQueryResult = { products: Product[]; pagination: OutputPagination };
+export type FindAllProductsQueryResult = { products: ProductListItem[]; pagination: OutputPagination };
 
 export abstract class IProductRepository {
   abstract create(product: Product): DBResult<Product>;
