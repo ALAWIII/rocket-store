@@ -8,10 +8,10 @@ import { UpdateProductDto } from './dto/request/write/update-product.dto';
 import { ProductCategoriesResponseDto } from './dto/response/product-categories-response.dto';
 import { ProductImage } from './domain/product-image';
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
-import { FindAllProductsResponseDto } from './dto/response/find-all-products-response.dto';
 import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
 import { FindAllAdminProductsQueryDto } from './dto/request/read/find-all-products-query.dto';
 import { FindByIdQueryAdminDto } from './dto/request/read/find-by-id-query.dto';
+import { FindAllProductsResponseDto } from './dto/response/find-all-products-response.dto';
 
 @Injectable()
 export class ProductsService {
@@ -46,7 +46,6 @@ export class ProductsService {
         category,
         sort: { field: sortBy ?? 'createdAt', direction: sortDirection ?? 'DESC' },
       })
-      .map(({ products, pagination }) => ({ products: products.map((p) => p.toJSON()), pagination }))
       .unwrap();
   }
   update(productId: string, data: UpdateProductDto): Promise<ProductResponseDto> {
