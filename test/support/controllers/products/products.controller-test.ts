@@ -1,5 +1,8 @@
-import { FindAllCustomerProductsQueryDto } from 'src/modules/products/dto/request/read/find-all-products-query.dto';
-import { FindByIdQueryDto } from 'src/modules/products/dto/request/read/find-by-id-query.dto';
+import {
+  FindAllAdminProductsQueryDto,
+  FindAllCustomerProductsQueryDto,
+} from 'src/modules/products/dto/request/read/find-all-products-query.dto';
+import { FindByIdQueryAdminDto, FindByIdQueryDto } from 'src/modules/products/dto/request/read/find-by-id-query.dto';
 import { AttachCategoriesDto } from 'src/modules/products/dto/request/write/attach-categories.dto';
 import { CreateProductDto } from 'src/modules/products/dto/request/write/create-product.dto';
 import { DetachCategoriesDto } from 'src/modules/products/dto/request/write/detach-categories.dto';
@@ -51,12 +54,27 @@ export class ProductsControllerTest {
     const response = await this.agent.get(`${this.urlPrefix}/${id}`).query(query).expect(statusCode.code);
     return { response, body: parseResponseBody<ProductDetailsResponseDto>(response, statusCode.parseBody) };
   }
+  async findByIdAdmin(
+    id: string,
+    query: FindByIdQueryAdminDto = { include: [] },
+    statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true },
+  ) {
+    const response = await this.agent.get(`${this.urlPrefix}/${id}/admin`).query(query).expect(statusCode.code);
+    return { response, body: parseResponseBody<ProductDetailsResponseDto>(response, statusCode.parseBody) };
+  }
 
   async findAll(
     query: FindAllCustomerProductsQueryDto = {},
     statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true },
   ) {
     const response = await this.agent.get(this.urlPrefix).query(query).expect(statusCode.code);
+    return { response, body: parseResponseBody<FindAllProductsResponseDto>(response, statusCode.parseBody) };
+  }
+  async findAllAdmin(
+    query: FindAllAdminProductsQueryDto = {},
+    statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true },
+  ) {
+    const response = await this.agent.get(`${this.urlPrefix}/admin`).query(query).expect(statusCode.code);
     return { response, body: parseResponseBody<FindAllProductsResponseDto>(response, statusCode.parseBody) };
   }
 
