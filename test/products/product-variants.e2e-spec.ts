@@ -24,6 +24,24 @@ describe.concurrent('products (e2e)', () => {
       expect(slim).toMatchObject(slimData);
       expect(pro).toMatchObject(proData);
     });
+    it('should fail create product variants with duplicate title, returns conflict.', async ({
+      productController,
+      productVariantsController,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slimData: CreateProductVariantDto = {
+        title: 'slim', // should be unique
+        description: 'white ps4',
+        info: {},
+        price: 29999,
+        sortOrder: 1,
+        visibility: 'public',
+        salesStatus: 'active',
+      };
+      const slim = (await productVariantsController.create(playstation.id, slimData)).body!;
+      expect(slim).toMatchObject(slimData);
+      await productVariantsController.create(playstation.id, slimData, { code: 409 });
+    });
     it('should fail create variants for non existed product', async ({ productVariantsController }) => {
       await productVariantsController.create(v7(), undefined, { code: 404 });
     });
