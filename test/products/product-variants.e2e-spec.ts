@@ -1,5 +1,6 @@
 import { CreateProductVariantDto } from 'src/modules/products/dto/request/write/create-product-variant.dto';
 import { it } from '../support/fixtures/authenticated-e2e.fixture';
+import { v7 } from 'uuid';
 
 describe.concurrent('products (e2e)', () => {
   describe('POST /api/v1/products/:productId/variants (create)', () => {
@@ -22,6 +23,9 @@ describe.concurrent('products (e2e)', () => {
       const pro = (await productVariantsController.create(playstation.id, proData)).body!;
       expect(slim).toMatchObject(slimData);
       expect(pro).toMatchObject(proData);
+    });
+    it('should fail create variants for non existed product', async ({ productVariantsController }) => {
+      await productVariantsController.create(v7(), undefined, { code: 404 });
     });
   });
 });
