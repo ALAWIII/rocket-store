@@ -48,10 +48,7 @@ export const PRODUCT_VARIANT_FIELDS = [
   'sortOrder',
 ] as const;
 export type ProductVariantFields = (typeof PRODUCT_VARIANT_FIELDS)[number];
-type CreateProductVariantPrimitives = Omit<
-  ProductVariantPrimitives,
-  'id' | 'createdAt' | 'visibility' | 'updatedAt' | 'images' | 'salesStatus'
->;
+type CreateProductVariantPrimitives = Omit<ProductVariantPrimitives, 'id' | 'createdAt' | 'updatedAt' | 'images'>;
 export class ProductVariant {
   private constructor(private props: ProductVariantProps) {}
   static create(data: CreateProductVariantPrimitives): Result<ProductVariant, ValueObjectError> {
@@ -59,8 +56,6 @@ export class ProductVariant {
     return this.build({
       ...data,
       id: ProductVariantId.create().unwrap().toString(),
-      visibility: 'public',
-      salesStatus: 'active',
       createdAt: date,
       updatedAt: date,
     });
