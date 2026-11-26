@@ -39,11 +39,7 @@ describe.concurrent('products (e2e)', () => {
       );
     });
   });
-  describe('GET /api/v1/products (findById)', () => {
-    it('should fail find existing product by its id because it has no variants.', async ({ productController }) => {
-      const p = (await productController.create()).body!;
-      await productController.findById(p.id, undefined, { code: 404 });
-    });
+  describe('GET /api/v1/products/:id/admin (findByIdAdmin)', () => {
     it('should success find existing product with all details by its id.', async ({
       productController,
       brandController,
@@ -60,6 +56,12 @@ describe.concurrent('products (e2e)', () => {
 
       // must test attaching categories and variants first.
       // expect(findP).toEqual({ product: p, brand: sony, categories: [entertainment, console], variants: [] });
+    });
+  });
+  describe('GET /api/v1/products/:id (findById)', () => {
+    it('should fail find existing product by its id because it has no variants.', async ({ productController }) => {
+      const p = (await productController.create()).body!;
+      await productController.findById(p.id, undefined, { code: 404 });
     });
     it('should success return 404 code for finding not existing product by an id.', async ({ productController }) => {
       await productController.findById(v7(), { include: [] }, { code: 404 });
