@@ -23,11 +23,11 @@ export class ProductVariantsControllerTest {
   async create(
     productId: string,
     data: CreateProductVariantDto = {
+      title: 'pink', // should be unique
       description: 'variant',
       info: {},
-      price: 49.99,
+      price: 4999, // no floating numbers.
       sortOrder: 1,
-      title: 'pink',
       visibility: 'public',
       salesStatus: 'active',
     },
