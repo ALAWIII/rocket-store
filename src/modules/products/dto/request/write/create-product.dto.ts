@@ -1,4 +1,6 @@
-import { IsOptional, IsString, IsUUID, Length, MaxLength } from 'class-validator';
+import { IsIn, IsOptional, IsString, IsUUID, Length, MaxLength } from 'class-validator';
+import { PRODUCT_SALES_STATUS, type ProductSalesStatus } from 'src/modules/products/domain/product-sales-status';
+import { PRODUCT_VISIBILITY, type ProductVisibility } from 'src/modules/products/domain/product-visibility';
 
 export class CreateProductDto {
   @IsString()
@@ -13,4 +15,10 @@ export class CreateProductDto {
   @IsOptional()
   @IsUUID('7')
   pageId: string | null = null;
+  @IsOptional()
+  @IsIn(PRODUCT_VISIBILITY)
+  visibility?: ProductVisibility = 'private';
+  @IsOptional()
+  @IsIn(PRODUCT_SALES_STATUS)
+  salesStatus?: ProductSalesStatus = 'active';
 }
