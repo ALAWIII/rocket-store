@@ -34,7 +34,7 @@ export type ProductPrimitives = {
 };
 export const PRODUCT_FIELDS = ['description', 'visibility', 'salesStatus'] as const;
 export type ProductFields = (typeof PRODUCT_FIELDS)[number];
-type CreateProductPrimitives = Pick<ProductPrimitives, 'description' | 'title' | 'brandId' | 'pageId'>;
+type CreateProductPrimitives = Omit<ProductPrimitives, 'id' | 'coverImage' | 'createdAt' | 'updatedAt'>;
 export class Product {
   private constructor(private props: ProductProps) {}
   static create(data: CreateProductPrimitives): Result<Product, ValueObjectError> {
@@ -44,8 +44,6 @@ export class Product {
       id: ProductId.create().unwrap().toString(),
       createdAt: date,
       updatedAt: date,
-      visibility: 'public',
-      salesStatus: 'active',
     });
   }
   static restore(data: ProductPrimitives): Result<Product, ValueObjectError> {

@@ -15,7 +15,12 @@ import { ProductVisibility } from './domain/product-visibility';
 export class ProductsVariantsService {
   constructor(private readonly pvariantRepo: IProductVariantRepository) {}
   create(productId: string, data: CreateProductVariantDto): Promise<ProductVariantResponseDto> {
-    const variant = ProductVariant.create({ ...data, productId }).unwrap();
+    const variant = ProductVariant.create({
+      ...data,
+      productId,
+      visibility: data.visibility ?? 'private',
+      salesStatus: data.salesStatus ?? 'active',
+    }).unwrap();
     return this.pvariantRepo
       .create(variant)
       .map((pv) => pv.toJSON())
