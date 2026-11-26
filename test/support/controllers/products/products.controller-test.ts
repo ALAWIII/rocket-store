@@ -29,11 +29,18 @@ export class ProductsControllerTest {
     return new ProductsControllerTest(agent);
   }
 
-  async create(product?: CreateProductDto, statusCode: ExpectedTestStatusCode = { code: 201, parseBody: true }) {
-    const response = await this.agent
-      .post(this.urlPrefix)
-      .send(product ?? { title: 'playstation', description: 'a console that you can hack and jailbreak it.' })
-      .expect(statusCode.code);
+  async create(
+    product: CreateProductDto = {
+      title: 'playstation',
+      description: 'a console that you can hack and jailbreak it.',
+      visibility: 'public',
+      salesStatus: 'active',
+      brandId: null,
+      pageId: null,
+    },
+    statusCode: ExpectedTestStatusCode = { code: 201, parseBody: true },
+  ) {
+    const response = await this.agent.post(this.urlPrefix).send(product).expect(statusCode.code);
     return { response, body: parseResponseBody<ProductResponseDto>(response, statusCode.parseBody) };
   }
 
