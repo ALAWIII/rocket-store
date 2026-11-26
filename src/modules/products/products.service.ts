@@ -17,7 +17,11 @@ import { FindAllProductsResponseDto } from './dto/response/find-all-products-res
 export class ProductsService {
   constructor(private readonly productRepo: IProductRepository) {}
   create(data: CreateProductDto): Promise<ProductResponseDto> {
-    return Product.create(data)
+    return Product.create({
+      ...data,
+      visibility: data.visibility ?? 'private',
+      salesStatus: data.salesStatus ?? 'active',
+    })
       .toAsyncResult()
       .andThen((p) => this.productRepo.create(p))
       .map((p) => p.toJSON())
