@@ -1,3 +1,4 @@
+import { FindVariantsQueryDto } from 'src/modules/products/dto/request/read/find-variants-query.dto';
 import { CreateProductVariantDto } from 'src/modules/products/dto/request/write/create-product-variant.dto';
 import { ProductVariantImagesDto } from 'src/modules/products/dto/request/write/product-variant-images.dto';
 import { UpdateProductVariantDto } from 'src/modules/products/dto/request/write/update-product-variant.dto';
@@ -53,6 +54,21 @@ export class ProductVariantsControllerTest {
     };
   }
 
+  async findAllAdmin(
+    productId: string,
+    query: FindVariantsQueryDto = {},
+    statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true },
+  ) {
+    const response = await this.agent
+      .get(`${this.urlPrefix}/${productId}/variants/admin`)
+      .query(query)
+      .expect(statusCode.code);
+
+    return {
+      response,
+      body: parseResponseBody<ProductVariantResponseDto[]>(response, statusCode.parseBody),
+    };
+  }
   async findById(
     productId: string,
     variantId: string,
@@ -60,6 +76,23 @@ export class ProductVariantsControllerTest {
   ) {
     const response = await this.agent
       .get(`${this.urlPrefix}/${productId}/variants/${variantId}`)
+      .expect(statusCode.code);
+
+    return {
+      response,
+      body: parseResponseBody<ProductVariantResponseDto>(response, statusCode.parseBody),
+    };
+  }
+
+  async findByIdAdmin(
+    productId: string,
+    variantId: string,
+    query: FindVariantsQueryDto = {},
+    statusCode: ExpectedTestStatusCode = { code: 200, parseBody: true },
+  ) {
+    const response = await this.agent
+      .get(`${this.urlPrefix}/${productId}/variants/${variantId}/admin`)
+      .query(query)
       .expect(statusCode.code);
 
     return {
