@@ -23,17 +23,19 @@ export class ProductVariantsControllerTest {
 
   async create(
     productId: string,
-    data: CreateProductVariantDto = {
-      title: 'pink', // should be unique
+    query?: Partial<CreateProductVariantDto>,
+    statusCode: ExpectedTestStatusCode = { code: 201, parseBody: true },
+  ) {
+    const data: CreateProductVariantDto = {
+      title: `pink-${Date.now()}`, // should be unique
       description: 'variant',
       info: {},
       price: 4999, // no floating numbers.
       sortOrder: 1,
       visibility: 'public',
       salesStatus: 'active',
-    },
-    statusCode: ExpectedTestStatusCode = { code: 201, parseBody: true },
-  ) {
+      ...query,
+    };
     const response = await this.agent
       .post(`${this.urlPrefix}/${productId}/variants`)
       .send(data)
