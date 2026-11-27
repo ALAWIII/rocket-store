@@ -349,6 +349,8 @@ describe.concurrent('product variants images (e2e)', () => {
           ],
         })
       ).body!;
+      const variantImagesBeforeSorting = (await productVariantsController.findByIdAdmin(playstation.id, slim.id)).body!
+        .images;
       const sortResponse = (
         await productVariantImagesController.updateImageSortOrder(slim.id, {
           images: [
@@ -358,8 +360,10 @@ describe.concurrent('product variants images (e2e)', () => {
         })
       ).body!;
       expect(sortResponse).toEqual({ affected: 2 });
-      const variantImagesAfter = (await productVariantsController.findByIdAdmin(playstation.id, slim.id)).body!.images;
-      expect(variantImagesAfter).toEqual([img2, img1]);
+      const variantImagesAfterSorting = (await productVariantsController.findByIdAdmin(playstation.id, slim.id)).body!
+        .images;
+      expect(variantImagesBeforeSorting).toEqual([img1, img2]);
+      expect(variantImagesAfterSorting).toEqual([img2, img1]);
     });
   });
 });
