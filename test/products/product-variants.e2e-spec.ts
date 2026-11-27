@@ -293,4 +293,35 @@ describe.concurrent('product variants images (e2e)', () => {
       expect(imgs).toHaveLength(2);
     });
   });
+  describe('POST /api/v1/product-variants/:variantId/images/detach (detachImages)', () => {
+    it('should success detach images from product variants.', async ({
+      productController,
+      productVariantsController,
+      productVariantImagesController,
+      imageController,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slim = (
+        await productVariantsController.create(playstation.id, {
+          title: 'slim',
+          visibility: 'public',
+          sortOrder: 1,
+        })
+      ).body!;
+      const img1 = (await imageController.upload()).body!;
+      const img2 = (await imageController.upload()).body!;
+      const imgs = (
+        await productVariantImagesController.attachImages(slim.id, {
+          images: [
+            { imageId: img1.id, sortOrder: 1 },
+            { imageId: img2.id, sortOrder: 2 },
+          ],
+        })
+      ).body!;
+      const affected = (
+        await productVariantImagesController.detachImages(slim.id, { imageIds: [img1.id, img2.id, v7()] })
+      ).body!; // the last value is for testing idemptency, ignoring non existed detaching images
+      expect(affected).toEqual({ affected: 2 });
+    });
+  });
 });
