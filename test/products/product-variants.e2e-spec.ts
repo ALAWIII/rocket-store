@@ -93,5 +93,31 @@ describe.concurrent('products (e2e)', () => {
       expect(slimPublic).toEqual(slim);
       expect(proPrivate).toEqual(pro);
     });
+    it('should fail fetch existed variant for existed product because of bad visibility 404.', async ({
+      productController,
+      productVariantsController,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slim = (await productVariantsController.create(playstation.id, { title: 'slim', visibility: 'public' }))
+        .body!;
+      const pro = (await productVariantsController.create(playstation.id, { title: 'pro', visibility: 'private' }))
+        .body!;
+      await productVariantsController.findByIdAdmin(
+        playstation.id,
+        slim.id,
+        {
+          visibility: 'private',
+        },
+        { code: 404 },
+      );
+      await productVariantsController.findByIdAdmin(
+        playstation.id,
+        pro.id,
+        {
+          visibility: 'public',
+        },
+        { code: 404 },
+      );
+    });
   });
 });
