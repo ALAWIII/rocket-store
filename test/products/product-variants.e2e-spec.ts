@@ -119,5 +119,21 @@ describe.concurrent('products (e2e)', () => {
         { code: 404 },
       );
     });
+    it('should fail fetch existed variant for non existed product 404.', async ({
+      productController,
+      productVariantsController,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slim = (await productVariantsController.create(playstation.id, { title: 'slim', visibility: 'public' }))
+        .body!;
+      await productVariantsController.findByIdAdmin(
+        v7(),
+        slim.id,
+        {
+          visibility: 'private',
+        },
+        { code: 404 },
+      );
+    });
   });
 });
