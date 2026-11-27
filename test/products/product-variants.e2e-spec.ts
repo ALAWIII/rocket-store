@@ -90,8 +90,10 @@ describe.concurrent('products (e2e)', () => {
       const proPrivate = (
         await productVariantsController.findByIdAdmin(playstation.id, pro.id, { visibility: 'private' })
       ).body!;
+      const findPrivate = (await productVariantsController.findByIdAdmin(playstation.id, pro.id)).body!; // with no visibility filter.
       expect(slimPublic).toEqual(slim);
       expect(proPrivate).toEqual(pro);
+      expect(findPrivate).toEqual(pro);
     });
     it('should fail fetch existed variant for existed product because of bad visibility 404.', async ({
       productController,
