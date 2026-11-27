@@ -74,4 +74,24 @@ describe.concurrent('products (e2e)', () => {
       expect(nothing).toHaveLength(0);
     });
   });
+  describe('GET /api/v1/products/:productId/variants/:id/admin (findByIdAdmin)', () => {
+    it('should success fetch existed variant for existed product.', async ({
+      productController,
+      productVariantsController,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slim = (await productVariantsController.create(playstation.id, { title: 'slim', visibility: 'public' }))
+        .body!;
+      const pro = (await productVariantsController.create(playstation.id, { title: 'pro', visibility: 'private' }))
+        .body!;
+      const slimPublic = (
+        await productVariantsController.findByIdAdmin(playstation.id, slim.id, { visibility: 'public' })
+      ).body!;
+      const proPrivate = (
+        await productVariantsController.findByIdAdmin(playstation.id, pro.id, { visibility: 'private' })
+      ).body!;
+      expect(slimPublic).toEqual(slim);
+      expect(proPrivate).toEqual(pro);
+    });
+  });
 });
