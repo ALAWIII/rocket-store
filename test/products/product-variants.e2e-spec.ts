@@ -203,4 +203,39 @@ describe.concurrent('products (e2e)', () => {
       await productVariantsController.update(playstation.id, v7(), { title: 'pro' }, { code: 404 });
     });
   });
+  describe('PATCH /api/v1/products/:id/variants/sort-order (updateSortOrder)', () => {
+    it('should success update sort order field for multible variants.', async ({
+      productController,
+      productVariantsController,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slim = (
+        await productVariantsController.create(playstation.id, {
+          title: 'slim',
+          visibility: 'public',
+          sortOrder: 1,
+        })
+      ).body!;
+      const pro = (
+        await productVariantsController.create(playstation.id, {
+          title: 'pro',
+          visibility: 'private',
+          sortOrder: 2,
+        })
+      ).body!;
+      const sortResponse = (
+        await productVariantsController.updateSortOrder(playstation.id, {
+          orders: [
+            { variantId: slim.id, sortOrder: 2 },
+            { variantId: pro.id, sortOrder: 1 },
+          ],
+        })
+      ).body!.toSorted((a, b) => a.sortOrder - b.sortOrder);
+      const allVariants = (await productVariantsController.findAllAdmin(playstation.id)).body!.toSorted(
+        (a, b) => a.sortOrder - b.sortOrder,
+      );
+      expect(sortResponse).toMatchObject(allVariants);
+      expect(sortResponse).toHaveLength(2);
+    });
+  });
 });
