@@ -1,6 +1,7 @@
 import { CreateProductVariantDto } from 'src/modules/products/dto/request/write/create-product-variant.dto';
 import { it } from '../support/fixtures/authenticated-e2e.fixture';
 import { v7 } from 'uuid';
+import { UpdateProductVariantDto } from 'src/modules/products/dto/request/write/update-product-variant.dto';
 
 describe.concurrent('products (e2e)', () => {
   describe('POST /api/v1/products/:productId/variants (create)', () => {
@@ -171,6 +172,27 @@ describe.concurrent('products (e2e)', () => {
       const slimPublic = (await productVariantsController.withAgent(anonymous).findById(playstation.id, slim.id)).body!;
       expect(slimPublic).toEqual(slim);
       await productVariantsController.withAgent(anonymous).findById(playstation.id, pro.id, { code: 404 });
+    });
+  });
+  describe('PATCH /api/v1/products/:productId/variants/:id (update)', () => {
+    it('should success updating existing product variant.', async ({
+      productController,
+      productVariantsController,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slim = (await productVariantsController.create(playstation.id, { title: 'slim', visibility: 'public' }))
+        .body!;
+      const updateData: UpdateProductVariantDto = {
+        title: 'pro',
+        price: 39999,
+        info: { weight: 78 },
+        salesStatus: 'paused',
+        visibility: 'private',
+        description: 'very powerful',
+      };
+      const pro = (await productVariantsController.update(playstation.id, slim.id, updateData)).body!;
+      expect(pro).toMatchObject(updateData);
+      expect(slim.id).toBe(pro.id);
     });
   });
 });
