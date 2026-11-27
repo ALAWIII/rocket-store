@@ -156,4 +156,21 @@ describe.concurrent('products (e2e)', () => {
       );
     });
   });
+  describe('GET /api/v1/products/:productId/variants/:id (findById)', () => {
+    it('should success find public product variant requested by anonymous user.', async ({
+      productController,
+      productVariantsController,
+      app,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slim = (await productVariantsController.create(playstation.id, { title: 'slim', visibility: 'public' }))
+        .body!;
+      const pro = (await productVariantsController.create(playstation.id, { title: 'pro', visibility: 'private' }))
+        .body!;
+      const anonymous = app.createAgent();
+      const slimPublic = (await productVariantsController.withAgent(anonymous).findById(playstation.id, slim.id)).body!;
+      expect(slimPublic).toEqual(slim);
+      await productVariantsController.withAgent(anonymous).findById(playstation.id, pro.id, { code: 404 });
+    });
+  });
 });
