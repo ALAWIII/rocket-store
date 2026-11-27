@@ -102,12 +102,11 @@ export class ProductVariantRepository implements IProductVariantRepository {
       const variantIds = ordering.map((x) => x.variantId);
       const sortOrders = ordering.map((x) => x.sortOrder);
 
-      const rows = await this.productVariantRepo.query<ProductVariantEntity[]>(UPDATE_PRODUCT_VARIANT_SORT_ORDER_SQL, [
-        variantIds,
-        sortOrders,
-        productId,
-      ]);
-      if (rows.length !== ordering.length) {
+      const [rows] = await this.productVariantRepo.query<[ProductVariantEntity[]]>(
+        UPDATE_PRODUCT_VARIANT_SORT_ORDER_SQL,
+        [variantIds, sortOrders, productId],
+      );
+      if (!rows || rows.length !== ordering.length) {
         throw new RecordNotFoundError('Some product variants were not found');
       }
       return rows;
