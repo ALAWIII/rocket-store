@@ -11,6 +11,7 @@ import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { DetachImagesDto } from '../shared/dto/detach-images.dto';
 import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
 import { FindVariantsQueryDto } from './dto/request/read/find-variants-query.dto';
+import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 
 @Controller('products/:id/variants')
 export class ProductVariantsController {
@@ -24,7 +25,7 @@ export class ProductVariantsController {
   ): Promise<ProductVariantResponseDto> {
     return this.pvariantService.create(productId, data);
   }
-
+  @AllowAnonymous()
   @Get()
   findAll(@Param('id', new ParseUUIDPipe({ version: '7' })) productId: string): Promise<ProductVariantResponseDto[]> {
     return this.pvariantService.findAll(productId, 'public');
@@ -37,7 +38,7 @@ export class ProductVariantsController {
   ): Promise<ProductVariantResponseDto[]> {
     return this.pvariantService.findAll(productId, query.visibility);
   }
-
+  @AllowAnonymous()
   @Get(':variantId')
   findById(
     @Param('id', new ParseUUIDPipe({ version: '7' })) productId: string,
@@ -45,6 +46,7 @@ export class ProductVariantsController {
   ): Promise<ProductVariantResponseDto> {
     return this.pvariantService.findById(productId, variantId, 'public');
   }
+
   @Get(':variantId/admin')
   @RequirePermission(AllPermissions.product.ProductReadAny)
   findByIdAdmin(

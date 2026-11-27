@@ -19,6 +19,7 @@ import {
   FindAllAdminProductsQueryDto,
   FindAllCustomerProductsQueryDto,
 } from './dto/request/read/find-all-products-query.dto';
+import { AllowAnonymous } from '@thallesp/nestjs-better-auth';
 
 @Controller('products')
 export class ProductsController {
@@ -36,7 +37,7 @@ export class ProductsController {
   ): Promise<ProductResponseDto> {
     return this.productService.update(id, data);
   }
-
+  @AllowAnonymous()
   @Get(':id')
   findById(
     @Param('id', new ParseUUIDPipe({ version: '7' })) id: string,
@@ -52,7 +53,7 @@ export class ProductsController {
   ): Promise<ProductDetailsResponseDto> {
     return this.productService.findById(id, query);
   }
-
+  @AllowAnonymous()
   @Get()
   findAll(@Query() query: FindAllCustomerProductsQueryDto): Promise<FindAllProductsResponseDto> {
     return this.productService.findAll({ ...query, visibility: 'public', variantVisibility: 'public' });
