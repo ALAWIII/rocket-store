@@ -262,3 +262,34 @@ describe.concurrent('products varinats (e2e)', () => {
     });
   });
 });
+describe.concurrent('product variants images (e2e)', () => {
+  describe('POST /api/v1/product-variants/:variantId/images (attachImages)', () => {
+    it('should success attach images to a product variants.', async ({
+      productController,
+      productVariantsController,
+      productVariantImagesController,
+      imageController,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slim = (
+        await productVariantsController.create(playstation.id, {
+          title: 'slim',
+          visibility: 'public',
+          sortOrder: 1,
+        })
+      ).body!;
+      const img1 = (await imageController.upload()).body!;
+      const img2 = (await imageController.upload()).body!;
+      const imgs = (
+        await productVariantImagesController.attachImages(slim.id, {
+          images: [
+            { imageId: img1.id, sortOrder: 1 },
+            { imageId: img2.id, sortOrder: 2 },
+          ],
+        })
+      ).body!;
+      expect(imgs).toEqual([img1, img2]);
+      expect(imgs).toHaveLength(2);
+    });
+  });
+});
