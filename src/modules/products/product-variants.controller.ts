@@ -10,7 +10,7 @@ import { ProductVariantImagesDto } from './dto/request/write/product-variant-ima
 import { ImageResponseDto } from '../shared/dto/image-response.dto';
 import { DetachImagesDto } from '../shared/dto/detach-images.dto';
 import { AffectedResponseDto } from '../shared/dto/affected-response.dto';
-import { FindVariantByIdQueryDto } from './dto/request/read/find-variant-by-id-query.dto';
+import { FindVariantsQueryDto } from './dto/request/read/find-variants-query.dto';
 
 @Controller('products/:id/variants')
 export class ProductVariantsController {
@@ -33,7 +33,7 @@ export class ProductVariantsController {
   @RequirePermission(AllPermissions.product.ProductReadAny)
   findAllAdmin(
     @Param('id', new ParseUUIDPipe({ version: '7' })) productId: string,
-    @Query() query: FindVariantByIdQueryDto,
+    @Query() query: FindVariantsQueryDto,
   ): Promise<ProductVariantResponseDto[]> {
     return this.pvariantService.findAll(productId, query.visibility);
   }
@@ -50,7 +50,7 @@ export class ProductVariantsController {
   findByIdAdmin(
     @Param('id', new ParseUUIDPipe({ version: '7' })) productId: string,
     @Param('variantId', new ParseUUIDPipe({ version: '7' })) variantId: string,
-    @Query() query: FindVariantByIdQueryDto,
+    @Query() query: FindVariantsQueryDto,
   ): Promise<ProductVariantResponseDto> {
     return this.pvariantService.findById(productId, variantId, query.visibility);
   }
