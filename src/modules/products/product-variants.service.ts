@@ -52,7 +52,7 @@ export class ProductsVariantsService {
   }
   attachImages(variantId: string, data: ProductVariantImagesDto): Promise<ImageResponseDto[]> {
     const images = data.images.map((img) =>
-      ProductVariantImage.create({ ...img, productVaraintId: variantId }).unwrap(),
+      ProductVariantImage.create({ ...img, productVariantId: variantId }).unwrap(),
     );
     return this.pvariantRepo
       .attachImages(images)

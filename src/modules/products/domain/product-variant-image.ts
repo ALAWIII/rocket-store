@@ -6,7 +6,7 @@ import { ValueObjectError } from 'src/modules/shared/value-objects/value-object.
 type ProductImageProps = {
   id: ProductVariantImageId;
   imageId: ImageId;
-  productVaraintId: ProductVariantId;
+  productVariantId: ProductVariantId;
   sortOrder: number;
   createdAt: Date;
   updatedAt: Date;
@@ -15,7 +15,7 @@ type ProductImageProps = {
 type ProductVariantImagePrimitives = {
   id: string;
   imageId: string;
-  productVaraintId: string;
+  productVariantId: string;
   sortOrder: number;
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -36,12 +36,12 @@ export class ProductVariantImage {
     return this.build(data);
   }
   private static build(data: ProductVariantImagePrimitives): Result<ProductVariantImage, ValueObjectError> {
-    const { id, imageId, createdAt, updatedAt, productVaraintId, sortOrder } = data;
+    const { id, imageId, createdAt, updatedAt, productVariantId: productVaraintId, sortOrder } = data;
     return Result.wrap(
       () =>
         new ProductVariantImage({
           id: ProductImageId.create(id).unwrap(),
-          productVaraintId: ProductVariantId.create(productVaraintId).unwrap(),
+          productVariantId: ProductVariantId.create(productVaraintId).unwrap(),
           imageId: ImageId.create(imageId).unwrap(),
           sortOrder,
           createdAt: new Date(createdAt),
