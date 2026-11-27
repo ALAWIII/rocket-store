@@ -6,6 +6,6 @@ export const UPDATE_VARIANT_IMAGE_SORT_ORDER_SQL =
       "updatedAt" = now()
   FROM unnest($1::uuid[], $2::integer[]) AS v(id, sort_order)
   WHERE pvi."productVariantId" = $3
-    AND pvi.id = v.id
+    AND pvi."imageId" = v.id
   RETURNING *;
   `;
