@@ -204,7 +204,7 @@ describe.concurrent('products (e2e)', () => {
     });
   });
   describe('PATCH /api/v1/products/:id/variants/sort-order (updateSortOrder)', () => {
-    it('should success update sort order field for multible variants.', async ({
+    it('should success update sort order field for multiple variants.', async ({
       productController,
       productVariantsController,
     }) => {
@@ -236,6 +236,29 @@ describe.concurrent('products (e2e)', () => {
       );
       expect(sortResponse).toMatchObject(allVariants);
       expect(sortResponse).toHaveLength(2);
+    });
+    it('should fail update sort order for non existed variants 404.', async ({
+      productController,
+      productVariantsController,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slim = (
+        await productVariantsController.create(playstation.id, {
+          title: 'slim',
+          visibility: 'public',
+          sortOrder: 1,
+        })
+      ).body!;
+      await productVariantsController.updateSortOrder(
+        playstation.id,
+        {
+          orders: [
+            { variantId: slim.id, sortOrder: 2 },
+            { variantId: v7(), sortOrder: 1 },
+          ],
+        },
+        { code: 404 },
+      );
     });
   });
 });
