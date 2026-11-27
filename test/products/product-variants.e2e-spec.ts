@@ -74,6 +74,24 @@ describe.concurrent('products (e2e)', () => {
       expect(nothing).toHaveLength(0);
     });
   });
+  describe('GET /api/v1/products/:productId/variants (findAll)', () => {
+    it('should success find all public variants requested by anonymous user.', async ({
+      productController,
+      productVariantsController,
+      app,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slim = (await productVariantsController.create(playstation.id, { title: 'slim', visibility: 'public' }))
+        .body!;
+      const pro = (await productVariantsController.create(playstation.id, { title: 'pro', visibility: 'private' }))
+        .body!;
+      const anonymous = app.createAgent();
+      const publicVariants = (await productVariantsController.withAgent(anonymous).findAll(playstation.id)).body!;
+      expect(publicVariants).toHaveLength(1);
+      expect(publicVariants).toEqual([slim]);
+      expect(publicVariants.includes(pro)).toBe(false);
+    });
+  });
   describe('GET /api/v1/products/:productId/variants/:id/admin (findByIdAdmin)', () => {
     it('should success fetch existed variant for existed product.', async ({
       productController,
