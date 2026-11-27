@@ -46,4 +46,28 @@ describe.concurrent('products (e2e)', () => {
       await productVariantsController.create(v7(), undefined, { code: 404 });
     });
   });
+  describe('GET /api/v1/products/:productId/variants/admin (findAllAdmin)', () => {
+    it('should success fetching all public and private variants of a product.', async ({
+      productVariantsController,
+      productController,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slim = (await productVariantsController.create(playstation.id, { title: 'slim', visibility: 'public' }))
+        .body!;
+      const pro = (await productVariantsController.create(playstation.id, { title: 'pro', visibility: 'private' }))
+        .body!;
+      const both = (await productVariantsController.findAllAdmin(playstation.id)).body!.toSorted((a, b) =>
+        a.id.localeCompare(b.id),
+      );
+      const slimPublic = (await productVariantsController.findAllAdmin(playstation.id, { visibility: 'public' })).body!;
+      const proPrivate = (await productVariantsController.findAllAdmin(playstation.id, { visibility: 'private' }))
+        .body!;
+      expect(both).toEqual([slim, pro]);
+      expect(slimPublic).toEqual([slim]);
+      expect(proPrivate).toEqual([pro]);
+      expect(both).toHaveLength(2);
+      expect(slimPublic).toHaveLength(1);
+      expect(proPrivate).toHaveLength(1);
+    });
+  });
 });
