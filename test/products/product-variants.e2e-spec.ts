@@ -3,7 +3,7 @@ import { it } from '../support/fixtures/authenticated-e2e.fixture';
 import { v7 } from 'uuid';
 import { UpdateProductVariantDto } from 'src/modules/products/dto/request/write/update-product-variant.dto';
 
-describe.concurrent('products (e2e)', () => {
+describe.concurrent('products varinats (e2e)', () => {
   describe('POST /api/v1/products/:productId/variants (create)', () => {
     it('should success create product variants for existed product', async ({
       productController,
