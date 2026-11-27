@@ -194,5 +194,13 @@ describe.concurrent('products (e2e)', () => {
       expect(pro).toMatchObject(updateData);
       expect(slim.id).toBe(pro.id);
     });
+    it('should fail updating non existed product variant.', async ({
+      productController,
+      productVariantsController,
+    }) => {
+      const playstation = (await productController.create()).body!;
+
+      await productVariantsController.update(playstation.id, v7(), { title: 'pro' }, { code: 404 });
+    });
   });
 });
