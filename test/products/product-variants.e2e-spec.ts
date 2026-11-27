@@ -284,6 +284,7 @@ describe.concurrent('product variants images (e2e)', () => {
         await productVariantImagesController.attachImages(slim.id, {
           images: [
             { imageId: img1.id, sortOrder: 1 },
+            { imageId: img1.id, sortOrder: 3 },
             { imageId: img2.id, sortOrder: 2 },
           ],
         })
