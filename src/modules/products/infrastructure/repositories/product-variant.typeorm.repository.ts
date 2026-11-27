@@ -54,6 +54,7 @@ export class ProductVariantRepository implements IProductVariantRepository {
         .leftJoinAndMapMany('pvariant.images', ImageEntity, 'images', 'images.id = pvariant_images."imageId"')
         .where('pvariant."productId" = :productId', { productId });
       if (visibility) q.andWhere('pvariant."visibility" = :visibility', { visibility });
+      q.orderBy('pvariant."sortOrder"', 'ASC').addOrderBy('pvariant_images."sortOrder"', 'ASC');
       return q.getMany();
     })
       .mapErr(mapTypeOrmError)
@@ -68,6 +69,7 @@ export class ProductVariantRepository implements IProductVariantRepository {
         .where('pvariant."productId" = :productId', { productId })
         .andWhere('pvariant.id = :variantId', { variantId });
       if (visibility) q.andWhere('pvariant."visibility" = :visibility', { visibility });
+      q.orderBy('pvariant_images."sortOrder"', 'ASC');
       return q.getOneOrFail();
     })
       .mapErr(mapTypeOrmError)

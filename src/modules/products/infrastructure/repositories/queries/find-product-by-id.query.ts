@@ -40,7 +40,7 @@ export const FIND_PRODUCT_BY_ID_SQL =
     SELECT
       pv.*,
       COALESCE(
-        json_agg(img) FILTER (WHERE img.id IS NOT NULL),
+        json_agg(img ORDER BY pvi."sortOrder" ASC) FILTER (WHERE img.id IS NOT NULL),
         '[]'::json
       ) AS images
     FROM find_product fp
