@@ -69,5 +69,9 @@ describe.concurrent('products (e2e)', () => {
       expect(slimPublic).toHaveLength(1);
       expect(proPrivate).toHaveLength(1);
     });
+    it('should success return zero variants because of non existed product.', async ({ productVariantsController }) => {
+      const nothing = (await productVariantsController.findAllAdmin(v7())).body!;
+      expect(nothing).toHaveLength(0);
+    });
   });
 });
