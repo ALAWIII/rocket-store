@@ -324,4 +324,42 @@ describe.concurrent('product variants images (e2e)', () => {
       expect(affected).toEqual({ affected: 2 });
     });
   });
+  describe('PATCH /api/v1/product-variants/:variantId/images/sort-order (updateImageSortOrder)', () => {
+    it('should success update sort order for variant images.', async ({
+      productController,
+      productVariantsController,
+      productVariantImagesController,
+      imageController,
+    }) => {
+      const playstation = (await productController.create()).body!;
+      const slim = (
+        await productVariantsController.create(playstation.id, {
+          title: 'slim',
+          visibility: 'public',
+          sortOrder: 1,
+        })
+      ).body!;
+      const img1 = (await imageController.upload()).body!;
+      const img2 = (await imageController.upload()).body!;
+      const imgs = (
+        await productVariantImagesController.attachImages(slim.id, {
+          images: [
+            { imageId: img1.id, sortOrder: 1 },
+            { imageId: img2.id, sortOrder: 2 },
+          ],
+        })
+      ).body!;
+      const sortResponse = (
+        await productVariantImagesController.updateImageSortOrder(slim.id, {
+          images: [
+            { imageId: img1.id, sortOrder: 2 },
+            { imageId: img2.id, sortOrder: 1 },
+          ],
+        })
+      ).body!;
+      expect(sortResponse).toEqual({ affected: 2 });
+      const variantImagesAfter = (await productVariantsController.findByIdAdmin(playstation.id, slim.id)).body!.images;
+      expect(variantImagesAfter).toEqual([img2, img1]);
+    });
+  });
 });
